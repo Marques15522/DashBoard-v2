@@ -374,6 +374,102 @@ footer {
   background: var(--s2) !important;
   border: 1px solid var(--border2) !important;
 }
+
+/* ── IA ANALYSIS SECTION ── */
+.ia-section {
+  margin-bottom: 36px;
+}
+.ia-grid-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+.ia-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.ia-card:hover { border-color: var(--border2); }
+.ia-card-accent {
+  position: absolute; top:0; left:0; right:0; height:2px;
+}
+.ia-card-icon {
+  font-size: 1rem; margin-bottom: 8px; display: block;
+}
+.ia-card-label {
+  font-size: 0.55rem; color: var(--muted); letter-spacing: 0.12em;
+  text-transform: uppercase; margin-bottom: 10px;
+}
+.ia-card-body {
+  font-size: 0.68rem; color: var(--text); line-height: 1.7;
+}
+.ia-resumo-card {
+  background: var(--s2);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--gold);
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-size: 0.72rem;
+  color: var(--text);
+  line-height: 1.75;
+  margin-bottom: 12px;
+}
+.ia-resumo-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.7rem; letter-spacing: 0.18em;
+  color: var(--gold); margin-bottom: 8px;
+}
+.ia-cliente-item {
+  display: flex; align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.ia-cliente-item:last-child { border-bottom: none; }
+.ia-cliente-nome {
+  font-size: 0.68rem; color: var(--text); font-weight: 500;
+}
+.ia-cliente-motivo {
+  font-size: 0.6rem; color: var(--muted); margin-top: 2px; line-height: 1.5;
+}
+.ia-score-pill {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.72rem; padding: 2px 8px;
+  border-radius: 4px; white-space: nowrap;
+  align-self: flex-start; margin-top: 1px;
+}
+.ia-score-alto  { background: rgba(239,71,111,0.15); color: var(--red); border: 1px solid rgba(239,71,111,0.3); }
+.ia-score-medio { background: rgba(240,180,41,0.12); color: var(--gold); border: 1px solid rgba(240,180,41,0.3); }
+.ia-btn-analisar {
+  background: var(--s2); border: 1px solid var(--border2);
+  color: var(--gold); padding: 6px 16px;
+  border-radius: 6px; font-family: 'DM Mono', monospace;
+  font-size: 0.65rem; cursor: pointer;
+  transition: all 0.2s; letter-spacing: 0.05em;
+  display: flex; align-items: center; gap: 6px;
+}
+.ia-btn-analisar:hover { border-color: var(--gold); background: rgba(240,180,41,0.06); }
+.ia-btn-analisar:disabled { opacity: 0.4; cursor: default; }
+.ia-spinner {
+  display: inline-block; width: 10px; height: 10px;
+  border: 1.5px solid var(--border2); border-top-color: var(--gold);
+  border-radius: 50%; animation: ia-spin 0.7s linear infinite;
+}
+@keyframes ia-spin { to { transform: rotate(360deg); } }
+.ia-timestamp {
+  font-size: 0.55rem; color: var(--muted2); text-align: right; margin-top: 8px;
+}
+.ia-loading-msg {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.65rem; color: var(--muted);
+  padding: 20px; justify-content: center;
+}
 </style>
 </head>
 <body>
@@ -542,6 +638,60 @@ footer {
   <div style="text-align:right; margin-top:14px; font-size:0.6rem; color:var(--muted)">
     Última atualização: <span id="last-update">—</span> · Auto-refresh a cada 5 min
   </div>
+
+  <!-- ── ANÁLISE IA ─────────────────────────── -->
+  <div class="section-label" style="margin-top:36px">🤖 ANÁLISE INTELIGENTE — IA</div>
+  <div class="ia-section">
+
+    <div class="ia-resumo-card">
+      <div class="ia-resumo-label">⚡ Diagnóstico da Carteira</div>
+      <div id="ia-resumo-texto" style="color:var(--muted);font-size:0.68rem">
+        Clique em <strong style="color:var(--gold)">ANALISAR AGORA</strong> para receber um diagnóstico completo gerado por IA com base nos seus dados em tempo real.
+      </div>
+    </div>
+
+    <div id="ia-loading-msg" class="ia-loading-msg" style="display:none">
+      <div class="ia-spinner"></div>
+      Analisando sua carteira com IA...
+    </div>
+
+    <div class="ia-grid-cards" id="ia-cards" style="opacity:0.35;pointer-events:none">
+      <div class="ia-card">
+        <div class="ia-card-accent" style="background:var(--red)"></div>
+        <span class="ia-card-icon">⚠️</span>
+        <div class="ia-card-label">Clientes de Alto Risco</div>
+        <div class="ia-card-body" id="ia-riscos">
+          <div style="color:var(--muted2);font-size:0.62rem">Aguardando análise...</div>
+        </div>
+      </div>
+      <div class="ia-card">
+        <div class="ia-card-accent" style="background:var(--gold)"></div>
+        <span class="ia-card-icon">📋</span>
+        <div class="ia-card-label">Estratégia de Cobrança</div>
+        <div class="ia-card-body" id="ia-cobranca" style="color:var(--muted2)">Aguardando análise...</div>
+      </div>
+      <div class="ia-card">
+        <div class="ia-card-accent" style="background:var(--blue)"></div>
+        <span class="ia-card-icon">📊</span>
+        <div class="ia-card-label">Saúde da Carteira</div>
+        <div class="ia-card-body" id="ia-saude" style="color:var(--muted2)">Aguardando análise...</div>
+      </div>
+      <div class="ia-card">
+        <div class="ia-card-accent" style="background:var(--green)"></div>
+        <span class="ia-card-icon">🚀</span>
+        <div class="ia-card-label">Oportunidades</div>
+        <div class="ia-card-body" id="ia-oportunidades" style="color:var(--muted2)">Aguardando análise...</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+      <button class="ia-btn-analisar" id="ia-btn" onclick="rodarAnaliseIA()">
+        <span id="ia-btn-icon">✦</span> ANALISAR AGORA
+      </button>
+      <div class="ia-timestamp" id="ia-timestamp"></div>
+    </div>
+  </div>
+
 </div>
 
 <footer>Dashboard Estratégico de Empréstimos · Dados via Google Sheets · Desenvolvido com IA</footer>
@@ -1075,7 +1225,149 @@ function render(empRows, pagRows) {
   `;
 
   document.getElementById('last-update').textContent = new Date().toLocaleTimeString('pt-BR');
+
+  // Salva dados para a análise IA
+  coletarDadosParaIA(emps, abertos, atrasado, totalCap, totalJuros, roi, inadimPct, clientesMap, calcRiscoCliente);
 }
+
+// ── ANÁLISE IA ────────────────────────────────────────────────────────────────
+// Guarda os dados processados para uso da IA
+let _dadosIA = null;
+
+function coletarDadosParaIA(emps, abertos, atrasado, totalCap, totalJuros, roi, inadimPct, clientesMap, calcRiscoCliente) {
+  const clientesRisco = Object.values(clientesMap).map(c => ({
+    nome: c.nome,
+    score: calcRiscoCliente(c),
+    temAtraso: c.temAtraso,
+    capitalTotal: c.capitalTotal,
+    taxaMedia: Number((c.taxaMedia * 100).toFixed(1)),
+    qtdContratos: c.qtdContratos,
+    qtdAtraso: c.qtdAtraso,
+  })).sort((a,b) => b.score - a.score);
+
+  _dadosIA = {
+    capitalAtivo: fmt(totalCap),
+    lucroPrevisto: fmt(totalJuros),
+    roi: pct(roi),
+    inadimplencia: pct(inadimPct),
+    totalContratos: abertos.length,
+    contratosAtraso: atrasado.length,
+    clientes: clientesRisco.slice(0, 10),
+  };
+}
+
+async function rodarAnaliseIA() {
+  if (!_dadosIA) {
+    alert('Aguarde os dados carregarem antes de analisar.');
+    return;
+  }
+
+  const btn = document.getElementById('ia-btn');
+  const cards = document.getElementById('ia-cards');
+  const loadMsg = document.getElementById('ia-loading-msg');
+  const resumo = document.getElementById('ia-resumo-texto');
+
+  btn.disabled = true;
+  document.getElementById('ia-btn-icon').innerHTML = '<span class="ia-spinner" style="border-top-color:var(--gold)"></span>';
+  loadMsg.style.display = 'flex';
+  cards.style.opacity = '0.25';
+
+  const prompt = `Você é um consultor financeiro sênior especializado em empréstimos pessoais no Brasil. Analise os dados abaixo e responda SOMENTE com JSON válido, sem markdown, sem texto fora do JSON.
+
+DADOS DA CARTEIRA:
+- Capital ativo em contratos abertos: ${_dadosIA.capitalAtivo}
+- Lucro previsto (juros totais): ${_dadosIA.lucroPrevisto}
+- ROI da carteira: ${_dadosIA.roi}
+- Taxa de inadimplência: ${_dadosIA.inadimplencia}
+- Total de contratos abertos: ${_dadosIA.totalContratos}
+- Contratos em atraso: ${_dadosIA.contratosAtraso}
+- Clientes (score 0-100, quanto maior = maior risco):
+${JSON.stringify(_dadosIA.clientes, null, 2)}
+
+CRITÉRIOS:
+- Score acima de 70 = alto risco → recomendar encerrar relacionamento
+- Score 40-70 = risco médio → monitorar de perto
+- Inadimplência acima de 15% = situação crítica → mudar estratégia de cobrança urgente
+- Inadimplência acima de 30% = risco sistêmico → considerar pausar novos empréstimos
+- Seja direto, prático e específico. Cite nomes de clientes e valores reais.
+
+Responda SOMENTE com este JSON (sem nenhum texto fora do JSON):
+{
+  "resumo": "2-3 frases diretas sobre a situação atual da carteira e a principal prioridade do momento",
+  "altosRiscos": [
+    {"nome": "Nome exato do cliente", "motivo": "motivo objetivo e direto", "score": 85, "nivel": "ALTO"}
+  ],
+  "cobranca": "Estratégia de cobrança concreta em 3-4 frases práticas baseadas no nível real de inadimplência",
+  "saude": "Avaliação objetiva da saúde financeira em 2-3 frases com números reais",
+  "oportunidades": "2-3 oportunidades concretas e acionáveis para melhorar a carteira"
+}`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!response.ok) throw new Error('API retornou ' + response.status);
+
+    const data = await response.json();
+    const texto = data.content.map(i => i.text || '').join('');
+    const limpo = texto.replace(/```json|```/g, '').trim();
+    const res = JSON.parse(limpo);
+
+    // Resumo
+    resumo.style.color = 'var(--text)';
+    resumo.textContent = res.resumo || '—';
+
+    // Cobrança / Saúde / Oportunidades
+    document.getElementById('ia-cobranca').style.color = 'var(--text)';
+    document.getElementById('ia-cobranca').textContent = res.cobranca || '—';
+    document.getElementById('ia-saude').style.color = 'var(--text)';
+    document.getElementById('ia-saude').textContent = res.saude || '—';
+    document.getElementById('ia-oportunidades').style.color = 'var(--text)';
+    document.getElementById('ia-oportunidades').textContent = res.oportunidades || '—';
+
+    // Clientes de alto risco
+    const riscos = res.altosRiscos || [];
+    const riscosEl = document.getElementById('ia-riscos');
+    if (riscos.length === 0) {
+      riscosEl.innerHTML = `<div style="color:var(--green);font-size:0.65rem">✓ Nenhum cliente de alto risco identificado</div>`;
+    } else {
+      riscosEl.innerHTML = riscos.map(c => {
+        const classe = c.score >= 70 ? 'ia-score-alto' : 'ia-score-medio';
+        return `<div class="ia-cliente-item">
+          <div>
+            <div class="ia-cliente-nome">${c.nome}</div>
+            <div class="ia-cliente-motivo">${c.motivo}</div>
+          </div>
+          <span class="ia-score-pill ${classe}">${c.score}</span>
+        </div>`;
+      }).join('');
+    }
+
+    cards.style.opacity = '1';
+    cards.style.pointerEvents = 'auto';
+
+    const agora = new Date();
+    document.getElementById('ia-timestamp').textContent =
+      `Análise gerada às ${agora.toLocaleTimeString('pt-BR')} de ${agora.toLocaleDateString('pt-BR')}`;
+
+  } catch (err) {
+    resumo.style.color = 'var(--red)';
+    resumo.textContent = 'Erro ao gerar análise: ' + err.message + '. Verifique sua conexão e tente novamente.';
+    cards.style.opacity = '0.35';
+  }
+
+  loadMsg.style.display = 'none';
+  btn.disabled = false;
+  document.getElementById('ia-btn-icon').textContent = '✦';
+}
+
 
 // ── LOAD ─────────────────────────────────────
 
@@ -1140,3 +1432,4 @@ setInterval(loadData, 60*1000); // auto-refresh a cada 1 minuto
 </script>
 </body>
 </html>
+
