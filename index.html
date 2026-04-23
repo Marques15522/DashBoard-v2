@@ -1187,95 +1187,127 @@ async function loadFromSheets(sheetId) {
 
   if (!json) throw new Error(`Não foi possível ler a planilha. Verifique se está compartilhada publicamente. Último erro: ${lastErr}`);
 
-  // Debug: show what we got
+  // ── Sua planilha tem 3 linhas antes dos dados reais:
+  //   Linha 1: título mesclado "GESTÃO DE EMPRÉSTIMOS..."
+  //   Linha 2: instrução mesclada
+  //   Linha 3: cabeçalhos reais (ID Empréstimo, ID Cliente, Nome Cliente...)
+  //   Linha 4+: dados
+  //
+  // O gviz lê a linha 1 como cols.labels e as demais como rows.
+  // Então row[0] = linha 2 (instrução), row[1] = linha 3 (cabeçalhos reais), row[2+] = dados.
+
+  const colMap = {
+    'ID Empréstimo':              'id_emp',
+    'ID Cliente':                 'id_cliente',
+    'Nome Cliente (auto)':        'nome',
+    'CPF (auto)':                 'cpf',
+    'Telefone (auto)':            'telefone',
+    'Valor Emprestado (R$)':      'valor',
+    'Data do Empréstimo':         'data_inicio',
+    'Taxa Juros (% a.m.)':        'taxa',
+    'Prazo (meses)':              'prazo',
+    'Venc. Original':             'venc_original',
+    'Tipo Juros':                 'tipo_juros',
+    'Juros Total (R$)':           'juros_total',
+    'Valor Total Devido (R$)':    'valor_total',
+    'Total Pago (R$)':            'total_pago',
+    'Saldo Restante (R$)':        'saldo',
+    'Juros Próx. Mês (R$)':       'juros_prox',
+    'Parcelas Pagas':             'parcelas',
+    'Status':                     'status_raw',
+    'Próximo Vencimento (Auto)':  'vencimento_raw',
+    'Observações':                'obs',
+  };
+  const realKeys = Object.keys(colMap).map(k => k.toLowerCase());
+
+  // Helper: given an array of cell values, does it look like the real header row?
+  const isHeaderRow = cells =>
+    cells.some(v => realKeys.some(k => String(v||'').toLowerCase().includes(k.slice(0,10))));
+
+  // Flatten all rows (including the gviz "cols" row which came from row 1)
+  // into a single list so we can find the real header row regardless of offset
+  const allRows = json.table.rows.map(r => r.c.map(cell => cell?.v ?? null));
+
+  // Find the row index that contains the real headers
+  let headerIdx = -1;
+  for (let i = 0; i < Math.min(6, allRows.length); i++) {
+    if (isHeaderRow(allRows[i])) { headerIdx = i; break; }
+  }
+
+  // Also check the gviz cols labels themselves
+  const gvizColLabels = json.table.cols.map(c => (c.label||'').toString());
+  let cols, dataRows;
+
+  if (isHeaderRow(gvizColLabels)) {
+    // gviz correctly picked up the header row
+    cols = gvizColLabels;
+    dataRows = allRows;
+  } else if (headerIdx >= 0) {
+    // Real headers are inside rows — use them, data starts after
+    cols = allRows[headerIdx].map(v => String(v||'').trim());
+    dataRows = allRows.slice(headerIdx + 1);
+  } else {
+    // Last resort: use gviz cols as-is
+    cols = gvizColLabels;
+    dataRows = allRows;
+  }
+
+  // Debug
   const debugEl = document.getElementById('debugInfo');
   if (debugEl) {
-    const cols = json.table.cols.map(c => c.label);
-    debugEl.innerHTML = `<strong>✅ Aba lida:</strong> "${usedName}" &nbsp;|&nbsp; <strong>Linhas:</strong> ${json.table.rows.length} &nbsp;|&nbsp; <strong>Colunas:</strong> ${cols.join(', ')}`;
+    const mappedCols = cols.map(c => colMap[c] ? `<span style="color:#00e676">${c}</span>` : `<span style="color:#4d6a85">${c||'—'}</span>`);
+    debugEl.innerHTML = `<strong>✅ Aba:</strong> "${usedName}" &nbsp;|&nbsp; <strong>Linhas de dados:</strong> ${dataRows.length} &nbsp;|&nbsp; <strong>Colunas mapeadas:</strong> ${mappedCols.join(', ')}`;
     debugEl.style.display = 'block';
   }
 
-  const cols = json.table.cols.map(c => (c.label || '').toString().trim());
+  const today = new Date(); today.setHours(0,0,0,0);
 
-  // Column name mapping from your sheet → internal names
-  const colMap = {
-    'ID Empréstimo':         'id_emp',
-    'ID Cliente':            'id_cliente',
-    'Nome Cliente (auto)':   'nome',
-    'CPF (auto)':            'cpf',
-    'Telefone (auto)':       'telefone',
-    'Valor Emprestado (R$)': 'valor',
-    'Data do Empréstimo':    'data_inicio',
-    'Taxa Juros (% a.m.)':   'taxa',
-    'Prazo (meses)':         'prazo',
-    'Venc. Original':        'venc_original',
-    'Tipo Juros':            'tipo_juros',
-    'Juros Total (R$)':      'juros_total',
-    'Valor Total Devido (R$)':'valor_total',
-    'Total Pago (R$)':       'total_pago',
-    'Saldo Restante (R$)':   'saldo',
-    'Juros Próx. Mês (R$)':  'juros_prox',
-    'Parcelas Pagas':        'parcelas',
-    'Status':                'status_raw',
-    'Próximo Vencimento (Auto)': 'vencimento_raw',
-    'Observações':           'obs',
+  const parseDate = v => {
+    if (!v && v !== 0) return null;
+    if (v instanceof Date) return v;
+    const s = String(v);
+    const m = s.match(/Date\((\d+),(\d+),(\d+)\)/);
+    if (m) return new Date(+m[1], +m[2], +m[3]);
+    if (!isNaN(Number(s)) && s.length > 4) return new Date(+s);
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
   };
 
-  const today = new Date();
-  today.setHours(0,0,0,0);
+  return dataRows.map(cells => {
+    const obj = {};
+    cols.forEach((col, i) => {
+      const key = colMap[col.trim()] || null;
+      if (key) obj[key] = cells[i] ?? null;
+    });
 
-  return json.table.rows
-    .map(row => {
-      const obj = {};
-      cols.forEach((col, i) => {
-        const key = colMap[col] || col.toLowerCase().replace(/\s+/g,'_');
-        obj[key] = row.c[i] ? row.c[i].v : null;
-      });
+    // Skip rows without a name or contract id
+    const nome = String(obj.nome || '').trim();
+    if (!nome || nome === 'null') return null;
 
-      // Skip empty rows
-      if (!obj.nome && !obj.id_emp) return null;
+    obj.nome   = nome;
+    obj.valor  = parseFloat(obj.valor)      || 0;
+    obj.taxa   = parseFloat(obj.taxa)        || 0;
+    obj.juros  = parseFloat(obj.juros_total) || (obj.valor * obj.taxa / 100);
 
-      // Parse numbers
-      obj.valor = parseFloat(obj.valor) || 0;
-      obj.taxa  = parseFloat(obj.taxa)  || 0;
+    const vencDate = parseDate(obj.vencimento_raw) || parseDate(obj.venc_original) || new Date();
+    obj.vencimento  = vencDate;
+    obj.data_inicio = parseDate(obj.data_inicio)   || new Date();
 
-      // Parse dates — gviz can return: "Date(2026,3,20)", a JS Date, a string, or a number (ms)
-      const parseDate = v => {
-        if (!v && v !== 0) return new Date();
-        if (v instanceof Date) return v;
-        const s = String(v);
-        const m = s.match(/Date\((\d+),(\d+),(\d+)\)/);
-        if (m) return new Date(+m[1], +m[2], +m[3]);
-        if (!isNaN(v)) return new Date(+v); // timestamp ms
-        const d = new Date(s);
-        return isNaN(d) ? new Date() : d;
-      };
+    const vencMidnight = new Date(vencDate); vencMidnight.setHours(0,0,0,0);
+    const diffMs = today - vencMidnight;
+    obj.atraso_dias = diffMs > 0 ? Math.floor(diffMs / 86400000) : 0;
 
-      obj.data_inicio = parseDate(obj.data_inicio);
-      const venc = parseDate(obj.vencimento_raw || obj.venc_original);
-      obj.vencimento = venc;
+    const sl = String(obj.status_raw || '').toLowerCase();
+    if (sl.includes('quit') || sl.includes('pago') || sl.includes('encerr')) {
+      obj.status = 'quitado'; obj.atraso_dias = 0;
+    } else if (obj.atraso_dias > 0 || sl.includes('atras') || sl.includes('inadim')) {
+      obj.status = 'atrasado';
+    } else {
+      obj.status = 'ativo';
+    }
 
-      // Calculate atraso_dias from vencimento vs today
-      const vencSemHora = new Date(venc); vencSemHora.setHours(0,0,0,0);
-      const diffMs = today - vencSemHora;
-      obj.atraso_dias = diffMs > 0 ? Math.floor(diffMs / 86400000) : 0;
-
-      // Normalize status
-      const sl = (obj.status_raw || '').toString().toLowerCase();
-      if (sl.includes('quit') || sl.includes('pago') || sl.includes('encerr')) {
-        obj.status = 'quitado'; obj.atraso_dias = 0;
-      } else if (obj.atraso_dias > 0 || sl.includes('atras') || sl.includes('inadim')) {
-        obj.status = 'atrasado';
-      } else {
-        obj.status = 'ativo';
-      }
-
-      // juros for this contract
-      obj.juros = obj.juros_total || (obj.valor * obj.taxa / 100);
-
-      return obj;
-    })
-    .filter(Boolean);
+    return obj;
+  }).filter(Boolean);
 }
 
 async function loadData() {
