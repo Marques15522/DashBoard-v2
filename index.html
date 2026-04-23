@@ -1131,7 +1131,9 @@
 // ══════════════════════════════════════════════════════
 
 let DATA = { contracts: [], clients: [] };
-let SHEET_ID = localStorage.getItem('sheetId') || '';
+const DEFAULT_SHEET_ID = '1g9336ZjN2jnVoxA5CFQmlaDxTkda7tlz48_EAlKUjr4';
+const DEFAULT_GID = '147333899';
+let SHEET_ID = localStorage.getItem('sheetId') || DEFAULT_SHEET_ID;
 let charts = {};
 
 // ── DEMO DATA (used when no sheet connected) ──
@@ -1163,29 +1165,58 @@ function generateDemoData() {
 
 // ── LOAD FROM GOOGLE SHEETS ──
 async function loadFromSheets(sheetId) {
-  // Try multiple possible sheet name variations
-  const sheetNames = ['Empréstimos', 'Emprestimos', 'emprestimos', 'Empréstimo', 'Sheet2'];
   let json = null;
   let usedName = '';
   let lastErr = '';
 
-  for (const name of sheetNames) {
+  // Helper to fetch and parse a gviz URL
+  const tryFetch = async (url, label) => {
+    const res = await fetch(url);
+    const text = await res.text();
+    const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);/);
+    if (!match) throw new Error(`Resposta inválida para "${label}"`);
+    const parsed = JSON.parse(match[1]);
+    if (parsed.status === 'error') throw new Error(`"${label}": ${parsed.errors?.[0]?.message||'erro'}`);
+    if (!parsed.table?.rows?.length) throw new Error(`"${label}" sem dados`);
+    return parsed;
+  };
+
+  // 1) Try by gid first (most reliable — targets exact tab)
+  const gid = sheetId === DEFAULT_SHEET_ID ? DEFAULT_GID : null;
+  if (gid) {
     try {
-      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`;
-      const res = await fetch(url);
-      const text = await res.text();
-      const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);/);
-      if (!match) { lastErr = `Resposta inválida para aba "${name}"`; continue; }
-      const parsed = JSON.parse(match[1]);
-      if (parsed.status === 'error') { lastErr = `Aba "${name}": ${parsed.errors?.[0]?.message||'erro'}`; continue; }
-      if (!parsed.table?.rows?.length) { lastErr = `Aba "${name}" encontrada mas sem dados`; continue; }
-      json = parsed;
-      usedName = name;
-      break;
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+      json = await tryFetch(url, `gid=${gid}`);
+      usedName = `gid:${gid}`;
     } catch(e) { lastErr = e.message; }
   }
 
-  if (!json) throw new Error(`Não foi possível ler a planilha. Verifique se está compartilhada publicamente. Último erro: ${lastErr}`);
+  // 2) Try by common sheet name variations
+  if (!json) {
+    const sheetNames = [
+      'Empréstimos','Emprestimos','emprestimos','Empréstimo','Emprestimo',
+      'EMPRÉSTIMOS','EMPRESTIMOS','Contratos','contratos','Sheet1','Sheet2','Planilha1','Dados'
+    ];
+    for (const name of sheetNames) {
+      try {
+        const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`;
+        json = await tryFetch(url, name);
+        usedName = name;
+        break;
+      } catch(e) { lastErr = e.message; }
+    }
+  }
+
+  // 3) Try default (no sheet param — first visible tab)
+  if (!json) {
+    try {
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+      json = await tryFetch(url, 'aba padrão');
+      usedName = 'aba padrão';
+    } catch(e) { lastErr = e.message; }
+  }
+
+  if (!json) throw new Error(`Não foi possível ler a planilha. Verifique se está compartilhada publicamente (Compartilhar → Qualquer pessoa com o link → Leitor). Último erro: ${lastErr}`);
 
   // ── Sua planilha tem 3 linhas antes dos dados reais:
   //   Linha 1: título mesclado "GESTÃO DE EMPRÉSTIMOS..."
@@ -1331,7 +1362,7 @@ async function loadData() {
       debugEl.innerHTML = `<strong style="color:#ff4444">❌ ERRO:</strong> ${e.message}`;
       debugEl.style.display = 'block';
     }
-    showStatus('error', `⚠ Erro ao conectar: ${e.message}. Exibindo dados de demonstração.`);
+    showStatus('error', `⚠ Erro ao conectar com a planilha: ${e.message}.<br><small>👉 Certifique-se que a planilha está em: <b>Compartilhar → Qualquer pessoa com o link → Leitor</b>. Exibindo dados de demonstração.</small>`);
     processData();
     renderAll();
   }
