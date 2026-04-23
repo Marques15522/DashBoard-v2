@@ -522,6 +522,7 @@
   ══════════════════════════════════════ -->
   <div class="section active" id="s-kpis">
     <div id="statusBanner"></div>
+    <div id="debugInfo" style="display:none;background:#0d1219;border:1px solid #1e2d40;border-radius:10px;padding:12px 18px;margin-bottom:16px;font-family:'DM Mono',monospace;font-size:12px;color:#8ba4be;line-height:1.6"></div>
 
     <div class="section-title">Indicadores Estratégicos Principais</div>
     <div class="grid-4">
@@ -1162,16 +1163,38 @@ function generateDemoData() {
 
 // ── LOAD FROM GOOGLE SHEETS ──
 async function loadFromSheets(sheetId) {
-  // Reads the "Empréstimos" sheet (gid must be discovered or use sheet name param)
-  // Try reading by sheet name using the gviz API
-  const sheetName = encodeURIComponent('Empréstimos');
-  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
-  const res = await fetch(url);
-  const text = await res.text();
-  const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);/)[1]);
+  // Try multiple possible sheet name variations
+  const sheetNames = ['Empréstimos', 'Emprestimos', 'emprestimos', 'Empréstimo', 'Sheet2'];
+  let json = null;
+  let usedName = '';
+  let lastErr = '';
 
-  // Row 3 (index 2) is the header in your sheet — gviz skips merged header rows automatically
-  // and uses the first non-empty row as labels
+  for (const name of sheetNames) {
+    try {
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`;
+      const res = await fetch(url);
+      const text = await res.text();
+      const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);/);
+      if (!match) { lastErr = `Resposta inválida para aba "${name}"`; continue; }
+      const parsed = JSON.parse(match[1]);
+      if (parsed.status === 'error') { lastErr = `Aba "${name}": ${parsed.errors?.[0]?.message||'erro'}`; continue; }
+      if (!parsed.table?.rows?.length) { lastErr = `Aba "${name}" encontrada mas sem dados`; continue; }
+      json = parsed;
+      usedName = name;
+      break;
+    } catch(e) { lastErr = e.message; }
+  }
+
+  if (!json) throw new Error(`Não foi possível ler a planilha. Verifique se está compartilhada publicamente. Último erro: ${lastErr}`);
+
+  // Debug: show what we got
+  const debugEl = document.getElementById('debugInfo');
+  if (debugEl) {
+    const cols = json.table.cols.map(c => c.label);
+    debugEl.innerHTML = `<strong>✅ Aba lida:</strong> "${usedName}" &nbsp;|&nbsp; <strong>Linhas:</strong> ${json.table.rows.length} &nbsp;|&nbsp; <strong>Colunas:</strong> ${cols.join(', ')}`;
+    debugEl.style.display = 'block';
+  }
+
   const cols = json.table.cols.map(c => (c.label || '').toString().trim());
 
   // Column name mapping from your sheet → internal names
@@ -1216,14 +1239,16 @@ async function loadFromSheets(sheetId) {
       obj.valor = parseFloat(obj.valor) || 0;
       obj.taxa  = parseFloat(obj.taxa)  || 0;
 
-      // Parse dates
+      // Parse dates — gviz can return: "Date(2026,3,20)", a JS Date, a string, or a number (ms)
       const parseDate = v => {
-        if (!v) return new Date();
+        if (!v && v !== 0) return new Date();
         if (v instanceof Date) return v;
-        // gviz returns Date(year,month,day) format sometimes
-        const m = String(v).match(/Date\((\d+),(\d+),(\d+)\)/);
+        const s = String(v);
+        const m = s.match(/Date\((\d+),(\d+),(\d+)\)/);
         if (m) return new Date(+m[1], +m[2], +m[3]);
-        return new Date(v);
+        if (!isNaN(v)) return new Date(+v); // timestamp ms
+        const d = new Date(s);
+        return isNaN(d) ? new Date() : d;
       };
 
       obj.data_inicio = parseDate(obj.data_inicio);
@@ -1269,6 +1294,11 @@ async function loadData() {
     renderAll();
   } catch(e) {
     DATA.contracts = generateDemoData();
+    const debugEl = document.getElementById('debugInfo');
+    if (debugEl) {
+      debugEl.innerHTML = `<strong style="color:#ff4444">❌ ERRO:</strong> ${e.message}`;
+      debugEl.style.display = 'block';
+    }
     showStatus('error', `⚠ Erro ao conectar: ${e.message}. Exibindo dados de demonstração.`);
     processData();
     renderAll();
