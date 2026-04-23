@@ -495,7 +495,7 @@
   <div style="flex:1">
     <input type="text" id="sheetUrl" placeholder="Cole aqui o ID ou URL da planilha Google Sheets (compartilhada publicamente)" />
     <div class="config-hint">Ex: https://docs.google.com/spreadsheets/d/SEU_ID_AQUI/edit · A planilha deve ser compartilhada como "Qualquer pessoa com o link pode ver"</div>
-    <div class="config-hint" style="margin-top:6px;color:var(--yellow)">⚠ Colunas esperadas: nome, tipo (PF/PJ), valor, taxa, vencimento, status, atraso_dias, regiao, data_inicio</div>
+    <div class="config-hint" style="margin-top:6px;color:var(--yellow)">⚠ Colunas lidas da aba "Empréstimos": Nome Cliente (auto), Valor Emprestado (R$), Taxa Juros (% a.m.), Próximo Vencimento (Auto), Status, Data do Empréstimo, Juros Total (R$)</div>
   </div>
   <button class="btn btn-primary" onclick="saveConfig()">Conectar</button>
 </div>
@@ -555,13 +555,7 @@
       </div>
     </div>
 
-    <div class="grid-4">
-      <div class="kpi" style="--kpi-color:var(--teal)">
-        <div class="kpi-icon">💵</div>
-        <div class="kpi-label">Caixa Disponível</div>
-        <div class="kpi-value" id="k-caixa">R$ —</div>
-        <div class="kpi-sub">capital não alocado</div>
-      </div>
+    <div class="grid-3">
       <div class="kpi" style="--kpi-color:var(--purple)">
         <div class="kpi-icon">⏱️</div>
         <div class="kpi-label">Atraso Médio</div>
@@ -596,33 +590,22 @@
       <div class="chart-card">
         <div class="chart-card-header">
           <div>
-            <div class="chart-title">PF vs PJ — Distribuição</div>
-            <div class="chart-sub">Carteira por tipo de cliente</div>
-          </div>
-        </div>
-        <canvas id="chartPFPJ"></canvas>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div>
-            <div class="chart-title">Receita de Juros vs Perdas</div>
-            <div class="chart-sub">Juros recebidos × valor inadimplente</div>
-          </div>
-        </div>
-        <canvas id="chartReceitaPerdas"></canvas>
-      </div>
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div>
             <div class="chart-title">Segmentação de Risco Geral</div>
-            <div class="chart-sub">Carteira por nível de risco</div>
+            <div class="chart-sub">Carteira por nível de risco (score interno)</div>
           </div>
         </div>
         <canvas id="chartRiscoGeral"></canvas>
       </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div>
+          <div class="chart-title">Receita de Juros vs Perdas</div>
+          <div class="chart-sub">Juros recebidos × valor inadimplente por mês</div>
+        </div>
+      </div>
+      <canvas id="chartReceitaPerdas"></canvas>
     </div>
   </div>
 
@@ -683,7 +666,6 @@
             <tr>
               <th>#</th>
               <th>Cliente</th>
-              <th>Tipo</th>
               <th>Valor Emprestado</th>
               <th>Dias em Atraso</th>
               <th>Valor em Risco</th>
@@ -702,7 +684,7 @@
   <div class="section" id="s-clientes">
     <div class="section-title">Perfil da Base de Clientes</div>
 
-    <div class="grid-4">
+    <div class="grid-3">
       <div class="kpi" style="--kpi-color:var(--accent)">
         <div class="kpi-label">Total de Clientes</div>
         <div class="kpi-value" id="c-total">—</div>
@@ -718,23 +700,9 @@
         <div class="kpi-value" id="c-inativos">—</div>
         <div class="kpi-sub">sem contrato ativo</div>
       </div>
-      <div class="kpi" style="--kpi-color:var(--purple)">
-        <div class="kpi-label">Tempo Médio Relacionamento</div>
-        <div class="kpi-value" id="c-tempo-rel">— m</div>
-        <div class="kpi-sub">meses de vínculo</div>
-      </div>
     </div>
 
     <div class="grid-2">
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div>
-            <div class="chart-title">PF vs PJ — Quantidade</div>
-            <div class="chart-sub">Distribuição da base de clientes</div>
-          </div>
-        </div>
-        <canvas id="chartPFPJ2"></canvas>
-      </div>
       <div class="chart-card">
         <div class="chart-card-header">
           <div>
@@ -743,18 +711,6 @@
           </div>
         </div>
         <canvas id="chartAtivosInativos"></canvas>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div>
-            <div class="chart-title">Distribuição por Região</div>
-            <div class="chart-sub">Origem dos clientes</div>
-          </div>
-        </div>
-        <canvas id="chartRegiao"></canvas>
       </div>
       <div class="chart-card">
         <div class="chart-card-header">
@@ -779,8 +735,6 @@
           <thead>
             <tr>
               <th>Cliente</th>
-              <th>Tipo</th>
-              <th>Região</th>
               <th>Contratos</th>
               <th>Total Emprestado</th>
               <th>Ticket Médio</th>
@@ -865,7 +819,6 @@
             <tr>
               <th>#</th>
               <th>Cliente</th>
-              <th>Tipo</th>
               <th>Score</th>
               <th>Risco</th>
               <th>Pontualidade</th>
@@ -909,25 +862,14 @@
       </div>
     </div>
 
-    <div class="grid-2">
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div>
-            <div class="chart-title">Lucro por Cliente (Top 15)</div>
-            <div class="chart-sub">Juros recebidos por cliente</div>
-          </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div>
+          <div class="chart-title">Lucro por Cliente (Top 15)</div>
+          <div class="chart-sub">Juros gerados por cliente</div>
         </div>
-        <canvas id="chartLucroPorCliente" style="max-height:300px"></canvas>
       </div>
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div>
-            <div class="chart-title">Lucro PF vs PJ</div>
-            <div class="chart-sub">Retorno por tipo de cliente</div>
-          </div>
-        </div>
-        <canvas id="chartLucroPFPJ"></canvas>
-      </div>
+      <canvas id="chartLucroPorCliente" style="max-height:300px"></canvas>
     </div>
 
     <div class="chart-card">
@@ -940,29 +882,6 @@
       <canvas id="chartLucroEvolucao"></canvas>
     </div>
 
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Lucratividade por Tipo de Empréstimo</div>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Tipo</th>
-              <th>Qtd. Contratos</th>
-              <th>Capital Emprestado</th>
-              <th>Lucro Realizado</th>
-              <th>Lucro Previsto</th>
-              <th>ROI</th>
-              <th>Taxa Méd.</th>
-            </tr>
-          </thead>
-          <tbody id="tabLucratividade"></tbody>
-        </table>
-      </div>
-    </div>
   </div>
 
   <!-- ══════════════════════════════════════
@@ -1029,7 +948,6 @@
             <tr>
               <th>Vencimento</th>
               <th>Cliente</th>
-              <th>Tipo</th>
               <th>Valor</th>
               <th>Status</th>
               <th>Contato</th>
@@ -1222,63 +1140,117 @@ function generateDemoData() {
     'Fernanda Lima','Roberto Alves','Juliana Ferreira','Marcos Pereira','Luciana Rocha',
     'Eduardo Martins','Camila Rodrigues','André Carvalho','Patrícia Gomes','Felipe Castro',
     'Beatriz Nunes','Rodrigo Barbosa','Vanessa Correia','Thiago Mendes','Larissa Araújo',
-    'Emp. ABC Ltda','Tech Soluções ME','Construtora XYZ','Mercearia do João','Auto Peças Silva'
   ];
-  const tipos = [...Array(20).fill('PF'), ...Array(5).fill('PJ')];
-  const regioes = ['Centro','Zona Norte','Zona Sul','Zona Leste','Zona Oeste','Interior','Online'];
   const statuses = ['ativo','ativo','ativo','ativo','ativo','atrasado','atrasado','quitado'];
-
   const today = new Date();
-  return names.map((nome, i) => {
-    const tipo = tipos[i];
-    const valor = tipo === 'PJ'
-      ? 5000 + Math.random() * 45000
-      : 500 + Math.random() * 9500;
-    const taxa = tipo === 'PJ'
-      ? 3 + Math.random() * 5
-      : 5 + Math.random() * 10;
+
+  return names.map((nome) => {
+    const valor = 500 + Math.random() * 9500;
+    const taxa  = 5 + Math.random() * 10;
     const status = statuses[Math.floor(Math.random() * statuses.length)];
     const atraso = status === 'atrasado' ? Math.floor(5 + Math.random() * 90) : 0;
     const dataInicio = new Date(today - Math.random() * 365 * 2 * 86400000);
     const vencimento = new Date(today.getTime() + (Math.random() * 60 - 30) * 86400000);
     const juros = (valor * taxa / 100);
-
     return {
-      nome,
-      tipo,
-      valor: Math.round(valor * 100) / 100,
-      taxa: Math.round(taxa * 10) / 10,
-      vencimento,
-      status,
-      atraso_dias: atraso,
-      regiao: regioes[Math.floor(Math.random() * regioes.length)],
-      data_inicio: dataInicio,
-      juros: Math.round(juros * 100) / 100,
+      nome, valor: Math.round(valor*100)/100, taxa: Math.round(taxa*10)/10,
+      vencimento, status, atraso_dias: atraso, data_inicio: dataInicio,
+      juros: Math.round(juros*100)/100,
     };
   });
 }
 
 // ── LOAD FROM GOOGLE SHEETS ──
 async function loadFromSheets(sheetId) {
-  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+  // Reads the "Empréstimos" sheet (gid must be discovered or use sheet name param)
+  // Try reading by sheet name using the gviz API
+  const sheetName = encodeURIComponent('Empréstimos');
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
   const res = await fetch(url);
   const text = await res.text();
   const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);/)[1]);
-  const cols = json.table.cols.map(c => c.label.toLowerCase().replace(/\s+/g, '_'));
-  return json.table.rows.map(row => {
-    const obj = {};
-    cols.forEach((col, i) => {
-      obj[col] = row.c[i] ? row.c[i].v : null;
-    });
-    // normalize
-    obj.valor = parseFloat(obj.valor) || 0;
-    obj.taxa = parseFloat(obj.taxa) || 0;
-    obj.atraso_dias = parseInt(obj.atraso_dias) || 0;
-    obj.vencimento = obj.vencimento ? new Date(obj.vencimento) : new Date();
-    obj.data_inicio = obj.data_inicio ? new Date(obj.data_inicio) : new Date();
-    obj.juros = obj.valor * obj.taxa / 100;
-    return obj;
-  });
+
+  // Row 3 (index 2) is the header in your sheet — gviz skips merged header rows automatically
+  // and uses the first non-empty row as labels
+  const cols = json.table.cols.map(c => (c.label || '').toString().trim());
+
+  // Column name mapping from your sheet → internal names
+  const colMap = {
+    'ID Empréstimo':         'id_emp',
+    'ID Cliente':            'id_cliente',
+    'Nome Cliente (auto)':   'nome',
+    'CPF (auto)':            'cpf',
+    'Telefone (auto)':       'telefone',
+    'Valor Emprestado (R$)': 'valor',
+    'Data do Empréstimo':    'data_inicio',
+    'Taxa Juros (% a.m.)':   'taxa',
+    'Prazo (meses)':         'prazo',
+    'Venc. Original':        'venc_original',
+    'Tipo Juros':            'tipo_juros',
+    'Juros Total (R$)':      'juros_total',
+    'Valor Total Devido (R$)':'valor_total',
+    'Total Pago (R$)':       'total_pago',
+    'Saldo Restante (R$)':   'saldo',
+    'Juros Próx. Mês (R$)':  'juros_prox',
+    'Parcelas Pagas':        'parcelas',
+    'Status':                'status_raw',
+    'Próximo Vencimento (Auto)': 'vencimento_raw',
+    'Observações':           'obs',
+  };
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  return json.table.rows
+    .map(row => {
+      const obj = {};
+      cols.forEach((col, i) => {
+        const key = colMap[col] || col.toLowerCase().replace(/\s+/g,'_');
+        obj[key] = row.c[i] ? row.c[i].v : null;
+      });
+
+      // Skip empty rows
+      if (!obj.nome && !obj.id_emp) return null;
+
+      // Parse numbers
+      obj.valor = parseFloat(obj.valor) || 0;
+      obj.taxa  = parseFloat(obj.taxa)  || 0;
+
+      // Parse dates
+      const parseDate = v => {
+        if (!v) return new Date();
+        if (v instanceof Date) return v;
+        // gviz returns Date(year,month,day) format sometimes
+        const m = String(v).match(/Date\((\d+),(\d+),(\d+)\)/);
+        if (m) return new Date(+m[1], +m[2], +m[3]);
+        return new Date(v);
+      };
+
+      obj.data_inicio = parseDate(obj.data_inicio);
+      const venc = parseDate(obj.vencimento_raw || obj.venc_original);
+      obj.vencimento = venc;
+
+      // Calculate atraso_dias from vencimento vs today
+      const vencSemHora = new Date(venc); vencSemHora.setHours(0,0,0,0);
+      const diffMs = today - vencSemHora;
+      obj.atraso_dias = diffMs > 0 ? Math.floor(diffMs / 86400000) : 0;
+
+      // Normalize status
+      const sl = (obj.status_raw || '').toString().toLowerCase();
+      if (sl.includes('quit') || sl.includes('pago') || sl.includes('encerr')) {
+        obj.status = 'quitado'; obj.atraso_dias = 0;
+      } else if (obj.atraso_dias > 0 || sl.includes('atras') || sl.includes('inadim')) {
+        obj.status = 'atrasado';
+      } else {
+        obj.status = 'ativo';
+      }
+
+      // juros for this contract
+      obj.juros = obj.juros_total || (obj.valor * obj.taxa / 100);
+
+      return obj;
+    })
+    .filter(Boolean);
 }
 
 async function loadData() {
@@ -1315,7 +1287,7 @@ function processData() {
   c.forEach(ct => {
     if (!clientMap[ct.nome]) {
       clientMap[ct.nome] = {
-        nome: ct.nome, tipo: ct.tipo, regiao: ct.regiao,
+        nome: ct.nome,
         contratos: [], totalValor: 0, totalJuros: 0,
         maxAtraso: 0, temAtraso: false, dataInicio: ct.data_inicio
       };
@@ -1337,7 +1309,7 @@ function processData() {
     const meses = Math.floor((today - cl.dataInicio) / (30 * 86400000));
     const tempoNorm = Math.min(1, meses / 24);
     const ticketNorm = Math.min(1, cl.totalValor / 20000);
-    const tipoPontos = cl.tipo === 'PJ' ? 0.9 : 0.8;
+    const tipoPontos = 0.85; // fixed neutral value (no PF/PJ data)
     cl.score = Math.round(
       pontualidade * 40 + atrasoNorm * 25 + tempoNorm * 15 + ticketNorm * 10 + tipoPontos * 10
     );
@@ -1420,14 +1392,13 @@ function renderKPIs() {
   const roi = carteira > 0 ? (jurosTotal / carteira * 100) : 0;
   const ticket = ativos.length > 0 ? carteira / ativos.length : 0;
   const inadTaxa = ativos.length > 0 ? (atrasados.length / ativos.length * 100) : 0;
-  const proxSemana = c.filter(x => {
+  const proxMes = c.filter(x => {
     const d = x.vencimento - today;
-    return d >= 0 && d <= 7 * 86400000 && x.status !== 'quitado';
-  }).reduce((s,x) => s + x.valor + x.juros, 0);
+    return d >= 0 && d <= 30 * 86400000 && x.status !== 'quitado';
+  }).reduce((s,x) => s + x.juros, 0);
   const clientesAtivos = DATA.clients.filter(c => c.status === 'ativo').length;
   const atrasoMedio = atrasados.length > 0
     ? atrasados.reduce((s,x) => s + x.atraso_dias, 0) / atrasados.length : 0;
-  const caixa = carteira * 0.15; // estimated available
 
   setText('k-carteira', fmt(carteira));
   setText('k-carteira-sub', fmtN(ativos.length) + ' contratos abertos');
@@ -1438,9 +1409,8 @@ function renderKPIs() {
   setText('k-ticket', fmt(ticket));
   setText('k-clientes-ativos', fmtN(clientesAtivos));
   setText('k-clientes-sub', 'de ' + DATA.clients.length + ' total');
-  setText('k-caixa', fmt(caixa));
   setText('k-atraso', atrasoMedio.toFixed(0) + ' dias');
-  setText('k-juros', fmt(proxSemana));
+  setText('k-juros', fmt(proxMes));
 
   // Charts
   const quitados = c.filter(x => x.status === 'quitado');
@@ -1452,22 +1422,6 @@ function renderKPIs() {
     ], backgroundColor: ['#00d4ff','#ff4444','#00e676'], borderWidth: 0 }]
   }, { plugins: { legend: { position: 'bottom', labels: { color: '#8ba4be' } } }, cutout: '65%' });
 
-  const pf = c.filter(x => x.tipo === 'PF');
-  const pj = c.filter(x => x.tipo === 'PJ');
-  mkChart('chartPFPJ', 'doughnut', {
-    labels: ['Pessoa Física','Pessoa Jurídica'],
-    datasets: [{ data: [pf.length, pj.length], backgroundColor: ['#7c4dff','#00bfa5'], borderWidth: 0 }]
-  }, { plugins: { legend: { position: 'bottom', labels: { color: '#8ba4be' } } }, cutout: '65%' });
-
-  const meses = getLast6Months();
-  mkChart('chartReceitaPerdas', 'bar', {
-    labels: meses,
-    datasets: [
-      { label: 'Receita de Juros', data: meses.map((_,i) => jurosTotal/6*(0.8+Math.random()*0.4)), backgroundColor: '#00d4ff88' },
-      { label: 'Perdas (Inadimplência)', data: meses.map((_,i) => jurosTotal/6*inadTaxa/100*(0.6+Math.random()*0.8)), backgroundColor: '#ff444488' }
-    ]
-  });
-
   const rb = DATA.clients.filter(x => x.score >= 70).length;
   const rm = DATA.clients.filter(x => x.score >= 40 && x.score < 70).length;
   const ra = DATA.clients.filter(x => x.score < 40).length;
@@ -1475,6 +1429,15 @@ function renderKPIs() {
     labels: ['Risco Baixo','Risco Médio','Risco Alto'],
     datasets: [{ data: [rb,rm,ra], backgroundColor: ['#00e676','#ffca28','#ff4444'], borderWidth: 0 }]
   }, { plugins: { legend: { position: 'bottom', labels: { color: '#8ba4be' } } }, cutout: '65%' });
+
+  const meses = getLast6Months();
+  mkChart('chartReceitaPerdas', 'bar', {
+    labels: meses,
+    datasets: [
+      { label: 'Receita de Juros', data: meses.map(() => jurosTotal/6*(0.8+Math.random()*0.4)), backgroundColor: '#00d4ff88' },
+      { label: 'Perdas (Inadimplência)', data: meses.map(() => jurosTotal/6*inadTaxa/100*(0.6+Math.random()*0.8)), backgroundColor: '#ff444488' }
+    ]
+  });
 }
 
 // ── INADIMPLÊNCIA ──
@@ -1512,7 +1475,6 @@ function renderInadimplencia() {
     <tr>
       <td style="color:var(--text3);font-family:var(--font-mono)">${i+1}</td>
       <td style="font-weight:500">${x.nome}</td>
-      <td>${badgeTipo(x.tipo)}</td>
       <td style="font-family:var(--font-mono)">${fmt(x.valor)}</td>
       <td>${badgeDias(x.atraso_dias)}</td>
       <td style="color:var(--red);font-family:var(--font-mono);font-weight:500">${fmt(x.valor)}</td>
@@ -1526,34 +1488,15 @@ function renderClientes() {
   const cl = DATA.clients;
   const ativos = cl.filter(x => x.status === 'ativo').length;
   const inativos = cl.length - ativos;
-  const tempoMedio = cl.length > 0 ? cl.reduce((s,x) => s + x.mesesRelacionamento, 0) / cl.length : 0;
 
   setText('c-total', cl.length);
   setText('c-ativos', ativos);
   setText('c-inativos', inativos);
-  setText('c-tempo-rel', tempoMedio.toFixed(0) + ' m');
-
-  // PF vs PJ qty
-  const pf = cl.filter(x => x.tipo === 'PF').length;
-  const pj = cl.filter(x => x.tipo === 'PJ').length;
-  mkChart('chartPFPJ2', 'doughnut', {
-    labels: ['Pessoa Física','Pessoa Jurídica'],
-    datasets: [{ data: [pf,pj], backgroundColor: ['#7c4dff','#00bfa5'], borderWidth: 0 }]
-  }, { plugins: { legend: { position: 'bottom', labels: { color: '#8ba4be' } } }, cutout: '65%' });
 
   mkChart('chartAtivosInativos', 'doughnut', {
     labels: ['Ativos','Inativos'],
     datasets: [{ data: [ativos, inativos], backgroundColor: ['#00d4ff','#243347'], borderWidth: 0 }]
   }, { plugins: { legend: { position: 'bottom', labels: { color: '#8ba4be' } } }, cutout: '65%' });
-
-  // Região
-  const regiaoMap = {};
-  cl.forEach(x => { regiaoMap[x.regiao] = (regiaoMap[x.regiao]||0)+1; });
-  const regioes = Object.keys(regiaoMap);
-  mkChart('chartRegiao', 'bar', {
-    labels: regioes,
-    datasets: [{ label: 'Clientes', data: regioes.map(r => regiaoMap[r]), backgroundColor: COLORS }]
-  }, { plugins: { legend: { display: false } } });
 
   // Ticket por cliente
   const top = [...cl].sort((a,b) => b.totalValor - a.totalValor).slice(0,15);
@@ -1567,8 +1510,6 @@ function renderClientes() {
   tbody.innerHTML = cl.sort((a,b) => b.totalValor - a.totalValor).map(x => `
     <tr>
       <td style="font-weight:500">${x.nome}</td>
-      <td>${badgeTipo(x.tipo)}</td>
-      <td style="color:var(--text2)">${x.regiao || '—'}</td>
       <td style="text-align:center">${x.contratos.length}</td>
       <td style="font-family:var(--font-mono)">${fmt(x.totalValor)}</td>
       <td style="font-family:var(--font-mono)">${fmt(x.ticketMedio)}</td>
@@ -1614,7 +1555,6 @@ function renderScore() {
     <tr>
       <td style="color:var(--text3);font-family:var(--font-mono)">${i+1}</td>
       <td style="font-weight:500">${x.nome}</td>
-      <td>${badgeTipo(x.tipo)}</td>
       <td>${scoreBar(x.score)}</td>
       <td>${badgeRisco(x.score)}</td>
       <td>${pontual}%</td>
@@ -1649,47 +1589,12 @@ function renderLucratividade() {
     datasets: [{ label: 'Lucro (Juros)', data: clTop.map(x => x.totalJuros), backgroundColor: '#00e67688' }]
   }, { indexAxis: 'y', plugins: { legend: { display: false } } });
 
-  // PF vs PJ lucro
-  const pfJuros = DATA.clients.filter(x=>x.tipo==='PF').reduce((s,x)=>s+x.totalJuros,0);
-  const pjJuros = DATA.clients.filter(x=>x.tipo==='PJ').reduce((s,x)=>s+x.totalJuros,0);
-  const pfCap = DATA.clients.filter(x=>x.tipo==='PF').reduce((s,x)=>s+x.totalValor,0);
-  const pjCap = DATA.clients.filter(x=>x.tipo==='PJ').reduce((s,x)=>s+x.totalValor,0);
-  mkChart('chartLucroPFPJ', 'bar', {
-    labels: ['Pessoa Física','Pessoa Jurídica'],
-    datasets: [
-      { label: 'Capital Emprestado', data: [pfCap, pjCap], backgroundColor: '#00d4ff44' },
-      { label: 'Lucro (Juros)', data: [pfJuros, pjJuros], backgroundColor: ['#7c4dff','#00bfa5'] }
-    ]
-  });
-
   // Evolução
   const meses = getLast6Months();
   mkChart('chartLucroEvolucao', 'line', {
     labels: meses,
-    datasets: [{ label: 'Lucro Mensal', data: meses.map((_,i) => lucroReal/6*(0.7+Math.random()*0.6)), borderColor: '#00e676', backgroundColor: '#00e67620', fill: true, tension: 0.4 }]
+    datasets: [{ label: 'Lucro Mensal', data: meses.map(() => lucroReal/6*(0.7+Math.random()*0.6)), borderColor: '#00e676', backgroundColor: '#00e67620', fill: true, tension: 0.4 }]
   });
-
-  // Lucratividade por tipo
-  const tbody = document.getElementById('tabLucratividade');
-  const pfContratos = c.filter(x=>x.tipo==='PF');
-  const pjContratos = c.filter(x=>x.tipo==='PJ');
-  const rows = [
-    { tipo: 'Pessoa Física (PF)', contratos: pfContratos, cap: pfCap, juros: pfJuros },
-    { tipo: 'Pessoa Jurídica (PJ)', contratos: pjContratos, cap: pjCap, juros: pjJuros }
-  ];
-  tbody.innerHTML = rows.map(r => {
-    const roi = r.cap > 0 ? (r.juros / r.cap * 100) : 0;
-    const taxaMedia = r.contratos.length > 0 ? r.contratos.reduce((s,x)=>s+x.taxa,0)/r.contratos.length : 0;
-    return `<tr>
-      <td style="font-weight:600">${r.tipo}</td>
-      <td>${r.contratos.length}</td>
-      <td style="font-family:var(--font-mono)">${fmt(r.cap)}</td>
-      <td style="color:var(--green);font-family:var(--font-mono)">${fmt(r.juros * 0.4)}</td>
-      <td style="font-family:var(--font-mono)">${fmt(r.juros)}</td>
-      <td style="font-family:var(--font-mono)">${fmtPct(roi)}</td>
-      <td>${fmtPct(taxaMedia)}</td>
-    </tr>`;
-  }).join('');
 }
 
 // ── FLUXO DE CAIXA ──
@@ -1776,7 +1681,6 @@ function renderFluxo() {
     return `<tr>
       <td>${x.vencimento.toLocaleDateString('pt-BR')} ${urgencia}</td>
       <td style="font-weight:500">${x.nome}</td>
-      <td>${badgeTipo(x.tipo)}</td>
       <td style="font-family:var(--font-mono)">${fmt(x.valor + x.juros)}</td>
       <td>${badgeStatus(x.status)}</td>
       <td><button class="btn" style="padding:4px 10px;font-size:11px" onclick="alert('Ligar para ${x.nome}')">📞 Cobrar</button></td>
