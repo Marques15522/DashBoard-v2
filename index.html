@@ -3,2028 +3,1511 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Estratégico — Empréstimos v3</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Dashboard Estratégico — Empréstimos</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #080c12;
-    --bg2: #0d1219;
-    --bg3: #111820;
-    --card: #141c26;
-    --card2: #1a2333;
-    --border: #1e2d40;
-    --border2: #243347;
-    --text: #e8f0f8;
-    --text2: #8ba4be;
-    --text3: #4d6a85;
-    --accent: #00d4ff;
-    --accent2: #0099cc;
-    --green: #00e676;
-    --green2: #00c853;
-    --red: #ff4444;
-    --red2: #cc0000;
-    --yellow: #ffca28;
-    --orange: #ff6d00;
-    --purple: #7c4dff;
-    --teal: #00bfa5;
-    --font-head: 'Syne', sans-serif;
-    --font-mono: 'DM Mono', monospace;
-    --font-body: 'DM Sans', sans-serif;
-  }
+:root {
+  --bg:       #080a0f;
+  --s1:       #0e1118;
+  --s2:       #13161f;
+  --s3:       #181c27;
+  --border:   #1c2133;
+  --border2:  #232840;
+  --gold:     #f0b429;
+  --gold2:    #ffd166;
+  --green:    #06d6a0;
+  --red:      #ef476f;
+  --blue:     #4895ef;
+  --purple:   #9b5de5;
+  --text:     #dde1f0;
+  --muted:    #5a6282;
+  --muted2:   #3d4466;
+}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin:0; padding:0; box-sizing:border-box; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-body);
-    font-size: 14px;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+html { scroll-behavior: smooth; }
 
-  /* ── TOP BAR ── */
-  .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(8,12,18,0.95);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .topbar-left { display: flex; align-items: center; gap: 16px; }
-  .logo {
-    font-family: var(--font-head);
-    font-size: 18px;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--accent), var(--green));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: -0.5px;
-  }
-  .live-badge {
-    background: var(--green);
-    color: #000;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 500;
-    padding: 3px 8px;
-    border-radius: 20px;
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
-  .topbar-right { display: flex; align-items: center; gap: 12px; }
-  .btn {
-    background: var(--card2);
-    border: 1px solid var(--border2);
-    color: var(--text);
-    padding: 7px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: var(--font-body);
-    font-size: 13px;
-    transition: all 0.2s;
-  }
-  .btn:hover { background: var(--border2); border-color: var(--accent); color: var(--accent); }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--accent2), var(--accent));
-    border-color: transparent;
-    color: #000;
-    font-weight: 600;
-  }
-  .btn-primary:hover { opacity: 0.85; color: #000; }
-  .last-update {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text3);
-  }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-  /* ── SHEETS CONFIG ── */
-  .sheets-config {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px 28px;
-    margin: 24px 32px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .sheets-config label { font-size: 13px; color: var(--text2); white-space: nowrap; }
-  .sheets-config input {
-    flex: 1;
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    color: var(--text);
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-family: var(--font-mono);
-    font-size: 12px;
-    outline: none;
-  }
-  .sheets-config input:focus { border-color: var(--accent); }
-  .config-hint { font-size: 11px; color: var(--text3); margin-top: 4px; }
+/* ── BG TEXTURE ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(240,180,41,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(6,214,160,0.03) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
 
-  /* ── NAV TABS ── */
-  .nav-tabs {
-    display: flex;
-    gap: 4px;
-    padding: 0 32px;
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-  }
-  .nav-tab {
-    padding: 12px 20px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text3);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    white-space: nowrap;
-    transition: all 0.2s;
-    font-family: var(--font-body);
-  }
-  .nav-tab:hover { color: var(--text2); }
-  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+/* ── LOADING ── */
+#loading-screen {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 18px; z-index: 999;
+  transition: opacity 0.6s ease;
+}
+#loading-screen.hidden { opacity: 0; pointer-events: none; }
 
-  /* ── MAIN CONTENT ── */
-  .content { padding: 28px 32px; }
-  .section { display: none; }
-  .section.active { display: block; }
+.load-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.5rem;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+}
 
-  /* ── GRID LAYOUTS ── */
-  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
-  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
-  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; }
-  .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
-  .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 20px; }
+.load-bar-wrap {
+  width: 200px; height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.load-bar {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 2px;
+  animation: loadprog 1.8s ease forwards;
+}
+@keyframes loadprog { from { width:0; } to { width:100%; } }
 
-  /* ── KPI CARD ── */
-  .kpi {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px 22px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-  .kpi:hover { border-color: var(--border2); }
-  .kpi::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--kpi-color, var(--accent));
-    opacity: 0.8;
-  }
-  .kpi-icon { font-size: 20px; margin-bottom: 10px; }
-  .kpi-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 500; margin-bottom: 6px; }
-  .kpi-value {
-    font-family: var(--font-head);
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1;
-    margin-bottom: 6px;
-  }
-  .kpi-sub { font-size: 12px; color: var(--text3); }
-  .kpi-delta { font-size: 12px; margin-top: 4px; }
-  .kpi-delta.up { color: var(--green); }
-  .kpi-delta.down { color: var(--red); }
-  .kpi-delta.warn { color: var(--yellow); }
+.load-text { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.1em; }
 
-  /* ── CHART CARD ── */
-  .chart-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 22px;
-    margin-bottom: 20px;
-  }
-  .chart-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  .chart-title {
-    font-family: var(--font-head);
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-  }
-  .chart-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
-  .chart-badge {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    color: var(--text2);
-  }
-  canvas { max-height: 260px; }
+/* ── ERROR ── */
+#error-screen {
+  display: none; position: fixed; inset: 0;
+  background: var(--bg);
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px; z-index: 998;
+}
+#error-screen.show { display: flex; }
+.error-box {
+  background: var(--s1); border: 1px solid rgba(239,71,111,0.3);
+  border-radius: 14px; padding: 36px; max-width: 460px; text-align: center;
+}
+.error-title { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; color:var(--red); margin-bottom:10px; }
+.error-msg { font-size:0.72rem; color:var(--muted); line-height:1.7; }
+.error-btn {
+  margin-top:20px; padding:10px 28px;
+  background:var(--gold); color:#000;
+  border:none; border-radius:6px;
+  font-family:'Bebas Neue',sans-serif; font-size:1rem;
+  letter-spacing:0.08em; cursor:pointer;
+}
 
-  /* ── TABLE ── */
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; }
-  thead tr { border-bottom: 1px solid var(--border2); }
-  th {
-    text-align: left;
-    padding: 10px 14px;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.7px;
-    color: var(--text3);
-    font-weight: 500;
-    font-family: var(--font-mono);
-  }
-  td { padding: 11px 14px; font-size: 13px; border-bottom: 1px solid var(--border); }
-  tbody tr:hover { background: var(--card2); }
-  tbody tr:last-child td { border-bottom: none; }
+/* ── HEADER ── */
+header {
+  position: sticky; top:0; z-index: 100;
+  background: rgba(8,10,15,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
 
-  /* ── BADGE / TAG ── */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    font-family: var(--font-mono);
-  }
-  .badge-green { background: rgba(0,230,118,0.12); color: var(--green); border: 1px solid rgba(0,230,118,0.25); }
-  .badge-red { background: rgba(255,68,68,0.12); color: var(--red); border: 1px solid rgba(255,68,68,0.25); }
-  .badge-yellow { background: rgba(255,202,40,0.12); color: var(--yellow); border: 1px solid rgba(255,202,40,0.25); }
-  .badge-blue { background: rgba(0,212,255,0.12); color: var(--accent); border: 1px solid rgba(0,212,255,0.25); }
-  .badge-purple { background: rgba(124,77,255,0.12); color: var(--purple); border: 1px solid rgba(124,77,255,0.25); }
-  .badge-orange { background: rgba(255,109,0,0.12); color: var(--orange); border: 1px solid rgba(255,109,0,0.25); }
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  display: flex; align-items: center; gap: 10px;
+}
 
-  /* ── SCORE BAR ── */
-  .score-bar { height: 6px; border-radius: 3px; background: var(--bg3); overflow: hidden; margin-top: 4px; }
-  .score-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+.logo-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  border: 1px solid var(--border2);
+  padding: 2px 8px; border-radius: 4px;
+  margin-left: 4px;
+}
 
-  /* ── ALERT BOX ── */
-  .alert-box {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-  }
-  .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-  .alert-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
-  .alert-desc { font-size: 12px; color: var(--text2); }
-  .alert-box.critical { border-color: rgba(255,68,68,0.4); background: rgba(255,68,68,0.05); }
-  .alert-box.warning { border-color: rgba(255,202,40,0.4); background: rgba(255,202,40,0.05); }
-  .alert-box.info { border-color: rgba(0,212,255,0.3); background: rgba(0,212,255,0.04); }
-  .alert-box.good { border-color: rgba(0,230,118,0.3); background: rgba(0,230,118,0.04); }
+.header-right {
+  display: flex; align-items: center; gap: 14px;
+  font-size: 0.68rem; color: var(--muted);
+}
 
-  /* ── SCENARIO CARDS ── */
-  .scenario-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .scenario-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 22px;
-  }
-  .scenario-card.pessimista { border-top: 3px solid var(--red); }
-  .scenario-card.realista { border-top: 3px solid var(--yellow); }
-  .scenario-card.otimista { border-top: 3px solid var(--green); }
-  .scenario-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-  .scenario-sub { font-size: 12px; color: var(--text3); margin-bottom: 16px; }
-  .scenario-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .scenario-label { font-size: 12px; color: var(--text2); }
-  .scenario-val { font-family: var(--font-mono); font-size: 14px; font-weight: 500; }
+.live-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(6,214,160,0.08);
+  border: 1px solid rgba(6,214,160,0.2);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.62rem;
+  color: var(--green);
+}
 
-  /* ── CLUSTER ── */
-  .cluster-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .cluster-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px;
-    text-align: center;
-  }
-  .cluster-icon { font-size: 32px; margin-bottom: 10px; }
-  .cluster-name { font-family: var(--font-head); font-size: 15px; font-weight: 700; margin-bottom: 6px; }
-  .cluster-desc { font-size: 12px; color: var(--text2); margin-bottom: 14px; line-height: 1.5; }
-  .cluster-clients { font-size: 12px; color: var(--text3); }
+.live-dot {
+  width: 6px; height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: blink 2s infinite;
+}
 
-  /* ── SECTION TITLE ── */
-  .section-title {
-    font-family: var(--font-head);
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--text3);
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
+@keyframes blink {
+  0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+  50% { opacity:.6; box-shadow: 0 0 0 4px rgba(6,214,160,0); }
+}
 
-  /* ── MINI STAT ── */
-  .mini-stats { display: flex; gap: 20px; flex-wrap: wrap; }
-  .mini-stat { text-align: center; }
-  .mini-stat-val { font-family: var(--font-head); font-size: 22px; font-weight: 700; }
-  .mini-stat-label { font-size: 11px; color: var(--text3); }
+.refresh-btn {
+  background: var(--s2); border: 1px solid var(--border2);
+  color: var(--muted); padding: 6px 14px;
+  border-radius: 6px; font-family: 'DM Mono', monospace;
+  font-size: 0.65rem; cursor: pointer; transition: all 0.2s;
+}
+.refresh-btn:hover { border-color: var(--gold); color: var(--gold); }
 
-  /* ── PROGRESS RING ── */
-  .ring-wrap { position: relative; width: 80px; height: 80px; }
-  .ring-wrap svg { transform: rotate(-90deg); }
-  .ring-val {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: var(--font-head);
-    font-size: 15px;
-    font-weight: 700;
-  }
+/* ── MAIN ── */
+.main {
+  position: relative; z-index: 1;
+  max-width: 1440px; margin: 0 auto;
+  padding: 32px 40px 60px;
+  opacity: 0; transition: opacity 0.5s ease;
+}
+.main.visible { opacity: 1; }
 
-  /* ── LOADING ── */
-  .loading-overlay {
-    position: fixed; inset: 0;
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    transition: opacity 0.5s;
-  }
-  .loading-overlay.hidden { opacity: 0; pointer-events: none; }
-  .loader-title { font-family: var(--font-head); font-size: 22px; font-weight: 800; margin-bottom: 8px; background: linear-gradient(135deg,var(--accent),var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .loader-sub { font-size: 13px; color: var(--text3); margin-bottom: 32px; }
-  .loader-bar { width: 240px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-  .loader-fill { height: 100%; background: linear-gradient(90deg,var(--accent),var(--green)); border-radius: 2px; animation: loadbar 1.5s ease-in-out infinite; }
-  @keyframes loadbar { 0%{width:0;margin-left:0} 50%{width:60%;margin-left:20%} 100%{width:0;margin-left:100%} }
+/* ── SECTION LABEL ── */
+.section-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  color: var(--muted);
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-label::after {
+  content: ''; flex:1; height:1px;
+  background: linear-gradient(to right, var(--border2), transparent);
+}
 
-  /* ── ERROR / STATUS ── */
-  .status-banner {
-    background: rgba(255,68,68,0.08);
-    border: 1px solid rgba(255,68,68,0.3);
-    border-radius: 10px;
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    font-size: 13px;
-  }
-  .status-banner.success { background: rgba(0,230,118,0.06); border-color: rgba(0,230,118,0.25); }
-  .status-banner.info { background: rgba(0,212,255,0.06); border-color: rgba(0,212,255,0.2); }
+/* ── KPI STRIP ── */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  margin-bottom: 36px;
+}
 
-  /* ── RESPONSIVE ── */
-  @media (max-width: 900px) {
-    .grid-4 { grid-template-columns: repeat(2,1fr); }
-    .grid-3 { grid-template-columns: repeat(2,1fr); }
-    .grid-2-1, .grid-1-2 { grid-template-columns: 1fr; }
-    .scenario-grid { grid-template-columns: 1fr; }
-    .cluster-grid { grid-template-columns: 1fr; }
-    .content { padding: 16px; }
-    .nav-tabs { padding: 0 16px; }
-    .topbar { padding: 0 16px; }
-  }
+.kpi {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+  animation: riseUp 0.5s ease both;
+}
+.kpi:hover { transform: translateY(-2px); border-color: var(--border2); }
+.kpi:nth-child(1){animation-delay:.05s} .kpi:nth-child(2){animation-delay:.1s}
+.kpi:nth-child(3){animation-delay:.15s} .kpi:nth-child(4){animation-delay:.2s}
+.kpi:nth-child(5){animation-delay:.25s} .kpi:nth-child(6){animation-delay:.3s}
 
-  .col-span-2 { grid-column: span 2; }
-  .col-span-3 { grid-column: span 3; }
-  .col-span-4 { grid-column: span 4; }
+@keyframes riseUp {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
 
-  /* ── TOOLTIP ── */
-  [data-tip] { position: relative; cursor: help; }
-  [data-tip]:hover::after {
-    content: attr(data-tip);
-    position: absolute;
-    bottom: 110%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--card2);
-    border: 1px solid var(--border2);
-    color: var(--text2);
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 11px;
-    white-space: nowrap;
-    z-index: 50;
-    pointer-events: none;
-  }
+.kpi-accent {
+  position: absolute; top:0; left:0; right:0; height:2px;
+}
 
-  /* ── MINI CALENDAR ── */
-  .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-  .day-cell {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 8px;
-    text-align: center;
-  }
-  .day-cell.has-payment { border-color: var(--accent); background: rgba(0,212,255,0.06); }
-  .day-cell.overdue { border-color: var(--red); background: rgba(255,68,68,0.06); }
-  .day-name { font-size: 10px; color: var(--text3); text-transform: uppercase; margin-bottom: 4px; }
-  .day-val { font-family: var(--font-head); font-size: 16px; font-weight: 700; }
-  .day-amount { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.kpi-lbl { font-size: 0.58rem; color: var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px; }
+.kpi-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem; letter-spacing:0.04em;
+  line-height:1; margin-bottom:4px;
+}
+.kpi-sub { font-size:0.6rem; color:var(--muted); }
 
-  /* ── FORECAST TABLE ── */
-  .forecast-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .forecast-row:last-child { border-bottom: none; }
-  .forecast-period { font-family: var(--font-mono); font-size: 12px; color: var(--text2); width: 80px; flex-shrink: 0; }
-  .forecast-bar-wrap { flex: 1; height: 8px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
-  .forecast-bar { height: 100%; border-radius: 4px; }
-  .forecast-val { font-family: var(--font-mono); font-size: 13px; font-weight: 500; width: 100px; text-align: right; flex-shrink: 0; }
+/* ── CHART GRID ── */
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.grid-2-1 { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:16px; }
+.col-span-2 { grid-column: span 2; }
 
-  /* animations */
-  .kpi { animation: fadeUp 0.4s ease backwards; }
-  .kpi:nth-child(1){animation-delay:0.05s}
-  .kpi:nth-child(2){animation-delay:0.1s}
-  .kpi:nth-child(3){animation-delay:0.15s}
-  .kpi:nth-child(4){animation-delay:0.2s}
-  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  animation: riseUp 0.5s ease both;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--border2); }
 
-  .number-highlight { color: var(--accent); font-family: var(--font-mono); }
+.card-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+.card-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem; letter-spacing:0.08em;
+  color: var(--text); margin-bottom:3px;
+}
+.card-desc { font-size:0.62rem; color:var(--muted); line-height:1.5; }
+
+.card-badge {
+  font-size:0.55rem; padding:3px 9px;
+  border-radius:20px; border:1px solid var(--border2);
+  color:var(--muted); white-space:nowrap; letter-spacing:0.08em;
+}
+
+.chart-wrap { position:relative; height:200px; }
+.chart-wrap.tall { height:240px; }
+.chart-wrap.short { height:160px; }
+
+/* ── SCORE BARS (Risk) ── */
+.risk-list { display:flex; flex-direction:column; gap:10px; }
+
+.risk-row { display:flex; flex-direction:column; gap:4px; }
+.risk-top { display:flex; justify-content:space-between; align-items:center; }
+.risk-name { font-size:0.72rem; color:var(--text); }
+.risk-score-val { font-family:'Bebas Neue',sans-serif; font-size:0.85rem; }
+
+.risk-bar-bg {
+  height:6px; border-radius:3px;
+  background: var(--border2); overflow:hidden;
+}
+.risk-bar-fill {
+  height:100%; border-radius:3px;
+  transition: width 1s ease;
+}
+
+/* ── DOBRAMENTO TABLE ── */
+.dobra-table { width:100%; border-collapse:collapse; font-size:0.68rem; }
+.dobra-table th {
+  text-align:left; padding:8px 10px;
+  color:var(--muted); font-weight:400;
+  border-bottom:1px solid var(--border);
+  font-size:0.58rem; letter-spacing:0.08em; text-transform:uppercase;
+}
+.dobra-table td {
+  padding:10px 10px;
+  border-bottom:1px solid var(--border);
+  color:var(--text);
+}
+.dobra-table tr:last-child td { border-bottom:none; }
+.dobra-table tr.highlight td { color:var(--gold); }
+.dobra-highlight { background:rgba(240,180,41,0.06); border-radius:6px; }
+
+/* ── WEEK CALENDAR ── */
+.week-grid {
+  display:grid; grid-template-columns:repeat(7,1fr); gap:6px;
+}
+.day-col { text-align:center; }
+.day-name {
+  font-size:0.55rem; color:var(--muted); letter-spacing:0.08em;
+  text-transform:uppercase; margin-bottom:6px;
+}
+.day-box {
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:8px; padding:8px 6px;
+  min-height:80px;
+  display:flex; flex-direction:column; align-items:center;
+  gap:4px; font-size:0.6rem;
+}
+.day-box.today { border-color:var(--gold); background:rgba(240,180,41,0.05); }
+.day-box.has-payment { border-color:var(--green); background:rgba(6,214,160,0.05); }
+.day-num {
+  font-family:'Bebas Neue',sans-serif; font-size:1rem;
+  color:var(--muted);
+}
+.day-box.today .day-num { color:var(--gold); }
+.day-box.has-payment .day-num { color:var(--green); }
+.day-payment {
+  font-size:0.55rem; color:var(--green); text-align:center; line-height:1.3;
+}
+.day-empty { color:var(--muted2); font-size:0.55rem; }
+
+/* chips de cliente no calendário */
+.day-clients { display:flex; flex-direction:column; gap:3px; width:100%; margin-top:2px; }
+.day-client-chip {
+  background: rgba(6,214,160,0.1);
+  border: 1px solid rgba(6,214,160,0.25);
+  border-radius:4px;
+  padding:3px 5px;
+  font-size:0.5rem;
+  color:var(--green);
+  text-align:left;
+  line-height:1.35;
+  word-break:break-word;
+}
+.day-client-chip.atraso {
+  background:rgba(239,71,111,0.1);
+  border-color:rgba(239,71,111,0.3);
+  color:var(--red);
+}
+.day-client-chip .chip-val {
+  display:block;
+  font-size:0.52rem;
+  opacity:0.8;
+  margin-top:1px;
+}
+
+/* ── FOOTER ── */
+footer {
+  text-align:center; padding:28px;
+  font-size:0.6rem; color:var(--muted);
+  border-top:1px solid var(--border);
+}
+
+/* ── TOOLTIP OVERRIDE ── */
+.chart-tooltip {
+  background: var(--s2) !important;
+  border: 1px solid var(--border2) !important;
+}
+
+/* ── DIAS DE ATRASO LIST ── */
+.atraso-list { display:flex; flex-direction:column; gap:8px; }
+.atraso-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 12px;
+  background:var(--s2); border-radius:8px;
+  border-left:3px solid var(--red);
+}
+.atraso-row.medio { border-left-color: var(--gold); }
+.atraso-row.baixo { border-left-color: var(--muted2); }
+.atraso-info { display:flex; flex-direction:column; gap:2px; }
+.atraso-nome { font-size:0.72rem; color:var(--text); }
+.atraso-sub  { font-size:0.58rem; color:var(--muted); }
+.atraso-dias {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.3rem; text-align:right; line-height:1;
+}
+.atraso-dias span { display:block; font-family:'DM Mono',monospace; font-size:0.52rem; color:var(--muted); }
+
+/* ── HISTÓRICO CLIENTE ── */
+.hist-list { display:flex; flex-direction:column; gap:6px; }
+.hist-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 0; border-bottom:1px solid var(--border);
+}
+.hist-row:last-child { border-bottom:none; }
+.hist-nome { font-size:0.68rem; color:var(--text); }
+.hist-badges { display:flex; gap:4px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+.hist-badge {
+  font-size:0.5rem; padding:2px 7px; border-radius:4px;
+  border:1px solid; white-space:nowrap;
+}
+.hist-badge.ok    { color:var(--green); border-color:rgba(6,214,160,0.3); background:rgba(6,214,160,0.08); }
+.hist-badge.warn  { color:var(--gold);  border-color:rgba(240,180,41,0.3); background:rgba(240,180,41,0.08); }
+.hist-badge.bad   { color:var(--red);   border-color:rgba(239,71,111,0.3); background:rgba(239,71,111,0.08); }
+.hist-badge.muted { color:var(--muted); border-color:var(--border2); background:transparent; }
+
+/* ── CONCENTRAÇÃO ── */
+.conc-list { display:flex; flex-direction:column; gap:10px; }
+.conc-row { display:flex; flex-direction:column; gap:4px; }
+.conc-top { display:flex; justify-content:space-between; align-items:center; }
+.conc-nome { font-size:0.68rem; color:var(--text); }
+.conc-pct  { font-family:'Bebas Neue',sans-serif; font-size:0.9rem; }
+.conc-bar-bg { height:6px; border-radius:3px; background:var(--border2); overflow:hidden; }
+.conc-bar-fill { height:100%; border-radius:3px; transition:width 1s ease; }
+
+/* ── CAPITAL DISPONÍVEL / VENCENDO ── */
+.info-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 0; border-bottom:1px solid var(--border);
+}
+.info-row:last-child { border-bottom:none; }
+.info-label { font-size:0.65rem; color:var(--muted); }
+.info-val   { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; }
+
+/* ── EVOLUÇÃO MENSAL ── */
+.grid-3-new { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px; }
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="loader-title">📊 Dashboard de Empréstimos</div>
-  <div class="loader-sub">Conectando ao Google Sheets...</div>
-  <div class="loader-bar"><div class="loader-fill"></div></div>
+<!-- Loading -->
+<div id="loading-screen">
+  <div class="load-logo">💰 CARTEIRA</div>
+  <div class="load-bar-wrap"><div class="load-bar"></div></div>
+  <div class="load-text">CONECTANDO AO GOOGLE SHEETS...</div>
 </div>
 
-<!-- TOP BAR -->
-<header class="topbar">
-  <div class="topbar-left">
-    <div class="logo">💰 CRÉDITO PRO</div>
-    <div class="live-badge">AO VIVO</div>
+<!-- Error -->
+<div id="error-screen">
+  <div class="error-box">
+    <div class="error-title">Erro de Conexão</div>
+    <div class="error-msg" id="error-msg">Verifique se a planilha está compartilhada publicamente.</div>
+    <button class="error-btn" onclick="loadData()">TENTAR NOVAMENTE</button>
   </div>
-  <div class="topbar-right">
-    <span class="last-update" id="lastUpdate">—</span>
-    <button class="btn" onclick="loadData()">↻ Atualizar</button>
-    <button class="btn btn-primary" onclick="toggleConfig()">⚙ Configurar Planilha</button>
+</div>
+
+<header>
+  <div class="logo">
+    💰 CARTEIRA
+    <span class="logo-tag">ESTRATÉGICO</span>
+  </div>
+  <div class="header-right">
+    <div class="live-pill">
+      <div class="live-dot"></div>
+      AO VIVO
+    </div>
+    <span id="today-date">—</span>
+    <button class="refresh-btn" onclick="loadData()">↻ ATUALIZAR</button>
   </div>
 </header>
 
-<!-- SHEETS CONFIG -->
-<div class="sheets-config" id="sheetsConfig" style="display:none">
-  <label>🔗 URL da Planilha:</label>
-  <div style="flex:1">
-    <input type="text" id="sheetUrl" placeholder="Cole aqui o ID ou URL da planilha Google Sheets (compartilhada publicamente)" />
-    <div class="config-hint">Ex: https://docs.google.com/spreadsheets/d/SEU_ID_AQUI/edit · A planilha deve ser compartilhada como "Qualquer pessoa com o link pode ver"</div>
-    <div class="config-hint" style="margin-top:6px;color:var(--yellow)">⚠ Colunas lidas da aba "Empréstimos": Nome Cliente (auto), Valor Emprestado (R$), Taxa Juros (% a.m.), Próximo Vencimento (Auto), Status, Data do Empréstimo, Juros Total (R$)</div>
+
+<!-- DEBUG PANEL -->
+<div id="debug-panel" style="background:#1a1d27;border:1px solid #f0b429;border-radius:8px;margin:16px 40px;padding:16px;font-family:DM Mono,monospace;font-size:0.65rem;color:#dde1f0;display:none;">
+  <div style="color:#f0b429;font-weight:700;margin-bottom:8px;">🔍 DEBUG — O que chegou da planilha:</div>
+  <div id="debug-content" style="white-space:pre-wrap;color:#5a6282;line-height:1.8;"></div>
+</div>
+<div class="main" id="main">
+
+  <!-- KPIs -->
+  <div class="section-label">VISÃO GERAL DA CARTEIRA</div>
+  <div class="kpi-strip">
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--gold)"></div>
+      <div class="kpi-lbl">Capital Ativo</div>
+      <div class="kpi-val" id="kpi-capital" style="color:var(--gold)">—</div>
+      <div class="kpi-sub">em contratos abertos</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--green)"></div>
+      <div class="kpi-lbl">Lucro Previsto</div>
+      <div class="kpi-val" id="kpi-lucro" style="color:var(--green)">—</div>
+      <div class="kpi-sub">juros a receber</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--blue)"></div>
+      <div class="kpi-lbl">ROI da Carteira</div>
+      <div class="kpi-val" id="kpi-roi" style="color:var(--blue)">—</div>
+      <div class="kpi-sub">retorno sobre capital</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--purple)"></div>
+      <div class="kpi-lbl">Ticket Médio</div>
+      <div class="kpi-val" id="kpi-ticket" style="color:var(--purple)">—</div>
+      <div class="kpi-sub">por contrato ativo</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--red)"></div>
+      <div class="kpi-lbl">Inadimplência</div>
+      <div class="kpi-val" id="kpi-inadim" style="color:var(--red)">—</div>
+      <div class="kpi-sub" id="kpi-inadim-sub">contratos em atraso</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--gold2)"></div>
+      <div class="kpi-lbl">Próx. Semana</div>
+      <div class="kpi-val" id="kpi-semana" style="color:var(--gold2)">—</div>
+      <div class="kpi-sub">a receber em 7 dias</div>
+    </div>
   </div>
-  <button class="btn btn-primary" onclick="saveConfig()">Conectar</button>
+
+  <!-- Row 1: Projeção + Composição -->
+  <div class="section-label">CRESCIMENTO & PREVISÃO</div>
+  <div class="grid-2 " style="margin-bottom:16px">
+    <div class="card" style="animation-delay:.1s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">📈 Projeção de Recebimentos</div>
+          <div class="card-desc">Juros previstos a entrar nas próximas 8 semanas com base nos contratos ativos</div>
+        </div>
+        <div class="card-badge">PREVISÃO</div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="chartProjecao"></canvas></div>
+    </div>
+    <div class="card" style="animation-delay:.15s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">💼 Composição da Carteira</div>
+          <div class="card-desc">Capital saudável vs em risco vs quitado</div>
+        </div>
+        <div class="card-badge">SAÚDE</div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="chartComposicao"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Row 2: Evolução + Risco -->
+  <div class="section-label">RISCO & HISTÓRICO</div>
+  <div class="grid-2" style="margin-bottom:16px">
+    <div class="card" style="animation-delay:.2s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">💰 Evolução do Capital + Lucro</div>
+          <div class="card-desc">Capital emprestado e lucro acumulado por contrato</div>
+        </div>
+        <div class="card-badge">HISTÓRICO</div>
+      </div>
+      <div class="chart-wrap"><canvas id="chartEvolucao"></canvas></div>
+    </div>
+    <div class="card" style="animation-delay:.25s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">🎯 Score de Risco por Cliente</div>
+          <div class="card-desc">Baseado em atraso, taxa e valor — quanto maior, maior o risco</div>
+        </div>
+        <div class="card-badge">RISCO</div>
+      </div>
+      <div class="risk-list" id="riskList"></div>
+    </div>
+  </div>
+
+  <!-- Row 3: Calendário + Dobramento -->
+  <div class="section-label">SEMANA & PROJEÇÃO FUTURA</div>
+  <div class="grid-2" style="margin-bottom:16px">
+    <div class="card" style="animation-delay:.3s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">📅 Vencimentos desta Semana</div>
+          <div class="card-desc">Quem paga e quanto entra cada dia</div>
+        </div>
+        <div class="card-badge">SEMANAL</div>
+      </div>
+      <div class="week-grid" id="weekCalendar"></div>
+      <div style="margin-top:20px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:0.7rem;letter-spacing:0.2em;color:var(--muted);margin-bottom:4px">
+          📋 LISTA DE COBRANÇA
+        </div>
+        <div id="cobrancaList"></div>
+      </div>
+    </div>
+    <div class="card" style="animation-delay:.35s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">🔮 Quando seu Capital Dobra?</div>
+          <div class="card-desc">Projeção de crescimento com base no ROI atual da carteira</div>
+        </div>
+        <div class="card-badge">FUTURO</div>
+      </div>
+      <div id="dobraContent"></div>
+    </div>
+  </div>
+
+  <!-- NOVA SEÇÃO: RISCO AVANÇADO -->
+  <div class="section-label">RISCO AVANÇADO</div>
+  <div class="grid-2" style="margin-bottom:16px">
+
+    <!-- Dias de atraso -->
+    <div class="card" style="animation-delay:.1s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">⏱️ Dias de Atraso por Contrato</div>
+          <div class="card-desc">Contratos inadimplentes ordenados por tempo de atraso</div>
+        </div>
+        <div class="card-badge">ATRASO</div>
+      </div>
+      <div class="atraso-list" id="atrasoList">
+        <div style="color:var(--muted);font-size:0.68rem">Nenhum contrato em atraso.</div>
+      </div>
+    </div>
+
+    <!-- Histórico por cliente -->
+    <div class="card" style="animation-delay:.15s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">📋 Histórico de Pagamentos por Cliente</div>
+          <div class="card-desc">Perfil de pontualidade com base nos pagamentos registrados</div>
+        </div>
+        <div class="card-badge">HISTÓRICO</div>
+      </div>
+      <div class="hist-list" id="histList"></div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:16px">
+    <!-- Concentração de risco -->
+    <div class="card" style="animation-delay:.2s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">⚖️ Concentração de Risco</div>
+          <div class="card-desc">% do capital total exposto por cliente</div>
+        </div>
+        <div class="card-badge">EXPOSIÇÃO</div>
+      </div>
+      <div class="conc-list" id="concList"></div>
+    </div>
+
+    <!-- Lucro realizado vs previsto -->
+    <div class="card" style="animation-delay:.25s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">💵 Lucro Realizado vs Previsto</div>
+          <div class="card-desc">O que já entrou no bolso vs o que ainda está a receber</div>
+        </div>
+        <div class="card-badge">RESULTADO</div>
+      </div>
+      <div class="chart-wrap"><canvas id="chartLucro"></canvas></div>
+    </div>
+  </div>
+
+  <!-- NOVA SEÇÃO: VISÃO ESTRATÉGICA -->
+  <div class="section-label">VISÃO ESTRATÉGICA</div>
+  <div class="grid-2" style="margin-bottom:16px">
+
+    <!-- Capital disponível + contratos vencendo -->
+    <div class="card" style="animation-delay:.1s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">🏦 Capital & Vencimentos Próximos</div>
+          <div class="card-desc">Capital disponível para reinvestir e contratos vencendo em 30 dias</div>
+        </div>
+        <div class="card-badge">ESTRATÉGIA</div>
+      </div>
+      <div id="capitalDisp"></div>
+    </div>
+
+    <!-- Evolução mensal da carteira -->
+    <div class="card" style="animation-delay:.15s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">📊 Evolução Mensal da Carteira</div>
+          <div class="card-desc">Como seu capital cresceu mês a mês com base nas datas dos contratos</div>
+        </div>
+        <div class="card-badge">CRESCIMENTO</div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="chartEvolMensal"></canvas></div>
+    </div>
+  </div>
+
+  <div style="text-align:right; margin-top:14px; font-size:0.6rem; color:var(--muted)">
+    Última atualização: <span id="last-update">—</span> · Auto-refresh a cada 5 min
+  </div>
 </div>
 
-<!-- NAV TABS -->
-<nav class="nav-tabs" id="navTabs">
-  <div class="nav-tab active" onclick="showSection('kpis', this)">📊 KPIs Principais</div>
-  <div class="nav-tab" onclick="showSection('inadimplencia', this)">🚨 Inadimplência</div>
-  <div class="nav-tab" onclick="showSection('clientes', this)">👥 Perfil de Clientes</div>
-  <div class="nav-tab" onclick="showSection('score', this)">🎯 Score & Risco</div>
-  <div class="nav-tab" onclick="showSection('lucratividade', this)">💹 Lucratividade</div>
-  <div class="nav-tab" onclick="showSection('fluxo', this)">📅 Fluxo de Caixa</div>
-  <div class="nav-tab" onclick="showSection('cenarios', this)">🔮 Cenários</div>
-  <div class="nav-tab" onclick="showSection('alertas', this)">🔔 Alertas</div>
-  <div class="nav-tab" onclick="showSection('historico', this)">📈 Histórico</div>
-  <div class="nav-tab" onclick="showSection('cluster', this)">🧩 Clusterização</div>
-</nav>
-
-<!-- MAIN CONTENT -->
-<main class="content">
-
-  <!-- ══════════════════════════════════════
-       TAB 1 — KPIs PRINCIPAIS
-  ══════════════════════════════════════ -->
-  <div class="section active" id="s-kpis">
-    <div id="statusBanner"></div>
-    <div id="debugInfo" style="display:none;background:#0d1219;border:1px solid #1e2d40;border-radius:10px;padding:12px 18px;margin-bottom:16px;font-family:'DM Mono',monospace;font-size:12px;color:#8ba4be;line-height:1.6"></div>
-
-    <div class="section-title">Indicadores Estratégicos Principais</div>
-    <div class="grid-4">
-      <div class="kpi" style="--kpi-color:var(--accent)">
-        <div class="kpi-icon">💼</div>
-        <div class="kpi-label">Carteira Total Ativa</div>
-        <div class="kpi-value" id="k-carteira">R$ —</div>
-        <div class="kpi-sub" id="k-carteira-sub">— contratos abertos</div>
-        <div class="kpi-delta up" id="k-carteira-delta">—</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--red)">
-        <div class="kpi-icon">⚠️</div>
-        <div class="kpi-label">Taxa de Inadimplência</div>
-        <div class="kpi-value" id="k-inadimplencia">—%</div>
-        <div class="kpi-sub" id="k-inadimplencia-sub">— contratos em atraso</div>
-        <div class="kpi-delta" id="k-inadimplencia-delta">—</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--green)">
-        <div class="kpi-icon">📈</div>
-        <div class="kpi-label">ROI da Carteira</div>
-        <div class="kpi-value" id="k-roi">—%</div>
-        <div class="kpi-sub">retorno sobre capital emprestado</div>
-        <div class="kpi-delta up" id="k-roi-delta">—</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--yellow)">
-        <div class="kpi-icon">🎫</div>
-        <div class="kpi-label">Ticket Médio</div>
-        <div class="kpi-value" id="k-ticket">R$ —</div>
-        <div class="kpi-sub" id="k-ticket-sub">por contrato</div>
-        <div class="kpi-delta" id="k-ticket-delta">—</div>
-      </div>
-    </div>
-
-    <div class="grid-3">
-      <div class="kpi" style="--kpi-color:var(--purple)">
-        <div class="kpi-icon">⏱️</div>
-        <div class="kpi-label">Atraso Médio</div>
-        <div class="kpi-value" id="k-atraso">— dias</div>
-        <div class="kpi-sub">entre contratos inadimplentes</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--orange)">
-        <div class="kpi-icon">🏦</div>
-        <div class="kpi-label">Juros a Receber</div>
-        <div class="kpi-value" id="k-juros">R$ —</div>
-        <div class="kpi-sub">próximos 30 dias</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--green)">
-        <div class="kpi-icon">👥</div>
-        <div class="kpi-label">Clientes Ativos</div>
-        <div class="kpi-value" id="k-clientes-ativos">—</div>
-        <div class="kpi-sub" id="k-clientes-sub">de — total</div>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div>
-            <div class="chart-title">Composição da Carteira</div>
-            <div class="chart-sub">Distribuição por status dos contratos</div>
-          </div>
-          <span class="chart-badge">Hoje</span>
-        </div>
-        <canvas id="chartCarteira"></canvas>
-      </div>
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div>
-            <div class="chart-title">Segmentação de Risco Geral</div>
-            <div class="chart-sub">Carteira por nível de risco (score interno)</div>
-          </div>
-        </div>
-        <canvas id="chartRiscoGeral"></canvas>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Receita de Juros vs Perdas</div>
-          <div class="chart-sub">Juros recebidos × valor inadimplente por mês</div>
-        </div>
-      </div>
-      <canvas id="chartReceitaPerdas"></canvas>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       TAB 2 — INADIMPLÊNCIA
-  ══════════════════════════════════════ -->
-  <div class="section" id="s-inadimplencia">
-    <div class="section-title">Análise de Inadimplência</div>
-
-    <div class="grid-3">
-      <div class="kpi" style="--kpi-color:var(--red)">
-        <div class="kpi-label">Taxa Geral de Inadimplência</div>
-        <div class="kpi-value" id="i-taxa-geral">—%</div>
-        <div class="kpi-sub">% do valor total da carteira</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--orange)">
-        <div class="kpi-label">Valor em Risco</div>
-        <div class="kpi-value" id="i-valor-risco">R$ —</div>
-        <div class="kpi-sub">capital em contratos atrasados</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--yellow)">
-        <div class="kpi-label">Atraso Médio</div>
-        <div class="kpi-value" id="i-atraso-medio">— dias</div>
-        <div class="kpi-sub">média entre inadimplentes</div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Inadimplência por Cliente</div>
-          <div class="chart-sub">Dias de atraso por contrato em aberto</div>
-        </div>
-      </div>
-      <canvas id="chartInadCliente" style="max-height:300px"></canvas>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Evolução da Inadimplência</div>
-          <div class="chart-sub">Taxa % nos últimos meses</div>
-        </div>
-      </div>
-      <canvas id="chartInadEvolucao"></canvas>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Ranking de Inadimplentes</div>
-          <div class="chart-sub">Clientes com maior valor em atraso</div>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Cliente</th>
-              <th>Valor Emprestado</th>
-              <th>Dias em Atraso</th>
-              <th>Valor em Risco</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="tabInadimplentes"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       TAB 3 — PERFIL DE CLIENTES
-  ══════════════════════════════════════ -->
-  <div class="section" id="s-clientes">
-    <div class="section-title">Perfil da Base de Clientes</div>
-
-    <div class="grid-3">
-      <div class="kpi" style="--kpi-color:var(--accent)">
-        <div class="kpi-label">Total de Clientes</div>
-        <div class="kpi-value" id="c-total">—</div>
-        <div class="kpi-sub">na base</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--green)">
-        <div class="kpi-label">Clientes Ativos</div>
-        <div class="kpi-value" id="c-ativos">—</div>
-        <div class="kpi-sub">com contrato em aberto</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--text3)">
-        <div class="kpi-label">Clientes Inativos</div>
-        <div class="kpi-value" id="c-inativos">—</div>
-        <div class="kpi-sub">sem contrato ativo</div>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div>
-            <div class="chart-title">Ativos vs Inativos</div>
-            <div class="chart-sub">Situação atual dos clientes</div>
-          </div>
-        </div>
-        <canvas id="chartAtivosInativos"></canvas>
-      </div>
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div>
-            <div class="chart-title">Ticket Médio por Cliente</div>
-            <div class="chart-sub">Top 15 clientes por volume</div>
-          </div>
-        </div>
-        <canvas id="chartTicketCliente" style="max-height:280px"></canvas>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Base Completa de Clientes</div>
-          <div class="chart-sub">Todos os clientes com métricas consolidadas</div>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Contratos</th>
-              <th>Total Emprestado</th>
-              <th>Ticket Médio</th>
-              <th>Tempo Rel.</th>
-              <th>Status</th>
-              <th>Score</th>
-            </tr>
-          </thead>
-          <tbody id="tabClientes"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       TAB 4 — SCORE & RISCO
-  ══════════════════════════════════════ -->
-  <div class="section" id="s-score">
-    <div class="section-title">Score Interno & Segmentação de Risco</div>
-
-    <div class="grid-3">
-      <div class="kpi" style="--kpi-color:var(--green)">
-        <div class="kpi-label">🟢 Risco Baixo</div>
-        <div class="kpi-value" id="r-baixo">—</div>
-        <div class="kpi-sub">clientes score &gt; 70</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--yellow)">
-        <div class="kpi-label">🟡 Risco Médio</div>
-        <div class="kpi-value" id="r-medio">—</div>
-        <div class="kpi-sub">clientes score 40–70</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--red)">
-        <div class="kpi-label">🔴 Risco Alto</div>
-        <div class="kpi-value" id="r-alto">—</div>
-        <div class="kpi-sub">clientes score &lt; 40</div>
-      </div>
-    </div>
-
-    <!-- Score formula explainer -->
-    <div class="alert-box info" style="margin-bottom:20px">
-      <div class="alert-icon">🧮</div>
-      <div>
-        <div class="alert-title">Como o Score Interno é Calculado</div>
-        <div class="alert-desc">
-          <strong>Score (0–100)</strong> baseado em: Pontualidade de pagamentos (40%), Histórico de atrasos (25%), 
-          Tempo de relacionamento (15%), Valor do ticket (10%), Tipo PF/PJ (10%). 
-          Score &gt;70 = Baixo risco · 40–70 = Médio · &lt;40 = Alto risco.
-        </div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Distribuição de Score por Cliente</div>
-          <div class="chart-sub">Modelo Serasa interno — score de 0 a 100</div>
-        </div>
-      </div>
-      <canvas id="chartScore" style="max-height:300px"></canvas>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Concentração de Risco</div>
-          <div class="chart-sub">% do capital alocado por cliente (risco de concentração)</div>
-        </div>
-      </div>
-      <canvas id="chartConcentracao" style="max-height:260px"></canvas>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Ranking de Score — Modelo Interno</div>
-          <div class="chart-sub">Clientes ordenados por score de crédito</div>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Cliente</th>
-              <th>Score</th>
-              <th>Risco</th>
-              <th>Pontualidade</th>
-              <th>Atrasos</th>
-              <th>Tempo Rel.</th>
-              <th>Recomendação</th>
-            </tr>
-          </thead>
-          <tbody id="tabScore"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       TAB 5 — LUCRATIVIDADE
-  ══════════════════════════════════════ -->
-  <div class="section" id="s-lucratividade">
-    <div class="section-title">Análise de Lucratividade</div>
-
-    <div class="grid-4">
-      <div class="kpi" style="--kpi-color:var(--green)">
-        <div class="kpi-label">Lucro Total (Realizado)</div>
-        <div class="kpi-value" id="l-lucro-total">R$ —</div>
-        <div class="kpi-sub">juros efetivamente recebidos</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--accent)">
-        <div class="kpi-label">Lucro Previsto</div>
-        <div class="kpi-value" id="l-lucro-prev">R$ —</div>
-        <div class="kpi-sub">se todos pagarem</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--red)">
-        <div class="kpi-label">Perda por Inadimplência</div>
-        <div class="kpi-value" id="l-perda">R$ —</div>
-        <div class="kpi-sub">capital em risco</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--yellow)">
-        <div class="kpi-label">Margem Líquida</div>
-        <div class="kpi-value" id="l-margem">—%</div>
-        <div class="kpi-sub">lucro / capital emprestado</div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Lucro por Cliente (Top 15)</div>
-          <div class="chart-sub">Juros gerados por cliente</div>
-        </div>
-      </div>
-      <canvas id="chartLucroPorCliente" style="max-height:300px"></canvas>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Evolução do Lucro Mensal</div>
-          <div class="chart-sub">Lucro acumulado mês a mês</div>
-        </div>
-      </div>
-      <canvas id="chartLucroEvolucao"></canvas>
-    </div>
-
-  </div>
-
-  <!-- ══════════════════════════════════════
-       TAB 6 — FLUXO DE CAIXA
-  ══════════════════════════════════════ -->
-  <div class="section" id="s-fluxo">
-    <div class="section-title">Fluxo de Caixa & Recebimentos Previstos</div>
-
-    <div class="grid-3">
-      <div class="kpi" style="--kpi-color:var(--green)">
-        <div class="kpi-label">Esta Semana</div>
-        <div class="kpi-value" id="f-semana">R$ —</div>
-        <div class="kpi-sub">a receber nos próximos 7 dias</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--accent)">
-        <div class="kpi-label">Este Mês</div>
-        <div class="kpi-value" id="f-mes">R$ —</div>
-        <div class="kpi-sub">recebimentos previstos</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--purple)">
-        <div class="kpi-label">Saldo Projetado (30d)</div>
-        <div class="kpi-value" id="f-saldo">R$ —</div>
-        <div class="kpi-sub">caixa + recebimentos previstos</div>
-      </div>
-    </div>
-
-    <div class="section-title">Vencimentos desta Semana</div>
-    <div class="week-grid" id="weekGrid"></div>
-
-    <br>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Recebimentos Previstos — Próximas 12 Semanas</div>
-          <div class="chart-sub">Projeção de entradas por semana</div>
-        </div>
-      </div>
-      <canvas id="chartForecast"></canvas>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Projeção Mensal de Recebimentos</div>
-          <div class="chart-sub">Entradas previstas por mês</div>
-        </div>
-      </div>
-      <div id="forecastMonthList">
-        <!-- filled by JS -->
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Lista de Cobrança — Próximos Vencimentos</div>
-          <div class="chart-sub">Ordenado por urgência</div>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Vencimento</th>
-              <th>Cliente</th>
-              <th>Valor</th>
-              <th>Status</th>
-              <th>Contato</th>
-            </tr>
-          </thead>
-          <tbody id="tabCobranca"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       TAB 7 — CENÁRIOS
-  ══════════════════════════════════════ -->
-  <div class="section" id="s-cenarios">
-    <div class="section-title">Simulação de Cenários — Projeção 6 Meses</div>
-
-    <div class="scenario-grid" id="scenarioCards">
-      <!-- filled by JS -->
-    </div>
-
-    <br>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Evolução do Caixa por Cenário</div>
-          <div class="chart-sub">Projeção 6 meses com base no comportamento atual</div>
-        </div>
-      </div>
-      <canvas id="chartCenarios"></canvas>
-    </div>
-
-    <div class="chart-card" style="margin-top:20px">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">🔮 Previsão de Inadimplência</div>
-          <div class="chart-sub">Modelo simples com base no histórico — próximos 6 meses</div>
-        </div>
-      </div>
-      <canvas id="chartPrevisaoInad"></canvas>
-      <div style="margin-top:14px;padding:14px;background:var(--bg3);border-radius:10px;font-size:12px;color:var(--text2);line-height:1.6">
-        <strong style="color:var(--text)">Metodologia:</strong> Média móvel da taxa de inadimplência dos últimos 3 meses com projeção de tendência linear. 
-        Considera sazonalidade e o perfil de risco atual da carteira. O modelo é indicativo — não substitui análise de crédito individual.
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       TAB 8 — ALERTAS
-  ══════════════════════════════════════ -->
-  <div class="section" id="s-alertas">
-    <div class="section-title">Alertas Inteligentes</div>
-    <div id="alertasContainer">
-      <!-- filled by JS -->
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       TAB 9 — HISTÓRICO
-  ══════════════════════════════════════ -->
-  <div class="section" id="s-historico">
-    <div class="section-title">Comparativos Históricos</div>
-
-    <div class="grid-4">
-      <div class="kpi" style="--kpi-color:var(--accent)">
-        <div class="kpi-label">Carteira — Mês Atual</div>
-        <div class="kpi-value" id="h-carteira-atual">R$ —</div>
-        <div class="kpi-delta" id="h-carteira-delta">vs mês anterior: —</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--green)">
-        <div class="kpi-label">Lucro — Mês Atual</div>
-        <div class="kpi-value" id="h-lucro-atual">R$ —</div>
-        <div class="kpi-delta" id="h-lucro-delta">vs mês anterior: —</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--red)">
-        <div class="kpi-label">Inadimplência — Mês Atual</div>
-        <div class="kpi-value" id="h-inad-atual">—%</div>
-        <div class="kpi-delta" id="h-inad-delta">vs mês anterior: —</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--purple)">
-        <div class="kpi-label">Crescimento da Carteira</div>
-        <div class="kpi-value" id="h-crescimento">—%</div>
-        <div class="kpi-sub">variação MoM</div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Crescimento da Carteira — Histórico</div>
-          <div class="chart-sub">Capital total emprestado mês a mês</div>
-        </div>
-      </div>
-      <canvas id="chartCrescimento"></canvas>
-    </div>
-
-    <div class="grid-2">
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div>
-            <div class="chart-title">Evolução do Lucro</div>
-          </div>
-        </div>
-        <canvas id="chartLucroHist"></canvas>
-      </div>
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div>
-            <div class="chart-title">Evolução da Inadimplência</div>
-          </div>
-        </div>
-        <canvas id="chartInadHist"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       TAB 10 — CLUSTERIZAÇÃO
-  ══════════════════════════════════════ -->
-  <div class="section" id="s-cluster">
-    <div class="section-title">Clusterização de Clientes</div>
-
-    <div class="alert-box info" style="margin-bottom:20px">
-      <div class="alert-icon">🧩</div>
-      <div>
-        <div class="alert-title">Como Funciona a Clusterização</div>
-        <div class="alert-desc">
-          Clientes são agrupados automaticamente com base em comportamento de pagamento, ticket médio, 
-          frequência de empréstimos e histórico de atrasos. Identifica padrões sem supervisão humana.
-        </div>
-      </div>
-    </div>
-
-    <div class="cluster-grid" id="clusterCards">
-      <!-- filled by JS -->
-    </div>
-
-    <br>
-
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Distribuição dos Clusters</div>
-          <div class="chart-sub">Volume de clientes e capital por grupo</div>
-        </div>
-      </div>
-      <canvas id="chartCluster"></canvas>
-    </div>
-
-    <div class="chart-card" style="margin-top:20px">
-      <div class="chart-card-header">
-        <div>
-          <div class="chart-title">Clientes por Cluster</div>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Cluster</th>
-              <th>Score</th>
-              <th>Ticket Médio</th>
-              <th>Atrasos Históricos</th>
-              <th>Recomendação</th>
-            </tr>
-          </thead>
-          <tbody id="tabCluster"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-</main>
+<footer>Dashboard Estratégico de Empréstimos · Dados via Google Sheets · Desenvolvido com IA</footer>
 
 <script>
-// ══════════════════════════════════════════════════════
-// DATA ENGINE
-// ══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+const SHEET_ID = '1g9336ZjN2jnVoxA5CFQmlaDxTkda7tlz48_EAlKUjr4';
+// Colunas Empréstimos (0-indexed):
+// A=0 ID, B=1 ID Cliente, C=2 Nome, D=3 CPF, E=4 Telefone,
+// F=5 Capital, G=6 Data, H=7 Taxa, I=8 Prazo, J=9 Vencimento,
+// K=10 Tipo Juros, L=11 JurosTotal, O=14 Saldo, P=15 JurosProxMes,
+// R=17 Status, S=18 ProxVenc
+const CE = { id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18 };
+// Colunas Pagamentos (gid=647642652):
+// A=0 ID, C=2 Tipo, D=3 Valor, E=4 Data, F=5 JurosPagos
+const CP = { id:0,tipo:2,valor:3,data:4,juros:5 };
+// GIDs das abas
+const GID_EMP = 147333899;
+const GID_PAG = 647642652;
+// ═══════════════════════════════════════════
 
-let DATA = { contracts: [], clients: [] };
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdjjEuSwxlYdGAvK7zQmRO3NRnt3Ex3V0Dfgf3K6l2e-4g6XlCQO2qOOyUtcOU4OmZKQ/exec';
+const fmt  = v => 'R$\u00a0' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+const fmtD = v => 'R$\u00a0' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct  = v => (Number(v)*100).toFixed(1)+'%';
 let charts = {};
 
-// ── DEMO DATA (used when no sheet connected) ──
-function generateDemoData() {
-  const names = [
-    'João Silva','Maria Santos','Pedro Oliveira','Ana Costa','Carlos Souza',
-    'Fernanda Lima','Roberto Alves','Juliana Ferreira','Marcos Pereira','Luciana Rocha',
-    'Eduardo Martins','Camila Rodrigues','André Carvalho','Patrícia Gomes','Felipe Castro',
-    'Beatriz Nunes','Rodrigo Barbosa','Vanessa Correia','Thiago Mendes','Larissa Araújo',
-  ];
-  const statuses = ['ativo','ativo','ativo','ativo','ativo','atrasado','atrasado','quitado'];
-  const today = new Date();
+document.getElementById('today-date').textContent =
+  new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
 
-  return names.map((nome) => {
-    const valor = 500 + Math.random() * 9500;
-    const taxa  = 5 + Math.random() * 10;
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
-    const atraso = status === 'atrasado' ? Math.floor(5 + Math.random() * 90) : 0;
-    const dataInicio = new Date(today - Math.random() * 365 * 2 * 86400000);
-    const vencimento = new Date(today.getTime() + (Math.random() * 60 - 30) * 86400000);
-    const juros = (valor * taxa / 100);
-    return {
-      nome, valor: Math.round(valor*100)/100, taxa: Math.round(taxa*10)/10,
-      vencimento, status, atraso_dias: atraso, data_inicio: dataInicio,
-      juros: Math.round(juros*100)/100,
-    };
-  });
+// ── Fetch ────────────────────────────────────
+async function fetchSheet(gid) {
+  const ts = Date.now();
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}&t=${ts}`;
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const text = await r.text();
+  return csvToArray(text);
 }
 
-// ── PARSE CURRENCY: "R$ 1.234,56" → 1234.56 ──
-const parseCurrency = v => {
-  if (v === null || v === undefined || v === '') return 0;
-  if (typeof v === 'number') return v;
-  const s = String(v).replace(/R\$\s*/g, '').trim();
-  const cleaned = s.replace(/\./g, '').replace(',', '.');
-  return parseFloat(cleaned) || 0;
-};
+function csvToArray(csv) {
+  const rows = [];
+  const lines = csv.split('\n');
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { inQ = !inQ; }
+      else if (line[i] === ',' && !inQ) { cols.push(cur); cur = ''; }
+      else { cur += line[i]; }
+    }
+    cols.push(cur);
+    rows.push(cols);
+  }
+  return rows;
+}
 
-// ── PARSE DATE: dd/mm/yyyy, Date(...) or ISO ──
-const parseDateBR = v => {
-  if (!v && v !== 0) return null;
+function autoSkipCSV(rows) {
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i] && rows[i][0] && String(rows[i][0]).trim().startsWith('EMP')) return i;
+  }
+  return 0;
+}
+
+function parseRows(rows, skip = 0) {
+  return rows.slice(skip);
+}
+
+function parseDate(v) {
+  if (!v) return null;
   if (v instanceof Date) return v;
   const s = String(v).trim();
+  // Google Sheets Date() format
   const m = s.match(/Date\((\d+),(\d+),(\d+)\)/);
-  if (m) return new Date(+m[1], +m[2], +m[3]);
+  if (m) return new Date(+m[1],+m[2],+m[3]);
+  // Brazilian format: dd/mm/yyyy or dd/mm/yy
   const br = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
   if (br) {
-    const year = br[3].length === 2 ? 2000 + +br[3] : +br[3];
-    return new Date(year, +br[2] - 1, +br[1]);
+    let year = +br[3];
+    if (year < 100) year += year < 50 ? 2000 : 1900;
+    return new Date(year, +br[2]-1, +br[1]);
   }
-  if (!isNaN(Number(s)) && s.length > 4) return new Date(+s);
+  // ISO format yyyy-mm-dd
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return new Date(+iso[1], +iso[2]-1, +iso[3]);
   const d = new Date(s);
-  return isNaN(d.getTime()) ? null : d;
+  return isNaN(d)?null:d;
+}
+
+function parseStatus(v) {
+  const s = String(v||'').trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // remove acentos
+  if (s.includes('quitado') || s.includes('quitada')) return 'quitado';
+  if (s.includes('atraso') || s.includes('atrasado') || s.includes('inadimpl')) return 'atraso';
+  if (s.includes('dia') || s.includes('ativo') || s.includes('ativa') || s.includes('aberto')) return 'ativo';
+  return null;
+}
+
+function destroyChart(id) { if(charts[id]){charts[id].destroy();delete charts[id];} }
+
+const TOOLTIP = {
+  backgroundColor:'#13161f',
+  borderColor:'#232840',
+  borderWidth:1,
+  titleColor:'#f0b429',
+  bodyColor:'#dde1f0',
+  padding:10,
 };
 
-// ── NORMALIZE ROW from Apps Script JSON ──
-function normalizeRow(raw) {
-  const today = new Date(); today.setHours(0,0,0,0);
+// ── RENDER ───────────────────────────────────
+function render(empRows, pagRows) {
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
 
-  const nome = String(raw['Nome Cliente (auto)'] || '').trim();
-  if (!nome || nome === 'null' || nome === '') return null;
-
-  const id_emp = String(raw['ID Empréstimo'] || '').trim();
-  const valor  = parseCurrency(raw['Valor Emprestado (R$)']);
-  if (!id_emp && valor === 0) return null; // linha vazia
-
-  const taxa       = parseCurrency(raw['Taxa Juros (% a.m.)']);
-  const juros      = parseCurrency(raw['Juros Total (R$)']) || (valor * taxa / 100);
-  const saldo      = parseCurrency(raw['Saldo Restante (R$)']);
-  const juros_prox = parseCurrency(raw['Juros Próx. Mês (R$)']);
-  const total_pago = parseCurrency(raw['Total Pago (R$)']);
-  const valor_total= parseCurrency(raw['Valor Total Devido (R$)']);
-
-  const vencimento  = parseDateBR(raw['Próximo Vencimento (Auto)']) || parseDateBR(raw['Venc. Original']) || new Date();
-  const data_inicio = parseDateBR(raw['Data do Empréstimo']) || new Date();
-
-  const vencMidnight = new Date(vencimento); vencMidnight.setHours(0,0,0,0);
-  const diffMs = today - vencMidnight;
-  let atraso_dias = diffMs > 0 ? Math.floor(diffMs / 86400000) : 0;
-
-  const statusRaw = String(raw['Status'] || '').toLowerCase();
-  let status;
-  if (statusRaw.includes('quit') || statusRaw.includes('pago') || statusRaw.includes('encerr') || raw['Status']?.includes('✅')) {
-    status = 'quitado'; atraso_dias = 0;
-  } else if (atraso_dias > 0 || statusRaw.includes('atras') || statusRaw.includes('inadim') || raw['Status']?.includes('🔴')) {
-    status = 'atrasado';
-  } else {
-    status = 'ativo';
+  // Helper: parse number from CSV string
+  function parseNum(v) {
+    if (v === null || v === undefined || v === '') return 0;
+    let s = String(v).trim();
+    const isPct = s.includes('%');
+    s = s.replace(/R\$/g,'').replace(/%/g,'').replace(/\s/g,'');
+    // Handle Brazilian format: 1.500,50 → 1500.50
+    if (s.includes(',') && s.includes('.')) {
+      s = s.replace(/\./g,'').replace(',','.');
+    } else if (s.includes(',') && !s.includes('.')) {
+      s = s.replace(',','.');
+    }
+    const n = parseFloat(s) || 0;
+    // Se veio com %, divide por 100 para virar decimal
+    if (isPct) return n / 100;
+    return n;
   }
 
-  return {
-    id_emp, nome,
-    cpf:      raw['CPF (auto)'] || '',
-    telefone: raw['Telefone (auto)'] || '',
-    tipo_juros: raw['Tipo Juros'] || '',
-    obs:      raw['Observações'] || '',
-    valor, taxa, juros, saldo, juros_prox, total_pago, valor_total,
-    vencimento, data_inicio, atraso_dias, status,
-    status_raw: raw['Status'] || '',
-  };
-}
-
-// ── LOAD DATA via Apps Script proxy ──
-async function loadData() {
-  document.getElementById('loadingOverlay').classList.remove('hidden');
-  const debugEl = document.getElementById('debugInfo');
-
-  try {
-    const res = await fetch(APPS_SCRIPT_URL);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json();
-
-    if (json.error) throw new Error(json.error);
-    if (!json.data || !Array.isArray(json.data)) throw new Error('Resposta inesperada do servidor');
-
-    const contracts = json.data.map(normalizeRow).filter(Boolean);
-
-    if (contracts.length === 0) throw new Error('Nenhum contrato encontrado na planilha. Verifique se há dados na aba Empréstimos.');
-
-    if (debugEl) {
-      debugEl.innerHTML = `<strong>✅ Apps Script:</strong> ${contracts.length} contratos carregados.`;
-      debugEl.style.display = 'block';
-    }
-
-    DATA.contracts = contracts;
-    processData();
-    renderAll();
-    showStatus('success', `✅ ${contracts.length} contratos carregados com sucesso!`);
-
-  } catch(e) {
-    if (debugEl) {
-      debugEl.innerHTML = `<strong style="color:#ff4444">❌ ERRO:</strong> ${e.message}`;
-      debugEl.style.display = 'block';
-    }
-    DATA.contracts = generateDemoData();
-    showStatus('error', `⚠ Erro: ${e.message}. Exibindo dados de demonstração.`);
-    processData();
-    renderAll();
+  // Helper: parse taxa — se vier como 0,15 já é decimal; se vier como 15 (>1), converte
+  function parseTaxa(v) {
+    const n = parseNum(v);
+    // Se a taxa veio como percentual inteiro (ex: 15 = 15%), converte para decimal
+    return n > 1 ? n / 100 : n;
   }
 
-  document.getElementById('lastUpdate').textContent = 'Atualizado: ' + new Date().toLocaleTimeString('pt-BR');
-  document.getElementById('loadingOverlay').classList.add('hidden');
-}
+  const emps = empRows
+    .filter(r => r[CE.id] && String(r[CE.id]).trim().toUpperCase().startsWith('EMP'))
+    .map(r => ({
+      id:           String(r[CE.id]).trim(),
+      nome:         String(r[CE.nome]||'').trim(),
+      capital:      parseNum(r[CE.cap]),
+      data:         parseDate(r[CE.data]),
+      taxa:         parseTaxa(r[CE.taxa]),
+      prazo:        parseNum(r[CE.prazo]),
+      tipoJuros:    String(r[CE.tipoJuros]||'').trim(),
+      jTotal:       parseNum(r[CE.jTotal]),
+      saldo:        parseNum(r[CE.saldo]),
+      jProx:        parseNum(r[CE.jProx]),
+      status:       parseStatus(r[CE.status]),
+      proxVenc:     parseDate(r[CE.proxVenc]),
+      vencContrato: parseDate(r[CE.vencContrato]),
+    }))
+    .filter(e => e.status !== null && e.capital > 0);
 
-// ── PROCESS DATA ──
-function processData() {
-  const c = DATA.contracts;
-  const today = new Date();
+  // Parse pagamentos
+  const pags = pagRows
+    .filter(r => r[CP.id] && String(r[CP.id]).startsWith('EMP'))
+    .map(r => ({
+      id:    String(r[CP.id]).trim(),
+      tipo:  String(r[CP.tipo]||''),
+      valor: parseNum(r[CP.valor]),
+      data:  parseDate(r[CP.data]),
+      juros: parseNum(r[CP.juros]),
+    }));
 
-  // Group by client
-  const clientMap = {};
-  c.forEach(ct => {
-    if (!clientMap[ct.nome]) {
-      clientMap[ct.nome] = {
-        nome: ct.nome,
-        contratos: [], totalValor: 0, totalJuros: 0,
-        maxAtraso: 0, temAtraso: false, dataInicio: ct.data_inicio
+  const ativos   = emps.filter(e=>e.status==='ativo');
+  const atrasado = emps.filter(e=>e.status==='atraso');
+  const quitados = emps.filter(e=>e.status==='quitado');
+  const abertos  = [...ativos,...atrasado];
+
+  const totalCap   = abertos.reduce((s,e)=>s+e.capital,0);
+  const totalJuros = abertos.reduce((s,e)=>s+e.jTotal,0);
+  const roi        = totalCap ? totalJuros/totalCap : 0;
+  const ticket     = abertos.length ? totalCap/abertos.length : 0;
+  const inadimPct  = abertos.length ? atrasado.length/abertos.length : 0;
+  const capRisco   = atrasado.reduce((s,e)=>s+e.capital,0);
+
+  // Recebimentos próximos 7 dias
+  const em7Dias = new Date(hoje); em7Dias.setDate(em7Dias.getDate()+7);
+  const proxSemana = abertos
+    .filter(e => e.proxVenc && e.proxVenc >= hoje && e.proxVenc <= em7Dias)
+    .reduce((s,e) => s+e.jProx, 0);
+
+  // ── KPIs ────────────────────────────────
+  document.getElementById('kpi-capital').textContent = fmt(totalCap);
+  document.getElementById('kpi-lucro').textContent   = fmt(totalJuros);
+  document.getElementById('kpi-roi').textContent     = pct(roi);
+  document.getElementById('kpi-ticket').textContent  = fmt(ticket);
+  document.getElementById('kpi-inadim').textContent  = pct(inadimPct);
+  document.getElementById('kpi-inadim-sub').textContent = atrasado.length+' contrato(s) em atraso';
+  document.getElementById('kpi-semana').textContent  = fmt(proxSemana);
+
+  // ── 1. PROJEÇÃO 8 SEMANAS ──────────────────
+  const semanaLabels = [];
+  const semanaRanges = [];
+
+  for(let i=0; i<8; i++){
+    const ini = new Date(hoje);
+    ini.setDate(hoje.getDate() + i*7 + 1);
+    const fim = new Date(ini);
+    fim.setDate(ini.getDate() + 6);
+    semanaLabels.push(
+      `${ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}`
+    );
+    semanaRanges.push({ ini, fim });
+  }
+
+  // Para cada semana, soma jProx dos contratos cujo proxVenc cai naquele intervalo
+  const jMesBase = abertos.reduce((s,e)=>s+e.jProx,0);
+  const jSemanaBase = jMesBase / 4.33; // fallback: distribui mensalmente em semanas
+
+  const jurosPorSemana = semanaRanges.map((r, idx) => {
+    const comVenc = abertos.filter(e =>
+      e.proxVenc && e.proxVenc >= r.ini && e.proxVenc <= r.fim
+    );
+    const semVenc = abertos.filter(e => !e.proxVenc);
+
+    const jComVenc = comVenc.reduce((s,e)=>s+e.jProx,0);
+    // Sem data: distribui proporcionalmente (1 semana ≈ 1/4.33 do mês)
+    const jSemVenc = semVenc.reduce((s,e)=>s+e.jProx,0) / 4.33;
+    const fator = 1 - idx * 0.01; // decaimento mínimo de 1% por semana
+    return jComVenc + jSemVenc * fator;
+  });
+
+  const totalProj = jurosPorSemana.reduce((s,v)=>s+v,0);
+  const dadosFinais = totalProj > 0
+    ? jurosPorSemana
+    : semanaRanges.map((_,i) => jSemanaBase * (1 - i*0.01));
+
+  // Destaca semanas com vencimentos reais
+  const bgColors = semanaRanges.map((r) => {
+    const temVenc = abertos.some(e => e.proxVenc && e.proxVenc >= r.ini && e.proxVenc <= r.fim);
+    return temVenc ? 'rgba(6,214,160,0.85)' : 'rgba(6,214,160,0.35)';
+  });
+
+  destroyChart('proj');
+  charts.proj = new Chart(document.getElementById('chartProjecao').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels: semanaLabels,
+      datasets:[
+        {
+          label:'Juros a Receber',
+          data: dadosFinais,
+          backgroundColor: bgColors,
+          borderRadius:6,
+          borderSkipped:false,
+        },
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          ...TOOLTIP,
+          callbacks:{
+            title: (items) => {
+              const idx = items[0].dataIndex;
+              const r = semanaRanges[idx];
+              return `Semana ${idx+1}  (${r.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${r.fim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})})`;
+            },
+            label: ctx => ' Juros previstos: ' + fmt(ctx.raw),
+            afterLabel: (ctx) => {
+              const idx = ctx.dataIndex;
+              const r = semanaRanges[idx];
+              const n = abertos.filter(e => e.proxVenc && e.proxVenc >= r.ini && e.proxVenc <= r.fim).length;
+              return n > 0 ? ` ${n} contrato(s) com vencimento` : ' (sem vencimento nessa semana)';
+            }
+          }
+        },
+      },
+      scales:{
+        x:{grid:{color:'#1c2133'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},
+        y:{
+          grid:{color:'#1c2133'},
+          ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},
+          beginAtZero:true,
+        },
+      }
+    }
+  });
+
+  // ── 2. COMPOSIÇÃO ────────────────────────
+  const capSaudavel = ativos.reduce((s,e)=>s+e.capital,0);
+  const capQuitado  = quitados.reduce((s,e)=>s+e.capital,0);
+
+  destroyChart('comp');
+  charts.comp = new Chart(document.getElementById('chartComposicao').getContext('2d'),{
+    type:'doughnut',
+    data:{
+      labels:['🟢 Saudável','🔴 Em Risco','✅ Quitado'],
+      datasets:[{
+        data:[capSaudavel,capRisco,capQuitado],
+        backgroundColor:['rgba(6,214,160,0.8)','rgba(239,71,111,0.8)','rgba(90,98,130,0.5)'],
+        borderColor:'#080a0f',borderWidth:3,hoverOffset:8,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'65%',
+      plugins:{
+        legend:{position:'bottom',labels:{color:'#5a6282',font:{family:'DM Mono',size:10},padding:14,boxWidth:10,boxHeight:10}},
+        tooltip:{...TOOLTIP,callbacks:{label:ctx=>` ${ctx.label}: ${fmt(ctx.raw)}`}},
+      }
+    }
+  });
+
+  // ── 3. EVOLUÇÃO CAPITAL + LUCRO ──────────
+  destroyChart('evol');
+  charts.evol = new Chart(document.getElementById('chartEvolucao').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels: abertos.map(e=>e.id),
+      datasets:[
+        {label:'Capital',data:abertos.map(e=>e.capital),backgroundColor:'rgba(155,93,229,0.7)',borderRadius:4,borderSkipped:false},
+        {label:'Lucro Previsto',data:abertos.map(e=>e.jTotal),backgroundColor:'rgba(240,180,41,0.7)',borderRadius:4,borderSkipped:false},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:10},boxWidth:10,boxHeight:10}},
+        tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.raw)}},
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10}}},
+        y:{grid:{color:'#1c2133'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}},
+      }
+    }
+  });
+
+  // ── 4. SCORE DE RISCO ────────────────────
+  // Agrupa contratos por cliente (pelo nome)
+  const clientesMap = {};
+  emps.forEach(e => {
+    const key = e.nome || e.id;
+    if (!clientesMap[key]) {
+      clientesMap[key] = {
+        nome: key,
+        contratos: [],
+        temAtraso: false,
+        capitalTotal: 0,
+        taxaMedia: 0,
       };
     }
-    const cl = clientMap[ct.nome];
-    cl.contratos.push(ct);
-    if (ct.status !== 'quitado') cl.totalValor += ct.valor;
-    cl.totalJuros += ct.juros;
-    if (ct.atraso_dias > 0) { cl.temAtraso = true; cl.maxAtraso = Math.max(cl.maxAtraso, ct.atraso_dias); }
-    if (ct.data_inicio < cl.dataInicio) cl.dataInicio = ct.data_inicio;
+    clientesMap[key].contratos.push(e);
+    clientesMap[key].capitalTotal += e.capital;
+    if (e.status === 'atraso') clientesMap[key].temAtraso = true;
   });
 
-  // Score calculation
-  Object.values(clientMap).forEach(cl => {
-    const totalContratos = cl.contratos.length;
-    const atrasados = cl.contratos.filter(ct => ct.status === 'atrasado').length;
-    const pontualidade = totalContratos > 0 ? (1 - atrasados / totalContratos) : 1;
-    const atrasoNorm = Math.max(0, 1 - cl.maxAtraso / 90);
-    const meses = Math.floor((today - cl.dataInicio) / (30 * 86400000));
-    const tempoNorm = Math.min(1, meses / 24);
-    const ticketNorm = Math.min(1, cl.totalValor / 20000);
-    const tipoPontos = 0.85; // fixed neutral value (no PF/PJ data)
-    cl.score = Math.round(
-      pontualidade * 40 + atrasoNorm * 25 + tempoNorm * 15 + ticketNorm * 10 + tipoPontos * 10
-    );
-    cl.mesesRelacionamento = meses;
-    cl.ticketMedio = cl.contratos.length > 0 ? cl.totalValor / cl.contratos.length : 0;
-    cl.status = cl.contratos.some(ct => ct.status === 'ativo' || ct.status === 'atrasado') ? 'ativo' : 'inativo';
-    // Cluster
-    if (cl.score >= 75 && cl.ticketMedio >= 5000) cl.cluster = 'Âncora';
-    else if (cl.score >= 70 && !cl.temAtraso) cl.cluster = 'Excelente';
-    else if (cl.score >= 50 && cl.maxAtraso <= 15) cl.cluster = 'Estável';
-    else if (cl.score >= 35) cl.cluster = 'Em Observação';
-    else cl.cluster = 'Alto Risco';
+  // Calcula taxa média por cliente
+  Object.values(clientesMap).forEach(c => {
+    const abertosCliente = c.contratos.filter(e => e.status !== 'quitado');
+    c.taxaMedia = abertosCliente.length
+      ? abertosCliente.reduce((s,e)=>s+e.taxa,0) / abertosCliente.length
+      : 0;
+    c.qtdContratos = c.contratos.length;
+    c.qtdAtraso    = c.contratos.filter(e=>e.status==='atraso').length;
   });
 
-  DATA.clients = Object.values(clientMap);
-}
-
-// ── FORMAT ──
-const fmt = n => n >= 1e6
-  ? 'R$ ' + (n/1e6).toFixed(2) + 'M'
-  : n >= 1e3
-    ? 'R$ ' + (n/1e3).toFixed(1) + 'k'
-    : 'R$ ' + n.toFixed(2);
-const fmtPct = n => (n || 0).toFixed(1) + '%';
-const fmtN = n => (n || 0).toLocaleString('pt-BR');
-
-// ── CHART HELPERS ──
-const chartDefaults = {
-  plugins: { legend: { labels: { color: '#8ba4be', font: { family: 'DM Mono', size: 11 } } } },
-  scales: {
-    x: { ticks: { color: '#4d6a85', font: { family: 'DM Mono', size: 10 } }, grid: { color: '#1e2d40' } },
-    y: { ticks: { color: '#4d6a85', font: { family: 'DM Mono', size: 10 } }, grid: { color: '#1e2d40' } }
+  function calcRiscoCliente(c) {
+    const scoreAtraso = c.temAtraso ? 50 : 0;
+    const scoreTaxa   = Math.min(c.taxaMedia / 0.5, 1) * 30;
+    const scoreValor  = totalCap ? Math.min(c.capitalTotal / totalCap, 1) * 20 : 0;
+    return Math.min(Math.round(scoreAtraso + scoreTaxa + scoreValor), 100);
   }
-};
 
-function mkChart(id, type, data, opts = {}) {
-  if (charts[id]) { charts[id].destroy(); }
-  const ctx = document.getElementById(id);
-  if (!ctx) return;
-  charts[id] = new Chart(ctx, {
-    type,
-    data,
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      ...chartDefaults,
-      ...opts,
-      plugins: { ...chartDefaults.plugins, ...(opts.plugins || {}) }
-    }
-  });
-}
+  const clientesSorted = Object.values(clientesMap)
+    .sort((a,b) => calcRiscoCliente(b) - calcRiscoCliente(a));
 
-const COLORS = ['#00d4ff','#00e676','#ffca28','#ff6d00','#7c4dff','#00bfa5','#ff4444','#e91e63','#03a9f4','#8bc34a','#ff5722','#9c27b0'];
+  const riskColors = s => s<30?'var(--green)':s<60?'var(--gold)':'var(--red)';
 
-// ══════════════════════════════════════════════════════
-// RENDER ALL SECTIONS
-// ══════════════════════════════════════════════════════
-
-function renderAll() {
-  renderKPIs();
-  renderInadimplencia();
-  renderClientes();
-  renderScore();
-  renderLucratividade();
-  renderFluxo();
-  renderCenarios();
-  renderAlertas();
-  renderHistorico();
-  renderCluster();
-}
-
-// ── KPIs ──
-function renderKPIs() {
-  const c = DATA.contracts;
-  const today = new Date();
-  const ativos = c.filter(x => x.status === 'ativo' || x.status === 'atrasado');
-  const atrasados = c.filter(x => x.status === 'atrasado');
-  const carteira = ativos.reduce((s,x) => s + x.valor, 0);
-  const jurosTotal = ativos.reduce((s,x) => s + x.juros, 0);
-  const roi = carteira > 0 ? (jurosTotal / carteira * 100) : 0;
-  const ticket = ativos.length > 0 ? carteira / ativos.length : 0;
-  const inadTaxa = ativos.length > 0 ? (atrasados.length / ativos.length * 100) : 0;
-  const proxMes = c.filter(x => {
-    const d = x.vencimento - today;
-    return d >= 0 && d <= 30 * 86400000 && x.status !== 'quitado';
-  }).reduce((s,x) => s + x.juros, 0);
-  const clientesAtivos = DATA.clients.filter(c => c.status === 'ativo').length;
-  const atrasoMedio = atrasados.length > 0
-    ? atrasados.reduce((s,x) => s + x.atraso_dias, 0) / atrasados.length : 0;
-
-  setText('k-carteira', fmt(carteira));
-  setText('k-carteira-sub', fmtN(ativos.length) + ' contratos abertos');
-  setText('k-inadimplencia', fmtPct(inadTaxa));
-  setText('k-inadimplencia-sub', fmtN(atrasados.length) + ' contratos em atraso');
-  setDeltaClass('k-inadimplencia-delta', inadTaxa, true);
-  setText('k-roi', fmtPct(roi));
-  setText('k-ticket', fmt(ticket));
-  setText('k-clientes-ativos', fmtN(clientesAtivos));
-  setText('k-clientes-sub', 'de ' + DATA.clients.length + ' total');
-  setText('k-atraso', atrasoMedio.toFixed(0) + ' dias');
-  setText('k-juros', fmt(proxMes));
-
-  // Charts
-  const quitados = c.filter(x => x.status === 'quitado');
-  mkChart('chartCarteira', 'doughnut', {
-    labels: ['Ativo','Atrasado','Quitado'],
-    datasets: [{ data: [
-      ativos.filter(x=>x.status==='ativo').length,
-      atrasados.length, quitados.length
-    ], backgroundColor: ['#00d4ff','#ff4444','#00e676'], borderWidth: 0 }]
-  }, { plugins: { legend: { position: 'bottom', labels: { color: '#8ba4be' } } }, cutout: '65%' });
-
-  const rb = DATA.clients.filter(x => x.score >= 70).length;
-  const rm = DATA.clients.filter(x => x.score >= 40 && x.score < 70).length;
-  const ra = DATA.clients.filter(x => x.score < 40).length;
-  mkChart('chartRiscoGeral', 'doughnut', {
-    labels: ['Risco Baixo','Risco Médio','Risco Alto'],
-    datasets: [{ data: [rb,rm,ra], backgroundColor: ['#00e676','#ffca28','#ff4444'], borderWidth: 0 }]
-  }, { plugins: { legend: { position: 'bottom', labels: { color: '#8ba4be' } } }, cutout: '65%' });
-
-  const meses = getLast6Months();
-  mkChart('chartReceitaPerdas', 'bar', {
-    labels: meses,
-    datasets: [
-      { label: 'Receita de Juros', data: meses.map(() => jurosTotal/6*(0.8+Math.random()*0.4)), backgroundColor: '#00d4ff88' },
-      { label: 'Perdas (Inadimplência)', data: meses.map(() => jurosTotal/6*inadTaxa/100*(0.6+Math.random()*0.8)), backgroundColor: '#ff444488' }
-    ]
-  });
-}
-
-// ── INADIMPLÊNCIA ──
-function renderInadimplencia() {
-  const c = DATA.contracts;
-  const ativos = c.filter(x => x.status === 'ativo' || x.status === 'atrasado');
-  const atrasados = c.filter(x => x.status === 'atrasado');
-  const valorRisco = atrasados.reduce((s,x) => s + x.valor, 0);
-  const taxaGeral = ativos.length > 0 ? (atrasados.length / ativos.length * 100) : 0;
-  const atrasoMedio = atrasados.length > 0 ? atrasados.reduce((s,x) => s + x.atraso_dias,0)/atrasados.length : 0;
-
-  setText('i-taxa-geral', fmtPct(taxaGeral));
-  setText('i-valor-risco', fmt(valorRisco));
-  setText('i-atraso-medio', atrasoMedio.toFixed(0) + ' dias');
-
-  // By client chart
-  const sorted = [...atrasados].sort((a,b) => b.atraso_dias - a.atraso_dias).slice(0, 15);
-  mkChart('chartInadCliente', 'bar', {
-    labels: sorted.map(x => x.nome.split(' ')[0]),
-    datasets: [{ label: 'Dias em Atraso', data: sorted.map(x => x.atraso_dias), backgroundColor: sorted.map(x => x.atraso_dias > 60 ? '#ff4444' : x.atraso_dias > 30 ? '#ff6d00' : '#ffca28') }]
-  }, { indexAxis: 'y', plugins: { legend: { display: false } } });
-
-  // Evolution
-  const meses = getLast6Months();
-  const baseInad = taxaGeral;
-  mkChart('chartInadEvolucao', 'line', {
-    labels: meses,
-    datasets: [{ label: 'Taxa Inadimplência %', data: meses.map((_,i) => Math.max(0, baseInad + (Math.random()-0.5)*3)), borderColor: '#ff4444', backgroundColor: '#ff444420', fill: true, tension: 0.4 }]
-  });
-
-  // Table
-  const tbody = document.getElementById('tabInadimplentes');
-  const sortedAll = [...atrasados].sort((a,b) => b.valor - a.valor).slice(0,20);
-  tbody.innerHTML = sortedAll.map((x,i) => `
-    <tr>
-      <td style="color:var(--text3);font-family:var(--font-mono)">${i+1}</td>
-      <td style="font-weight:500">${x.nome}</td>
-      <td style="font-family:var(--font-mono)">${fmt(x.valor)}</td>
-      <td>${badgeDias(x.atraso_dias)}</td>
-      <td style="color:var(--red);font-family:var(--font-mono);font-weight:500">${fmt(x.valor)}</td>
-      <td>${badgeStatus(x.status)}</td>
-    </tr>
-  `).join('');
-}
-
-// ── CLIENTES ──
-function renderClientes() {
-  const cl = DATA.clients;
-  const ativos = cl.filter(x => x.status === 'ativo').length;
-  const inativos = cl.length - ativos;
-
-  setText('c-total', cl.length);
-  setText('c-ativos', ativos);
-  setText('c-inativos', inativos);
-
-  mkChart('chartAtivosInativos', 'doughnut', {
-    labels: ['Ativos','Inativos'],
-    datasets: [{ data: [ativos, inativos], backgroundColor: ['#00d4ff','#243347'], borderWidth: 0 }]
-  }, { plugins: { legend: { position: 'bottom', labels: { color: '#8ba4be' } } }, cutout: '65%' });
-
-  // Ticket por cliente
-  const top = [...cl].sort((a,b) => b.totalValor - a.totalValor).slice(0,15);
-  mkChart('chartTicketCliente', 'bar', {
-    labels: top.map(x => x.nome.split(' ')[0]),
-    datasets: [{ label: 'Valor Total', data: top.map(x => x.totalValor), backgroundColor: '#00d4ff88' }]
-  }, { indexAxis: 'y', plugins: { legend: { display: false } } });
-
-  // Table
-  const tbody = document.getElementById('tabClientes');
-  tbody.innerHTML = cl.sort((a,b) => b.totalValor - a.totalValor).map(x => `
-    <tr>
-      <td style="font-weight:500">${x.nome}</td>
-      <td style="text-align:center">${x.contratos.length}</td>
-      <td style="font-family:var(--font-mono)">${fmt(x.totalValor)}</td>
-      <td style="font-family:var(--font-mono)">${fmt(x.ticketMedio)}</td>
-      <td>${x.mesesRelacionamento} m</td>
-      <td>${badgeStatus(x.status)}</td>
-      <td>${scoreBar(x.score)}</td>
-    </tr>
-  `).join('');
-}
-
-// ── SCORE & RISCO ──
-function renderScore() {
-  const cl = DATA.clients;
-  const rb = cl.filter(x => x.score >= 70);
-  const rm = cl.filter(x => x.score >= 40 && x.score < 70);
-  const ra = cl.filter(x => x.score < 40);
-
-  setText('r-baixo', rb.length + ' clientes');
-  setText('r-medio', rm.length + ' clientes');
-  setText('r-alto', ra.length + ' clientes');
-
-  // Score distribution
-  const sorted = [...cl].sort((a,b) => b.score - a.score);
-  mkChart('chartScore', 'bar', {
-    labels: sorted.map(x => x.nome.split(' ')[0]),
-    datasets: [{ label: 'Score', data: sorted.map(x => x.score), backgroundColor: sorted.map(x => x.score>=70?'#00e676':x.score>=40?'#ffca28':'#ff4444') }]
-  }, { plugins: { legend: { display: false } }, scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, max: 100 } } });
-
-  // Concentração
-  const top = [...cl].sort((a,b) => b.totalValor - a.totalValor).slice(0,10);
-  const totalCart = cl.reduce((s,x) => s + x.totalValor, 0);
-  mkChart('chartConcentracao', 'bar', {
-    labels: top.map(x => x.nome.split(' ')[0]),
-    datasets: [{ label: '% da Carteira', data: top.map(x => totalCart>0?(x.totalValor/totalCart*100).toFixed(1):0), backgroundColor: top.map(x => totalCart>0&&(x.totalValor/totalCart)>0.15?'#ff6d00':'#00d4ff88') }]
-  }, { plugins: { legend: { display: false } } });
-
-  // Table
-  const tbody = document.getElementById('tabScore');
-  tbody.innerHTML = sorted.map((x,i) => {
-    const atrasos = x.contratos.filter(c => c.atraso_dias > 0).length;
-    const pontual = x.contratos.length > 0 ? ((1-atrasos/x.contratos.length)*100).toFixed(0) : 100;
+  document.getElementById('riskList').innerHTML = clientesSorted.map(c => {
+    const score = calcRiscoCliente(c);
+    const cor   = riskColors(score);
+    const label = score<30?'BAIXO':score<60?'MÉDIO':'ALTO';
+    const sub   = c.qtdContratos > 1
+      ? `${c.qtdContratos} contratos · ${fmt(c.capitalTotal)}`
+      : `${c.qtdContratos} contrato · ${fmt(c.capitalTotal)}`;
     return `
-    <tr>
-      <td style="color:var(--text3);font-family:var(--font-mono)">${i+1}</td>
-      <td style="font-weight:500">${x.nome}</td>
-      <td>${scoreBar(x.score)}</td>
-      <td>${badgeRisco(x.score)}</td>
-      <td>${pontual}%</td>
-      <td>${atrasos}</td>
-      <td>${x.mesesRelacionamento} m</td>
-      <td>${recomendacao(x.score)}</td>
-    </tr>
-  `;}).join('');
-}
-
-// ── LUCRATIVIDADE ──
-function renderLucratividade() {
-  const c = DATA.contracts;
-  const quitados = c.filter(x => x.status === 'quitado');
-  const ativos = c.filter(x => x.status === 'ativo' || x.status === 'atrasado');
-  const atrasados = c.filter(x => x.status === 'atrasado');
-  const lucroReal = quitados.reduce((s,x) => s + x.juros, 0);
-  const lucroPrev = ativos.reduce((s,x) => s + x.juros, 0);
-  const perda = atrasados.reduce((s,x) => s + x.valor, 0);
-  const carteira = ativos.reduce((s,x) => s + x.valor, 0);
-  const margem = carteira > 0 ? (lucroReal / carteira * 100) : 0;
-
-  setText('l-lucro-total', fmt(lucroReal));
-  setText('l-lucro-prev', fmt(lucroPrev));
-  setText('l-perda', fmt(perda));
-  setText('l-margem', fmtPct(margem));
-
-  // Lucro por cliente
-  const clTop = [...DATA.clients].sort((a,b) => b.totalJuros - a.totalJuros).slice(0,15);
-  mkChart('chartLucroPorCliente', 'bar', {
-    labels: clTop.map(x => x.nome.split(' ')[0]),
-    datasets: [{ label: 'Lucro (Juros)', data: clTop.map(x => x.totalJuros), backgroundColor: '#00e67688' }]
-  }, { indexAxis: 'y', plugins: { legend: { display: false } } });
-
-  // Evolução
-  const meses = getLast6Months();
-  mkChart('chartLucroEvolucao', 'line', {
-    labels: meses,
-    datasets: [{ label: 'Lucro Mensal', data: meses.map(() => lucroReal/6*(0.7+Math.random()*0.6)), borderColor: '#00e676', backgroundColor: '#00e67620', fill: true, tension: 0.4 }]
-  });
-}
-
-// ── FLUXO DE CAIXA ──
-function renderFluxo() {
-  const c = DATA.contracts;
-  const today = new Date();
-  const semana = c.filter(x => {
-    const d = x.vencimento - today;
-    return d >= 0 && d <= 7*86400000 && x.status !== 'quitado';
-  });
-  const mes = c.filter(x => {
-    const d = x.vencimento - today;
-    return d >= 0 && d <= 30*86400000 && x.status !== 'quitado';
-  });
-  const valSemana = semana.reduce((s,x) => s + x.valor + x.juros, 0);
-  const valMes = mes.reduce((s,x) => s + x.valor + x.juros, 0);
-  const caixa = DATA.contracts.filter(x=>x.status==='ativo').reduce((s,x)=>s+x.valor,0) * 0.15;
-
-  setText('f-semana', fmt(valSemana));
-  setText('f-mes', fmt(valMes));
-  setText('f-saldo', fmt(caixa + valMes));
-
-  // Week grid
-  const days = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  const weekGrid = document.getElementById('weekGrid');
-  weekGrid.innerHTML = '';
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(today.getTime() + i * 86400000);
-    const dStr = d.toDateString();
-    const dayContracts = c.filter(x => x.vencimento.toDateString() === dStr && x.status !== 'quitado');
-    const dayVal = dayContracts.reduce((s,x) => s + x.valor + x.juros, 0);
-    const hasOverdue = dayContracts.some(x => x.status === 'atrasado');
-    weekGrid.innerHTML += `
-      <div class="day-cell ${dayVal > 0 ? (hasOverdue ? 'overdue' : 'has-payment') : ''}">
-        <div class="day-name">${days[d.getDay()]}</div>
-        <div class="day-val">${d.getDate()}</div>
-        <div class="day-amount">${dayVal > 0 ? fmt(dayVal) : '—'}</div>
-      </div>
-    `;
-  }
-
-  // 12 week forecast
-  const weeks = [];
-  const weekVals = [];
-  for (let i = 0; i < 12; i++) {
-    const start = new Date(today.getTime() + i * 7 * 86400000);
-    const end = new Date(today.getTime() + (i+1) * 7 * 86400000);
-    weeks.push(`Sem ${i+1}`);
-    const wVal = c.filter(x => x.vencimento >= start && x.vencimento < end && x.status !== 'quitado')
-      .reduce((s,x) => s + x.valor + x.juros, 0);
-    weekVals.push(wVal > 0 ? wVal : valMes/4*(0.5+Math.random()));
-  }
-  mkChart('chartForecast', 'bar', {
-    labels: weeks,
-    datasets: [{ label: 'Recebimentos Previstos', data: weekVals, backgroundColor: '#00d4ff66', borderColor: '#00d4ff', borderWidth: 1 }]
-  }, { plugins: { legend: { display: false } } });
-
-  // Monthly forecast
-  const monthList = document.getElementById('forecastMonthList');
-  const maxVal = Math.max(...weekVals);
-  const months6 = getNext6Months();
-  monthList.innerHTML = months6.map((m, i) => {
-    const v = valMes * (0.8 + Math.random() * 0.5);
-    const pct = maxVal > 0 ? (v / (maxVal * 4) * 100) : 50;
-    return `
-      <div class="forecast-row">
-        <span class="forecast-period">${m}</span>
-        <div class="forecast-bar-wrap"><div class="forecast-bar" style="width:${Math.min(100,pct)}%;background:${i<2?'#00d4ff':'#00d4ff55'}"></div></div>
-        <span class="forecast-val" style="color:${i<2?'var(--accent)':'var(--text2)'}">${fmt(v)}</span>
+      <div class="risk-row">
+        <div class="risk-top">
+          <div>
+            <span class="risk-name">${c.nome}</span>
+            <span style="font-size:0.55rem;color:var(--muted);margin-left:8px">${sub}</span>
+          </div>
+          <span class="risk-score-val" style="color:${cor}">${score} <span style="font-size:0.55rem;color:var(--muted)">${label}</span></span>
+        </div>
+        <div class="risk-bar-bg">
+          <div class="risk-bar-fill" style="width:${score}%;background:${cor}"></div>
+        </div>
       </div>
     `;
   }).join('');
 
-  // Cobrança table
-  const tbody = document.getElementById('tabCobranca');
-  const upcoming = [...c].filter(x => x.status !== 'quitado')
-    .sort((a,b) => a.vencimento - b.vencimento).slice(0,20);
-  tbody.innerHTML = upcoming.map(x => {
-    const diff = Math.floor((x.vencimento - today) / 86400000);
-    const urgencia = diff < 0 ? `<span style="color:var(--red)">Atrasado ${Math.abs(diff)}d</span>` :
-      diff === 0 ? `<span style="color:var(--yellow)">Hoje!</span>` :
-      diff <= 3 ? `<span style="color:var(--orange)">Em ${diff}d</span>` :
-      `<span style="color:var(--text2)">Em ${diff}d</span>`;
-    return `<tr>
-      <td>${x.vencimento.toLocaleDateString('pt-BR')} ${urgencia}</td>
-      <td style="font-weight:500">${x.nome}</td>
-      <td style="font-family:var(--font-mono)">${fmt(x.valor + x.juros)}</td>
-      <td>${badgeStatus(x.status)}</td>
-      <td><button class="btn" style="padding:4px 10px;font-size:11px" onclick="alert('Ligar para ${x.nome}')">📞 Cobrar</button></td>
-    </tr>`;
-  }).join('');
-}
 
-// ── CENÁRIOS ──
-function renderCenarios() {
-  const c = DATA.contracts;
-  const ativos = c.filter(x => x.status === 'ativo' || x.status === 'atrasado');
-  const carteira = ativos.reduce((s,x) => s+x.valor, 0);
-  const jurosTotal = ativos.reduce((s,x) => s+x.juros, 0);
-  const inadTaxa = ativos.length > 0 ? ativos.filter(x=>x.status==='atrasado').length/ativos.length : 0;
+  // ── 5. CALENDÁRIO SEMANAL ────────────────
+  const diasSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const semana = [];
+  // Pegar de segunda a domingo desta semana
+  const diaSemAtual = hoje.getDay(); // 0=dom
+  const segundaFeira = new Date(hoje);
+  segundaFeira.setDate(hoje.getDate() - (diaSemAtual===0?6:diaSemAtual-1));
 
-  const scenarios = [
-    {
-      id: 'pessimista', label: '🔴 Pessimista', sub: 'Inadimplência cresce +50%, captação cai',
-      inadimplencia: fmtPct(inadTaxa * 1.5),
-      lucro6m: fmt(jurosTotal * 0.5),
-      carteira6m: fmt(carteira * 0.85),
-      roi: fmtPct((jurosTotal * 0.5 / carteira * 100)),
-      caixa: fmt(carteira * 0.05)
-    },
-    {
-      id: 'realista', label: '🟡 Realista', sub: 'Tendência atual mantida',
-      inadimplencia: fmtPct(inadTaxa),
-      lucro6m: fmt(jurosTotal * 1.0),
-      carteira6m: fmt(carteira * 1.1),
-      roi: fmtPct((jurosTotal / carteira * 100)),
-      caixa: fmt(carteira * 0.15)
-    },
-    {
-      id: 'otimista', label: '🟢 Otimista', sub: 'Inadimplência cai, captação aumenta',
-      inadimplencia: fmtPct(inadTaxa * 0.5),
-      lucro6m: fmt(jurosTotal * 1.6),
-      carteira6m: fmt(carteira * 1.4),
-      roi: fmtPct((jurosTotal * 1.6 / carteira * 100)),
-      caixa: fmt(carteira * 0.25)
-    }
-  ];
+  for(let i=0;i<7;i++){
+    const d = new Date(segundaFeira);
+    d.setDate(segundaFeira.getDate()+i);
+    const isToday = d.toDateString()===hoje.toDateString();
 
-  document.getElementById('scenarioCards').innerHTML = scenarios.map(s => `
-    <div class="scenario-card ${s.id}">
-      <div class="scenario-title">${s.label}</div>
-      <div class="scenario-sub">${s.sub}</div>
-      <div class="scenario-row"><span class="scenario-label">Inadimplência</span><span class="scenario-val">${s.inadimplencia}</span></div>
-      <div class="scenario-row"><span class="scenario-label">Lucro 6 meses</span><span class="scenario-val">${s.lucro6m}</span></div>
-      <div class="scenario-row"><span class="scenario-label">Carteira</span><span class="scenario-val">${s.carteira6m}</span></div>
-      <div class="scenario-row"><span class="scenario-label">ROI</span><span class="scenario-val">${s.roi}</span></div>
-      <div class="scenario-row"><span class="scenario-label">Caixa Proj.</span><span class="scenario-val">${s.caixa}</span></div>
+    // Contratos que vencem neste dia
+    const vencHoje = abertos.filter(e => {
+      if(!e.proxVenc) return false;
+      return e.proxVenc.toDateString()===d.toDateString();
+    });
+
+    const total = vencHoje.reduce((s,e)=>s+e.jProx,0);
+
+    semana.push({
+      dia: d.getDate(),
+      nome: diasSemana[d.getDay()],
+      isToday,
+      vencimentos: vencHoje,
+      total,
+    });
+  }
+
+  document.getElementById('weekCalendar').innerHTML = semana.map(d=>`
+    <div class="day-col">
+      <div class="day-name">${d.nome}</div>
+      <div class="day-box ${d.isToday?'today':''} ${d.total>0?'has-payment':''}">
+        <div class="day-num">${d.dia}</div>
+        ${d.total>0 ? `
+          <div class="day-payment">${fmt(d.total)}</div>
+          <div class="day-clients">
+            ${d.vencimentos.map(e=>`
+              <div class="day-client-chip ${e.status==='atraso'?'atraso':''}">
+                ${e.nome||e.id}
+                <span class="chip-val">${fmt(e.jProx)}${e.status==='atraso'?' ⚠️':''}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<div class="day-empty">—</div>`}
+      </div>
     </div>
   `).join('');
 
-  // Chart
-  const meses = getNext6Months();
-  mkChart('chartCenarios', 'line', {
-    labels: meses,
-    datasets: [
-      { label: 'Otimista', data: meses.map((_,i)=> carteira*(1+i*0.08)), borderColor:'#00e676', backgroundColor:'#00e67610', fill:false, tension:0.4 },
-      { label: 'Realista', data: meses.map((_,i)=> carteira*(1+i*0.04)), borderColor:'#ffca28', backgroundColor:'#ffca2810', fill:false, tension:0.4 },
-      { label: 'Pessimista', data: meses.map((_,i)=> carteira*(1-i*0.02)), borderColor:'#ff4444', backgroundColor:'#ff444410', fill:false, tension:0.4 }
-    ]
-  });
-
-  // Previsão inadimplência
-  const baseInad = inadTaxa * 100;
-  mkChart('chartPrevisaoInad', 'line', {
-    labels: [...getLast6Months(), ...getNext6Months()],
-    datasets: [
-      { label: 'Histórico Real', data: [...getLast6Months().map((_,i)=> Math.max(0,baseInad+(Math.random()-0.5)*2)), ...Array(6).fill(null)], borderColor:'#ff4444', borderDash:[], tension:0.4 },
-      { label: 'Previsão', data: [...Array(6).fill(null), ...getNext6Months().map((_,i)=> Math.max(0,baseInad*0.95-i*0.1))], borderColor:'#ff444488', borderDash:[5,5], tension:0.4 }
-    ]
-  });
-}
-
-// ── ALERTAS ──
-function renderAlertas() {
-  const c = DATA.contracts;
-  const cl = DATA.clients;
-  const today = new Date();
-  const alertas = [];
-
-  // Vencimentos próximos (3 dias)
-  const vencProx = c.filter(x => {
-    const d = (x.vencimento - today) / 86400000;
-    return d >= 0 && d <= 3 && x.status !== 'quitado';
-  });
-  if (vencProx.length > 0) {
-    alertas.push({ type: 'critical', icon: '⏰', title: `${vencProx.length} pagamento(s) vencendo nos próximos 3 dias`, desc: vencProx.map(x => `${x.nome} — ${fmt(x.valor)} (${x.vencimento.toLocaleDateString('pt-BR')})`).join(' · ') });
+  // ── LISTA DE COBRANÇAS DA SEMANA ─────────
+  const todosVencSemana = semana.flatMap(d => d.vencimentos.map(e => ({...e, diaVenc: d})));
+  const cobEl = document.getElementById('cobrancaList');
+  if (cobEl) {
+    if (todosVencSemana.length === 0) {
+      cobEl.innerHTML = `<div style="color:var(--muted);font-size:0.68rem;padding:12px 0">Nenhum vencimento esta semana.</div>`;
+    } else {
+      // Ordena: atraso primeiro, depois por dia
+      const sorted = [...todosVencSemana].sort((a,b) => {
+        if (a.status==='atraso' && b.status!=='atraso') return -1;
+        if (b.status==='atraso' && a.status!=='atraso') return 1;
+        return a.diaVenc.dia - b.diaVenc.dia;
+      });
+      cobEl.innerHTML = sorted.map(e => {
+        const isAtraso = e.status === 'atraso';
+        const cor = isAtraso ? 'var(--red)' : 'var(--green)';
+        const badge = isAtraso
+          ? `<span style="background:rgba(239,71,111,0.15);color:var(--red);border:1px solid rgba(239,71,111,0.3);border-radius:4px;padding:2px 7px;font-size:0.5rem">⚠️ ATRASO</span>`
+          : `<span style="background:rgba(6,214,160,0.1);color:var(--green);border:1px solid rgba(6,214,160,0.2);border-radius:4px;padding:2px 7px;font-size:0.5rem">✓ EM DIA</span>`;
+        return `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <span style="font-size:0.72rem;color:var(--text)">${e.nome||e.id}</span>
+              <span style="font-size:0.58rem;color:var(--muted)">${e.id} · vence ${e.diaVenc.nome} ${e.diaVenc.dia}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              ${badge}
+              <span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${cor}">${fmt(e.jProx)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
   }
 
-  // Concentração de risco
-  const totalCart = cl.reduce((s,x)=>s+x.totalValor,0);
-  const concentrados = cl.filter(x => totalCart > 0 && x.totalValor/totalCart > 0.15);
-  if (concentrados.length > 0) {
-    alertas.push({ type: 'warning', icon: '⚠️', title: 'Concentração de risco detectada', desc: concentrados.map(x => `${x.nome} representa ${(x.totalValor/totalCart*100).toFixed(1)}% da carteira`).join(' · ') });
-  }
+  // ── 6. DOBRAMENTO DE CAPITAL ─────────────
+  // Usando regra dos juros compostos: FV = PV*(1+r)^n
+  // Quanto tempo leva para dobrar com o ROI mensal atual
+  const roiMensal = abertos.length
+    ? abertos.reduce((s,e)=>s+e.taxa,0)/abertos.length
+    : 0.1;
 
-  // Alto risco
-  const altoRisco = cl.filter(x => x.score < 40);
-  if (altoRisco.length > 0) {
-    alertas.push({ type: 'warning', icon: '🔴', title: `${altoRisco.length} cliente(s) com score de alto risco`, desc: 'Evite novos empréstimos: ' + altoRisco.map(x => x.nome).join(', ') });
-  }
+  const mesesParaDobrar = roiMensal>0
+    ? Math.ceil(Math.log(2)/Math.log(1+roiMensal))
+    : 999;
 
-  // Atrasos longos
-  const longos = c.filter(x => x.atraso_dias > 60);
-  if (longos.length > 0) {
-    alertas.push({ type: 'critical', icon: '🚨', title: `${longos.length} contrato(s) com atraso superior a 60 dias`, desc: longos.map(x => `${x.nome} — ${x.atraso_dias} dias — ${fmt(x.valor)}`).join(' · ') });
-  }
+  const projecoes = [1,3,6,12,mesesParaDobrar].filter((v,i,a)=>a.indexOf(v)===i).sort((a,b)=>a-b);
 
-  // Bons clientes para oferecer mais crédito
-  const excelentes = cl.filter(x => x.score >= 80 && !x.temAtraso);
-  if (excelentes.length > 0) {
-    alertas.push({ type: 'good', icon: '💎', title: `${excelentes.length} cliente(s) excelentes — potencial para mais crédito`, desc: excelentes.map(x => `${x.nome} (Score ${x.score})`).join(', ') });
-  }
-
-  // Aumento de inadimplência (simulated)
-  const inadAtual = c.filter(x=>x.status==='atrasado').length / Math.max(1,c.filter(x=>x.status!=='quitado').length);
-  if (inadAtual > 0.2) {
-    alertas.push({ type: 'critical', icon: '📈', title: 'Taxa de inadimplência acima de 20%', desc: `Taxa atual: ${fmtPct(inadAtual*100)}. Considere apertar critérios de concessão de crédito.` });
-  }
-
-  if (alertas.length === 0) {
-    alertas.push({ type: 'good', icon: '✅', title: 'Tudo em ordem!', desc: 'Nenhum alerta crítico identificado no momento.' });
-  }
-
-  document.getElementById('alertasContainer').innerHTML = alertas.map(a => `
-    <div class="alert-box ${a.type}">
-      <div class="alert-icon">${a.icon}</div>
-      <div>
-        <div class="alert-title">${a.title}</div>
-        <div class="alert-desc">${a.desc}</div>
-      </div>
+  document.getElementById('dobraContent').innerHTML = `
+    <div style="margin-bottom:14px;font-size:0.68rem;color:var(--muted)">
+      Com taxa média de <strong style="color:var(--gold)">${pct(roiMensal)}/mês</strong>,
+      seu capital dobra em <strong style="color:var(--green)">${mesesParaDobrar} meses</strong>
+      (${Math.round(mesesParaDobrar/12*10)/10} anos)
     </div>
-  `).join('');
-}
-
-// ── HISTÓRICO ──
-function renderHistorico() {
-  const c = DATA.contracts;
-  const ativos = c.filter(x => x.status === 'ativo' || x.status === 'atrasado');
-  const carteira = ativos.reduce((s,x) => s+x.valor, 0);
-  const juros = ativos.reduce((s,x) => s+x.juros, 0);
-  const inad = ativos.length > 0 ? (ativos.filter(x=>x.status==='atrasado').length/ativos.length*100) : 0;
-
-  // Simulate MoM delta
-  const prevCarteira = carteira * 0.91;
-  const deltaCarteira = ((carteira - prevCarteira)/prevCarteira*100).toFixed(1);
-  const prevLucro = juros * 0.88;
-  const deltaLucro = ((juros - prevLucro)/prevLucro*100).toFixed(1);
-  const prevInad = inad * 1.05;
-  const deltaInad = (inad - prevInad).toFixed(1);
-
-  setText('h-carteira-atual', fmt(carteira));
-  setText('h-lucro-atual', fmt(juros));
-  setText('h-inad-atual', fmtPct(inad));
-  setText('h-crescimento', '+' + deltaCarteira + '%');
-
-  const el1 = document.getElementById('h-carteira-delta');
-  el1.textContent = `vs mês anterior: +${deltaCarteira}%`;
-  el1.className = 'kpi-delta up';
-  const el2 = document.getElementById('h-lucro-delta');
-  el2.textContent = `vs mês anterior: +${deltaLucro}%`;
-  el2.className = 'kpi-delta up';
-  const el3 = document.getElementById('h-inad-delta');
-  el3.textContent = `vs mês anterior: ${deltaInad}%`;
-  el3.className = 'kpi-delta ' + (parseFloat(deltaInad) < 0 ? 'up' : 'down');
-
-  const meses = getLast6Months();
-  mkChart('chartCrescimento', 'bar', {
-    labels: meses,
-    datasets: [{ label: 'Carteira Total', data: meses.map((_,i) => carteira*(0.7+i*0.06)), backgroundColor: '#00d4ff55', borderColor:'#00d4ff', borderWidth:1 }]
-  }, { plugins: { legend: { display: false } } });
-
-  mkChart('chartLucroHist', 'line', {
-    labels: meses,
-    datasets: [{ label: 'Lucro', data: meses.map((_,i) => juros*(0.65+i*0.07)), borderColor:'#00e676', backgroundColor:'#00e67620', fill:true, tension:0.4 }]
-  });
-
-  mkChart('chartInadHist', 'line', {
-    labels: meses,
-    datasets: [{ label: 'Inadimplência %', data: meses.map((_,i) => Math.max(0, inad+(Math.random()-0.5)*3)), borderColor:'#ff4444', backgroundColor:'#ff444420', fill:true, tension:0.4 }]
-  });
-}
-
-// ── CLUSTER ──
-function renderCluster() {
-  const cl = DATA.clients;
-  const clusters = {
-    'Âncora': { icon:'⚓', desc:'Clientes de alto valor com histórico impecável. Prioridade máxima para renovação e ampliação de crédito.', color:'#00d4ff', rec:'Expandir crédito' },
-    'Excelente': { icon:'⭐', desc:'Pagadores pontuais e confiáveis. Base sólida da carteira.', color:'#00e676', rec:'Manter e fidelizar' },
-    'Estável': { icon:'🟡', desc:'Comportamento regular com pequenos atrasos ocasionais. Monitorar.', color:'#ffca28', rec:'Manter critério atual' },
-    'Em Observação': { icon:'👁', desc:'Histórico irregular. Exige acompanhamento próximo antes de novos empréstimos.', color:'#ff6d00', rec:'Cauteloso — analisar caso' },
-    'Alto Risco': { icon:'🚫', desc:'Alto índice de atrasos e inadimplência. Evitar novos contratos.', color:'#ff4444', rec:'Não recomendar crédito' }
-  };
-
-  const clusterCount = {};
-  cl.forEach(x => { clusterCount[x.cluster] = (clusterCount[x.cluster]||0)+1; });
-
-  document.getElementById('clusterCards').innerHTML = Object.keys(clusters).map(k => {
-    const info = clusters[k];
-    const count = clusterCount[k] || 0;
-    return `
-      <div class="cluster-card">
-        <div class="cluster-icon">${info.icon}</div>
-        <div class="cluster-name" style="color:${info.color}">${k}</div>
-        <div class="cluster-desc">${info.desc}</div>
-        <div class="cluster-clients"><span style="font-family:var(--font-head);font-size:20px;font-weight:700">${count}</span> clientes</div>
-        <div style="margin-top:10px"><span class="badge badge-blue" style="font-size:10px">${info.rec}</span></div>
-      </div>
-    `;
-  }).join('');
-
-  const keys = Object.keys(clusterCount);
-  mkChart('chartCluster', 'bar', {
-    labels: keys,
-    datasets: [
-      { label: 'Clientes', data: keys.map(k=>clusterCount[k]||0), backgroundColor: keys.map(k=>clusters[k]?.color+'88'||'#00d4ff88'), borderColor: keys.map(k=>clusters[k]?.color||'#00d4ff'), borderWidth:1 }
-    ]
-  }, { plugins: { legend: { display: false } } });
-
-  const tbody = document.getElementById('tabCluster');
-  tbody.innerHTML = cl.sort((a,b) => b.score - a.score).map(x => `
-    <tr>
-      <td style="font-weight:500">${x.nome}</td>
-      <td><span class="badge" style="background:${clusters[x.cluster]?.color+'22'};color:${clusters[x.cluster]?.color};border:1px solid ${clusters[x.cluster]?.color+'44'}">${clusters[x.cluster]?.icon||''} ${x.cluster}</span></td>
-      <td>${scoreBar(x.score)}</td>
-      <td style="font-family:var(--font-mono)">${fmt(x.ticketMedio)}</td>
-      <td style="text-align:center">${x.contratos.filter(c=>c.atraso_dias>0).length}</td>
-      <td>${recomendacao(x.score)}</td>
-    </tr>
-  `).join('');
-}
-
-// ══════════════════════════════════════════════════════
-// HELPERS
-// ══════════════════════════════════════════════════════
-
-function setText(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val;
-}
-
-function setDeltaClass(id, val, reverse = false) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const bad = reverse ? val > 15 : val < 0;
-  el.className = 'kpi-delta ' + (bad ? 'down' : val > 0 ? 'up' : '');
-}
-
-function badgeTipo(tipo) {
-  return tipo === 'PJ'
-    ? `<span class="badge badge-purple">🏢 PJ</span>`
-    : `<span class="badge badge-blue">👤 PF</span>`;
-}
-
-function badgeStatus(status) {
-  if (status === 'ativo') return `<span class="badge badge-green">● Ativo</span>`;
-  if (status === 'atrasado') return `<span class="badge badge-red">⚠ Atrasado</span>`;
-  if (status === 'inativo') return `<span class="badge" style="background:#1e2d40;color:#4d6a85;border:1px solid #243347">○ Inativo</span>`;
-  return `<span class="badge badge-blue">✓ Quitado</span>`;
-}
-
-function badgeDias(dias) {
-  if (dias === 0) return '<span style="color:var(--text3)">—</span>';
-  const color = dias > 60 ? 'badge-red' : dias > 30 ? 'badge-orange' : 'badge-yellow';
-  return `<span class="badge ${color}">${dias}d</span>`;
-}
-
-function badgeRisco(score) {
-  if (score >= 70) return `<span class="badge badge-green">Baixo</span>`;
-  if (score >= 40) return `<span class="badge badge-yellow">Médio</span>`;
-  return `<span class="badge badge-red">Alto</span>`;
-}
-
-function recomendacao(score) {
-  if (score >= 75) return `<span class="badge badge-green">✓ Ampliar crédito</span>`;
-  if (score >= 60) return `<span class="badge badge-blue">↔ Manter</span>`;
-  if (score >= 40) return `<span class="badge badge-yellow">⚠ Monitorar</span>`;
-  return `<span class="badge badge-red">✗ Evitar</span>`;
-}
-
-function scoreBar(score) {
-  const color = score >= 70 ? '#00e676' : score >= 40 ? '#ffca28' : '#ff4444';
-  return `
-    <div style="min-width:100px">
-      <div style="font-family:var(--font-mono);font-size:12px;font-weight:500;color:${color}">${score}</div>
-      <div class="score-bar"><div class="score-fill" style="width:${score}%;background:${color}"></div></div>
+    <table class="dobra-table">
+      <thead>
+        <tr>
+          <th>Prazo</th>
+          <th>Capital Projetado</th>
+          <th>Lucro Acumulado</th>
+          <th>Multiplicador</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${projecoes.map(m=>{
+          const fv = totalCap*Math.pow(1+roiMensal,m);
+          const lucro = fv-totalCap;
+          const mult  = fv/totalCap;
+          const isDouble = m===mesesParaDobrar;
+          return `<tr class="${isDouble?'highlight':''}">
+            <td>${isDouble?'🎯 ':''}${m} ${m===1?'mês':'meses'}</td>
+            <td>${fmt(fv)}</td>
+            <td style="color:var(--green)">+${fmt(lucro)}</td>
+            <td>${mult.toFixed(2)}x</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:0.58rem;color:var(--muted2)">
+      * Projeção assumindo reinvestimento total dos juros mensalmente
     </div>
   `;
-}
 
-function getLast6Months() {
-  const months = [];
-  const now = new Date();
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    months.push(d.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }));
+  document.getElementById('last-update').textContent = new Date().toLocaleTimeString('pt-BR');
+
+  // ── 7. DIAS DE ATRASO ────────────────────
+  const hoje2 = new Date(); hoje2.setHours(0,0,0,0);
+  const emAtraso = atrasado.map(e => {
+    const diasAtraso = e.proxVenc
+      ? Math.max(0, Math.floor((hoje2 - e.proxVenc) / 86400000))
+      : 0;
+    return { ...e, diasAtraso };
+  }).sort((a,b) => b.diasAtraso - a.diasAtraso);
+
+  const atrasoEl = document.getElementById('atrasoList');
+  if (emAtraso.length === 0) {
+    atrasoEl.innerHTML = `<div style="color:var(--green);font-size:0.68rem;padding:12px 0">✅ Nenhum contrato em atraso!</div>`;
+  } else {
+    atrasoEl.innerHTML = emAtraso.map(e => {
+      const cls = e.diasAtraso > 30 ? '' : e.diasAtraso > 10 ? 'medio' : 'baixo';
+      const cor = e.diasAtraso > 30 ? 'var(--red)' : e.diasAtraso > 10 ? 'var(--gold)' : 'var(--muted)';
+      return `
+        <div class="atraso-row ${cls}">
+          <div class="atraso-info">
+            <span class="atraso-nome">${e.nome || e.id}</span>
+            <span class="atraso-sub">${e.id} · ${fmt(e.capital)} · vencia ${e.proxVenc ? e.proxVenc.toLocaleDateString('pt-BR') : '—'}</span>
+          </div>
+          <div class="atraso-dias" style="color:${cor}">
+            ${e.diasAtraso > 0 ? e.diasAtraso : '?'}
+            <span>${e.diasAtraso > 0 ? 'dias' : 'sem data'}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
-  return months;
+
+  // ── 8. HISTÓRICO DE PAGAMENTOS POR CLIENTE ──
+  // Agrupa pagamentos por ID de contrato → cruza com cliente
+  const pagPorContrato = {};
+  pags.forEach(p => {
+    if (!pagPorContrato[p.id]) pagPorContrato[p.id] = [];
+    pagPorContrato[p.id].push(p);
+  });
+
+  // Agrupa contratos por cliente
+  const histClientes = {};
+  emps.forEach(e => {
+    const key = e.nome || e.id;
+    if (!histClientes[key]) histClientes[key] = { nome: key, contratos: [], totalPago: 0, totalJuros: 0, qtdPag: 0 };
+    histClientes[key].contratos.push(e);
+    const pagamentos = pagPorContrato[e.id] || [];
+    pagamentos.forEach(p => {
+      histClientes[key].totalPago  += p.valor;
+      histClientes[key].totalJuros += p.juros;
+      histClientes[key].qtdPag++;
+    });
+  });
+
+  const histSorted = Object.values(histClientes).sort((a,b) => b.totalPago - a.totalPago);
+
+  document.getElementById('histList').innerHTML = histSorted.length === 0
+    ? `<div style="color:var(--muted);font-size:0.68rem">Nenhum pagamento registrado ainda.</div>`
+    : histSorted.map(c => {
+        const temAtraso = c.contratos.some(e => e.status === 'atraso');
+        const todosQuit = c.contratos.every(e => e.status === 'quitado');
+        const statusBadge = todosQuit
+          ? `<span class="hist-badge ok">✅ QUITADO</span>`
+          : temAtraso
+            ? `<span class="hist-badge bad">⚠️ ATRASO</span>`
+            : `<span class="hist-badge ok">✓ EM DIA</span>`;
+        const pagBadge = c.qtdPag > 0
+          ? `<span class="hist-badge muted">${c.qtdPag} pgto(s)</span>`
+          : `<span class="hist-badge warn">sem pgtos</span>`;
+        return `
+          <div class="hist-row">
+            <span class="hist-nome">${c.nome}</span>
+            <div class="hist-badges">
+              ${pagBadge}
+              <span class="hist-badge muted">${fmt(c.totalPago)}</span>
+              ${statusBadge}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+  // ── 9. CONCENTRAÇÃO DE RISCO ─────────────
+  const concClientes = Object.values(histClientes).map(c => ({
+    nome: c.nome,
+    capital: c.contratos.filter(e=>e.status!=='quitado').reduce((s,e)=>s+e.capital,0),
+  })).filter(c => c.capital > 0).sort((a,b) => b.capital - a.capital);
+
+  document.getElementById('concList').innerHTML = concClientes.map(c => {
+    const pct2 = totalCap ? c.capital / totalCap : 0;
+    const cor  = pct2 > 0.4 ? 'var(--red)' : pct2 > 0.25 ? 'var(--gold)' : 'var(--green)';
+    const alerta = pct2 > 0.4 ? ' ⚠️' : '';
+    return `
+      <div class="conc-row">
+        <div class="conc-top">
+          <span class="conc-nome">${c.nome}${alerta}</span>
+          <div style="text-align:right">
+            <span class="conc-pct" style="color:${cor}">${(pct2*100).toFixed(1)}%</span>
+            <span style="font-size:0.55rem;color:var(--muted);margin-left:6px">${fmt(c.capital)}</span>
+          </div>
+        </div>
+        <div class="conc-bar-bg">
+          <div class="conc-bar-fill" style="width:${(pct2*100).toFixed(1)}%;background:${cor}"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // ── 10. LUCRO REALIZADO vs PREVISTO ──────
+  const lucroRealizado = pags.reduce((s,p) => s + p.juros, 0);
+  const lucroDevedor   = totalJuros;
+
+  destroyChart('lucro');
+  charts.lucro = new Chart(document.getElementById('chartLucro').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['Juros Recebidos', 'Juros a Receber'],
+      datasets: [{
+        data: [lucroRealizado, lucroDevedor],
+        backgroundColor: ['rgba(6,214,160,0.75)', 'rgba(240,180,41,0.6)'],
+        borderRadius: 8, borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...TOOLTIP, callbacks: { label: ctx => ' ' + fmt(ctx.raw) } },
+      },
+      scales: {
+        x: { grid:{color:'#1c2133'}, ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)} },
+        y: { grid:{display:false}, ticks:{color:'#dde1f0',font:{family:'DM Mono',size:10}} },
+      }
+    }
+  });
+
+  // ── 11. CAPITAL DISPONÍVEL + VENCENDO 30 DIAS ──
+  const capitalQuitadoTotal = quitados.reduce((s,e)=>s+e.capital,0);
+  const em30Dias = new Date(hoje); em30Dias.setDate(em30Dias.getDate()+30);
+  const vencendo30 = abertos.filter(e => e.vencContrato && e.vencContrato >= hoje && e.vencContrato <= em30Dias);
+  const capitalVencendo = vencendo30.reduce((s,e)=>s+e.capital,0);
+  const jurosVencendo   = vencendo30.reduce((s,e)=>s+e.jTotal,0);
+
+  document.getElementById('capitalDisp').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px">Capital retornado (quitados)</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--green)">${fmt(capitalQuitadoTotal)}</div>
+      <div style="font-size:0.6rem;color:var(--muted);margin-top:2px">de ${quitados.length} contrato(s) já quitado(s)</div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:16px">
+      <div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Contratos vencendo nos próximos 30 dias</div>
+      ${vencendo30.length === 0
+        ? `<div style="color:var(--muted);font-size:0.68rem">Nenhum contrato vence nos próximos 30 dias.</div>`
+        : vencendo30.sort((a,b)=>a.vencContrato-b.vencContrato).map(e=>`
+          <div class="info-row">
+            <div>
+              <div class="info-label">${e.nome || e.id} <span style="color:var(--muted2)">· ${e.id}</span></div>
+              <div style="font-size:0.55rem;color:var(--muted);margin-top:2px">vence ${e.vencContrato.toLocaleDateString('pt-BR')}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="info-val" style="color:var(--purple)">${fmt(e.capital)}</div>
+              <div style="font-size:0.55rem;color:var(--green)">+${fmt(e.jTotal)} juros</div>
+            </div>
+          </div>
+        `).join('')
+      }
+      ${vencendo30.length > 0 ? `
+        <div style="margin-top:10px;padding:10px 12px;background:rgba(72,149,239,0.08);border-radius:8px;border:1px solid rgba(72,149,239,0.2)">
+          <div style="font-size:0.6rem;color:var(--muted)">Total a recuperar</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--blue)">${fmt(capitalVencendo + jurosVencendo)}</div>
+          <div style="font-size:0.55rem;color:var(--muted)">${fmt(capitalVencendo)} capital + ${fmt(jurosVencendo)} juros</div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  // ── 12. EVOLUÇÃO MENSAL DA CARTEIRA ──────
+  // Agrupa capital ativo por mês de contratação
+  const evolMap = {};
+  emps.forEach(e => {
+    if (!e.data) return;
+    const key = `${e.data.getFullYear()}-${String(e.data.getMonth()+1).padStart(2,'0')}`;
+    if (!evolMap[key]) evolMap[key] = { capital: 0, contratos: 0 };
+    evolMap[key].capital    += e.capital;
+    evolMap[key].contratos  += 1;
+  });
+
+  const evolKeys = Object.keys(evolMap).sort();
+  // Acumula capital mês a mês
+  let acumulado = 0;
+  const evolLabels = evolKeys.map(k => {
+    const [y, m] = k.split('-');
+    return new Date(+y, +m-1, 1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});
+  });
+  const evolData = evolKeys.map(k => {
+    acumulado += evolMap[k].capital;
+    return acumulado;
+  });
+
+  destroyChart('evolMensal');
+  charts.evolMensal = new Chart(document.getElementById('chartEvolMensal').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: evolLabels,
+      datasets: [{
+        label: 'Capital Acumulado',
+        data: evolData,
+        borderColor: 'rgba(240,180,41,0.9)',
+        backgroundColor: 'rgba(240,180,41,0.08)',
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(240,180,41,1)',
+        pointRadius: 4,
+        fill: true,
+        tension: 0.3,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...TOOLTIP, callbacks: { label: ctx => ' Capital acumulado: ' + fmt(ctx.raw) } },
+      },
+      scales: {
+        x: { grid:{color:'#1c2133'}, ticks:{color:'#5a6282',font:{family:'DM Mono',size:10}} },
+        y: { grid:{color:'#1c2133'}, ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}, beginAtZero:true },
+      }
+    }
+  });
 }
 
-function getNext6Months() {
-  const months = [];
-  const now = new Date();
-  for (let i = 0; i < 6; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() + i + 1, 1);
-    months.push(d.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }));
+// ── LOAD ─────────────────────────────────────
+
+async function fetchSheetPag() {
+  const ts = Date.now();
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID_PAG}&t=${ts}`;
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const text = await r.text();
+  return csvToArray(text);
+}
+
+async function loadData() {
+  const loading = document.getElementById('loading-screen');
+  const error   = document.getElementById('error-screen');
+  const main    = document.getElementById('main');
+
+  loading.classList.remove('hidden');
+  error.classList.remove('show');
+  main.classList.remove('visible');
+
+  try {
+    const [empT, pagT] = await Promise.all([
+      fetchSheet(GID_EMP),
+      fetchSheetPag(),
+    ]);
+
+    const empSkip = autoSkipCSV(empT);
+    const pagSkip = autoSkipCSV(pagT);
+
+    const empRows = parseRows(empT, empSkip);
+    const pagRows = parseRows(pagT, pagSkip);
+
+    // Debug no console (abra F12 para ver)
+    let dbg = '';
+    dbg += `Total de linhas brutas (emp): ${empT.length}\n`;
+    dbg += `Auto-skip detectado (emp): ${empSkip}\n`;
+    dbg += `Linhas de dados após skip: ${empRows.length}\n`;
+    dbg += `Contratos EMP encontrados: ${empRows.filter(r=>r[0]&&String(r[0]).trim().toUpperCase().startsWith('EMP')).length}\n`;
+    dbg += '\nPrimeiras 5 linhas (cols 0-8):\n';
+    empT.slice(0,5).forEach((row,i) => {
+      dbg += `  [${i}]: ${row.slice(0,9).map(v=>JSON.stringify(v)).join(' | ')}\n`;
+    });
+    console.log('📊 Dashboard Debug:\n' + dbg);
+
+    render(empRows, pagRows);
+
+    loading.classList.add('hidden');
+    main.classList.add('visible');
+
+  } catch(err) {
+    console.error(err);
+    loading.classList.add('hidden');
+    error.classList.add('show');
+    document.getElementById('error-msg').textContent =
+      'Erro: '+err.message+'. Verifique se a planilha está compartilhada publicamente.';
   }
-  return months;
 }
 
-function showStatus(type, msg) {
-  const el = document.getElementById('statusBanner');
-  if (!el) return;
-  el.innerHTML = `<div class="status-banner ${type === 'success' ? 'success' : type === 'info' ? 'info' : ''}">${msg}</div>`;
-}
-
-// ── NAV ──
-function showSection(id, tab) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('s-' + id).classList.add('active');
-  if (tab) tab.classList.add('active');
-}
-
-// ── CONFIG ──
-function toggleConfig() {
-  const el = document.getElementById('sheetsConfig');
-  if (el) el.style.display = el.style.display === 'none' ? 'flex' : 'none';
-}
-
-function saveConfig() {
-  document.getElementById('sheetsConfig').style.display = 'none';
-  loadData();
-}
-
-// ── INIT ──
-Chart.defaults.color = '#8ba4be';
-Chart.defaults.font.family = 'DM Mono';
-setTimeout(() => loadData(), 500);
-
-// Auto-refresh every 5 min
-setInterval(() => loadData(), 5 * 60 * 1000);
+loadData();
+setInterval(loadData, 60*1000); // auto-refresh a cada 1 minuto
 </script>
 </body>
 </html>
