@@ -1293,17 +1293,6 @@ async function loadFromSheets(sheetId) {
 
   const today = new Date(); today.setHours(0,0,0,0);
 
-  const parseDate = v => {
-    if (!v && v !== 0) return null;
-    if (v instanceof Date) return v;
-    const s = String(v);
-    const m = s.match(/Date\((\d+),(\d+),(\d+)\)/);
-    if (m) return new Date(+m[1], +m[2], +m[3]);
-    if (!isNaN(Number(s)) && s.length > 4) return new Date(+s);
-    const d = new Date(s);
-    return isNaN(d.getTime()) ? null : d;
-  };
-
   return dataRows.map(cells => {
     const obj = {};
     cols.forEach((col, i) => {
@@ -1316,26 +1305,66 @@ async function loadFromSheets(sheetId) {
     if (!nome || nome === 'null') return null;
 
     obj.nome   = nome;
-    obj.valor  = parseFloat(obj.valor)      || 0;
-    obj.taxa   = parseFloat(obj.taxa)        || 0;
-    obj.juros  = parseFloat(obj.juros_total) || (obj.valor * obj.taxa / 100);
 
-    const vencDate = parseDate(obj.vencimento_raw) || parseDate(obj.venc_original) || new Date();
+    // Parse currency: handles both number and "R$ 1.234,56" / "1234.56" formats
+    const parseCurrency = v => {
+      if (v === null || v === undefined || v === '') return 0;
+      if (typeof v === 'number') return v;
+      const s = String(v).replace(/R\$\s*/g, '').trim();
+      // Brazilian format: 1.234,56 → 1234.56
+      const cleaned = s.replace(/\./g, '').replace(',', '.');
+      return parseFloat(cleaned) || 0;
+    };
+
+    obj.valor  = parseCurrency(obj.valor);
+    obj.taxa   = parseCurrency(obj.taxa);
+    obj.juros  = parseCurrency(obj.juros_total) || (obj.valor * obj.taxa / 100);
+    obj.saldo  = parseCurrency(obj.saldo);
+    obj.juros_prox = parseCurrency(obj.juros_prox);
+    obj.total_pago = parseCurrency(obj.total_pago);
+
+    // Parse dates — gviz returns dd/mm/yyyy strings or Date(...) objects
+    const parseDateBR = v => {
+      if (!v && v !== 0) return null;
+      if (v instanceof Date) return v;
+      const s = String(v).trim();
+      // gviz Date(...) format
+      const m = s.match(/Date\((\d+),(\d+),(\d+)\)/);
+      if (m) return new Date(+m[1], +m[2], +m[3]);
+      // dd/mm/yyyy or dd/mm/yy
+      const br = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+      if (br) {
+        const year = br[3].length === 2 ? 2000 + +br[3] : +br[3];
+        return new Date(year, +br[2] - 1, +br[1]);
+      }
+      // ISO or timestamp
+      if (!isNaN(Number(s)) && s.length > 4) return new Date(+s);
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? null : d;
+    };
+
+    const vencDate = parseDateBR(obj.vencimento_raw) || parseDateBR(obj.venc_original) || new Date();
     obj.vencimento  = vencDate;
-    obj.data_inicio = parseDate(obj.data_inicio)   || new Date();
+    obj.data_inicio = parseDateBR(obj.data_inicio) || new Date();
 
     const vencMidnight = new Date(vencDate); vencMidnight.setHours(0,0,0,0);
     const diffMs = today - vencMidnight;
     obj.atraso_dias = diffMs > 0 ? Math.floor(diffMs / 86400000) : 0;
 
+    // Status: handle emoji-based values from the spreadsheet
+    // 🟢 Em Dia / 🔴 Atrasado / ✅ Quitado / 🟡 Pendente etc.
     const sl = String(obj.status_raw || '').toLowerCase();
-    if (sl.includes('quit') || sl.includes('pago') || sl.includes('encerr')) {
+    const hasEmoji = s => /[\u{1F300}-\u{1FFFF}]/u.test(String(obj.status_raw || ''));
+    if (sl.includes('quit') || sl.includes('pago') || sl.includes('encerr') || sl.includes('✅') || obj.status_raw?.includes('✅')) {
       obj.status = 'quitado'; obj.atraso_dias = 0;
-    } else if (obj.atraso_dias > 0 || sl.includes('atras') || sl.includes('inadim')) {
+    } else if (obj.atraso_dias > 0 || sl.includes('atras') || sl.includes('inadim') || sl.includes('atraso') || obj.status_raw?.includes('🔴')) {
       obj.status = 'atrasado';
     } else {
-      obj.status = 'ativo';
+      obj.status = 'ativo'; // "Em Dia", "🟢 Em Dia", "Ativo" etc.
     }
+
+    // Skip rows that have no real value (empty filler rows in the sheet)
+    if (obj.valor === 0 && !obj.id_emp) return null;
 
     return obj;
   }).filter(Boolean);
