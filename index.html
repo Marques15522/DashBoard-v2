@@ -1131,9 +1131,7 @@
 // ══════════════════════════════════════════════════════
 
 let DATA = { contracts: [], clients: [] };
-const DEFAULT_SHEET_ID = '1g9336ZjN2jnVoxA5CFQmlaDxTkda7tlz48_EAlKUjr4';
-const DEFAULT_GID = '147333899';
-let SHEET_ID = localStorage.getItem('sheetId') || DEFAULT_SHEET_ID;
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdjjEuSwxlYdGAvK7zQmRO3NRnt3Ex3V0Dfgf3K6l2e-4g6XlCQO2qOOyUtcOU4OmZKQ/exec';
 let charts = {};
 
 // ── DEMO DATA (used when no sheet connected) ──
@@ -1163,238 +1161,117 @@ function generateDemoData() {
   });
 }
 
-// ── LOAD FROM GOOGLE SHEETS ──
-async function loadFromSheets(sheetId) {
-  let json = null;
-  let usedName = '';
-  let lastErr = '';
+// ── PARSE CURRENCY: "R$ 1.234,56" → 1234.56 ──
+const parseCurrency = v => {
+  if (v === null || v === undefined || v === '') return 0;
+  if (typeof v === 'number') return v;
+  const s = String(v).replace(/R\$\s*/g, '').trim();
+  const cleaned = s.replace(/\./g, '').replace(',', '.');
+  return parseFloat(cleaned) || 0;
+};
 
-  // Helper to fetch and parse a gviz URL
-  const tryFetch = async (url, label) => {
-    const res = await fetch(url);
-    const text = await res.text();
-    const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);/);
-    if (!match) throw new Error(`Resposta inválida para "${label}"`);
-    const parsed = JSON.parse(match[1]);
-    if (parsed.status === 'error') throw new Error(`"${label}": ${parsed.errors?.[0]?.message||'erro'}`);
-    if (!parsed.table?.rows?.length) throw new Error(`"${label}" sem dados`);
-    return parsed;
-  };
-
-  // 1) Try by gid first (most reliable — targets exact tab)
-  const gid = sheetId === DEFAULT_SHEET_ID ? DEFAULT_GID : null;
-  if (gid) {
-    try {
-      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
-      json = await tryFetch(url, `gid=${gid}`);
-      usedName = `gid:${gid}`;
-    } catch(e) { lastErr = e.message; }
+// ── PARSE DATE: dd/mm/yyyy, Date(...) or ISO ──
+const parseDateBR = v => {
+  if (!v && v !== 0) return null;
+  if (v instanceof Date) return v;
+  const s = String(v).trim();
+  const m = s.match(/Date\((\d+),(\d+),(\d+)\)/);
+  if (m) return new Date(+m[1], +m[2], +m[3]);
+  const br = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (br) {
+    const year = br[3].length === 2 ? 2000 + +br[3] : +br[3];
+    return new Date(year, +br[2] - 1, +br[1]);
   }
+  if (!isNaN(Number(s)) && s.length > 4) return new Date(+s);
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+};
 
-  // 2) Try by common sheet name variations
-  if (!json) {
-    const sheetNames = [
-      'Empréstimos','Emprestimos','emprestimos','Empréstimo','Emprestimo',
-      'EMPRÉSTIMOS','EMPRESTIMOS','Contratos','contratos','Sheet1','Sheet2','Planilha1','Dados'
-    ];
-    for (const name of sheetNames) {
-      try {
-        const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`;
-        json = await tryFetch(url, name);
-        usedName = name;
-        break;
-      } catch(e) { lastErr = e.message; }
-    }
-  }
-
-  // 3) Try default (no sheet param — first visible tab)
-  if (!json) {
-    try {
-      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
-      json = await tryFetch(url, 'aba padrão');
-      usedName = 'aba padrão';
-    } catch(e) { lastErr = e.message; }
-  }
-
-  if (!json) throw new Error(`Não foi possível ler a planilha. Verifique se está compartilhada publicamente (Compartilhar → Qualquer pessoa com o link → Leitor). Último erro: ${lastErr}`);
-
-  // ── Sua planilha tem 3 linhas antes dos dados reais:
-  //   Linha 1: título mesclado "GESTÃO DE EMPRÉSTIMOS..."
-  //   Linha 2: instrução mesclada
-  //   Linha 3: cabeçalhos reais (ID Empréstimo, ID Cliente, Nome Cliente...)
-  //   Linha 4+: dados
-  //
-  // O gviz lê a linha 1 como cols.labels e as demais como rows.
-  // Então row[0] = linha 2 (instrução), row[1] = linha 3 (cabeçalhos reais), row[2+] = dados.
-
-  const colMap = {
-    'ID Empréstimo':              'id_emp',
-    'ID Cliente':                 'id_cliente',
-    'Nome Cliente (auto)':        'nome',
-    'CPF (auto)':                 'cpf',
-    'Telefone (auto)':            'telefone',
-    'Valor Emprestado (R$)':      'valor',
-    'Data do Empréstimo':         'data_inicio',
-    'Taxa Juros (% a.m.)':        'taxa',
-    'Prazo (meses)':              'prazo',
-    'Venc. Original':             'venc_original',
-    'Tipo Juros':                 'tipo_juros',
-    'Juros Total (R$)':           'juros_total',
-    'Valor Total Devido (R$)':    'valor_total',
-    'Total Pago (R$)':            'total_pago',
-    'Saldo Restante (R$)':        'saldo',
-    'Juros Próx. Mês (R$)':       'juros_prox',
-    'Parcelas Pagas':             'parcelas',
-    'Status':                     'status_raw',
-    'Próximo Vencimento (Auto)':  'vencimento_raw',
-    'Observações':                'obs',
-  };
-  const realKeys = Object.keys(colMap).map(k => k.toLowerCase());
-
-  // Helper: given an array of cell values, does it look like the real header row?
-  const isHeaderRow = cells =>
-    cells.some(v => realKeys.some(k => String(v||'').toLowerCase().includes(k.slice(0,10))));
-
-  // Flatten all rows (including the gviz "cols" row which came from row 1)
-  // into a single list so we can find the real header row regardless of offset
-  const allRows = json.table.rows.map(r => r.c.map(cell => cell?.v ?? null));
-
-  // Find the row index that contains the real headers
-  let headerIdx = -1;
-  for (let i = 0; i < Math.min(6, allRows.length); i++) {
-    if (isHeaderRow(allRows[i])) { headerIdx = i; break; }
-  }
-
-  // Also check the gviz cols labels themselves
-  const gvizColLabels = json.table.cols.map(c => (c.label||'').toString());
-  let cols, dataRows;
-
-  if (isHeaderRow(gvizColLabels)) {
-    // gviz correctly picked up the header row
-    cols = gvizColLabels;
-    dataRows = allRows;
-  } else if (headerIdx >= 0) {
-    // Real headers are inside rows — use them, data starts after
-    cols = allRows[headerIdx].map(v => String(v||'').trim());
-    dataRows = allRows.slice(headerIdx + 1);
-  } else {
-    // Last resort: use gviz cols as-is
-    cols = gvizColLabels;
-    dataRows = allRows;
-  }
-
-  // Debug
-  const debugEl = document.getElementById('debugInfo');
-  if (debugEl) {
-    const mappedCols = cols.map(c => colMap[c] ? `<span style="color:#00e676">${c}</span>` : `<span style="color:#4d6a85">${c||'—'}</span>`);
-    debugEl.innerHTML = `<strong>✅ Aba:</strong> "${usedName}" &nbsp;|&nbsp; <strong>Linhas de dados:</strong> ${dataRows.length} &nbsp;|&nbsp; <strong>Colunas mapeadas:</strong> ${mappedCols.join(', ')}`;
-    debugEl.style.display = 'block';
-  }
-
+// ── NORMALIZE ROW from Apps Script JSON ──
+function normalizeRow(raw) {
   const today = new Date(); today.setHours(0,0,0,0);
 
-  return dataRows.map(cells => {
-    const obj = {};
-    cols.forEach((col, i) => {
-      const key = colMap[col.trim()] || null;
-      if (key) obj[key] = cells[i] ?? null;
-    });
+  const nome = String(raw['Nome Cliente (auto)'] || '').trim();
+  if (!nome || nome === 'null' || nome === '') return null;
 
-    // Skip rows without a name or contract id
-    const nome = String(obj.nome || '').trim();
-    if (!nome || nome === 'null') return null;
+  const id_emp = String(raw['ID Empréstimo'] || '').trim();
+  const valor  = parseCurrency(raw['Valor Emprestado (R$)']);
+  if (!id_emp && valor === 0) return null; // linha vazia
 
-    obj.nome   = nome;
+  const taxa       = parseCurrency(raw['Taxa Juros (% a.m.)']);
+  const juros      = parseCurrency(raw['Juros Total (R$)']) || (valor * taxa / 100);
+  const saldo      = parseCurrency(raw['Saldo Restante (R$)']);
+  const juros_prox = parseCurrency(raw['Juros Próx. Mês (R$)']);
+  const total_pago = parseCurrency(raw['Total Pago (R$)']);
+  const valor_total= parseCurrency(raw['Valor Total Devido (R$)']);
 
-    // Parse currency: handles both number and "R$ 1.234,56" / "1234.56" formats
-    const parseCurrency = v => {
-      if (v === null || v === undefined || v === '') return 0;
-      if (typeof v === 'number') return v;
-      const s = String(v).replace(/R\$\s*/g, '').trim();
-      // Brazilian format: 1.234,56 → 1234.56
-      const cleaned = s.replace(/\./g, '').replace(',', '.');
-      return parseFloat(cleaned) || 0;
-    };
+  const vencimento  = parseDateBR(raw['Próximo Vencimento (Auto)']) || parseDateBR(raw['Venc. Original']) || new Date();
+  const data_inicio = parseDateBR(raw['Data do Empréstimo']) || new Date();
 
-    obj.valor  = parseCurrency(obj.valor);
-    obj.taxa   = parseCurrency(obj.taxa);
-    obj.juros  = parseCurrency(obj.juros_total) || (obj.valor * obj.taxa / 100);
-    obj.saldo  = parseCurrency(obj.saldo);
-    obj.juros_prox = parseCurrency(obj.juros_prox);
-    obj.total_pago = parseCurrency(obj.total_pago);
+  const vencMidnight = new Date(vencimento); vencMidnight.setHours(0,0,0,0);
+  const diffMs = today - vencMidnight;
+  let atraso_dias = diffMs > 0 ? Math.floor(diffMs / 86400000) : 0;
 
-    // Parse dates — gviz returns dd/mm/yyyy strings or Date(...) objects
-    const parseDateBR = v => {
-      if (!v && v !== 0) return null;
-      if (v instanceof Date) return v;
-      const s = String(v).trim();
-      // gviz Date(...) format
-      const m = s.match(/Date\((\d+),(\d+),(\d+)\)/);
-      if (m) return new Date(+m[1], +m[2], +m[3]);
-      // dd/mm/yyyy or dd/mm/yy
-      const br = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
-      if (br) {
-        const year = br[3].length === 2 ? 2000 + +br[3] : +br[3];
-        return new Date(year, +br[2] - 1, +br[1]);
-      }
-      // ISO or timestamp
-      if (!isNaN(Number(s)) && s.length > 4) return new Date(+s);
-      const d = new Date(s);
-      return isNaN(d.getTime()) ? null : d;
-    };
+  const statusRaw = String(raw['Status'] || '').toLowerCase();
+  let status;
+  if (statusRaw.includes('quit') || statusRaw.includes('pago') || statusRaw.includes('encerr') || raw['Status']?.includes('✅')) {
+    status = 'quitado'; atraso_dias = 0;
+  } else if (atraso_dias > 0 || statusRaw.includes('atras') || statusRaw.includes('inadim') || raw['Status']?.includes('🔴')) {
+    status = 'atrasado';
+  } else {
+    status = 'ativo';
+  }
 
-    const vencDate = parseDateBR(obj.vencimento_raw) || parseDateBR(obj.venc_original) || new Date();
-    obj.vencimento  = vencDate;
-    obj.data_inicio = parseDateBR(obj.data_inicio) || new Date();
-
-    const vencMidnight = new Date(vencDate); vencMidnight.setHours(0,0,0,0);
-    const diffMs = today - vencMidnight;
-    obj.atraso_dias = diffMs > 0 ? Math.floor(diffMs / 86400000) : 0;
-
-    // Status: handle emoji-based values from the spreadsheet
-    // 🟢 Em Dia / 🔴 Atrasado / ✅ Quitado / 🟡 Pendente etc.
-    const sl = String(obj.status_raw || '').toLowerCase();
-    const hasEmoji = s => /[\u{1F300}-\u{1FFFF}]/u.test(String(obj.status_raw || ''));
-    if (sl.includes('quit') || sl.includes('pago') || sl.includes('encerr') || sl.includes('✅') || obj.status_raw?.includes('✅')) {
-      obj.status = 'quitado'; obj.atraso_dias = 0;
-    } else if (obj.atraso_dias > 0 || sl.includes('atras') || sl.includes('inadim') || sl.includes('atraso') || obj.status_raw?.includes('🔴')) {
-      obj.status = 'atrasado';
-    } else {
-      obj.status = 'ativo'; // "Em Dia", "🟢 Em Dia", "Ativo" etc.
-    }
-
-    // Skip rows that have no real value (empty filler rows in the sheet)
-    if (obj.valor === 0 && !obj.id_emp) return null;
-
-    return obj;
-  }).filter(Boolean);
+  return {
+    id_emp, nome,
+    cpf:      raw['CPF (auto)'] || '',
+    telefone: raw['Telefone (auto)'] || '',
+    tipo_juros: raw['Tipo Juros'] || '',
+    obs:      raw['Observações'] || '',
+    valor, taxa, juros, saldo, juros_prox, total_pago, valor_total,
+    vencimento, data_inicio, atraso_dias, status,
+    status_raw: raw['Status'] || '',
+  };
 }
 
+// ── LOAD DATA via Apps Script proxy ──
 async function loadData() {
   document.getElementById('loadingOverlay').classList.remove('hidden');
+  const debugEl = document.getElementById('debugInfo');
+
   try {
-    let contracts;
-    if (SHEET_ID) {
-      contracts = await loadFromSheets(SHEET_ID);
-      showStatus('success', '✅ Planilha conectada com sucesso! Dados atualizados.');
-    } else {
-      contracts = generateDemoData();
-      showStatus('info', '📋 Exibindo dados de demonstração. Configure sua planilha Google Sheets para ver dados reais.');
+    const res = await fetch(APPS_SCRIPT_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+
+    if (json.error) throw new Error(json.error);
+    if (!json.data || !Array.isArray(json.data)) throw new Error('Resposta inesperada do servidor');
+
+    const contracts = json.data.map(normalizeRow).filter(Boolean);
+
+    if (contracts.length === 0) throw new Error('Nenhum contrato encontrado na planilha. Verifique se há dados na aba Empréstimos.');
+
+    if (debugEl) {
+      debugEl.innerHTML = `<strong>✅ Apps Script:</strong> ${contracts.length} contratos carregados.`;
+      debugEl.style.display = 'block';
     }
+
     DATA.contracts = contracts;
     processData();
     renderAll();
+    showStatus('success', `✅ ${contracts.length} contratos carregados com sucesso!`);
+
   } catch(e) {
-    DATA.contracts = generateDemoData();
-    const debugEl = document.getElementById('debugInfo');
     if (debugEl) {
       debugEl.innerHTML = `<strong style="color:#ff4444">❌ ERRO:</strong> ${e.message}`;
       debugEl.style.display = 'block';
     }
-    showStatus('error', `⚠ Erro ao conectar com a planilha: ${e.message}.<br><small>👉 Certifique-se que a planilha está em: <b>Compartilhar → Qualquer pessoa com o link → Leitor</b>. Exibindo dados de demonstração.</small>`);
+    DATA.contracts = generateDemoData();
+    showStatus('error', `⚠ Erro: ${e.message}. Exibindo dados de demonstração.`);
     processData();
     renderAll();
   }
+
   document.getElementById('lastUpdate').textContent = 'Atualizado: ' + new Date().toLocaleTimeString('pt-BR');
   document.getElementById('loadingOverlay').classList.add('hidden');
 }
@@ -2133,15 +2010,10 @@ function showSection(id, tab) {
 // ── CONFIG ──
 function toggleConfig() {
   const el = document.getElementById('sheetsConfig');
-  el.style.display = el.style.display === 'none' ? 'flex' : 'none';
-  if (SHEET_ID) document.getElementById('sheetUrl').value = SHEET_ID;
+  if (el) el.style.display = el.style.display === 'none' ? 'flex' : 'none';
 }
 
 function saveConfig() {
-  const val = document.getElementById('sheetUrl').value.trim();
-  const match = val.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  SHEET_ID = match ? match[1] : val;
-  localStorage.setItem('sheetId', SHEET_ID);
   document.getElementById('sheetsConfig').style.display = 'none';
   loadData();
 }
