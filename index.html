@@ -953,7 +953,8 @@ function waPreview(tid,nome){
 function waEnviar(tid){
   const tel=(document.getElementById(tid+'_tel')?.value||'').replace(/\D/g,'');
   const msg=document.getElementById(tid+'_prev')?.value||'';
-  window.open(tel?`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+  const url=tel?`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url,'_whatsapp_tab');
 }
 
 function waCopy(tid){
