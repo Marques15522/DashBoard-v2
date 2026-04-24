@@ -274,6 +274,71 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .tpl-btn-cancel{background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer;}
 .wa-tpl-edit-btn{font-size:0.55rem;padding:4px 12px;border-radius:20px;border:1px solid rgba(201,146,42,0.3);color:var(--gold2);background:rgba(201,146,42,0.07);cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:0.06em;transition:all 0.2s;margin-left:auto;}
 .wa-tpl-edit-btn:hover{background:rgba(201,146,42,0.15);}
+
+/* ── PASTA DE CLIENTES ── */
+.pasta-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.pasta-search{background:var(--s2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:8px 14px;outline:none;width:240px;transition:border-color 0.2s;}
+.pasta-search:focus{border-color:var(--gold);}
+.pasta-btn-new{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:8px;padding:9px 18px;font-family:'DM Mono',monospace;font-size:0.62rem;font-weight:700;cursor:pointer;letter-spacing:0.08em;}
+.pasta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:20px;}
+.pasta-card{background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;transition:all 0.2s;position:relative;}
+.pasta-card:hover{border-color:var(--gold);transform:translateY(-2px);}
+.pasta-card-avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:#07090e;margin-bottom:10px;overflow:hidden;flex-shrink:0;}
+.pasta-card-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.pasta-card-name{font-size:0.75rem;color:var(--text);font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pasta-card-sub{font-size:0.57rem;color:var(--muted);margin-bottom:8px;}
+.pasta-card-tags{display:flex;gap:4px;flex-wrap:wrap;}
+.pasta-tag{font-size:0.46rem;padding:2px 6px;border-radius:4px;border:1px solid var(--border2);color:var(--muted);}
+.pasta-tag.ok{color:var(--green);border-color:rgba(6,214,160,0.3);background:rgba(6,214,160,0.06);}
+.pasta-tag.warn{color:var(--gold2);border-color:rgba(240,180,41,0.3);background:rgba(240,180,41,0.06);}
+.pasta-del-btn{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted2);cursor:pointer;font-size:0.75rem;padding:2px 5px;border-radius:4px;transition:all 0.2s;opacity:0;}
+.pasta-card:hover .pasta-del-btn{opacity:1;}
+.pasta-del-btn:hover{color:var(--red);background:rgba(239,71,111,0.1);}
+.pasta-empty{text-align:center;padding:48px 20px;color:var(--muted);font-size:0.68rem;}
+
+/* MODAL PASTA */
+.pasta-modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,8,18,0.9);z-index:1002;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px;}
+.pasta-modal-overlay.open{display:flex;}
+.pasta-modal{background:var(--s1);border:1px solid var(--border);border-radius:18px;width:min(780px,100%);padding:0;overflow:hidden;}
+.pasta-modal-top{background:linear-gradient(135deg,var(--s2),var(--s3));padding:24px 28px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--border);}
+.pasta-modal-avatar-wrap{position:relative;width:72px;height:72px;flex-shrink:0;}
+.pasta-modal-avatar{width:72px;height:72px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#07090e;overflow:hidden;cursor:pointer;border:2px solid var(--border2);}
+.pasta-modal-avatar img{width:100%;height:100%;object-fit:cover;}
+.pasta-modal-avatar-btn{position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:var(--gold);border:2px solid var(--s1);display:flex;align-items:center;justify-content:center;font-size:0.6rem;cursor:pointer;}
+.pasta-modal-title-wrap{flex:1;}
+.pasta-modal-name{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--text);letter-spacing:0.04em;}
+.pasta-modal-sub{font-size:0.6rem;color:var(--muted);margin-top:2px;}
+.pasta-modal-body{padding:24px 28px;}
+.pasta-section{margin-bottom:22px;}
+.pasta-section-title{font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.2em;color:var(--gold);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.pasta-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.pasta-form-grid.cols3{grid-template-columns:1fr 1fr 1fr;}
+.pasta-field{display:flex;flex-direction:column;gap:4px;}
+.pasta-field.full{grid-column:1/-1;}
+.pasta-label{font-size:0.54rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;}
+.pasta-input{background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:8px 11px;outline:none;transition:border-color 0.2s;width:100%;}
+.pasta-input:focus{border-color:var(--gold);}
+.pasta-textarea{background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:8px 11px;outline:none;resize:vertical;min-height:60px;width:100%;transition:border-color 0.2s;}
+.pasta-textarea:focus{border-color:var(--gold);}
+
+/* UPLOAD BOXES */
+.pasta-uploads{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
+.pasta-upload-box{background:var(--s2);border:1px dashed var(--border2);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+.pasta-upload-box:hover{border-color:var(--gold);background:rgba(201,146,42,0.04);}
+.pasta-upload-box.has-file{border-style:solid;border-color:var(--green);}
+.pasta-upload-icon{font-size:1.4rem;}
+.pasta-upload-lbl{font-size:0.55rem;color:var(--muted);line-height:1.4;}
+.pasta-upload-name{font-size:0.52rem;color:var(--green);word-break:break-all;margin-top:2px;}
+.pasta-upload-preview{width:100%;height:70px;object-fit:cover;border-radius:6px;margin-bottom:4px;}
+.pasta-upload-pdf{display:flex;align-items:center;gap:5px;background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.2);border-radius:6px;padding:5px 8px;font-size:0.52rem;color:var(--red);}
+.pasta-upload-input{display:none;}
+.pasta-upload-clear{position:absolute;top:5px;right:5px;background:rgba(239,71,111,0.15);border:none;color:var(--red);border-radius:50%;width:18px;height:18px;font-size:0.6rem;cursor:pointer;display:none;align-items:center;justify-content:center;}
+.pasta-upload-box.has-file .pasta-upload-clear{display:flex;}
+
+/* FOOTER MODAL */
+.pasta-modal-footer{padding:16px 28px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;background:var(--s2);}
+.pasta-btn-save{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:8px;padding:10px 28px;font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:700;cursor:pointer;letter-spacing:0.08em;}
+.pasta-btn-cancel{background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:10px 18px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -413,6 +478,25 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
 <!-- CLIENTES -->
 <div id="tab-clientes" class="tab-panel">
+
+  <!-- PASTA DE CLIENTES -->
+  <div class="section-label">📁 PASTA DE CLIENTES</div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="pasta-header">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:0.85rem;letter-spacing:0.1em;color:var(--text)">Fichas Cadastrais</div>
+        <div style="font-size:0.57rem;color:var(--muted);margin-top:2px">Dados pessoais, documentos e arquivos de cada cliente</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input class="pasta-search" id="pasta-search" type="text" placeholder="🔍 Buscar cliente..." oninput="pastaFiltrar(this.value)">
+        <button class="pasta-btn-new" onclick="pastaNovoModal()">＋ Nova Ficha</button>
+      </div>
+    </div>
+    <div class="pasta-grid" id="pasta-grid">
+      <div class="pasta-empty" id="pasta-empty">Nenhuma ficha cadastrada ainda.<br><br>Clique em <strong>+ Nova Ficha</strong> para começar.</div>
+    </div>
+  </div>
+
   <div class="section-label">PERFIL DA BASE DE CLIENTES</div>
   <div class="grid-4">
     <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Clientes Ativos</div><div class="kpi-val" id="cli-ativos-n" style="color:var(--green)">—</div><div class="kpi-sub">com contrato aberto</div></div>
@@ -1544,6 +1628,136 @@ function simPDF(){
   </div>
 
 </div>
+
+<!-- MODAL PASTA DE CLIENTES -->
+<div class="pasta-modal-overlay" id="pasta-modal-overlay" onclick="if(event.target===this)pastaModalClose()">
+  <div class="pasta-modal">
+    <div class="pasta-modal-top">
+      <div class="pasta-modal-avatar-wrap">
+        <div class="pasta-modal-avatar" id="pasta-av-preview" onclick="document.getElementById('pasta-foto-input').click()">
+          <span id="pasta-av-ini">?</span>
+        </div>
+        <div class="pasta-modal-avatar-btn" onclick="document.getElementById('pasta-foto-input').click()">📷</div>
+        <input type="file" id="pasta-foto-input" accept="image/*" class="pasta-upload-input" onchange="pastaFotoChange(this)">
+      </div>
+      <div class="pasta-modal-title-wrap">
+        <div class="pasta-modal-name" id="pasta-modal-title">Nova Ficha</div>
+        <div class="pasta-modal-sub">Preencha os dados do cliente. Tudo fica salvo localmente no seu navegador.</div>
+      </div>
+    </div>
+    <div class="pasta-modal-body">
+
+      <!-- DADOS PESSOAIS -->
+      <div class="pasta-section">
+        <div class="pasta-section-title">👤 DADOS PESSOAIS</div>
+        <div class="pasta-form-grid">
+          <div class="pasta-field full"><div class="pasta-label">Nome Completo *</div><input class="pasta-input" id="pf-nome" type="text" placeholder="Nome completo" oninput="pastaAtualizarTitulo()"></div>
+          <div class="pasta-field"><div class="pasta-label">CPF</div><input class="pasta-input" id="pf-cpf" type="text" placeholder="000.000.000-00" maxlength="14"></div>
+          <div class="pasta-field"><div class="pasta-label">RG</div><input class="pasta-input" id="pf-rg" type="text" placeholder="00.000.000-0"></div>
+          <div class="pasta-field"><div class="pasta-label">Idade</div><input class="pasta-input" id="pf-idade" type="number" placeholder="30" min="18" max="99"></div>
+          <div class="pasta-field"><div class="pasta-label">Data de Nascimento</div><input class="pasta-input" id="pf-nasc" type="date"></div>
+          <div class="pasta-field"><div class="pasta-label">Telefone / WhatsApp</div><input class="pasta-input" id="pf-tel" type="text" placeholder="(00) 00000-0000"></div>
+          <div class="pasta-field"><div class="pasta-label">E-mail</div><input class="pasta-input" id="pf-email" type="email" placeholder="email@exemplo.com"></div>
+        </div>
+      </div>
+
+      <!-- ENDEREÇO -->
+      <div class="pasta-section">
+        <div class="pasta-section-title">🏠 ENDEREÇO RESIDENCIAL</div>
+        <div class="pasta-form-grid">
+          <div class="pasta-field full"><div class="pasta-label">Endereço Completo</div><input class="pasta-input" id="pf-end" type="text" placeholder="Rua, número, bairro"></div>
+          <div class="pasta-field"><div class="pasta-label">Cidade</div><input class="pasta-input" id="pf-cidade" type="text" placeholder="Cidade"></div>
+          <div class="pasta-field"><div class="pasta-label">Estado</div><input class="pasta-input" id="pf-estado" type="text" placeholder="SP" maxlength="2"></div>
+          <div class="pasta-field"><div class="pasta-label">CEP</div><input class="pasta-input" id="pf-cep" type="text" placeholder="00000-000" maxlength="9"></div>
+        </div>
+      </div>
+
+      <!-- RENDA / TRABALHO -->
+      <div class="pasta-section">
+        <div class="pasta-section-title">💼 RENDA & TRABALHO</div>
+        <div class="pasta-form-grid">
+          <div class="pasta-field">
+            <div class="pasta-label">Tipo de Ocupação</div>
+            <select class="pasta-input" id="pf-ocup" onchange="pastaOcupChange()">
+              <option value="">Selecione...</option>
+              <option value="clt">CLT / Empregado</option>
+              <option value="autonomo">Autônomo / Freelancer</option>
+              <option value="empresario">Empresário / Dono de empresa</option>
+              <option value="aposentado">Aposentado / Pensionista</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+          <div class="pasta-field"><div class="pasta-label">Empresa / Empregador</div><input class="pasta-input" id="pf-empresa" type="text" placeholder="Nome da empresa"></div>
+          <div class="pasta-field" id="pf-nome-empresa-wrap" style="display:none"><div class="pasta-label">Nome da Empresa (proprietário)</div><input class="pasta-input" id="pf-nome-empresa" type="text" placeholder="Razão social ou nome fantasia"></div>
+          <div class="pasta-field"><div class="pasta-label">Renda / Faturamento Mensal (R$)</div><input class="pasta-input" id="pf-renda" type="number" placeholder="0,00"></div>
+          <div class="pasta-field"><div class="pasta-label">Cargo / Função</div><input class="pasta-input" id="pf-cargo" type="text" placeholder="Ex: Gerente, Sócio..."></div>
+          <div class="pasta-field full"><div class="pasta-label">Observações</div><textarea class="pasta-textarea" id="pf-obs" placeholder="Informações adicionais sobre o cliente..."></textarea></div>
+        </div>
+      </div>
+
+      <!-- DOCUMENTOS & ARQUIVOS -->
+      <div class="pasta-section">
+        <div class="pasta-section-title">📎 DOCUMENTOS & ARQUIVOS</div>
+        <div class="pasta-uploads">
+
+          <div class="pasta-upload-box" id="box-rg-f" onclick="document.getElementById('inp-rg-f').click()">
+            <input type="file" id="inp-rg-f" accept="image/*,.pdf" class="pasta-upload-input" onchange="pastaArqChange('rg-f',this)">
+            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('rg-f')">✕</button>
+            <div class="pasta-upload-icon">🪪</div>
+            <div class="pasta-upload-lbl">RG — Frente<br><span style="font-size:0.47rem;color:var(--muted2)">imagem ou PDF</span></div>
+            <div class="pasta-upload-name" id="nome-rg-f"></div>
+          </div>
+
+          <div class="pasta-upload-box" id="box-rg-v" onclick="document.getElementById('inp-rg-v').click()">
+            <input type="file" id="inp-rg-v" accept="image/*,.pdf" class="pasta-upload-input" onchange="pastaArqChange('rg-v',this)">
+            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('rg-v')">✕</button>
+            <div class="pasta-upload-icon">🪪</div>
+            <div class="pasta-upload-lbl">RG — Verso<br><span style="font-size:0.47rem;color:var(--muted2)">imagem ou PDF</span></div>
+            <div class="pasta-upload-name" id="nome-rg-v"></div>
+          </div>
+
+          <div class="pasta-upload-box" id="box-holerite" onclick="document.getElementById('inp-holerite').click()">
+            <input type="file" id="inp-holerite" accept="image/*,.pdf" class="pasta-upload-input" onchange="pastaArqChange('holerite',this)">
+            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('holerite')">✕</button>
+            <div class="pasta-upload-icon">📄</div>
+            <div class="pasta-upload-lbl">Holerite / Extrato<br><span style="font-size:0.47rem;color:var(--muted2)">comprovante de renda</span></div>
+            <div class="pasta-upload-name" id="nome-holerite"></div>
+          </div>
+
+          <div class="pasta-upload-box" id="box-comp-end" onclick="document.getElementById('inp-comp-end').click()">
+            <input type="file" id="inp-comp-end" accept="image/*,.pdf" class="pasta-upload-input" onchange="pastaArqChange('comp-end',this)">
+            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('comp-end')">✕</button>
+            <div class="pasta-upload-icon">📮</div>
+            <div class="pasta-upload-lbl">Comprovante de Endereço<br><span style="font-size:0.47rem;color:var(--muted2)">conta, boleto, etc.</span></div>
+            <div class="pasta-upload-name" id="nome-comp-end"></div>
+          </div>
+
+          <div class="pasta-upload-box" id="box-foto-casa" onclick="document.getElementById('inp-foto-casa').click()">
+            <input type="file" id="inp-foto-casa" accept="image/*" class="pasta-upload-input" onchange="pastaArqChange('foto-casa',this)">
+            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('foto-casa')">✕</button>
+            <div class="pasta-upload-icon">🏠</div>
+            <div class="pasta-upload-lbl">Foto da Casa<br><span style="font-size:0.47rem;color:var(--muted2)">frente da residência</span></div>
+            <div class="pasta-upload-name" id="nome-foto-casa"></div>
+          </div>
+
+          <div class="pasta-upload-box" id="box-foto-empresa" onclick="document.getElementById('inp-foto-empresa').click()">
+            <input type="file" id="inp-foto-empresa" accept="image/*" class="pasta-upload-input" onchange="pastaArqChange('foto-empresa',this)">
+            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('foto-empresa')">✕</button>
+            <div class="pasta-upload-icon">🏢</div>
+            <div class="pasta-upload-lbl">Foto da Empresa<br><span style="font-size:0.47rem;color:var(--muted2)">frente do estabelecimento</span></div>
+            <div class="pasta-upload-name" id="nome-foto-empresa"></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    <div class="pasta-modal-footer">
+      <button class="pasta-btn-cancel" onclick="pastaModalClose()">Cancelar</button>
+      <button class="pasta-btn-save" onclick="pastaSalvar()">💾 SALVAR FICHA</button>
+    </div>
+  </div>
+</div>
 </body></html>`;
   const w=window.open('','_blank');
   w.document.write(html);
@@ -1733,6 +1947,236 @@ async function loadData(){
 }
 loadData();
 setInterval(loadData,15*60*1000);
+
+// ════════════════════════════════════════════════════════
+// PASTA DE CLIENTES
+// ════════════════════════════════════════════════════════
+const PASTA_FIELDS = ['nome','cpf','rg','idade','nasc','tel','email','end','cidade','estado','cep','ocup','empresa','nome-empresa','renda','cargo','obs'];
+const PASTA_ARQUIVOS = ['rg-f','rg-v','holerite','comp-end','foto-casa','foto-empresa','foto-perfil'];
+let _pastas = {};
+let _pastaEditId = null;
+let _pastaArqs = {}; // arquivos temporários durante edição
+let _pastaFotoPerfil = null;
+
+function pastasCarregar(){
+  try{ const s=localStorage.getItem('pastas_clientes'); if(s) _pastas=JSON.parse(s); }catch(e){ _pastas={}; }
+}
+function pastasSalvarLocal(){
+  try{ localStorage.setItem('pastas_clientes', JSON.stringify(_pastas)); }catch(e){
+    alert('⚠️ Espaço de armazenamento cheio. Tente remover arquivos grandes (fotos/PDFs) de fichas antigas.');
+  }
+}
+pastasCarregar();
+
+function pastaRenderGrid(filtro=''){
+  const grid = document.getElementById('pasta-grid');
+  const empty = document.getElementById('pasta-empty');
+  const ids = Object.keys(_pastas).filter(id => {
+    if(!filtro) return true;
+    const p = _pastas[id];
+    return (p.nome||'').toLowerCase().includes(filtro.toLowerCase()) ||
+           (p.cpf||'').includes(filtro) ||
+           (p.empresa||'').toLowerCase().includes(filtro.toLowerCase());
+  });
+  if(!ids.length){
+    grid.innerHTML = '<div class="pasta-empty" id="pasta-empty">' + (filtro ? 'Nenhum cliente encontrado.' : 'Nenhuma ficha cadastrada ainda.<br><br>Clique em <strong>+ Nova Ficha</strong> para começar.') + '</div>';
+    return;
+  }
+  const cores = ['#c9922a','#4895ef','#06d6a0','#9b5de5','#ef476f','#e8b84b'];
+  grid.innerHTML = ids.map(id => {
+    const p = _pastas[id];
+    const ini = (p.nome||'?').trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const cor = cores[id.charCodeAt(0) % cores.length];
+    const avatar = p['foto-perfil']
+      ? `<img src="${p['foto-perfil']}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+      : `<span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:#07090e">${ini}</span>`;
+    const tags = [];
+    if(p.cpf) tags.push('<span class="pasta-tag ok">CPF</span>');
+    if(p['rg-f']||p['rg-v']) tags.push('<span class="pasta-tag ok">RG</span>');
+    if(p.holerite) tags.push('<span class="pasta-tag ok">Holerite</span>');
+    if(p['comp-end']) tags.push('<span class="pasta-tag ok">End.</span>');
+    if(p['foto-casa']) tags.push('<span class="pasta-tag">🏠</span>');
+    if(p['foto-empresa']) tags.push('<span class="pasta-tag">🏢</span>');
+    const sub = [p.ocup==='clt'?'CLT':p.ocup==='empresario'?'Empresário':p.ocup==='autonomo'?'Autônomo':p.ocup==='aposentado'?'Aposentado':p.ocup||'', p.empresa||p['nome-empresa']||''].filter(Boolean).join(' · ') || 'Sem ocupação cadastrada';
+    return `<div class="pasta-card" onclick="pastaAbrirModal('${id}')">
+      <button class="pasta-del-btn" onclick="event.stopPropagation();pastaExcluir('${id}')" title="Excluir ficha">🗑</button>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div class="pasta-card-avatar" style="background:${cor}">${avatar}</div>
+        <div style="min-width:0">
+          <div class="pasta-card-name">${p.nome||'Sem nome'}</div>
+          <div class="pasta-card-sub">${sub}</div>
+        </div>
+      </div>
+      <div class="pasta-card-tags">${tags.join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+function pastaFiltrar(v){ pastaRenderGrid(v); }
+
+function pastaNovoModal(){
+  _pastaEditId = null;
+  _pastaArqs = {};
+  _pastaFotoPerfil = null;
+  PASTA_FIELDS.forEach(f => { const el=document.getElementById('pf-'+f); if(el) el.value=''; });
+  PASTA_ARQUIVOS.forEach(k => pastaArqReset(k));
+  document.getElementById('pasta-av-ini').textContent = '?';
+  document.getElementById('pasta-av-preview').style.background = 'var(--gold)';
+  const img = document.getElementById('pasta-av-preview').querySelector('img');
+  if(img) img.remove();
+  document.getElementById('pasta-modal-title').textContent = 'Nova Ficha';
+  document.getElementById('pf-nome-empresa-wrap').style.display='none';
+  document.getElementById('pasta-modal-overlay').classList.add('open');
+}
+
+function pastaAbrirModal(id){
+  _pastaEditId = id;
+  _pastaArqs = {};
+  _pastaFotoPerfil = null;
+  const p = _pastas[id] || {};
+  PASTA_FIELDS.forEach(f => { const el=document.getElementById('pf-'+f); if(el) el.value=p[f]||''; });
+  // Arquivos
+  PASTA_ARQUIVOS.forEach(k => {
+    if(k==='foto-perfil') return;
+    pastaArqReset(k);
+    if(p[k]){ pastaArqPreviewFromData(k, p[k], p[k+'_nome']||k); }
+  });
+  // Foto perfil
+  const av = document.getElementById('pasta-av-preview');
+  av.querySelectorAll('img').forEach(i=>i.remove());
+  document.getElementById('pasta-av-ini').style.display='';
+  if(p['foto-perfil']){
+    _pastaFotoPerfil = p['foto-perfil'];
+    const img=document.createElement('img');img.src=p['foto-perfil'];img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%;position:absolute;inset:0;';
+    av.style.position='relative'; av.appendChild(img);
+    document.getElementById('pasta-av-ini').style.display='none';
+  }
+  document.getElementById('pasta-modal-title').textContent = p.nome||'Editar Ficha';
+  document.getElementById('pf-nome-empresa-wrap').style.display = p.ocup==='empresario'?'':'none';
+  document.getElementById('pasta-modal-overlay').classList.add('open');
+}
+
+function pastaModalClose(){
+  document.getElementById('pasta-modal-overlay').classList.remove('open');
+}
+
+function pastaAtualizarTitulo(){
+  const nome = document.getElementById('pf-nome').value||'Nova Ficha';
+  document.getElementById('pasta-modal-title').textContent = nome;
+  // atualiza iniciais no avatar
+  const ini = nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()||'?';
+  document.getElementById('pasta-av-ini').textContent = ini;
+}
+
+function pastaOcupChange(){
+  const v = document.getElementById('pf-ocup').value;
+  document.getElementById('pf-nome-empresa-wrap').style.display = v==='empresario' ? '' : 'none';
+}
+
+// ── FOTO DE PERFIL ──────────────────────────────────────
+function pastaFotoChange(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    _pastaFotoPerfil = e.target.result;
+    const av = document.getElementById('pasta-av-preview');
+    av.querySelectorAll('img').forEach(i=>i.remove());
+    const img=document.createElement('img');img.src=_pastaFotoPerfil;img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%;position:absolute;inset:0;';
+    av.style.position='relative'; av.appendChild(img);
+    document.getElementById('pasta-av-ini').style.display='none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── ARQUIVOS ─────────────────────────────────────────────
+function pastaArqChange(key, input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    _pastaArqs[key] = e.target.result;
+    _pastaArqs[key+'_nome'] = file.name;
+    pastaArqPreviewFromData(key, e.target.result, file.name);
+  };
+  reader.readAsDataURL(file);
+}
+
+function pastaArqPreviewFromData(key, data, nome){
+  const box = document.getElementById('box-'+key);
+  const nomeEl = document.getElementById('nome-'+key);
+  if(!box) return;
+  box.classList.add('has-file');
+  // Limpar conteúdo antigo (exceto input e clear btn)
+  box.querySelectorAll('.pasta-upload-preview, .pasta-upload-pdf, .pasta-upload-icon, .pasta-upload-lbl').forEach(e=>e.remove());
+  if(data && data.startsWith('data:image')){
+    const img = document.createElement('img');
+    img.src = data; img.className='pasta-upload-preview';
+    box.insertBefore(img, box.querySelector('.pasta-upload-clear').nextSibling);
+  } else {
+    const pdf = document.createElement('div');
+    pdf.className='pasta-upload-pdf'; pdf.innerHTML='📄 '+nome;
+    box.insertBefore(pdf, box.querySelector('.pasta-upload-clear').nextSibling);
+  }
+  if(nomeEl){ nomeEl.textContent = nome.length>22 ? nome.slice(0,20)+'…' : nome; }
+}
+
+function pastaArqReset(key){
+  const box = document.getElementById('box-'+key);
+  const nomeEl = document.getElementById('nome-'+key);
+  if(!box) return;
+  box.classList.remove('has-file');
+  box.querySelectorAll('.pasta-upload-preview, .pasta-upload-pdf').forEach(e=>e.remove());
+  if(nomeEl) nomeEl.textContent='';
+  // re-add icon and label based on key
+  const icons = {'rg-f':'🪪','rg-v':'🪪','holerite':'📄','comp-end':'📮','foto-casa':'🏠','foto-empresa':'🏢'};
+  const labels = {'rg-f':'RG — Frente','rg-v':'RG — Verso','holerite':'Holerite / Extrato','comp-end':'Comprovante de Endereço','foto-casa':'Foto da Casa','foto-empresa':'Foto da Empresa'};
+  const subs = {'rg-f':'imagem ou PDF','rg-v':'imagem ou PDF','holerite':'comprovante de renda','comp-end':'conta, boleto, etc.','foto-casa':'frente da residência','foto-empresa':'frente do estabelecimento'};
+  const clearBtn = box.querySelector('.pasta-upload-clear');
+  const iconEl = document.createElement('div'); iconEl.className='pasta-upload-icon'; iconEl.textContent=icons[key]||'📎';
+  const lblEl = document.createElement('div'); lblEl.className='pasta-upload-lbl'; lblEl.innerHTML=(labels[key]||key)+'<br><span style="font-size:0.47rem;color:var(--muted2)">'+(subs[key]||'')+'</span>';
+  box.appendChild(iconEl); box.appendChild(lblEl);
+  const input = box.querySelector('input[type=file]'); if(input) input.value='';
+}
+
+function pastaArqClear(key){
+  delete _pastaArqs[key]; delete _pastaArqs[key+'_nome'];
+  pastaArqReset(key);
+}
+
+// ── SALVAR ───────────────────────────────────────────────
+function pastaSalvar(){
+  const nome = document.getElementById('pf-nome').value.trim();
+  if(!nome){ alert('Informe o nome do cliente.'); return; }
+  const id = _pastaEditId || ('cli_' + Date.now());
+  const existing = _pastas[id] || {};
+  const dados = { ...existing };
+  PASTA_FIELDS.forEach(f => { dados[f] = document.getElementById('pf-'+f)?.value||''; });
+  // Arquivos: usa os novos se houver, senão mantém os existentes
+  PASTA_ARQUIVOS.forEach(k => {
+    if(k==='foto-perfil') return;
+    if(_pastaArqs[k] !== undefined){ dados[k]=_pastaArqs[k]; dados[k+'_nome']=_pastaArqs[k+'_nome']||''; }
+    // se não alterou, mantém o existing (já está em dados por causa do spread)
+  });
+  if(_pastaFotoPerfil) dados['foto-perfil'] = _pastaFotoPerfil;
+  _pastas[id] = dados;
+  pastasSalvarLocal();
+  pastaModalClose();
+  pastaRenderGrid(document.getElementById('pasta-search').value||'');
+  // feedback
+  const btn=document.querySelector('.pasta-btn-save');
+  if(btn){ const o=btn.textContent; btn.textContent='✅ SALVO!'; setTimeout(()=>btn.textContent=o,1800); }
+}
+
+function pastaExcluir(id){
+  const p=_pastas[id];
+  if(!confirm('Excluir a ficha de '+((p&&p.nome)||'este cliente')+'? Esta ação não pode ser desfeita.')) return;
+  delete _pastas[id];
+  pastasSalvarLocal();
+  pastaRenderGrid(document.getElementById('pasta-search').value||'');
+}
+
+// Render inicial
+pastaRenderGrid();
+
 </script>
 </body>
 </html>
