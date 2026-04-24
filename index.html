@@ -471,8 +471,8 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
           </select>
         </div>
         <div class="sim-field"><label class="sim-label">👤 Nome do Cliente <span style="color:var(--red)">*</span></label><input class="sim-input" id="sim-cliente" type="text" placeholder="Nome completo do cliente"></div>
-        <div class="sim-field"><label class="sim-label">🪪 CPF do Cliente <span style="color:var(--red)">*</span></label><input class="sim-input" id="sim-cpf" type="text" placeholder="000.000.000-00" maxlength="14"></div>
-        <div class="sim-field"><label class="sim-label">📞 Telefone do Cliente <span style="color:var(--red)">*</span></label><input class="sim-input" id="sim-tel" type="text" placeholder="(00) 00000-0000" required></div>
+        <div class="sim-field"><label class="sim-label">🪪 CPF do Cliente <span style="color:var(--muted);font-size:0.5rem">(opcional)</span></label><input class="sim-input" id="sim-cpf" type="text" placeholder="000.000.000-00" maxlength="14"></div>
+        <div class="sim-field"><label class="sim-label">📞 Telefone do Cliente <span style="color:var(--muted);font-size:0.5rem">(opcional)</span></label><input class="sim-input" id="sim-tel" type="text" placeholder="(00) 00000-0000" required></div>
         <div class="sim-field"><label class="sim-label">📅 Data de Início do Contrato</label><input class="sim-input" id="sim-inicio" type="date"></div>
         <button class="sim-btn-pdf" onclick="simPDF()">📄 Gerar Proposta para o Cliente</button>
       </div>
@@ -1337,8 +1337,6 @@ function simPDF(){
   const inicioRaw=document.getElementById('sim-inicio')?.value||'';
   if(!valor||!taxa||!prazo){alert('Preencha valor, taxa e prazo para gerar a proposta.');return;}
   if(!cliente.trim()||cliente==='Cliente'){alert('Informe o nome do cliente.');return;}
-  if(!cpf.trim()){alert('O CPF do cliente é obrigatório.');return;}
-  if(!tel.trim()){alert('O telefone do cliente é obrigatório.');return;}
   const taxaM=taxa/100;
   const jurosTotal=tipo==='simples'?valor*taxaM*prazo:valor*(Math.pow(1+taxaM,prazo)-1);
   const valorTotal=valor+jurosTotal;
@@ -1479,7 +1477,6 @@ function simPDF(){
     <div class="sum-item"><div class="sum-lbl">Modalidade</div><div class="sum-val">${tipo==='simples'?'Simples':'Composto'}</div></div>
     <div class="sum-item"><div class="sum-lbl">Total de Juros</div><div class="sum-val green">${fmtR(jurosTotal)}</div></div>
     <div class="sum-item"><div class="sum-lbl">Total a Pagar</div><div class="sum-val">${fmtR(valorTotal)}</div></div>
-    <div class="sum-item"><div class="sum-lbl">Custo Efetivo</div><div class="sum-val blue">${roi}%</div></div>
     <div class="sum-item"><div class="sum-lbl">Início</div><div class="sum-val">${fmtD(dataInicio)}</div></div>
   </div>
 
