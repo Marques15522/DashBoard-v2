@@ -204,7 +204,48 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .wa-btn-copy.copied{border-color:var(--green);color:var(--green);}
 .wa-empty{text-align:center;padding:40px;color:var(--muted);font-size:0.68rem;}
 
-/* ── BARRA DE PESQUISA ── */
+/* ── SIMULADOR ── */
+.sim-form{display:flex;flex-direction:column;gap:12px;}
+.sim-field{display:flex;flex-direction:column;gap:4px;}
+.sim-label{font-size:0.58rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;}
+.sim-input{background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.68rem;padding:9px 12px;outline:none;transition:border-color 0.2s;}
+.sim-input:focus{border-color:var(--gold);}
+.sim-btn-pdf{margin-top:8px;padding:11px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.62rem;font-weight:700;cursor:pointer;letter-spacing:0.08em;}
+.sim-results{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.sim-res-item{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;}
+.sim-res-lbl{font-size:0.52rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;}
+.sim-res-val{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;line-height:1;}
+.sim-table{width:100%;border-collapse:collapse;font-size:0.6rem;}
+.sim-table th{background:var(--s2);color:var(--muted);font-size:0.52rem;letter-spacing:0.08em;text-transform:uppercase;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);}
+.sim-table th:first-child{text-align:left;}
+.sim-table td{padding:8px 10px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;text-align:right;color:var(--text);}
+.sim-table td:first-child{text-align:left;color:var(--muted);}
+.sim-table tr:hover td{background:var(--s2);}
+.table-wrap{overflow-x:auto;}
+/* ── FLUXO 90d ── */
+.f90-venc-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.62rem;}
+.f90-venc-item:last-child{border-bottom:none;}
+.f90-semana-risco{background:var(--s2);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+/* ── HISTORICO COBRANÇA WA ── */
+.wa-hist-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.6rem;}
+.wa-hist-item:last-child{border-bottom:none;}
+.wa-hist-badge{font-size:0.48rem;padding:2px 7px;border-radius:10px;background:rgba(6,214,160,0.1);color:var(--green);border:1px solid rgba(6,214,160,0.2);white-space:nowrap;}
+/* ── MODAL PAGAMENTO ── */
+.pag-modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,8,18,0.88);z-index:1001;align-items:center;justify-content:center;}
+.pag-modal-overlay.open{display:flex;}
+.pag-modal{background:var(--s1);border:1px solid var(--border);border-radius:16px;width:min(440px,95vw);padding:28px;}
+.pag-modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--green);letter-spacing:0.06em;margin-bottom:4px;}
+.pag-modal-sub{font-size:0.58rem;color:var(--muted);margin-bottom:20px;}
+.pag-field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px;}
+.pag-label{font-size:0.55rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;}
+.pag-input{background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.68rem;padding:9px 12px;outline:none;}
+.pag-input:focus{border-color:var(--green);}
+.pag-modal-footer{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+.pag-btn-ok{background:linear-gradient(135deg,#06d6a0,#048a67);color:#fff;border:none;border-radius:8px;padding:9px 22px;font-family:'DM Mono',monospace;font-size:0.62rem;font-weight:700;cursor:pointer;letter-spacing:0.06em;}
+.pag-btn-cancel{background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer;}
+.wa-btn-pago{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.3);color:var(--green);border-radius:8px;padding:9px;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;letter-spacing:0.04em;transition:all 0.2s;}
+.wa-btn-pago:hover{background:rgba(6,214,160,0.2);}
+
 .wa-search-wrap{position:relative;margin-bottom:14px;}
 .wa-search-input{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:9px 12px 9px 36px;outline:none;box-sizing:border-box;transition:border-color 0.2s;}
 .wa-search-input:focus{border-color:var(--gold);}
@@ -286,13 +327,40 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="nav-tab" data-tab="clientes">👤 Clientes</div>
   <div class="nav-tab" data-tab="comparativo">📈 Comparativos</div>
   <div class="nav-tab" data-tab="agenda">📅 Agenda</div>
+  <div class="nav-tab" data-tab="simulador">🧮 Simulador</div>
+  <div class="nav-tab" data-tab="fluxo90">🔮 Fluxo 90d</div>
   <div class="nav-tab" data-tab="whatsapp">📱 WhatsApp</div>
 </div>
 
 <!-- VISÃO GERAL -->
 <div id="tab-visao" class="tab-panel active">
   <div id="alertasBanner"></div>
-  <div class="section-label">INDICADORES ESTRATÉGICOS — KPIs PRINCIPAIS</div>
+  <!-- NOTIFICAÇÃO VENCIMENTOS HOJE/AMANHÃ -->
+  <div id="notif-venc" style="display:none;background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.3);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;animation:fadeUp 0.4s ease">
+    <span style="font-size:1.2rem">🔔</span>
+    <div style="flex:1"><div id="notif-venc-texto" style="font-size:0.72rem;color:var(--red);font-weight:600"></div><div id="notif-venc-sub" style="font-size:0.58rem;color:var(--muted);margin-top:2px"></div></div>
+    <button onclick="document.getElementById('notif-venc').style.display='none'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem">✕</button>
+  </div>
+  <!-- META MENSAL -->
+  <div id="meta-bar-wrap" style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px;animation:fadeUp 0.4s ease">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div>
+        <div style="font-size:0.58rem;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:2px">🎯 Meta de Juros do Mês</div>
+        <div style="font-size:0.62rem;color:var(--muted2)" id="meta-desc">—</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input id="meta-input" type="number" placeholder="Ex: 1000" style="background:var(--s2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.62rem;padding:5px 10px;width:130px;outline:none" onchange="salvarMeta()">
+        <button onclick="salvarMeta()" style="background:rgba(201,146,42,0.12);border:1px solid rgba(201,146,42,0.3);color:var(--gold2);border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:0.58rem;cursor:pointer;letter-spacing:0.06em">DEFINIR</button>
+      </div>
+    </div>
+    <div style="background:var(--s2);border-radius:6px;height:8px;overflow:hidden">
+      <div id="meta-bar-fill" style="height:100%;border-radius:6px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width 1s ease;width:0%"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px">
+      <span style="font-size:0.55rem;color:var(--muted)" id="meta-realizado-txt">R$ 0 realizados</span>
+      <span style="font-size:0.55rem;color:var(--gold2)" id="meta-pct-txt">0%</span>
+    </div>
+  </div>
   <div class="grid-5">
     <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Carteira Ativa</div><div class="kpi-val" id="kpi-capital" style="color:var(--gold)">—</div><div class="kpi-sub" id="kpi-cap-sub">—</div></div>
     <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Lucro Previsto</div><div class="kpi-val" id="kpi-lucro" style="color:var(--green)">—</div><div class="kpi-sub">juros a receber</div></div>
@@ -386,6 +454,58 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="card"><div class="card-header"><div><div class="card-title">🏦 Capital a Recuperar</div><div class="card-desc">Capital e juros de contratos próximos do vencimento</div></div><div class="card-badge">ESTRATÉGIA</div></div><div id="capitalDisp"></div></div>
 </div>
 
+<!-- SIMULADOR -->
+<div id="tab-simulador" class="tab-panel">
+  <div class="section-label">SIMULADOR DE NOVO EMPRÉSTIMO</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">🧮 Parâmetros do Empréstimo</div><div class="card-desc">Simule antes de fechar o contrato</div></div><div class="card-badge">SIMULAÇÃO</div></div>
+      <div class="sim-form">
+        <div class="sim-field"><label class="sim-label">💰 Valor Emprestado (R$)</label><input class="sim-input" id="sim-valor" type="number" placeholder="5000" oninput="simCalc()"></div>
+        <div class="sim-field"><label class="sim-label">📈 Taxa de Juros (% a.m.)</label><input class="sim-input" id="sim-taxa" type="number" placeholder="10" step="0.1" oninput="simCalc()"></div>
+        <div class="sim-field"><label class="sim-label">📅 Prazo (meses)</label><input class="sim-input" id="sim-prazo" type="number" placeholder="3" oninput="simCalc()"></div>
+        <div class="sim-field"><label class="sim-label">⚙️ Tipo de Juros</label>
+          <select class="sim-input" id="sim-tipo" onchange="simCalc()">
+            <option value="simples">Simples</option>
+            <option value="composto">Composto</option>
+          </select>
+        </div>
+        <div class="sim-field"><label class="sim-label">👤 Nome do Cliente (opcional)</label><input class="sim-input" id="sim-cliente" type="text" placeholder="Para personalizar o relatório"></div>
+        <button class="sim-btn-pdf" onclick="simPDF()">📄 Gerar Relatório PDF</button>
+      </div>
+    </div>
+    <div class="card" id="sim-resultado" style="display:none">
+      <div class="card-header"><div><div class="card-title">📊 Resultado da Simulação</div><div class="card-desc">Projeção detalhada do contrato</div></div><div class="card-badge">RESULTADO</div></div>
+      <div class="sim-results" id="sim-results-content"></div>
+      <div class="chart-wrap" style="margin-top:16px"><canvas id="chartSim"></canvas></div>
+    </div>
+  </div>
+  <div class="card" id="sim-tabela-card" style="display:none">
+    <div class="card-header"><div><div class="card-title">📋 Tabela de Amortização</div><div class="card-desc">Evolução mês a mês do contrato</div></div><div class="card-badge">DETALHAMENTO</div></div>
+    <div class="table-wrap"><table class="sim-table"><thead><tr><th>Mês</th><th>Saldo Inicial</th><th>Juros</th><th>Amortização</th><th>Parcela</th><th>Saldo Final</th></tr></thead><tbody id="sim-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- FLUXO 90 DIAS -->
+<div id="tab-fluxo90" class="tab-panel">
+  <div class="section-label">PREVISÃO DE FLUXO — PRÓXIMOS 90 DIAS</div>
+  <div class="grid-3" id="fluxo90-kpis"></div>
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">📈 Linha do Tempo — Entradas Previstas</div><div class="card-desc">Juros a receber semana a semana nos próximos 90 dias</div></div><div class="card-badge">FLUXO</div></div>
+    <div class="chart-wrap xtall"><canvas id="chartFluxo90"></canvas></div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">⚠️ Concentração de Risco nos 90d</div><div class="card-desc">Semanas com maior exposição</div></div><div class="card-badge">RISCO</div></div>
+      <div id="fluxo90-risco"></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">📋 Vencimentos Detalhados</div><div class="card-desc">Todos os vencimentos nos próximos 90 dias</div></div><div class="card-badge">AGENDA</div></div>
+      <div id="fluxo90-lista"></div>
+    </div>
+  </div>
+</div>
+
 <!-- WHATSAPP -->
 <div id="tab-whatsapp" class="tab-panel">
   <div class="section-label">MENSAGENS WHATSAPP — ENVIO RÁPIDO</div>
@@ -411,6 +531,13 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="wa-cards" id="wa-cards">
     <div class="wa-empty">Aguardando dados...</div>
   </div>
+  <!-- HISTÓRICO DE COBRANÇAS -->
+  <div class="section-label" style="margin-top:28px">📋 HISTÓRICO DE COBRANÇAS ENVIADAS</div>
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">📋 Registro de Contatos</div><div class="card-desc">Última vez que cada cliente foi contatado via WhatsApp</div></div>
+    <button onclick="waHistLimpar()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:0.55rem;cursor:pointer">🗑️ Limpar</button></div>
+    <div id="wa-hist-list"><div style="color:var(--muted);font-size:0.65rem;padding:12px 0">Nenhum contato registrado ainda. Após enviar uma mensagem, o registro aparece aqui.</div></div>
+  </div>
 </div>
 
 <div style="text-align:right;margin-top:8px;font-size:0.57rem;color:var(--muted)">última atualização: <span id="last-update">—</span> · auto-refresh 15 min</div>
@@ -431,6 +558,24 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       <button class="tpl-btn-reset" onclick="tplReset()">🔄 Restaurar Padrão</button>
       <button class="tpl-btn-cancel" onclick="tplModalClose()">Cancelar</button>
       <button class="tpl-btn-save" onclick="tplSave()">💾 SALVAR MENSAGENS</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REGISTRAR PAGAMENTO -->
+<div class="pag-modal-overlay" id="pag-modal-overlay" onclick="if(event.target===this)pagModalClose()">
+  <div class="pag-modal">
+    <div class="pag-modal-title">✅ Registrar Pagamento</div>
+    <div class="pag-modal-sub" id="pag-modal-cliente">—</div>
+    <div class="pag-field"><label class="pag-label">💰 Valor Recebido (R$)</label><input class="pag-input" id="pag-valor" type="number" placeholder="0"></div>
+    <div class="pag-field"><label class="pag-label">📅 Data do Pagamento</label><input class="pag-input" id="pag-data" type="date"></div>
+    <div class="pag-field"><label class="pag-label">📝 Observação (opcional)</label><input class="pag-input" id="pag-obs" type="text" placeholder="Ex: Pix recebido"></div>
+    <div style="margin-top:12px;padding:10px;background:rgba(6,214,160,0.05);border:1px solid rgba(6,214,160,0.15);border-radius:8px;font-size:0.55rem;color:var(--muted);line-height:1.6">
+      ℹ️ O registro é salvo localmente no navegador como lembrete. Para atualizar a planilha, insira o pagamento manualmente na aba Pagamentos.
+    </div>
+    <div class="pag-modal-footer">
+      <button class="pag-btn-cancel" onclick="pagModalClose()">Cancelar</button>
+      <button class="pag-btn-ok" onclick="pagSalvar()">✅ REGISTRAR</button>
     </div>
   </div>
 </div>
@@ -765,6 +910,13 @@ function render(empRows,pagRows){
 
   // WhatsApp
   waRender(clientes, abertos, atrasado, hoje);
+
+  // NOVAS FEATURES
+  verificarVencimentos(abertos, hoje);
+  atualizarMetaBar(lucroReal);
+  renderFluxo90(abertos, hoje);
+  verificarConcentracao(clientes, totalCap, document.getElementById('alertasBanner'));
+  waHistRender();
 }
 
 // ── WHATSAPP ─────────────────────────────────────────────
@@ -960,6 +1112,7 @@ function waCard(c){
     <textarea class="wa-textarea" id="${tid}_prev">${tpls[def].txt}</textarea>
     <div class="wa-btns">
       <a class="wa-btn-send" href="#" onclick="waEnviar('${tid}');return false;"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> ABRIR WHATSAPP</a>
+      <button class="wa-btn-pago" onclick="pagModalOpen('${nomeSafe}')">✅ Pago</button>
       <button class="wa-btn-copy" id="${tid}_copy" onclick="waCopy('${tid}')">📋</button>
     </div>
   </div>
@@ -979,6 +1132,10 @@ function waEnviar(tid){
   const tel=(document.getElementById(tid+'_tel')?.value||'').replace(/\D/g,'');
   const msg=document.getElementById(tid+'_prev')?.value||'';
   const url=tel?`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`;
+  // Registra no histórico
+  const nome=tid.replace(/^wa_/,'').replace(/_/g,' ');
+  const cli=_waCli.find(c=>c.nome.replace(/[^a-zA-Z0-9]/g,'_')===tid.replace(/^wa_/,''));
+  if(cli) waHistRegistrar(cli.nome);
   if(_waTab && !_waTab.closed){
     _waTab.location.href=url;
     _waTab.focus();
@@ -1016,7 +1173,348 @@ function waRenderCards(){
   cont.innerHTML=lista.map(waCard).join('');
 }
 
-async function loadData(){
+// ════════════════════════════════════════════════════════
+// NOTIFICAÇÃO DE VENCIMENTOS HOJE / AMANHÃ
+// ════════════════════════════════════════════════════════
+function verificarVencimentos(abertos, hoje){
+  const amanha=new Date(hoje); amanha.setDate(hoje.getDate()+1);
+  const venceHoje=abertos.filter(e=>e.proxVenc&&e.proxVenc.toDateString()===hoje.toDateString());
+  const venceAmanha=abertos.filter(e=>e.proxVenc&&e.proxVenc.toDateString()===amanha.toDateString());
+  const atrasados=abertos.filter(e=>e.status==='atraso');
+  const notif=document.getElementById('notif-venc');
+  const texto=document.getElementById('notif-venc-texto');
+  const sub=document.getElementById('notif-venc-sub');
+  if(!notif) return;
+  const msgs=[];
+  if(venceHoje.length) msgs.push(`🔴 ${venceHoje.length} contrato(s) vencem HOJE`);
+  if(venceAmanha.length) msgs.push(`🟡 ${venceAmanha.length} contrato(s) vencem AMANHÃ`);
+  if(atrasados.length) msgs.push(`⚠️ ${atrasados.length} contrato(s) em atraso`);
+  if(msgs.length){
+    texto.textContent=msgs.join(' · ');
+    const nomes=[...venceHoje,...venceAmanha,...atrasados].map(e=>e.nome).filter((v,i,a)=>a.indexOf(v)===i).slice(0,4).join(', ');
+    sub.textContent='Clientes: '+nomes+(([...venceHoje,...venceAmanha,...atrasados].length>4)?` +${[...venceHoje,...venceAmanha,...atrasados].length-4} mais`:'');
+    notif.style.display='flex';
+    // Som de notificação
+    try{
+      const ctx=new (window.AudioContext||window.webkitAudioContext)();
+      [440,550,660].forEach((freq,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);
+        o.frequency.value=freq;o.type='sine';
+        g.gain.setValueAtTime(0,ctx.currentTime+i*0.12);
+        g.gain.linearRampToValueAtTime(0.15,ctx.currentTime+i*0.12+0.04);
+        g.gain.linearRampToValueAtTime(0,ctx.currentTime+i*0.12+0.18);
+        o.start(ctx.currentTime+i*0.12);o.stop(ctx.currentTime+i*0.12+0.2);
+      });
+    }catch(e){}
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// META MENSAL DE JUROS
+// ════════════════════════════════════════════════════════
+function salvarMeta(){
+  const v=parseFloat(document.getElementById('meta-input')?.value)||0;
+  if(v>0) try{localStorage.setItem('meta_mensal',v);}catch(e){}
+  atualizarMetaBar(_lucroRealGlobal||0);
+}
+let _lucroRealGlobal=0;
+function atualizarMetaBar(lucroReal){
+  _lucroRealGlobal=lucroReal;
+  let meta=0;
+  try{meta=parseFloat(localStorage.getItem('meta_mensal'))||0;}catch(e){}
+  const input=document.getElementById('meta-input');
+  if(input&&!input.value&&meta>0) input.value=meta;
+  const pct=meta>0?Math.min(lucroReal/meta*100,100):0;
+  const fill=document.getElementById('meta-bar-fill');
+  const desc=document.getElementById('meta-desc');
+  const realTxt=document.getElementById('meta-realizado-txt');
+  const pctTxt=document.getElementById('meta-pct-txt');
+  if(fill) fill.style.width=pct+'%';
+  if(fill) fill.style.background=pct>=100?'linear-gradient(90deg,var(--green),#04a87b)':pct>=60?'linear-gradient(90deg,var(--gold),var(--gold2))':'linear-gradient(90deg,var(--red),#c9433a)';
+  if(desc) desc.textContent=meta>0?`Meta: R$ ${meta.toLocaleString('pt-BR')} · ${pct>=100?'✅ META ATINGIDA!':pct.toFixed(0)+'% concluída'}`:'Defina sua meta de juros para o mês →';
+  if(realTxt) realTxt.textContent=`R$ ${Math.round(lucroReal).toLocaleString('pt-BR')} realizados`;
+  if(pctTxt) pctTxt.textContent=meta>0?pct.toFixed(1)+'%':'—';
+}
+
+// ════════════════════════════════════════════════════════
+// SIMULADOR DE EMPRÉSTIMO
+// ════════════════════════════════════════════════════════
+function simCalc(){
+  const valor=parseFloat(document.getElementById('sim-valor')?.value)||0;
+  const taxa=parseFloat(document.getElementById('sim-taxa')?.value)||0;
+  const prazo=parseInt(document.getElementById('sim-prazo')?.value)||0;
+  const tipo=document.getElementById('sim-tipo')?.value||'simples';
+  if(!valor||!taxa||!prazo) return;
+  const taxaM=taxa/100;
+  let jurosTotal,valorTotal,parcela;
+  const tabela=[];
+  if(tipo==='simples'){
+    jurosTotal=valor*taxaM*prazo;
+    valorTotal=valor+jurosTotal;
+    parcela=valorTotal/prazo;
+    let saldo=valorTotal;
+    for(let m=1;m<=prazo;m++){
+      const j=valor*taxaM;
+      const amort=valor/prazo;
+      saldo-=parcela;
+      tabela.push({mes:m,saldoInicial:saldo+parcela,juros:j,amort,parcela,saldoFinal:Math.max(0,saldo)});
+    }
+  } else {
+    valorTotal=valor*Math.pow(1+taxaM,prazo);
+    jurosTotal=valorTotal-valor;
+    parcela=valor*(taxaM*Math.pow(1+taxaM,prazo))/(Math.pow(1+taxaM,prazo)-1);
+    let saldo=valor;
+    for(let m=1;m<=prazo;m++){
+      const j=saldo*taxaM;
+      const amort=parcela-j;
+      const saldoI=saldo;
+      saldo=Math.max(0,saldo-amort);
+      tabela.push({mes:m,saldoInicial:saldoI,juros:j,amort,parcela,saldoFinal:saldo});
+    }
+  }
+  const roi=jurosTotal/valor*100;
+  // Mostrar resultado
+  document.getElementById('sim-resultado').style.display='';
+  document.getElementById('sim-tabela-card').style.display='';
+  document.getElementById('sim-results-content').innerHTML=`
+    <div class="sim-res-item"><div class="sim-res-lbl">Juros Total</div><div class="sim-res-val" style="color:var(--green)">${fmt(jurosTotal)}</div></div>
+    <div class="sim-res-item"><div class="sim-res-lbl">Valor Total</div><div class="sim-res-val" style="color:var(--gold)">${fmt(valorTotal)}</div></div>
+    <div class="sim-res-item"><div class="sim-res-lbl">Parcela Mensal</div><div class="sim-res-val" style="color:var(--blue)">${fmt(parcela)}</div></div>
+    <div class="sim-res-item"><div class="sim-res-lbl">ROI</div><div class="sim-res-val" style="color:var(--purple)">${roi.toFixed(1)}%</div></div>
+    <div class="sim-res-item"><div class="sim-res-lbl">Capital</div><div class="sim-res-val">${fmt(valor)}</div></div>
+    <div class="sim-res-item"><div class="sim-res-lbl">Prazo</div><div class="sim-res-val">${prazo} meses</div></div>
+  `;
+  document.getElementById('sim-tbody').innerHTML=tabela.map(t=>`
+    <tr>
+      <td>Mês ${t.mes}</td>
+      <td>${fmt(t.saldoInicial)}</td>
+      <td style="color:var(--green)">${fmt(t.juros)}</td>
+      <td>${fmt(t.amort)}</td>
+      <td style="color:var(--gold);font-weight:600">${fmt(t.parcela)}</td>
+      <td style="color:${t.saldoFinal<1?'var(--green)':'var(--text)'}">${fmt(t.saldoFinal)}</td>
+    </tr>
+  `).join('');
+  // Gráfico
+  destroyChart('sim');
+  charts.sim=new Chart(document.getElementById('chartSim').getContext('2d'),{
+    type:'bar',
+    data:{labels:tabela.map(t=>`Mês ${t.mes}`),datasets:[
+      {label:'Juros',data:tabela.map(t=>t.juros),backgroundColor:'rgba(6,214,160,0.7)',borderRadius:4,borderSkipped:false},
+      {label:'Amortização',data:tabela.map(t=>t.amort),backgroundColor:'rgba(201,146,42,0.7)',borderRadius:4,borderSkipped:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#5a6282',font:{family:'DM Mono',size:10}}},tooltip:{...TOOLTIP}},scales:{x:{stacked:true,grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{stacked:true,grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}
+  });
+}
+
+function simPDF(){
+  const valor=parseFloat(document.getElementById('sim-valor')?.value)||0;
+  const taxa=parseFloat(document.getElementById('sim-taxa')?.value)||0;
+  const prazo=parseInt(document.getElementById('sim-prazo')?.value)||0;
+  const tipo=document.getElementById('sim-tipo')?.value||'simples';
+  const cliente=document.getElementById('sim-cliente')?.value||'—';
+  if(!valor||!taxa||!prazo){alert('Preencha os campos para gerar o relatório.');return;}
+  const taxaM=taxa/100;
+  const jurosTotal=tipo==='simples'?valor*taxaM*prazo:valor*(Math.pow(1+taxaM,prazo)-1);
+  const valorTotal=valor+jurosTotal;
+  const parcela=tipo==='simples'?valorTotal/prazo:valor*(taxaM*Math.pow(1+taxaM,prazo))/(Math.pow(1+taxaM,prazo)-1);
+  const agora=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Simulação Capital Investimentos</title>
+  <style>body{font-family:'Arial',sans-serif;color:#222;padding:40px;max-width:700px;margin:0 auto;}
+  h1{color:#c9922a;font-size:1.4rem;border-bottom:2px solid #c9922a;padding-bottom:10px;margin-bottom:20px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+  .item{background:#f9f6f0;border:1px solid #e0d5c0;border-radius:8px;padding:14px;}
+  .lbl{font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+  .val{font-size:1.1rem;font-weight:700;color:#333;}
+  table{width:100%;border-collapse:collapse;font-size:0.75rem;}
+  th{background:#c9922a;color:#fff;padding:8px;text-align:right;}th:first-child{text-align:left;}
+  td{padding:7px 8px;border-bottom:1px solid #eee;text-align:right;}td:first-child{text-align:left;}
+  tr:nth-child(even)td{background:#faf8f4;}
+  .footer{margin-top:30px;font-size:0.6rem;color:#aaa;text-align:center;}
+  </style></head><body>
+  <h1>💰 Capital Investimentos — Simulação de Empréstimo</h1>
+  <p style="color:#888;font-size:0.75rem;margin-bottom:20px">Gerado em ${agora} · Cliente: ${cliente}</p>
+  <div class="grid">
+    <div class="item"><div class="lbl">Valor Emprestado</div><div class="val">R$ ${valor.toLocaleString('pt-BR')}</div></div>
+    <div class="item"><div class="lbl">Taxa de Juros</div><div class="val">${taxa}% a.m.</div></div>
+    <div class="item"><div class="lbl">Prazo</div><div class="val">${prazo} meses</div></div>
+    <div class="item"><div class="lbl">Tipo</div><div class="val">${tipo==='simples'?'Juros Simples':'Juros Compostos'}</div></div>
+    <div class="item"><div class="lbl">Juros Total</div><div class="val" style="color:green">R$ ${Math.round(jurosTotal).toLocaleString('pt-BR')}</div></div>
+    <div class="item"><div class="lbl">Valor Total a Receber</div><div class="val" style="color:#c9922a">R$ ${Math.round(valorTotal).toLocaleString('pt-BR')}</div></div>
+    <div class="item"><div class="lbl">Parcela Mensal</div><div class="val">R$ ${Math.round(parcela).toLocaleString('pt-BR')}</div></div>
+    <div class="item"><div class="lbl">ROI</div><div class="val">${(jurosTotal/valor*100).toFixed(1)}%</div></div>
+  </div>
+  <div class="footer">Capital Investimentos · Soluções Financeiras Estratégicas · Este documento é uma simulação e não tem valor contratual.</div>
+  </body></html>`;
+  const w=window.open('','_blank');
+  w.document.write(html);w.document.close();
+  setTimeout(()=>w.print(),400);
+}
+
+// ════════════════════════════════════════════════════════
+// FLUXO 90 DIAS
+// ════════════════════════════════════════════════════════
+function renderFluxo90(abertos, hoje){
+  const fim90=new Date(hoje);fim90.setDate(hoje.getDate()+90);
+  const vencimentos=abertos
+    .filter(e=>e.proxVenc&&e.proxVenc>=hoje&&e.proxVenc<=fim90)
+    .sort((a,b)=>a.proxVenc-b.proxVenc);
+
+  // Agrupa por semana
+  const semanas=[];
+  for(let i=0;i<13;i++){
+    const ini=new Date(hoje);ini.setDate(hoje.getDate()+i*7);
+    const fim=new Date(ini);fim.setDate(ini.getDate()+6);
+    const itens=vencimentos.filter(e=>e.proxVenc>=ini&&e.proxVenc<=fim);
+    semanas.push({ini,fim,itens,total:itens.reduce((s,e)=>s+e.jProx,0),cap:itens.reduce((s,e)=>s+e.capital,0)});
+  }
+  const totalPrev=vencimentos.reduce((s,e)=>s+e.jProx,0);
+  const totalCap=vencimentos.reduce((s,e)=>s+e.capital,0);
+  const maxSem=Math.max(...semanas.map(s=>s.total),1);
+
+  // KPIs
+  document.getElementById('fluxo90-kpis').innerHTML=`
+    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Juros a Receber (90d)</div><div class="kpi-val" style="color:var(--gold)">${fmt(totalPrev)}</div><div class="kpi-sub">${vencimentos.length} contrato(s)</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Capital a Retornar (90d)</div><div class="kpi-val" style="color:var(--blue)">${fmt(totalCap)}</div><div class="kpi-sub">principal + juros: ${fmt(totalCap+totalPrev)}</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--purple)"></div><div class="kpi-lbl">Semana de Pico</div><div class="kpi-val" style="color:var(--purple)">${fmt(maxSem)}</div><div class="kpi-sub">maior entrada semanal</div></div>
+  `;
+
+  // Gráfico
+  destroyChart('fluxo90');
+  charts.fluxo90=new Chart(document.getElementById('chartFluxo90').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels:semanas.map((s,i)=>`Sem ${i+1}\n${s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}`),
+      datasets:[
+        {label:'Juros',data:semanas.map(s=>s.total),backgroundColor:'rgba(201,146,42,0.75)',borderRadius:5,borderSkipped:false},
+        {label:'Capital',data:semanas.map(s=>s.cap),backgroundColor:'rgba(72,149,239,0.4)',borderRadius:5,borderSkipped:false}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#5a6282',font:{family:'DM Mono',size:10}}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}
+  });
+
+  // Semanas de risco (concentração)
+  const semOrdenadas=[...semanas].sort((a,b)=>b.total-a.total).slice(0,5);
+  document.getElementById('fluxo90-risco').innerHTML=semOrdenadas.length?semOrdenadas.map((s,i)=>{
+    const pct=totalPrev>0?(s.total/totalPrev*100).toFixed(0):0;
+    const cor=i===0?'var(--red)':i===1?'var(--gold2)':'var(--muted)';
+    return`<div class="f90-semana-risco">
+      <div><div style="font-size:0.65rem;color:var(--text)">${s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${s.fim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</div>
+      <div style="font-size:0.55rem;color:var(--muted);margin-top:2px">${s.itens.length} vencimento(s)</div></div>
+      <div style="text-align:right"><div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${cor}">${fmt(s.total)}</div>
+      <div style="font-size:0.52rem;color:var(--muted)">${pct}% do total</div></div>
+    </div>`;
+  }).join(''):`<div style="color:var(--muted);font-size:0.65rem;padding:16px 0">Sem vencimentos nos próximos 90 dias.</div>`;
+
+  // Lista detalhada
+  document.getElementById('fluxo90-lista').innerHTML=vencimentos.length?vencimentos.slice(0,20).map(e=>{
+    const diasRestantes=Math.floor((e.proxVenc-hoje)/86400000);
+    const cor=diasRestantes<=7?'var(--red)':diasRestantes<=30?'var(--gold2)':'var(--green)';
+    return`<div class="f90-venc-item">
+      <div><div style="font-size:0.65rem;color:var(--text);font-weight:500">${e.nome}</div>
+      <div style="font-size:0.52rem;color:var(--muted);margin-top:2px">${e.proxVenc.toLocaleDateString('pt-BR')} · ${e.id}</div></div>
+      <div style="text-align:right"><div style="font-size:0.68rem;color:${cor};font-family:'Bebas Neue',sans-serif">${fmt(e.jProx)}</div>
+      <div style="font-size:0.5rem;color:var(--muted)">${diasRestantes}d</div></div>
+    </div>`;
+  }).join(''):`<div style="color:var(--muted);font-size:0.65rem;padding:16px 0">Nenhum vencimento encontrado.</div>`;
+}
+
+// ════════════════════════════════════════════════════════
+// CONCENTRAÇÃO DE RISCO — alerta quando cliente > X% carteira
+// ════════════════════════════════════════════════════════
+function verificarConcentracao(clientes, totalCap, alertasBanner){
+  if(!totalCap) return;
+  const LIMITE=0.40; // alerta acima de 40%
+  const concentrados=clientes.filter(c=>c.ativo&&(c.totalCap/totalCap)>LIMITE);
+  if(concentrados.length&&alertasBanner){
+    const html=concentrados.map(c=>`
+      <div class="alert-bar danger" style="margin-bottom:8px">
+        <span class="alert-icon">⚠️</span>
+        <div><strong>${c.nome}</strong> representa <strong>${(c.totalCap/totalCap*100).toFixed(0)}%</strong> da sua carteira (${fmt(c.totalCap)}). Considere diversificar para reduzir o risco de concentração.</div>
+      </div>`).join('');
+    alertasBanner.insertAdjacentHTML('afterbegin',html);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// HISTÓRICO DE COBRANÇAS WHATSAPP
+// ════════════════════════════════════════════════════════
+let _waHist={};
+function waHistCarregar(){
+  try{const s=localStorage.getItem('wa_hist');if(s)_waHist=JSON.parse(s);}catch(e){}
+}
+function waHistSalvar(){
+  try{localStorage.setItem('wa_hist',JSON.stringify(_waHist));}catch(e){}
+}
+function waHistRegistrar(nome){
+  _waHist[nome]={ts:Date.now(),data:new Date().toLocaleString('pt-BR')};
+  waHistSalvar();
+  waHistRender();
+}
+function waHistRender(){
+  const el=document.getElementById('wa-hist-list');if(!el)return;
+  const entradas=Object.entries(_waHist).sort((a,b)=>b[1].ts-a[1].ts);
+  if(!entradas.length){
+    el.innerHTML='<div style="color:var(--muted);font-size:0.65rem;padding:12px 0">Nenhum contato registrado ainda.</div>';
+    return;
+  }
+  el.innerHTML=entradas.map(([nome,h])=>`
+    <div class="wa-hist-item">
+      <div style="width:32px;height:32px;border-radius:50%;background:${waColor(nome)};display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:0.85rem;color:#07090e;flex-shrink:0">${nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>
+      <div style="flex:1;min-width:0"><div style="font-size:0.65rem;color:var(--text);font-weight:500">${nome}</div><div style="font-size:0.52rem;color:var(--muted);margin-top:1px">Último contato: ${h.data}</div></div>
+      <span class="wa-hist-badge">✓ Contatado</span>
+    </div>
+  `).join('');
+}
+function waHistLimpar(){
+  if(!confirm('Limpar todo o histórico de cobranças?'))return;
+  _waHist={};waHistSalvar();waHistRender();
+}
+waHistCarregar();
+
+// ════════════════════════════════════════════════════════
+// MODAL REGISTRAR PAGAMENTO
+// ════════════════════════════════════════════════════════
+let _pagClienteAtual='';
+let _pagRegistros={};
+function pagCarregar(){try{const s=localStorage.getItem('pag_reg');if(s)_pagRegistros=JSON.parse(s);}catch(e){}}
+function pagSalvarLocal(){try{localStorage.setItem('pag_reg',JSON.stringify(_pagRegistros));}catch(e){}}
+pagCarregar();
+
+function pagModalOpen(nome){
+  _pagClienteAtual=nome;
+  const sub=document.getElementById('pag-modal-cliente');
+  if(sub)sub.textContent='Cliente: '+nome;
+  const dataEl=document.getElementById('pag-data');
+  if(dataEl)dataEl.value=new Date().toISOString().slice(0,10);
+  document.getElementById('pag-modal-overlay').classList.add('open');
+}
+function pagModalClose(){document.getElementById('pag-modal-overlay').classList.remove('open');}
+function pagSalvar(){
+  const valor=parseFloat(document.getElementById('pag-valor')?.value)||0;
+  const data=document.getElementById('pag-data')?.value||'';
+  const obs=document.getElementById('pag-obs')?.value||'';
+  if(!valor){alert('Informe o valor recebido.');return;}
+  if(!_pagRegistros[_pagClienteAtual])_pagRegistros[_pagClienteAtual]=[];
+  _pagRegistros[_pagClienteAtual].push({valor,data,obs,ts:Date.now()});
+  pagSalvarLocal();
+  pagModalClose();
+  document.getElementById('pag-valor').value='';
+  document.getElementById('pag-obs').value='';
+  // Feedback
+  const cards=document.querySelectorAll('.wa-card');
+  cards.forEach(card=>{
+    const nome=card.querySelector('.wa-client-name')?.textContent;
+    if(nome===_pagClienteAtual){
+      const orig=card.style.border;
+      card.style.border='1px solid var(--green)';
+      setTimeout(()=>card.style.border=orig,2000);
+    }
+  });
+  alert(`✅ Pagamento de ${fmt(valor)} registrado para ${_pagClienteAtual}!`);
+}
+
+
   const loading=document.getElementById('loading-screen'),error=document.getElementById('error-screen'),main=document.getElementById('main');
   loading.classList.remove('hidden');error.classList.remove('show');main.classList.remove('visible');
   try{
