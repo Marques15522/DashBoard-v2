@@ -382,6 +382,8 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   </div>
 </header>
 
+<div id="data-source-banner" style="display:none;padding:8px 24px;font-size:0.62rem;letter-spacing:0.06em;border-bottom:1px solid var(--border);align-items:center;gap:8px;"></div>
+
 <div id="main">
 <div class="wrap">
 
@@ -792,9 +794,16 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
 <script>
 const SHEET_ID='1g9336ZjN2jnVoxA5CFQmlaDxTkda7tlz48_EAlKUjr4';
-const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18};
-const CP={id:0,tipo:2,valor:3,data:4,juros:5};
-const GID_EMP=147333899, GID_PAG=647642652;
+// Aba Empréstimos: cabeçalho linha 3, dados linha 5+
+// Colunas: A=ID Emp, B=ID Cliente, C=Nome Cliente, D=CPF, E=Telefone, F=Valor Emprestado,
+//          G=Data Emp, H=Taxa Juros, I=Prazo, J=Venc.Original, K=Tipo Juros,
+//          L=Juros Total, M=Valor Total Devido, N=Total Pago, O=Saldo Restante,
+//          P=Juros Próx.Mês, Q=Parcelas Pagas, R=Status, S=Próximo Vencimento
+// Aba Pagamentos: cabeçalho linha 3, dados linha 4+
+// Colunas: A=ID Emp, B=ID Cliente, C=Tipo Pagamento, D=Valor Pago, E=Data Pagamento,
+//          F=Juros Pagos, G=Amort.Principal
+const SHEET_NAME_EMP='Empréstimos';
+const SHEET_NAME_PAG='Pagamentos';
 const fmt=v=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
 const pct=v=>(Number(v)*100).toFixed(1)+'%';
 let charts={};
@@ -813,80 +822,160 @@ document.querySelectorAll('.nav-tab').forEach(tab=>{
 
 document.getElementById('today-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
 
-async function fetchSheet(gid){
-  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}&t=${Date.now()}`;
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),12000);
-  try{
-    const r=await fetch(url,{cache:'no-store',signal:controller.signal});
-    clearTimeout(timeout);
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    return csvToArray(await r.text());
-  }catch(e){
-    clearTimeout(timeout);
-    if(e.name==='AbortError') throw new Error('Tempo esgotado (12s). Verifique sua conexão ou se a planilha está pública.');
-    throw e;
-  }
-}
-async function fetchSheetPag(){return fetchSheet(GID_PAG);}
-
-function csvToArray(csv){
-  const rows=[];
-  for(const line of csv.split('\n')){
-    if(!line.trim()) continue;
-    const cols=[];let cur='',inQ=false;
-    for(let i=0;i<line.length;i++){
-      if(line[i]==='"'){inQ=!inQ;}
-      else if(line[i]===','&&!inQ){cols.push(cur);cur='';}
-      else{cur+=line[i];}
+// ── FETCH VIA gviz/tq ──
+async function fetchSheetByName(sheetName){
+  // Tenta o nome exato e também variações sem acento
+  const names=[sheetName, sheetName.normalize('NFD').replace(/[\u0300-\u036f]/g,'')];
+  let lastErr=null;
+  for(const name of names){
+    try{
+      const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}&t=${Date.now()}`;
+      const ctrl=new AbortController();
+      const tid=setTimeout(()=>ctrl.abort(),12000);
+      const r=await fetch(url,{signal:ctrl.signal});
+      clearTimeout(tid);
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const text=await r.text();
+      // gviz envolve o JSON em: /*O_o*/\ngoogle.visualization.Query.setResponse({...});
+      const i0=text.indexOf('{');
+      const i1=text.lastIndexOf('}');
+      if(i0===-1||i1===-1) throw new Error('Resposta inválida do Google Sheets');
+      const json=JSON.parse(text.slice(i0,i1+1));
+      if(json.status==='error'){
+        const detail=json.errors?.[0]?.detailed_message||json.errors?.[0]?.message||'erro desconhecido';
+        throw new Error('Sheets: '+detail);
+      }
+      if(!json.table) throw new Error('Tabela vazia na resposta');
+      return json.table;
+    }catch(e){
+      if(e.name==='AbortError') throw new Error('Timeout ao ler "'+name+'"');
+      lastErr=e;
     }
-    cols.push(cur);rows.push(cols);
   }
-  return rows;
+  throw lastErr;
 }
 
-function autoSkipCSV(rows){for(let i=0;i<rows.length;i++){if(rows[i]?.[0]&&String(rows[i][0]).trim().toUpperCase().startsWith('EMP'))return i;}return 0;}
+async function fetchSheetPag(){return fetchSheetByName(SHEET_NAME_PAG);}
+async function fetchSheetEmp(){return fetchSheetByName(SHEET_NAME_EMP);}
+
+// ── DADOS DEMO (quando planilha não carrega) ──
+function buildDemoTables(){
+  const hoje=new Date();
+  const d=(offset)=>{const x=new Date(hoje);x.setDate(x.getDate()+offset);return x.toLocaleDateString('pt-BR');};
+  // Empréstimos: colunas A..S
+  // [ID Emp, ID Cli, Nome, CPF, Tel, Valor, Data Emp, Taxa, Prazo, Venc.Orig, Tipo, JurosTotal, ValorDev, TotalPago, Saldo, JurosProx, Parcelas, Status, ProxVenc]
+  const empRaw=[
+    ['EMP001','CLI001','Caio Santos Cunha','','(11) 96702-8960',500,d(-30),40,1,d(20),'Simples',200,700,300,400,200,0,'Em Dia',d(20)],
+    ['EMP002','CLI002','Renata Evangelista Novais','540.252.198-08','(11) 91167-5582',1200,d(-45),30,2,d(-5),'Simples',360,1560,0,1560,360,0,'Em Atraso',d(-5)],
+    ['EMP003','CLI001','Caio Santos Cunha','','(11) 96702-8960',800,d(-60),35,2,d(30),'Simples',280,1080,560,520,140,1,'Em Dia',d(30)],
+  ];
+  function makeTable(rawRows){
+    return{rows:rawRows.map(r=>({c:r.map(v=>({v,f:v instanceof Date?v.toLocaleDateString('pt-BR'):v}))}))};
+  }
+  // Pagamentos: [ID Emp, ID Cli, Tipo, Valor, Data, Juros, Amort]
+  const pagRaw=[
+    ['EMP001','CLI001','Total',300,d(-10),0,300],
+    ['EMP003','CLI001','Juros',140,d(-5),140,0],
+  ];
+  return{empTable:makeTable(empRaw),pagTable:makeTable(pagRaw)};
+}
+
+function parseNum(v){
+  if(v===null||v===undefined||v==='')return 0;
+  let s=String(v).trim();const isPct=s.includes('%');
+  s=s.replace(/R\$/g,'').replace(/%/g,'').replace(/\s/g,'');
+  if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+  else if(s.includes(',')&&!s.includes('.'))s=s.replace(',','.');
+  const n=parseFloat(s)||0;return isPct?n/100:n;
+}
+function parseTaxa(v){const n=parseNum(v);return n>1?n/100:n;}
+
 function parseDate(v){
   if(!v)return null; if(v instanceof Date)return v;
   const s=String(v).trim();
+  // gviz Date(year,month,day)
   const m=s.match(/Date\((\d+),(\d+),(\d+)\)/); if(m)return new Date(+m[1],+m[2],+m[3]);
+  // DD/MM/YYYY
   const br=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/); if(br){let y=+br[3];if(y<100)y+=y<50?2000:1900;return new Date(y,+br[2]-1,+br[1]);}
+  // YYYY-MM-DD
   const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(iso)return new Date(+iso[1],+iso[2]-1,+iso[3]);
   const d=new Date(s);return isNaN(d)?null:d;
 }
 function parseStatus(v){
   const s=String(v||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  if(s.includes('quitad'))return 'quitado';
-  if(s.includes('atraso')||s.includes('inadimpl'))return 'atraso';
-  if(s.includes('dia')||s.includes('ativo')||s.includes('aberto'))return 'ativo';
-  return null;
+  if(s.includes('quitad')||s.includes('liquidad'))return 'quitado';
+  if(s.includes('atraso')||s.includes('inadimpl')||s.includes('vencido'))return 'atraso';
+  if(s.includes('dia')||s.includes('ativo')||s.includes('aberto')||s.includes('em dia'))return 'ativo';
+  if(s==='') return null;
+  return 'ativo'; // default para linhas preenchidas sem status reconhecido
 }
 
-function render(empRows,pagRows){
+function render(empTable, pagTable){
   const hoje=new Date();hoje.setHours(0,0,0,0);
-  function parseNum(v){
-    if(v===null||v===undefined||v==='')return 0;
-    let s=String(v).trim();const isPct=s.includes('%');
-    s=s.replace(/R\$/g,'').replace(/%/g,'').replace(/\s/g,'');
-    if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
-    else if(s.includes(',')&&!s.includes('.'))s=s.replace(',','.');
-    const n=parseFloat(s)||0;return isPct?n/100:n;
+
+  // ── helpers para ler células gviz ──
+  // empTable.rows[i].c[j] = {v: valor_bruto, f: valor_formatado}
+  function cv(row,j){ // cell value (formatted string preferred)
+    if(!row||!row.c||!row.c[j])return null;
+    const c=row.c[j];
+    return (c.f!==null&&c.f!==undefined)?c.f:c.v;
   }
-  function parseTaxa(v){const n=parseNum(v);return n>1?n/100:n;}
+  function cn(row,j){ // cell as number
+    if(!row||!row.c||!row.c[j])return 0;
+    const c=row.c[j];
+    if(c===null||c.v===null||c.v===undefined)return 0;
+    if(typeof c.v==='number')return c.v;
+    return parseNum(c.f||c.v);
+  }
+  function cd(row,j){ // cell as date
+    if(!row||!row.c||!row.c[j])return null;
+    const c=row.c[j];
+    if(!c||c.v===null)return null;
+    if(typeof c.v==='string'&&c.v.includes('Date('))return parseDate(c.v);
+    if(c.f)return parseDate(c.f);
+    return parseDate(c.v);
+  }
 
-  const emps=empRows
-    .filter(r=>r[CE.id]&&String(r[CE.id]).trim().toUpperCase().startsWith('EMP'))
-    .map(r=>({id:String(r[CE.id]).trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital:parseNum(r[CE.cap]),data:parseDate(r[CE.data]),taxa:parseTaxa(r[CE.taxa]),prazo:parseNum(r[CE.prazo]),tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal:parseNum(r[CE.jTotal]),saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status:parseStatus(r[CE.status]),proxVenc:parseDate(r[CE.proxVenc]),vencContrato:parseDate(r[CE.vencContrato])}))
-    .filter(e=>e.status!==null&&e.capital>0);
+  // ── PARSE EMPRÉSTIMOS (cabeçalho linha 3, dados linha 5 → pular 1 linha extra) ──
+  // gviz com range padrão: linha 1 = cabeçalho, mas nossa planilha tem cabeçalho na linha 3
+  // e dados na linha 5, então gviz já pula as linhas de título (1,2) e retorna col labels da linha 3
+  // A primeira linha de dados do gviz já é a linha 4 (de índice 0), precisamos pular mais 1 (linha 4 = sub-cabeçalho ou vazia)
+  const empRows=(empTable.rows||[]).filter((row,i)=>{
+    if(!row||!row.c)return false;
+    const id=cv(row,0);
+    return id&&String(id).trim().toUpperCase().startsWith('EMP');
+  });
 
-  const pags=pagRows
-    .filter(r=>r[CP.id]&&String(r[CP.id]).startsWith('EMP'))
-    .map(r=>{
-      const valor=parseNum(r[CP.valor]);
-      const jurosRaw=parseNum(r[CP.juros]);
-      const juros=jurosRaw>0?jurosRaw:valor;
-      return{id:String(r[CP.id]).trim(),tipo:String(r[CP.tipo]||''),valor,data:parseDate(r[CP.data]),juros};
-    });
+  const emps=empRows.map(r=>({
+    id:    String(cv(r,0)||'').trim(),
+    nome:  String(cv(r,2)||cv(r,1)||'').trim(),
+    tel:   String(cv(r,4)||'').trim(),
+    capital:   cn(r,5),
+    data:      cd(r,6),
+    taxa:      parseTaxa(cn(r,7)||cv(r,7)),
+    prazo:     cn(r,8)||0,
+    vencContrato: cd(r,9),
+    tipoJuros: String(cv(r,10)||'').trim(),
+    jTotal:    cn(r,11),
+    saldo:     cn(r,14),
+    jProx:     cn(r,15),
+    status:    parseStatus(cv(r,17)),
+    proxVenc:  cd(r,18),
+  })).filter(e=>e.status!==null&&e.capital>0);
+
+  // ── PARSE PAGAMENTOS (cabeçalho linha 3, dados linha 4) ──
+  const pagRows=(pagTable.rows||[]).filter(row=>{
+    if(!row||!row.c)return false;
+    const id=cv(row,0);
+    return id&&String(id).trim().toUpperCase().startsWith('EMP');
+  });
+
+  const pags=pagRows.map(r=>{
+    const valor=cn(r,3);
+    const jurosRaw=cn(r,5);
+    const juros=jurosRaw>0?jurosRaw:valor;
+    return{id:String(cv(r,0)||'').trim(),tipo:String(cv(r,2)||''),valor,data:cd(r,4),juros};
+  });
 
   const ativos=emps.filter(e=>e.status==='ativo');
   const atrasado=emps.filter(e=>e.status==='atraso');
@@ -1920,17 +2009,32 @@ function pagSalvar(){
 
 
 async function loadData(){
-  const loading=document.getElementById('loading-screen'),error=document.getElementById('error-screen'),main=document.getElementById('main');
-  loading.classList.remove('hidden');error.classList.remove('show');main.classList.remove('visible');
+  const loading=document.getElementById('loading-screen');
+  const error=document.getElementById('error-screen');
+  const main=document.getElementById('main');
+  const banner=document.getElementById('data-source-banner');
+
+  loading.classList.remove('hidden');
+  error.classList.remove('show');
+  main.classList.remove('visible');
+
+  // 1. Renderiza dados demo imediatamente — loading some em < 100ms
+  const demo=buildDemoTables();
+  try{ render(demo.empTable,demo.pagTable); }catch(e){ console.warn('demo render:',e); }
+  loading.classList.add('hidden');
+  main.classList.add('visible');
+  if(banner){ banner.style.display='flex'; banner.textContent='⏳ Conectando à sua planilha...'; banner.style.background='rgba(201,146,42,0.12)'; banner.style.color='var(--gold2)'; }
+
+  // 2. Tenta carregar dados reais em background
   try{
-    const[empT,pagT]=await Promise.all([fetchSheet(GID_EMP),fetchSheetPag()]);
-    const empRows=empT.slice(autoSkipCSV(empT)),pagRows=pagT.slice(autoSkipCSV(pagT));
-    console.log('📊 Capital Investimentos — emp:',empRows.length,'pag:',pagRows.length);
-    render(empRows,pagRows);
-    loading.classList.add('hidden');main.classList.add('visible');
+    const[empTable,pagTable]=await Promise.all([fetchSheetEmp(),fetchSheetPag()]);
+    const empCount=(empTable.rows||[]).filter(r=>r&&r.c&&r.c[0]&&String(r.c[0].v||'').startsWith('EMP')).length;
+    console.log('✅ Planilha carregada — emp:',empCount,'pag:',(pagTable.rows||[]).length);
+    render(empTable,pagTable);
+    if(banner){ banner.textContent='✅ Dados reais carregados — '+new Date().toLocaleTimeString('pt-BR'); banner.style.background='rgba(6,214,160,0.08)'; banner.style.color='var(--green)'; setTimeout(()=>{banner.style.display='none';},4000); }
   }catch(err){
-    console.error(err);loading.classList.add('hidden');error.classList.add('show');
-    document.getElementById('error-msg').textContent='Erro: '+err.message+'. Verifique se a planilha está compartilhada publicamente.';
+    console.error('❌ Falha ao carregar planilha:',err.message);
+    if(banner){ banner.textContent='⚠️ Não foi possível conectar à planilha ('+err.message+'). Exibindo dados de demonstração.'; banner.style.background='rgba(239,71,111,0.08)'; banner.style.color='var(--red)'; }
   }
 }
 loadData();
