@@ -973,11 +973,18 @@ function waPreview(tid,nome){
   if(sel&&prev)prev.value=waTpls(c)[sel.value]?.txt||'';
 }
 
+let _waTab = null;
+
 function waEnviar(tid){
   const tel=(document.getElementById(tid+'_tel')?.value||'').replace(/\D/g,'');
   const msg=document.getElementById(tid+'_prev')?.value||'';
   const url=tel?`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`;
-  window.open(url,'_whatsapp_tab');
+  if(_waTab && !_waTab.closed){
+    _waTab.location.href=url;
+    _waTab.focus();
+  } else {
+    _waTab=window.open(url,'_blank');
+  }
 }
 
 function waCopy(tid){
