@@ -610,8 +610,18 @@ document.getElementById('today-date').textContent=new Date().toLocaleDateString(
 
 async function fetchSheet(gid){
   const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}&t=${Date.now()}`;
-  const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status);
-  return csvToArray(await r.text());
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),12000);
+  try{
+    const r=await fetch(url,{cache:'no-store',signal:controller.signal});
+    clearTimeout(timeout);
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return csvToArray(await r.text());
+  }catch(e){
+    clearTimeout(timeout);
+    if(e.name==='AbortError') throw new Error('Tempo esgotado (12s). Verifique sua conexão ou se a planilha está pública.');
+    throw e;
+  }
 }
 async function fetchSheetPag(){return fetchSheet(GID_PAG);}
 
@@ -1515,6 +1525,7 @@ function pagSalvar(){
 }
 
 
+async function loadData(){
   const loading=document.getElementById('loading-screen'),error=document.getElementById('error-screen'),main=document.getElementById('main');
   loading.classList.remove('hidden');error.classList.remove('show');main.classList.remove('visible');
   try{
