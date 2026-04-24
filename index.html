@@ -593,31 +593,19 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     </div>
 
     <div class="pasta-form-section">DOCUMENTOS & FOTOS</div>
-    <div style="font-size:0.58rem;color:var(--muted);margin-bottom:12px">Aceita fotos e documentos em PDF, JPG, PNG. Máx. 5MB por arquivo.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-
+    <div style="font-size:0.58rem;color:var(--muted);margin-bottom:8px">Aceita fotos e documentos em PDF, JPG, PNG. Máx. 5MB por arquivo.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div>
-        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">🪪 RG / CNH — Frente</div>
-        <div class="docs-upload-area" onclick="document.getElementById('pf-upload-rg-frente').click()">
+        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">RG / CNH</div>
+        <div class="docs-upload-area" onclick="document.getElementById('pf-upload-rg').click()">
           <div class="docs-upload-icon">🪪</div>
-          <div class="docs-upload-txt">Clique para anexar frente</div>
+          <div class="docs-upload-txt">Clique para anexar RG ou CNH</div>
         </div>
-        <input id="pf-upload-rg-frente" type="file" accept="image/*,.pdf" multiple style="display:none" onchange="pastaAddDoc('rg-frente',this)">
-        <div class="docs-list" id="pf-docs-rg-frente"></div>
+        <input id="pf-upload-rg" type="file" accept="image/*,.pdf" multiple style="display:none" onchange="pastaAddDoc('rg',this)">
+        <div class="docs-list" id="pf-docs-rg"></div>
       </div>
-
       <div>
-        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">🪪 RG / CNH — Verso</div>
-        <div class="docs-upload-area" onclick="document.getElementById('pf-upload-rg-verso').click()">
-          <div class="docs-upload-icon">🔄</div>
-          <div class="docs-upload-txt">Clique para anexar verso</div>
-        </div>
-        <input id="pf-upload-rg-verso" type="file" accept="image/*,.pdf" multiple style="display:none" onchange="pastaAddDoc('rg-verso',this)">
-        <div class="docs-list" id="pf-docs-rg-verso"></div>
-      </div>
-
-      <div>
-        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">💵 Holerite / Comprovante de Renda</div>
+        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">Holerite / Comprovante de Renda</div>
         <div class="docs-upload-area" onclick="document.getElementById('pf-upload-holerite').click()">
           <div class="docs-upload-icon">💵</div>
           <div class="docs-upload-txt">Clique para anexar holerite ou extrato</div>
@@ -625,37 +613,24 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
         <input id="pf-upload-holerite" type="file" accept="image/*,.pdf" multiple style="display:none" onchange="pastaAddDoc('holerite',this)">
         <div class="docs-list" id="pf-docs-holerite"></div>
       </div>
-
       <div>
-        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">🏠 Foto da Casa</div>
-        <div class="docs-upload-area" onclick="document.getElementById('pf-upload-casa').click()">
-          <div class="docs-upload-icon">🏠</div>
-          <div class="docs-upload-txt">Frente da residência</div>
+        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">Fotos do Cliente</div>
+        <div class="docs-upload-area" onclick="document.getElementById('pf-upload-foto').click()">
+          <div class="docs-upload-icon">📷</div>
+          <div class="docs-upload-txt">Clique para adicionar fotos</div>
         </div>
-        <input id="pf-upload-casa" type="file" accept="image/*" multiple style="display:none" onchange="pastaAddDoc('casa',this)">
-        <div class="docs-list" id="pf-docs-casa"></div>
+        <input id="pf-upload-foto" type="file" accept="image/*" multiple style="display:none" onchange="pastaAddDoc('foto',this)">
+        <div class="docs-list" id="pf-docs-foto"></div>
       </div>
-
       <div>
-        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">🏢 Foto do Trabalho / Empresa</div>
-        <div class="docs-upload-area" onclick="document.getElementById('pf-upload-trabalho').click()">
-          <div class="docs-upload-icon">🏢</div>
-          <div class="docs-upload-txt">Frente do local de trabalho</div>
+        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">Outros Documentos</div>
+        <div class="docs-upload-area" onclick="document.getElementById('pf-upload-outro').click()">
+          <div class="docs-upload-icon">📄</div>
+          <div class="docs-upload-txt">Contratos, comprovantes, etc.</div>
         </div>
-        <input id="pf-upload-trabalho" type="file" accept="image/*" multiple style="display:none" onchange="pastaAddDoc('trabalho',this)">
-        <div class="docs-list" id="pf-docs-trabalho"></div>
+        <input id="pf-upload-outro" type="file" accept="image/*,.pdf" multiple style="display:none" onchange="pastaAddDoc('outro',this)">
+        <div class="docs-list" id="pf-docs-outro"></div>
       </div>
-
-      <div>
-        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">🤳 Selfie Segurando o Documento</div>
-        <div class="docs-upload-area" onclick="document.getElementById('pf-upload-selfie').click()">
-          <div class="docs-upload-icon">🤳</div>
-          <div class="docs-upload-txt">Foto segurando RG ou CNH</div>
-        </div>
-        <input id="pf-upload-selfie" type="file" accept="image/*" multiple style="display:none" onchange="pastaAddDoc('selfie',this)">
-        <div class="docs-list" id="pf-docs-selfie"></div>
-      </div>
-
     </div>
 
     <div class="pasta-modal-footer">
@@ -1160,10 +1135,32 @@ function render(empRows,pagRows){
   destroyChart('evolLucro');
   charts.evolLucro=new Chart(document.getElementById('chartEvolLucro').getContext('2d'),{type:'line',data:{labels:evolLabels,datasets:[{label:'Lucro Acumulado',data:evolJuros,borderColor:'rgba(6,214,160,0.8)',backgroundColor:'rgba(6,214,160,0.05)',borderWidth:2,pointRadius:3,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
 
-  // QUANDO DOBRA
-  const taxaAA=taxaMediaGlobal*12;
-  const mesesDobra=taxaAA>0?Math.round(Math.log(2)/Math.log(1+taxaAA)*12):null;
-  document.getElementById('dobraContent').innerHTML=mesesDobra?`<div style="text-align:center;padding:16px 0"><div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px">SEU CAPITAL DOBRA EM</div><div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--gold);line-height:1">${mesesDobra}</div><div style="font-size:0.68rem;color:var(--muted);margin-top:4px">meses (${(mesesDobra/12).toFixed(1)} anos)</div></div><div style="border-top:1px solid var(--border);padding-top:12px"><div class="info-row"><span class="info-label">Taxa média/mês</span><span class="info-val" style="color:var(--gold)">${pct(taxaMediaGlobal)}</span></div><div class="info-row"><span class="info-label">Taxa média/ano</span><span class="info-val" style="color:var(--gold)">${pct(taxaAA)}</span></div><div class="info-row"><span class="info-label">Capital atual</span><span class="info-val">${fmt(totalCap)}</span></div><div class="info-row"><span class="info-label">Capital dobrado</span><span class="info-val" style="color:var(--green)">${fmt(totalCap*2)}</span></div></div>`:`<div style="color:var(--muted);font-size:0.68rem;padding:20px 0;text-align:center">Dados insuficientes.</div>`;
+  // QUANDO DOBRA — cálculo correto usando taxa mensal
+  const taxaAA = taxaMediaGlobal * 12;
+  // Fórmula correta: meses = log(2) / log(1 + taxa_mensal)
+  const mesesDobra = taxaMediaGlobal > 0 ? Math.ceil(Math.log(2) / Math.log(1 + taxaMediaGlobal)) : null;
+  // Projeções reais com juros compostos sobre o capital atual
+  const proj3  = totalCap * Math.pow(1 + taxaMediaGlobal, 3);
+  const proj6  = totalCap * Math.pow(1 + taxaMediaGlobal, 6);
+  const proj12 = totalCap * Math.pow(1 + taxaMediaGlobal, 12);
+  document.getElementById('dobraContent').innerHTML = mesesDobra ? `
+    <div style="text-align:center;padding:14px 0 10px">
+      <div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px">SEU CAPITAL DOBRA EM</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--gold);line-height:1">${mesesDobra}</div>
+      <div style="font-size:0.68rem;color:var(--muted);margin-top:4px">meses (${(mesesDobra/12).toFixed(1)} anos) · reinvestindo todos os juros</div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
+      <div style="font-size:0.58rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:8px">PROJEÇÃO DO CAPITAL (JUROS COMPOSTOS)</div>
+      <div class="info-row"><span class="info-label">Capital hoje</span><span class="info-val">${fmt(totalCap)}</span></div>
+      <div class="info-row"><span class="info-label">Em 3 meses</span><span class="info-val" style="color:var(--blue)">${fmt(proj3)} <span style="font-size:0.55rem;color:var(--muted)">(+${fmt(proj3-totalCap)})</span></span></div>
+      <div class="info-row"><span class="info-label">Em 6 meses</span><span class="info-val" style="color:var(--purple)">${fmt(proj6)} <span style="font-size:0.55rem;color:var(--muted)">(+${fmt(proj6-totalCap)})</span></span></div>
+      <div class="info-row"><span class="info-label">Em 12 meses</span><span class="info-val" style="color:var(--green)">${fmt(proj12)} <span style="font-size:0.55rem;color:var(--muted)">(+${fmt(proj12-totalCap)})</span></span></div>
+      <div class="info-row" style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px"><span class="info-label">Capital dobrado</span><span class="info-val" style="color:var(--gold)">${fmt(totalCap*2)}</span></div>
+      <div class="info-row"><span class="info-label">Taxa média/mês</span><span class="info-val" style="color:var(--gold)">${pct(taxaMediaGlobal)}</span></div>
+      <div class="info-row"><span class="info-label">Taxa média/ano</span><span class="info-val" style="color:var(--gold)">${pct(taxaAA)}</span></div>
+    </div>
+    <div style="font-size:0.52rem;color:var(--muted2);margin-top:8px">* Projeção assume reinvestimento total dos juros mensalmente (juros compostos)</div>
+  ` : `<div style="color:var(--muted);font-size:0.68rem;padding:20px 0;text-align:center">Dados insuficientes para projeção.</div>`;
 
   // CALENDÁRIO SEMANAL
   const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
@@ -1763,6 +1760,8 @@ function simPDF(){
       <th>Parcela</th>
       <th>Vencimento</th>
       <th>Juros</th>
+      <th>Amortização</th>
+      <th>Parcela Total</th>
       <th>Saldo Devedor</th>
     </tr></thead>
     <tbody>
@@ -1770,8 +1769,37 @@ function simPDF(){
         <td>${t.mes}ª parcela</td>
         <td>${fmtD(t.venc)}</td>
         <td class="td-juros">${fmtR(t.juros)}</td>
+        <td>${fmtR(t.amort)}</td>
+        <td>${fmtR(t.parcela)}</td>
         <td class="${t.saldoFinal<1?'td-saldo-zero':''}">${t.saldoFinal<1?'✓ Quitado':fmtR(t.saldoFinal)}</td>
       </tr>`).join('')}
+    </tbody>
+  </table>
+
+  <!-- TABELA DE AMORTIZAÇÃO ANTECIPADA -->
+  <div class="section-title" style="margin-top:24px">Simulação de Amortização Antecipada</div>
+  <p style="font-size:0.72rem;color:#888;margin-bottom:12px">Caso o cliente opte por amortizar o saldo devedor antecipadamente, os valores abaixo representam o desconto no saldo a cada pagamento extra realizado sobre o principal.</p>
+  <table>
+    <thead><tr>
+      <th>Após a Parcela</th>
+      <th>Saldo Devedor</th>
+      <th>Amortização Extra de 10%</th>
+      <th>Novo Saldo</th>
+      <th>Parcelas Restantes</th>
+    </tr></thead>
+    <tbody>
+      ${tabela.filter(t=>t.saldoFinal>=1).map(t=>{
+        const amortExtra=t.saldoFinal*0.10;
+        const novoSaldo=Math.max(0,t.saldoFinal-amortExtra);
+        const parcelasRest=prazo-t.mes;
+        return `<tr>
+          <td>${t.mes}ª parcela</td>
+          <td>${fmtR(t.saldoFinal)}</td>
+          <td class="td-juros">${fmtR(amortExtra)}</td>
+          <td>${fmtR(novoSaldo)}</td>
+          <td>${parcelasRest} restante${parcelasRest!==1?'s':''}</td>
+        </tr>`;
+      }).join('')}
     </tbody>
   </table>
 
@@ -1978,7 +2006,7 @@ function pagSalvar(){
 let _pastas = {};
 let _pastaEditId = null;
 let _pastaViewId = null;
-let _pastaDocs = {'rg-frente':[], 'rg-verso':[], holerite:[], casa:[], trabalho:[], selfie:[]};
+let _pastaDocs = {rg:[], holerite:[], foto:[], outro:[]};
 const PASTA_COLORS = ['#c9922a','#06d6a0','#4895ef','#9b5de5','#e8b84b','#ef476f','#f5d080','#128c7e'];
 function pastaColor(nome){if(!nome)return PASTA_COLORS[0];let h=0;for(let c of nome)h=(h*31+c.charCodeAt(0))%PASTA_COLORS.length;return PASTA_COLORS[Math.abs(h)];}
 function pastaInitials(nome){if(!nome)return '?';return nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
@@ -2003,8 +2031,8 @@ function maskCPF(el){
 
 function pastaModalOpen(id){
   _pastaEditId = id;
-  _pastaDocs = {'rg-frente':[], 'rg-verso':[], holerite:[], casa:[], trabalho:[], selfie:[]};
-  ['rg-frente','rg-verso','holerite','casa','trabalho','selfie'].forEach(t=>{
+  _pastaDocs = {rg:[], holerite:[], foto:[], outro:[]};
+  ['rg','holerite','foto','outro'].forEach(t=>{
     document.getElementById('pf-docs-'+t).innerHTML='';
     document.getElementById('pf-upload-'+t).value='';
   });
@@ -2028,11 +2056,7 @@ function pastaModalOpen(id){
     // re-carregar docs
     if(p.docs){
       _pastaDocs=JSON.parse(JSON.stringify(p.docs));
-      // ensure new keys exist if loading an old pasta
-      ['rg-frente','rg-verso','holerite','casa','trabalho','selfie'].forEach(t=>{
-        if(!_pastaDocs[t])_pastaDocs[t]=[];
-        pastaRenderDocs(t);
-      });
+      ['rg','holerite','foto','outro'].forEach(t=>pastaRenderDocs(t));
     }
   } else {
     document.getElementById('pasta-modal-titulo').textContent='📁 Nova Pasta de Cliente';
@@ -2061,8 +2085,8 @@ function pastaAddDoc(tipo, input){
 }
 function pastaRenderDocs(tipo){
   const el=document.getElementById('pf-docs-'+tipo);
-  const typeLabels={'rg-frente':'RG Frente','rg-verso':'RG Verso','holerite':'Holerite','casa':'Foto Casa','trabalho':'Foto Trabalho','selfie':'Selfie+Doc'};
-  const typeChip={'rg-frente':'doc-chip-rg','rg-verso':'doc-chip-rg','holerite':'doc-chip-holerite','casa':'doc-chip-foto','trabalho':'doc-chip-foto','selfie':'doc-chip-foto'};
+  const typeLabels={rg:'RG/CNH',holerite:'Holerite',foto:'Foto',outro:'Outro'};
+  const typeChip={rg:'doc-chip-rg',holerite:'doc-chip-holerite',foto:'doc-chip-foto',outro:'doc-chip-outro'};
   el.innerHTML=_pastaDocs[tipo].map((d,i)=>{
     const isImg=d.mime&&d.mime.startsWith('image/');
     const kb=Math.round(d.size/1024);
@@ -2208,7 +2232,7 @@ function pastaViewOpen(id){
   // Obs
   if(p.obs)html+=`<div class="pasta-view-section">OBSERVAÇÕES</div><div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.65rem;color:var(--text);line-height:1.7">${p.obs}</div>`;
   // Docs
-  const docTypes=[{key:'rg-frente',label:'RG / CNH — Frente',icon:'🪪'},{key:'rg-verso',label:'RG / CNH — Verso',icon:'🔄'},{key:'holerite',label:'Holerite / Extrato',icon:'💵'},{key:'casa',label:'Foto da Casa',icon:'🏠'},{key:'trabalho',label:'Foto do Trabalho',icon:'🏢'},{key:'selfie',label:'Selfie com Documento',icon:'🤳'}];
+  const docTypes=[{key:'rg',label:'RG / CNH',icon:'🪪'},{key:'holerite',label:'Holerite / Extrato',icon:'💵'},{key:'foto',label:'Fotos',icon:'📷'},{key:'outro',label:'Outros Documentos',icon:'📄'}];
   const hasDocs=docTypes.some(t=>(p.docs||{})[t.key]?.length>0);
   if(hasDocs){
     html+=`<div class="pasta-view-section">DOCUMENTOS ANEXADOS</div>`;
