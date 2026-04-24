@@ -1508,8 +1508,6 @@ function simPDF(){
       <th>Parcela</th>
       <th>Vencimento</th>
       <th>Juros</th>
-      <th>Amortização</th>
-      <th>Valor a Pagar</th>
       <th>Saldo Devedor</th>
     </tr></thead>
     <tbody>
@@ -1517,8 +1515,6 @@ function simPDF(){
         <td>${t.mes}ª parcela</td>
         <td>${fmtD(t.venc)}</td>
         <td class="td-juros">${fmtR(t.juros)}</td>
-        <td>${fmtR(t.amort)}</td>
-        <td style="font-weight:600;color:#c9922a">${fmtR(t.parcela)}</td>
         <td class="${t.saldoFinal<1?'td-saldo-zero':''}">${t.saldoFinal<1?'✓ Quitado':fmtR(t.saldoFinal)}</td>
       </tr>`).join('')}
     </tbody>
@@ -1548,10 +1544,13 @@ function simPDF(){
   </div>
 
 </div>
-<scr'+'ipt>window.onload=()=>setTimeout(()=>window.print(),300);</scr'+'ipt>
 </body></html>`;
   const w=window.open('','_blank');
-  w.document.write(html);w.document.close();
+  w.document.write(html);
+  w.document.close();
+  const s=w.document.createElement('script');
+  s.textContent='window.onload=()=>setTimeout(()=>window.print(),300);';
+  w.document.body.appendChild(s);
 }
 
 // ════════════════════════════════════════════════════════
