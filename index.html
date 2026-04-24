@@ -203,6 +203,36 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .wa-btn-copy:hover{border-color:var(--gold);color:var(--gold);}
 .wa-btn-copy.copied{border-color:var(--green);color:var(--green);}
 .wa-empty{text-align:center;padding:40px;color:var(--muted);font-size:0.68rem;}
+
+/* ── BARRA DE PESQUISA ── */
+.wa-search-wrap{position:relative;margin-bottom:14px;}
+.wa-search-input{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:9px 12px 9px 36px;outline:none;box-sizing:border-box;transition:border-color 0.2s;}
+.wa-search-input:focus{border-color:var(--gold);}
+.wa-search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:0.75rem;pointer-events:none;}
+.wa-search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.75rem;padding:0;display:none;}
+.wa-search-clear.visible{display:block;}
+
+/* ── MODAL TEMPLATES ── */
+.tpl-modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,8,18,0.85);z-index:1000;align-items:center;justify-content:center;}
+.tpl-modal-overlay.open{display:flex;}
+.tpl-modal{background:var(--s1);border:1px solid var(--border);border-radius:16px;width:min(680px,95vw);max-height:90vh;overflow-y:auto;padding:28px;}
+.tpl-modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gold2);letter-spacing:0.06em;margin-bottom:4px;}
+.tpl-modal-sub{font-size:0.58rem;color:var(--muted);margin-bottom:22px;}
+.tpl-item{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;}
+.tpl-item-label{font-size:0.58rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.tpl-item-emoji{font-size:0.85rem;}
+.tpl-item-name{font-size:0.65rem;color:var(--text);font-family:'DM Mono',monospace;font-weight:600;flex:1;}
+.tpl-textarea{width:100%;background:var(--s1);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.6rem;padding:10px;line-height:1.7;min-height:80px;resize:vertical;outline:none;box-sizing:border-box;margin-top:6px;}
+.tpl-textarea:focus{border-color:var(--gold);}
+.tpl-vars{font-size:0.5rem;color:var(--muted);margin-top:5px;}
+.tpl-vars span{background:rgba(201,146,42,0.1);border:1px solid rgba(201,146,42,0.2);border-radius:4px;padding:1px 6px;margin-right:4px;color:var(--gold2);font-family:'DM Mono',monospace;}
+.tpl-modal-footer{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+.tpl-btn-save{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:8px;padding:9px 22px;font-family:'DM Mono',monospace;font-size:0.62rem;font-weight:700;cursor:pointer;letter-spacing:0.06em;}
+.tpl-btn-reset{background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer;}
+.tpl-btn-reset:hover{border-color:var(--red);color:var(--red);}
+.tpl-btn-cancel{background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer;}
+.wa-tpl-edit-btn{font-size:0.55rem;padding:4px 12px;border-radius:20px;border:1px solid rgba(201,146,42,0.3);color:var(--gold2);background:rgba(201,146,42,0.07);cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:0.06em;transition:all 0.2s;margin-left:auto;}
+.wa-tpl-edit-btn:hover{background:rgba(201,146,42,0.15);}
 </style>
 </head>
 <body>
@@ -371,6 +401,12 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     <button class="wa-filter-btn" onclick="waFiltrar('vence',this)">⏰ Vence em 7 dias</button>
     <button class="wa-filter-btn" onclick="waFiltrar('emdia',this)">✅ Em Dia</button>
     <button class="wa-filter-btn" onclick="waFiltrar('inativo',this)">💤 Inativos</button>
+    <button class="wa-tpl-edit-btn" onclick="tplModalOpen()">✏️ Personalizar Mensagens</button>
+  </div>
+  <div class="wa-search-wrap">
+    <span class="wa-search-icon">🔍</span>
+    <input class="wa-search-input" id="wa-search" type="text" placeholder="Pesquisar cliente pelo nome..." oninput="waSearchChange(this)">
+    <button class="wa-search-clear" id="wa-search-clear" onclick="waSearchClear()">✕</button>
   </div>
   <div class="wa-cards" id="wa-cards">
     <div class="wa-empty">Aguardando dados...</div>
@@ -379,6 +415,25 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
 <div style="text-align:right;margin-top:8px;font-size:0.57rem;color:var(--muted)">última atualização: <span id="last-update">—</span> · auto-refresh 15 min</div>
 </div></div>
+
+<!-- MODAL PERSONALIZAR MENSAGENS -->
+<div class="tpl-modal-overlay" id="tpl-modal-overlay" onclick="if(event.target===this)tplModalClose()">
+  <div class="tpl-modal">
+    <div class="tpl-modal-title">✏️ Personalizar Mensagens</div>
+    <div class="tpl-modal-sub">Edite os textos dos templates. Use as variáveis destacadas para inserir dados do cliente automaticamente.</div>
+    <div class="tpl-vars" style="margin-bottom:20px;padding:10px;background:rgba(201,146,42,0.05);border:1px solid rgba(201,146,42,0.15);border-radius:8px;">
+      <div style="color:var(--gold2);font-size:0.58rem;margin-bottom:8px;font-weight:600">VARIÁVEIS DISPONÍVEIS:</div>
+      <span>{nome}</span> <span>{valor}</span> <span>{capital}</span> <span>{vencimento}</span> <span>{dias_atraso}</span>
+      <div style="color:var(--muted);font-size:0.5rem;margin-top:6px">Ex: "Olá, {nome}! Sua parcela de {valor} vence em {vencimento}."</div>
+    </div>
+    <div id="tpl-editor-list"></div>
+    <div class="tpl-modal-footer">
+      <button class="tpl-btn-reset" onclick="tplReset()">🔄 Restaurar Padrão</button>
+      <button class="tpl-btn-cancel" onclick="tplModalClose()">Cancelar</button>
+      <button class="tpl-btn-save" onclick="tplSave()">💾 SALVAR MENSAGENS</button>
+    </div>
+  </div>
+</div>
 
 <footer>
   <div class="footer-logo">Capital Investimentos</div>
@@ -713,7 +768,101 @@ function render(empRows,pagRows){
 }
 
 // ── WHATSAPP ─────────────────────────────────────────────
-let _waCli=[], _waFiltro='todos';
+let _waCli=[], _waFiltro='todos', _waBusca='';
+
+// ── TEMPLATES PADRÃO ─────────────────────────────────────
+const TPL_DEFAULT = {
+  suave:       {lbl:'💬 Cobrança Suave',         txt:`Olá, {nome}! Tudo bem? 😊\n\nPassando para lembrar que temos uma parcela de *{valor}* com vencimento em *{vencimento}*.\n\nQualquer dúvida, estou à disposição! 🙏`},
+  formal:      {lbl:'📋 Cobrança Formal',         txt:`Olá, {nome}.\n\nIdentificamos a parcela de *{valor}* como pendente (vencimento: *{vencimento}*).\n\nPor favor, entre em contato para regularizarmos.\n\nAtenciosamente, Capital Investimentos.`},
+  atraso_leve: {lbl:'⚠️ Atraso (até 15 dias)',   txt:`Olá, {nome}! Como vai?\n\nSua parcela de *{valor}* está em atraso há *{dias_atraso} dia(s)*.\n\nPodemos resolver rapidinho — me avise quando puder! 😊`},
+  atraso_grav: {lbl:'🔴 Atraso Grave (+15 dias)', txt:`{nome}, bom dia.\n\nSua parcela de *{valor}* está em atraso há *{dias_atraso} dias*. Precisamos regularizar urgente para evitar encargos adicionais.\n\nAguardo seu contato. Obrigado.`},
+  vencimento:  {lbl:'⏰ Aviso de Vencimento',     txt:`Olá, {nome}! 👋\n\nAvisando que sua parcela de *{valor}* vence em *{vencimento}*.\n\nPosso enviar os dados para pagamento agora, é só falar! 😉`},
+  renovacao:   {lbl:'🔄 Proposta de Renovação',   txt:`Olá, {nome}! Espero que esteja bem 😊\n\nSeu contrato de *{capital}* está chegando ao fim. Quer renovar ou ampliar o limite?\n\nTenho condições especiais para você. Vamos conversar?`},
+  quitacao:    {lbl:'🎉 Parabéns pela Quitação',  txt:`{nome}! 🎉 Parabéns pela quitação!\n\nFoi um prazer trabalhar com você. Quando precisar, estarei aqui — com condições especiais para quem já é cliente!\n\nObrigado pela confiança! 🙏`},
+  reativacao:  {lbl:'💤 Reativar Cliente',         txt:`Olá, {nome}! Sumiu hein? 😄\n\nSentimos sua falta! Se precisar de crédito rápido com taxas especiais, me chama — tenho uma oferta exclusiva para você!\n\nAté mais! 👋`},
+};
+
+// Carrega templates salvos do localStorage (ou usa padrão)
+function tplLoad(){
+  try{
+    const saved=localStorage.getItem('wa_templates');
+    if(saved) return {...TPL_DEFAULT,...JSON.parse(saved)};
+  }catch(e){}
+  return {...TPL_DEFAULT};
+}
+let _tpls = tplLoad();
+
+// Substitui variáveis {nome}, {valor}, etc. pelo valor real do cliente
+function tplApply(txt, c){
+  const nome=c.nome.split(' ')[0];
+  const val=c.totalJuros>0?'R$ '+Math.round(c.totalJuros).toLocaleString('pt-BR'):'valor em aberto';
+  const cap='R$ '+Math.round(c.totalCap).toLocaleString('pt-BR');
+  const venc=c.proxVenc?c.proxVenc.toLocaleDateString('pt-BR'):'—';
+  return txt
+    .replace(/\{nome\}/g, nome)
+    .replace(/\{valor\}/g, val)
+    .replace(/\{capital\}/g, cap)
+    .replace(/\{vencimento\}/g, venc)
+    .replace(/\{dias_atraso\}/g, c.diasAtraso||0);
+}
+
+// ── MODAL EDITOR ─────────────────────────────────────────
+function tplModalOpen(){
+  const list=document.getElementById('tpl-editor-list');
+  list.innerHTML=Object.entries(_tpls).map(([key,tpl])=>`
+    <div class="tpl-item">
+      <div class="tpl-item-label">
+        <span class="tpl-item-emoji">${tpl.lbl.split(' ')[0]}</span>
+        <span class="tpl-item-name">${tpl.lbl.replace(/^[^\s]+\s/,'')}</span>
+      </div>
+      <textarea class="tpl-textarea" id="tpl_txt_${key}" rows="4">${tpl.txt}</textarea>
+      <div class="tpl-vars">Variáveis: <span>{nome}</span><span>{valor}</span><span>{capital}</span><span>{vencimento}</span><span>{dias_atraso}</span></div>
+    </div>
+  `).join('');
+  document.getElementById('tpl-modal-overlay').classList.add('open');
+}
+function tplModalClose(){
+  document.getElementById('tpl-modal-overlay').classList.remove('open');
+}
+function tplSave(){
+  const updated={};
+  Object.keys(_tpls).forEach(key=>{
+    const el=document.getElementById('tpl_txt_'+key);
+    updated[key]={..._tpls[key], txt: el?el.value:_tpls[key].txt};
+  });
+  _tpls=updated;
+  try{ localStorage.setItem('wa_templates', JSON.stringify(
+    Object.fromEntries(Object.entries(updated).map(([k,v])=>[k,{txt:v.txt}]))
+  )); }catch(e){}
+  tplModalClose();
+  waRenderCards(); // re-render com novos templates
+  // Feedback visual
+  const btn=document.querySelector('.tpl-btn-save');
+  const orig=btn.textContent; btn.textContent='✅ SALVO!';
+  setTimeout(()=>btn.textContent=orig,1800);
+}
+function tplReset(){
+  if(!confirm('Restaurar todos os templates para o padrão original?'))return;
+  _tpls={...TPL_DEFAULT};
+  try{ localStorage.removeItem('wa_templates'); }catch(e){}
+  tplModalOpen(); // re-abre com valores padrão
+}
+
+// ── BUSCA ────────────────────────────────────────────────
+function waSearchChange(input){
+  _waBusca=input.value.toLowerCase().trim();
+  const clearBtn=document.getElementById('wa-search-clear');
+  if(clearBtn) clearBtn.classList.toggle('visible',_waBusca.length>0);
+  waRenderCards();
+}
+function waSearchClear(){
+  const input=document.getElementById('wa-search');
+  if(input){input.value='';input.focus();}
+  _waBusca='';
+  const clearBtn=document.getElementById('wa-search-clear');
+  if(clearBtn) clearBtn.classList.remove('visible');
+  waRenderCards();
+}
 
 function waRender(clientes,abertos,atrasado,hoje){
   const em7=new Date(hoje);em7.setDate(hoje.getDate()+7);
@@ -742,21 +891,9 @@ function waSit(c){
 }
 
 function waTpls(c){
-  const nome=c.nome.split(' ')[0];
-  const val=c.totalJuros>0?'R$ '+Math.round(c.totalJuros).toLocaleString('pt-BR'):'valor em aberto';
-  const cap='R$ '+Math.round(c.totalCap).toLocaleString('pt-BR');
-  const venc=c.proxVenc?c.proxVenc.toLocaleDateString('pt-BR'):'—';
-  const dias=c.diasAtraso;
-  return{
-    suave:      {lbl:'💬 Cobrança Suave',         txt:`Olá, ${nome}! Tudo bem? 😊\n\nPassando para lembrar que temos uma parcela de *${val}* com vencimento em *${venc}*.\n\nQualquer dúvida, estou à disposição! 🙏`},
-    formal:     {lbl:'📋 Cobrança Formal',         txt:`Olá, ${nome}.\n\nIdentificamos a parcela de *${val}* como pendente (vencimento: *${venc}*).\n\nPor favor, entre em contato para regularizarmos.\n\nAtenciosamente, Capital Investimentos.`},
-    atraso_leve:{lbl:'⚠️ Atraso (até 15 dias)',   txt:`Olá, ${nome}! Como vai?\n\nSua parcela de *${val}* está em atraso há *${dias} dia(s)*.\n\nPodemos resolver rapidinho — me avise quando puder! 😊`},
-    atraso_grav:{lbl:'🔴 Atraso Grave (+15 dias)', txt:`${nome}, bom dia.\n\nSua parcela de *${val}* está em atraso há *${dias} dias*. Precisamos regularizar urgente para evitar encargos adicionais.\n\nAguardo seu contato. Obrigado.`},
-    vencimento: {lbl:'⏰ Aviso de Vencimento',     txt:`Olá, ${nome}! 👋\n\nAvisando que sua parcela de *${val}* vence em *${venc}*.\n\nPosso enviar os dados para pagamento agora, é só falar! 😉`},
-    renovacao:  {lbl:'🔄 Proposta de Renovação',   txt:`Olá, ${nome}! Espero que esteja bem 😊\n\nSeu contrato de *${cap}* está chegando ao fim. Quer renovar ou ampliar o limite?\n\nTenho condições especiais para você. Vamos conversar?`},
-    quitacao:   {lbl:'🎉 Parabéns pela Quitação',  txt:`${nome}! 🎉 Parabéns pela quitação!\n\nFoi um prazer trabalhar com você. Quando precisar, estarei aqui — com condições especiais para quem já é cliente!\n\nObrigado pela confiança! 🙏`},
-    reativacao: {lbl:'💤 Reativar Cliente',         txt:`Olá, ${nome}! Sumiu hein? 😄\n\nSentimos sua falta! Se precisar de crédito rápido com taxas especiais, me chama — tenho uma oferta exclusiva para você!\n\nAté mais! 👋`},
-  };
+  return Object.fromEntries(
+    Object.entries(_tpls).map(([k,tpl])=>[k,{lbl:tpl.lbl, txt:tplApply(tpl.txt,c)}])
+  );
 }
 
 function waDefTpl(c){
@@ -836,8 +973,16 @@ function waFiltrar(filtro,el){
 
 function waRenderCards(){
   const cont=document.getElementById('wa-cards');if(!cont)return;
-  const lista=_waFiltro==='todos'?_waCli:_waCli.filter(c=>waSit(c).tipo===_waFiltro);
-  cont.innerHTML=lista.length?lista.map(waCard).join(''):`<div class="wa-empty">Nenhum cliente nesta categoria.</div>`;
+  let lista=_waFiltro==='todos'?_waCli:_waCli.filter(c=>waSit(c).tipo===_waFiltro);
+  if(_waBusca) lista=lista.filter(c=>c.nome.toLowerCase().includes(_waBusca));
+  if(!lista.length){
+    const msg=_waBusca
+      ?`Nenhum cliente encontrado para "<strong>${_waBusca}</strong>".`
+      :'Nenhum cliente nesta categoria.';
+    cont.innerHTML=`<div class="wa-empty">${msg}</div>`;
+    return;
+  }
+  cont.innerHTML=lista.map(waCard).join('');
 }
 
 async function loadData(){
