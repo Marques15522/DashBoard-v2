@@ -191,9 +191,12 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .wa-body{padding:14px 16px;}
 .wa-phone{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.62rem;padding:7px 10px;margin-bottom:8px;outline:none;}
 .wa-phone:focus{border-color:var(--gold);}
+.wa-phone.has-number{border-color:rgba(6,214,160,0.4);color:var(--green);}
 .wa-select{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.62rem;padding:7px 10px;margin-bottom:8px;cursor:pointer;outline:none;}
 .wa-select:focus{border-color:var(--gold);}
-.wa-preview{background:var(--s2);border:1px solid var(--border);border-radius:8px;border-top-left-radius:2px;padding:12px;font-size:0.62rem;color:var(--text);line-height:1.7;white-space:pre-wrap;min-height:80px;margin-bottom:10px;}
+.wa-textarea{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;border-top-left-radius:2px;padding:12px;font-size:0.62rem;color:var(--text);line-height:1.7;min-height:110px;margin-bottom:10px;font-family:'DM Mono',monospace;resize:vertical;outline:none;box-sizing:border-box;}
+.wa-textarea:focus{border-color:var(--gold);}
+.wa-edit-hint{font-size:0.52rem;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:4px;}
 .wa-btns{display:flex;gap:8px;}
 .wa-btn-send{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:8px;padding:9px;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;text-decoration:none;letter-spacing:0.06em;}
 .wa-btn-copy{background:var(--s2);border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:9px 12px;font-size:0.62rem;cursor:pointer;font-family:'DM Mono',monospace;transition:all 0.2s;}
@@ -458,7 +461,7 @@ function render(empRows,pagRows){
 
   const emps=empRows
     .filter(r=>r[CE.id]&&String(r[CE.id]).trim().toUpperCase().startsWith('EMP'))
-    .map(r=>({id:String(r[CE.id]).trim(),nome:String(r[CE.nome]||'').trim(),capital:parseNum(r[CE.cap]),data:parseDate(r[CE.data]),taxa:parseTaxa(r[CE.taxa]),prazo:parseNum(r[CE.prazo]),tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal:parseNum(r[CE.jTotal]),saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status:parseStatus(r[CE.status]),proxVenc:parseDate(r[CE.proxVenc]),vencContrato:parseDate(r[CE.vencContrato])}))
+    .map(r=>({id:String(r[CE.id]).trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital:parseNum(r[CE.cap]),data:parseDate(r[CE.data]),taxa:parseTaxa(r[CE.taxa]),prazo:parseNum(r[CE.prazo]),tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal:parseNum(r[CE.jTotal]),saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status:parseStatus(r[CE.status]),proxVenc:parseDate(r[CE.proxVenc]),vencContrato:parseDate(r[CE.vencContrato])}))
     .filter(e=>e.status!==null&&e.capital>0);
 
   const pags=pagRows
@@ -487,12 +490,13 @@ function render(empRows,pagRows){
   const cliMap={};
   emps.forEach(e=>{
     const k=e.nome||e.id;
-    if(!cliMap[k])cliMap[k]={nome:k,contratos:[],totalCap:0,totalJuros:0,totalPago:0,temAtraso:false,soQuitados:true};
+    if(!cliMap[k])cliMap[k]={nome:k,contratos:[],totalCap:0,totalJuros:0,totalPago:0,temAtraso:false,soQuitados:true,tel:''};
     cliMap[k].contratos.push(e);
     cliMap[k].totalCap+=e.capital;
     cliMap[k].totalJuros+=e.jTotal;
     if(e.status==='atraso')cliMap[k].temAtraso=true;
     if(e.status!=='quitado')cliMap[k].soQuitados=false;
+    if(e.tel&&!cliMap[k].tel)cliMap[k].tel=String(e.tel).replace(/\D/g,'');
   });
   pags.forEach(p=>{
     const e=emps.find(x=>x.id===p.id);if(!e)return;
@@ -776,6 +780,12 @@ function waCard(c){
   const opts=Object.entries(tpls).map(([k,v])=>`<option value="${k}"${k===def?' selected':''}>${v.lbl}</option>`).join('');
   const extra=c.diasAtraso>0?` · <span style="color:var(--red)">${c.diasAtraso}d atraso</span>`:'';
   const nomeSafe=c.nome.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  const telLimpo=(c.tel||'').replace(/\D/g,'');
+  const telClass=telLimpo?'has-number':'';
+  const telIcon=telLimpo?'📞':'📵';
+  const telHint=telLimpo
+    ? `<span style="font-size:0.5rem;color:var(--green);margin-left:6px">✓ número da planilha</span>`
+    : `<span style="font-size:0.5rem;color:var(--muted);margin-left:6px">sem número na planilha</span>`;
   return`<div class="wa-card" data-sit="${sit.tipo}">
   <div class="wa-card-head">
     <div class="wa-avatar" style="background:${waColor(c.nome)}">${ini}</div>
@@ -783,12 +793,14 @@ function waCard(c){
     <span class="wa-pill ${sit.cls}">${sit.label}</span>
   </div>
   <div class="wa-body">
-    <input class="wa-phone" id="${tid}_tel" type="tel" placeholder="📞 DDD + número (ex: 11999990000)">
+    <div style="display:flex;align-items:center;margin-bottom:4px">${telIcon}${telHint}</div>
+    <input class="wa-phone ${telClass}" id="${tid}_tel" type="tel" value="${telLimpo}" placeholder="Digite o DDD + número">
     <select class="wa-select" id="${tid}_sel" onchange="waPreview('${tid}','${nomeSafe}')">${opts}</select>
-    <div class="wa-preview" id="${tid}_prev">${tpls[def].txt}</div>
+    <div class="wa-edit-hint">✏️ Edite a mensagem abaixo antes de enviar</div>
+    <textarea class="wa-textarea" id="${tid}_prev">${tpls[def].txt}</textarea>
     <div class="wa-btns">
-      <a class="wa-btn-send" href="#" onclick="waEnviar('${tid}','${nomeSafe}');return false;"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> ABRIR WHATSAPP</a>
-      <button class="wa-btn-copy" id="${tid}_copy" onclick="waCopy('${tid}','${nomeSafe}')">📋</button>
+      <a class="wa-btn-send" href="#" onclick="waEnviar('${tid}');return false;"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> ABRIR WHATSAPP</a>
+      <button class="wa-btn-copy" id="${tid}_copy" onclick="waCopy('${tid}')">📋</button>
     </div>
   </div>
 </div>`;
@@ -798,22 +810,19 @@ function waPreview(tid,nome){
   const c=_waCli.find(x=>x.nome===nome);if(!c)return;
   const sel=document.getElementById(tid+'_sel');
   const prev=document.getElementById(tid+'_prev');
-  if(sel&&prev)prev.textContent=waTpls(c)[sel.value]?.txt||'';
+  if(sel&&prev)prev.value=waTpls(c)[sel.value]?.txt||'';
 }
 
-function waEnviar(tid,nome){
-  const c=_waCli.find(x=>x.nome===nome);if(!c)return;
+function waEnviar(tid){
   const tel=(document.getElementById(tid+'_tel')?.value||'').replace(/\D/g,'');
-  const sel=document.getElementById(tid+'_sel');
-  const msg=waTpls(c)[sel?.value]?.txt||'';
+  const msg=document.getElementById(tid+'_prev')?.value||'';
   window.open(tel?`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
 }
 
-function waCopy(tid,nome){
-  const c=_waCli.find(x=>x.nome===nome);if(!c)return;
-  const sel=document.getElementById(tid+'_sel');
+function waCopy(tid){
   const btn=document.getElementById(tid+'_copy');
-  navigator.clipboard.writeText(waTpls(c)[sel?.value]?.txt||'').then(()=>{
+  const msg=document.getElementById(tid+'_prev')?.value||'';
+  navigator.clipboard.writeText(msg).then(()=>{
     if(btn){btn.textContent='✅';btn.classList.add('copied');setTimeout(()=>{btn.textContent='📋';btn.classList.remove('copied');},2000);}
   });
 }
