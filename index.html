@@ -168,6 +168,38 @@ header{position:sticky;top:0;z-index:50;background:rgba(7,9,14,0.93);backdrop-fi
 .info-val{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;}
 footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px;align-items:center;}
 .footer-logo{font-family:'Cinzel',serif;font-size:0.75rem;color:var(--gold);opacity:0.5;letter-spacing:0.12em;}
+
+/* ── WHATSAPP ── */
+.wa-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.wa-sum{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
+.wa-sum-val{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;line-height:1;margin-bottom:3px;}
+.wa-sum-lbl{font-size:0.52rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;}
+.wa-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.wa-filter-btn{font-size:0.6rem;padding:5px 14px;border-radius:20px;border:1px solid var(--border2);color:var(--muted);background:transparent;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s;font-family:'DM Mono',monospace;}
+.wa-filter-btn.active{background:rgba(201,146,42,0.12);border-color:var(--gold);color:var(--gold2);}
+.wa-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;}
+.wa-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.wa-card-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);}
+.wa-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1rem;color:#07090e;flex-shrink:0;}
+.wa-client-name{font-size:0.72rem;color:var(--text);}
+.wa-client-meta{font-size:0.55rem;color:var(--muted);margin-top:2px;}
+.wa-pill{font-size:0.5rem;padding:3px 9px;border-radius:12px;white-space:nowrap;margin-left:auto;flex-shrink:0;}
+.wa-pill.atraso{background:rgba(239,71,111,0.15);color:var(--red);border:1px solid rgba(239,71,111,0.3);}
+.wa-pill.vence{background:rgba(201,146,42,0.12);color:var(--gold2);border:1px solid rgba(201,146,42,0.3);}
+.wa-pill.emdia{background:rgba(6,214,160,0.1);color:var(--green);border:1px solid rgba(6,214,160,0.2);}
+.wa-pill.inativo{background:rgba(90,98,130,0.1);color:var(--muted);border:1px solid var(--border2);}
+.wa-body{padding:14px 16px;}
+.wa-phone{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.62rem;padding:7px 10px;margin-bottom:8px;outline:none;}
+.wa-phone:focus{border-color:var(--gold);}
+.wa-select{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.62rem;padding:7px 10px;margin-bottom:8px;cursor:pointer;outline:none;}
+.wa-select:focus{border-color:var(--gold);}
+.wa-preview{background:var(--s2);border:1px solid var(--border);border-radius:8px;border-top-left-radius:2px;padding:12px;font-size:0.62rem;color:var(--text);line-height:1.7;white-space:pre-wrap;min-height:80px;margin-bottom:10px;}
+.wa-btns{display:flex;gap:8px;}
+.wa-btn-send{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:8px;padding:9px;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;text-decoration:none;letter-spacing:0.06em;}
+.wa-btn-copy{background:var(--s2);border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:9px 12px;font-size:0.62rem;cursor:pointer;font-family:'DM Mono',monospace;transition:all 0.2s;}
+.wa-btn-copy:hover{border-color:var(--gold);color:var(--gold);}
+.wa-btn-copy.copied{border-color:var(--green);color:var(--green);}
+.wa-empty{text-align:center;padding:40px;color:var(--muted);font-size:0.68rem;}
 </style>
 </head>
 <body>
@@ -221,6 +253,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="nav-tab" data-tab="clientes">👤 Clientes</div>
   <div class="nav-tab" data-tab="comparativo">📈 Comparativos</div>
   <div class="nav-tab" data-tab="agenda">📅 Agenda</div>
+  <div class="nav-tab" data-tab="whatsapp">📱 WhatsApp</div>
 </div>
 
 <!-- VISÃO GERAL -->
@@ -318,6 +351,27 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   </div>
   <div class="section-label">CONTRATOS VENCENDO EM 30 DIAS</div>
   <div class="card"><div class="card-header"><div><div class="card-title">🏦 Capital a Recuperar</div><div class="card-desc">Capital e juros de contratos próximos do vencimento</div></div><div class="card-badge">ESTRATÉGIA</div></div><div id="capitalDisp"></div></div>
+</div>
+
+<!-- WHATSAPP -->
+<div id="tab-whatsapp" class="tab-panel">
+  <div class="section-label">MENSAGENS WHATSAPP — ENVIO RÁPIDO</div>
+  <div class="wa-summary">
+    <div class="wa-sum"><div class="wa-sum-val" id="wa-n-total" style="color:var(--gold)">—</div><div class="wa-sum-lbl">Total Clientes</div></div>
+    <div class="wa-sum"><div class="wa-sum-val" id="wa-n-atraso" style="color:var(--red)">—</div><div class="wa-sum-lbl">Em Atraso</div></div>
+    <div class="wa-sum"><div class="wa-sum-val" id="wa-n-vence" style="color:var(--gold2)">—</div><div class="wa-sum-lbl">Vence em 7 dias</div></div>
+    <div class="wa-sum"><div class="wa-sum-val" id="wa-n-emdia" style="color:var(--green)">—</div><div class="wa-sum-lbl">Em Dia</div></div>
+  </div>
+  <div class="wa-filter-bar">
+    <button class="wa-filter-btn active" onclick="waFiltrar('todos',this)">Todos</button>
+    <button class="wa-filter-btn" onclick="waFiltrar('atraso',this)">⚠️ Em Atraso</button>
+    <button class="wa-filter-btn" onclick="waFiltrar('vence',this)">⏰ Vence em 7 dias</button>
+    <button class="wa-filter-btn" onclick="waFiltrar('emdia',this)">✅ Em Dia</button>
+    <button class="wa-filter-btn" onclick="waFiltrar('inativo',this)">💤 Inativos</button>
+  </div>
+  <div class="wa-cards" id="wa-cards">
+    <div class="wa-empty">Aguardando dados...</div>
+  </div>
 </div>
 
 <div style="text-align:right;margin-top:8px;font-size:0.57rem;color:var(--muted)">última atualização: <span id="last-update">—</span> · auto-refresh 15 min</div>
@@ -649,6 +703,132 @@ function render(empRows,pagRows){
   document.getElementById('capitalDisp').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"><div style="background:var(--s2);border-radius:10px;padding:14px;border:1px solid var(--border)"><div style="font-size:0.57rem;color:var(--muted);margin-bottom:6px">CAPITAL RETORNADO (QUITADOS)</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--green)">${fmt(capQuit)}</div><div style="font-size:0.55rem;color:var(--muted)">${quitados.length} contrato(s)</div></div><div style="background:var(--s2);border-radius:10px;padding:14px;border:1px solid var(--border)"><div style="font-size:0.57rem;color:var(--muted);margin-bottom:6px">A RECUPERAR EM 30 DIAS</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold)">${fmt(v30.reduce((s,e)=>s+e.capital+e.jTotal,0))}</div><div style="font-size:0.55rem;color:var(--muted)">${v30.length} contrato(s) vencendo</div></div></div>${v30.length===0?`<div style="color:var(--muted);font-size:0.68rem">Nenhum contrato vence nos próximos 30 dias.</div>`:v30.sort((a,b)=>a.vencContrato-b.vencContrato).map(e=>`<div class="info-row"><div><div class="info-label">${e.nome||e.id} <span style="color:var(--muted2)">· ${e.id}</span></div><div style="font-size:0.55rem;color:var(--muted);margin-top:2px">vence ${e.vencContrato.toLocaleDateString('pt-BR')}</div></div><div style="text-align:right"><div class="info-val" style="color:var(--purple)">${fmt(e.capital)}</div><div style="font-size:0.55rem;color:var(--green)">+${fmt(e.jTotal)} juros</div></div></div>`).join('')}`;
 
   document.getElementById('last-update').textContent=new Date().toLocaleTimeString('pt-BR');
+
+  // WhatsApp
+  waRender(clientes, abertos, atrasado, hoje);
+}
+
+// ── WHATSAPP ─────────────────────────────────────────────
+let _waCli=[], _waFiltro='todos';
+
+function waRender(clientes,abertos,atrasado,hoje){
+  const em7=new Date(hoje);em7.setDate(hoje.getDate()+7);
+  _waCli=clientes.map(c=>{
+    const ab=c.contratos.filter(e=>e.status!=='quitado');
+    const proxVenc=ab.map(e=>e.proxVenc).filter(Boolean).sort((a,b)=>a-b)[0]||null;
+    const diasAtraso=(proxVenc&&proxVenc<hoje)?Math.floor((hoje-proxVenc)/86400000):0;
+    const vence7=!!(proxVenc&&proxVenc>=hoje&&proxVenc<=em7);
+    return{...c,proxVenc,diasAtraso,vence7};
+  }).sort((a,b)=>{const o={atraso:0,vence:1,emdia:2,inativo:3};return(o[waSit(a).tipo]||9)-(o[waSit(b).tipo]||9);});
+  const nA=_waCli.filter(c=>c.diasAtraso>0).length;
+  const nV=_waCli.filter(c=>c.vence7&&!c.diasAtraso).length;
+  const nE=_waCli.filter(c=>waSit(c).tipo==='emdia').length;
+  document.getElementById('wa-n-total').textContent=_waCli.length;
+  document.getElementById('wa-n-atraso').textContent=nA;
+  document.getElementById('wa-n-vence').textContent=nV;
+  document.getElementById('wa-n-emdia').textContent=nE;
+  waRenderCards();
+}
+
+function waSit(c){
+  if(c.diasAtraso>0)return{tipo:'atraso',label:c.diasAtraso>15?'🔴 Atraso grave':'⚠️ Em atraso',cls:'atraso'};
+  if(c.vence7)return{tipo:'vence',label:'⏰ Vence em breve',cls:'vence'};
+  if(!c.ativo)return{tipo:'inativo',label:'💤 Inativo',cls:'inativo'};
+  return{tipo:'emdia',label:'✅ Em dia',cls:'emdia'};
+}
+
+function waTpls(c){
+  const nome=c.nome.split(' ')[0];
+  const val=c.totalJuros>0?'R$ '+Math.round(c.totalJuros).toLocaleString('pt-BR'):'valor em aberto';
+  const cap='R$ '+Math.round(c.totalCap).toLocaleString('pt-BR');
+  const venc=c.proxVenc?c.proxVenc.toLocaleDateString('pt-BR'):'—';
+  const dias=c.diasAtraso;
+  return{
+    suave:      {lbl:'💬 Cobrança Suave',         txt:`Olá, ${nome}! Tudo bem? 😊\n\nPassando para lembrar que temos uma parcela de *${val}* com vencimento em *${venc}*.\n\nQualquer dúvida, estou à disposição! 🙏`},
+    formal:     {lbl:'📋 Cobrança Formal',         txt:`Olá, ${nome}.\n\nIdentificamos a parcela de *${val}* como pendente (vencimento: *${venc}*).\n\nPor favor, entre em contato para regularizarmos.\n\nAtenciosamente, Capital Investimentos.`},
+    atraso_leve:{lbl:'⚠️ Atraso (até 15 dias)',   txt:`Olá, ${nome}! Como vai?\n\nSua parcela de *${val}* está em atraso há *${dias} dia(s)*.\n\nPodemos resolver rapidinho — me avise quando puder! 😊`},
+    atraso_grav:{lbl:'🔴 Atraso Grave (+15 dias)', txt:`${nome}, bom dia.\n\nSua parcela de *${val}* está em atraso há *${dias} dias*. Precisamos regularizar urgente para evitar encargos adicionais.\n\nAguardo seu contato. Obrigado.`},
+    vencimento: {lbl:'⏰ Aviso de Vencimento',     txt:`Olá, ${nome}! 👋\n\nAvisando que sua parcela de *${val}* vence em *${venc}*.\n\nPosso enviar os dados para pagamento agora, é só falar! 😉`},
+    renovacao:  {lbl:'🔄 Proposta de Renovação',   txt:`Olá, ${nome}! Espero que esteja bem 😊\n\nSeu contrato de *${cap}* está chegando ao fim. Quer renovar ou ampliar o limite?\n\nTenho condições especiais para você. Vamos conversar?`},
+    quitacao:   {lbl:'🎉 Parabéns pela Quitação',  txt:`${nome}! 🎉 Parabéns pela quitação!\n\nFoi um prazer trabalhar com você. Quando precisar, estarei aqui — com condições especiais para quem já é cliente!\n\nObrigado pela confiança! 🙏`},
+    reativacao: {lbl:'💤 Reativar Cliente',         txt:`Olá, ${nome}! Sumiu hein? 😄\n\nSentimos sua falta! Se precisar de crédito rápido com taxas especiais, me chama — tenho uma oferta exclusiva para você!\n\nAté mais! 👋`},
+  };
+}
+
+function waDefTpl(c){
+  const s=waSit(c).tipo;
+  if(s==='atraso')return c.diasAtraso>15?'atraso_grav':'atraso_leve';
+  if(s==='vence') return'vencimento';
+  if(s==='inativo')return'reativacao';
+  return'suave';
+}
+
+function waColor(nome){
+  const cores=['#c9922a','#4895ef','#06d6a0','#9b5de5','#ef476f','#e8b84b'];
+  let h=0;for(let i=0;i<nome.length;i++)h=(h*31+nome.charCodeAt(i))%cores.length;
+  return cores[h];
+}
+
+function waCard(c){
+  const sit=waSit(c),tpls=waTpls(c),def=waDefTpl(c);
+  const ini=c.nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const tid='wa_'+c.nome.replace(/[^a-zA-Z0-9]/g,'_');
+  const opts=Object.entries(tpls).map(([k,v])=>`<option value="${k}"${k===def?' selected':''}>${v.lbl}</option>`).join('');
+  const extra=c.diasAtraso>0?` · <span style="color:var(--red)">${c.diasAtraso}d atraso</span>`:'';
+  const nomeSafe=c.nome.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  return`<div class="wa-card" data-sit="${sit.tipo}">
+  <div class="wa-card-head">
+    <div class="wa-avatar" style="background:${waColor(c.nome)}">${ini}</div>
+    <div style="flex:1;min-width:0"><div class="wa-client-name">${c.nome}</div><div class="wa-client-meta">${c.qtdContratos} contrato(s) · R$ ${Math.round(c.totalCap).toLocaleString('pt-BR')}${extra}</div></div>
+    <span class="wa-pill ${sit.cls}">${sit.label}</span>
+  </div>
+  <div class="wa-body">
+    <input class="wa-phone" id="${tid}_tel" type="tel" placeholder="📞 DDD + número (ex: 11999990000)">
+    <select class="wa-select" id="${tid}_sel" onchange="waPreview('${tid}','${nomeSafe}')">${opts}</select>
+    <div class="wa-preview" id="${tid}_prev">${tpls[def].txt}</div>
+    <div class="wa-btns">
+      <a class="wa-btn-send" href="#" onclick="waEnviar('${tid}','${nomeSafe}');return false;"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> ABRIR WHATSAPP</a>
+      <button class="wa-btn-copy" id="${tid}_copy" onclick="waCopy('${tid}','${nomeSafe}')">📋</button>
+    </div>
+  </div>
+</div>`;
+}
+
+function waPreview(tid,nome){
+  const c=_waCli.find(x=>x.nome===nome);if(!c)return;
+  const sel=document.getElementById(tid+'_sel');
+  const prev=document.getElementById(tid+'_prev');
+  if(sel&&prev)prev.textContent=waTpls(c)[sel.value]?.txt||'';
+}
+
+function waEnviar(tid,nome){
+  const c=_waCli.find(x=>x.nome===nome);if(!c)return;
+  const tel=(document.getElementById(tid+'_tel')?.value||'').replace(/\D/g,'');
+  const sel=document.getElementById(tid+'_sel');
+  const msg=waTpls(c)[sel?.value]?.txt||'';
+  window.open(tel?`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+function waCopy(tid,nome){
+  const c=_waCli.find(x=>x.nome===nome);if(!c)return;
+  const sel=document.getElementById(tid+'_sel');
+  const btn=document.getElementById(tid+'_copy');
+  navigator.clipboard.writeText(waTpls(c)[sel?.value]?.txt||'').then(()=>{
+    if(btn){btn.textContent='✅';btn.classList.add('copied');setTimeout(()=>{btn.textContent='📋';btn.classList.remove('copied');},2000);}
+  });
+}
+
+function waFiltrar(filtro,el){
+  _waFiltro=filtro;
+  document.querySelectorAll('.wa-filter-btn').forEach(b=>b.classList.remove('active'));
+  if(el)el.classList.add('active');
+  waRenderCards();
+}
+
+function waRenderCards(){
+  const cont=document.getElementById('wa-cards');if(!cont)return;
+  const lista=_waFiltro==='todos'?_waCli:_waCli.filter(c=>waSit(c).tipo===_waFiltro);
+  cont.innerHTML=lista.length?lista.map(waCard).join(''):`<div class="wa-empty">Nenhum cliente nesta categoria.</div>`;
 }
 
 async function loadData(){
