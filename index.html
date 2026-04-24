@@ -786,10 +786,31 @@ const TPL_DEFAULT = {
 function tplLoad(){
   try{
     const saved=localStorage.getItem('wa_templates');
-    if(saved) return {...TPL_DEFAULT,...JSON.parse(saved)};
+    if(saved){
+      const parsed=JSON.parse(saved);
+      // Sempre preserva lbl do padrão, só sobrescreve txt
+      const merged={};
+      Object.keys(TPL_DEFAULT).forEach(k=>{
+        merged[k]={...TPL_DEFAULT[k], txt: parsed[k]?.txt || TPL_DEFAULT[k].txt};
+      });
+      return merged;
+    }
   }catch(e){}
   return {...TPL_DEFAULT};
 }
+// Limpa localStorage corrompido (versão antiga sem lbl)
+try{
+  const saved=localStorage.getItem('wa_templates');
+  if(saved){
+    const parsed=JSON.parse(saved);
+    const firstVal=Object.values(parsed)[0];
+    if(firstVal && firstVal.lbl!==undefined){
+      // Formato antigo com lbl — remove e recomeça limpo
+      localStorage.removeItem('wa_templates');
+    }
+  }
+}catch(e){ try{localStorage.removeItem('wa_templates');}catch(e2){} }
+
 let _tpls = tplLoad();
 
 // Substitui variáveis {nome}, {valor}, etc. pelo valor real do cliente
@@ -826,20 +847,22 @@ function tplModalClose(){
 }
 function tplSave(){
   const updated={};
-  Object.keys(_tpls).forEach(key=>{
+  Object.keys(TPL_DEFAULT).forEach(key=>{
     const el=document.getElementById('tpl_txt_'+key);
-    updated[key]={..._tpls[key], txt: el?el.value:_tpls[key].txt};
+    // Sempre preserva lbl do padrão, só atualiza txt
+    updated[key]={ lbl: TPL_DEFAULT[key].lbl, txt: el ? el.value : _tpls[key].txt };
   });
   _tpls=updated;
-  try{ localStorage.setItem('wa_templates', JSON.stringify(
-    Object.fromEntries(Object.entries(updated).map(([k,v])=>[k,{txt:v.txt}]))
-  )); }catch(e){}
+  try{
+    // Salva só txt no localStorage (lbl sempre vem do TPL_DEFAULT)
+    localStorage.setItem('wa_templates', JSON.stringify(
+      Object.fromEntries(Object.entries(updated).map(([k,v])=>[k,{txt:v.txt}]))
+    ));
+  }catch(e){}
   tplModalClose();
-  waRenderCards(); // re-render com novos templates
-  // Feedback visual
+  waRenderCards();
   const btn=document.querySelector('.tpl-btn-save');
-  const orig=btn.textContent; btn.textContent='✅ SALVO!';
-  setTimeout(()=>btn.textContent=orig,1800);
+  if(btn){ const orig=btn.textContent; btn.textContent='✅ SALVO!'; setTimeout(()=>btn.textContent=orig,1800); }
 }
 function tplReset(){
   if(!confirm('Restaurar todos os templates para o padrão original?'))return;
