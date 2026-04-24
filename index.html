@@ -479,6 +479,21 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 <!-- CLIENTES -->
 <div id="tab-clientes" class="tab-panel">
 
+  <div class="section-label">PERFIL DA BASE DE CLIENTES</div>
+  <div class="grid-4">
+    <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Clientes Ativos</div><div class="kpi-val" id="cli-ativos-n" style="color:var(--green)">—</div><div class="kpi-sub">com contrato aberto</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--muted)"></div><div class="kpi-lbl">Clientes Inativos</div><div class="kpi-val" id="cli-inativos-n" style="color:var(--muted)">—</div><div class="kpi-sub">somente quitados</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Recorrência</div><div class="kpi-val" id="cli-recorrencia" style="color:var(--gold)">—</div><div class="kpi-sub">repetem empréstimo</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Tempo Médio Relac.</div><div class="kpi-val" id="cli-tempo-rel" style="color:var(--blue)">—</div><div class="kpi-sub">meses em média</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-header"><div><div class="card-title">💰 Lucro por Cliente</div><div class="card-desc">Juros totais gerados por cliente</div></div><div class="card-badge">RESULTADO</div></div><div class="chart-wrap xtall"><canvas id="chartLucroCliente"></canvas></div></div>
+    <div class="card"><div class="card-header"><div><div class="card-title">🎫 Ticket Médio por Cliente</div><div class="card-desc">Valor médio emprestado por cliente</div></div><div class="card-badge">TICKET</div></div><div class="chart-wrap xtall"><canvas id="chartTicketCliente"></canvas></div></div>
+  </div>
+  <div class="section-label">CLUSTERIZAÇÃO DE CLIENTES</div>
+  <div class="card"><div class="card-header"><div><div class="card-title">🧩 Perfil de Clientes</div><div class="card-desc">Agrupamento automático por comportamento: Premium · Regular Fiel · Alto Risco · Inativo</div></div><div class="card-badge">IA</div></div><div class="profile-grid" id="profileGrid"></div></div>
+  <div class="card"><div class="card-header"><div><div class="card-title">📋 Histórico de Pagamentos por Cliente</div><div class="card-desc">Pontualidade e volume registrado</div></div><div class="card-badge">HISTÓRICO</div></div><div class="hist-list" id="histList"></div></div>
+
   <!-- PASTA DE CLIENTES -->
   <div class="section-label">📁 PASTA DE CLIENTES</div>
   <div class="card" style="margin-bottom:16px">
@@ -496,21 +511,6 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       <div class="pasta-empty" id="pasta-empty">Nenhuma ficha cadastrada ainda.<br><br>Clique em <strong>+ Nova Ficha</strong> para começar.</div>
     </div>
   </div>
-
-  <div class="section-label">PERFIL DA BASE DE CLIENTES</div>
-  <div class="grid-4">
-    <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Clientes Ativos</div><div class="kpi-val" id="cli-ativos-n" style="color:var(--green)">—</div><div class="kpi-sub">com contrato aberto</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--muted)"></div><div class="kpi-lbl">Clientes Inativos</div><div class="kpi-val" id="cli-inativos-n" style="color:var(--muted)">—</div><div class="kpi-sub">somente quitados</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Recorrência</div><div class="kpi-val" id="cli-recorrencia" style="color:var(--gold)">—</div><div class="kpi-sub">repetem empréstimo</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Tempo Médio Relac.</div><div class="kpi-val" id="cli-tempo-rel" style="color:var(--blue)">—</div><div class="kpi-sub">meses em média</div></div>
-  </div>
-  <div class="grid-2">
-    <div class="card"><div class="card-header"><div><div class="card-title">💰 Lucro por Cliente</div><div class="card-desc">Juros totais gerados por cliente</div></div><div class="card-badge">RESULTADO</div></div><div class="chart-wrap xtall"><canvas id="chartLucroCliente"></canvas></div></div>
-    <div class="card"><div class="card-header"><div><div class="card-title">🎫 Ticket Médio por Cliente</div><div class="card-desc">Valor médio emprestado por cliente</div></div><div class="card-badge">TICKET</div></div><div class="chart-wrap xtall"><canvas id="chartTicketCliente"></canvas></div></div>
-  </div>
-  <div class="section-label">CLUSTERIZAÇÃO DE CLIENTES</div>
-  <div class="card"><div class="card-header"><div><div class="card-title">🧩 Perfil de Clientes</div><div class="card-desc">Agrupamento automático por comportamento: Premium · Regular Fiel · Alto Risco · Inativo</div></div><div class="card-badge">IA</div></div><div class="profile-grid" id="profileGrid"></div></div>
-  <div class="card"><div class="card-header"><div><div class="card-title">📋 Histórico de Pagamentos por Cliente</div><div class="card-desc">Pontualidade e volume registrado</div></div><div class="card-badge">HISTÓRICO</div></div><div class="hist-list" id="histList"></div></div>
 </div>
 
 <!-- COMPARATIVOS -->
@@ -671,6 +671,124 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="footer-logo">Capital Investimentos</div>
   <div>Soluções Financeiras Estratégicas · Dashboard via Google Sheets</div>
 </footer>
+
+<!-- MODAL PASTA DE CLIENTES -->
+<div class="pasta-modal-overlay" id="pasta-modal-overlay" onclick="if(event.target===this)pastaModalClose()">
+  <div class="pasta-modal">
+    <div class="pasta-modal-top">
+      <div class="pasta-modal-avatar-wrap">
+        <div class="pasta-modal-avatar" id="pasta-av-preview" onclick="document.getElementById('pasta-foto-input').click()">
+          <span id="pasta-av-ini">?</span>
+        </div>
+        <div class="pasta-modal-avatar-btn" onclick="document.getElementById('pasta-foto-input').click()">📷</div>
+        <input type="file" id="pasta-foto-input" accept="image/*" class="pasta-upload-input" onchange="pastaFotoChange(this)">
+      </div>
+      <div class="pasta-modal-title-wrap">
+        <div class="pasta-modal-name" id="pasta-modal-title">Nova Ficha</div>
+        <div class="pasta-modal-sub">Preencha os dados do cliente. Tudo fica salvo localmente no seu navegador.</div>
+      </div>
+    </div>
+    <div class="pasta-modal-body">
+      <!-- DADOS PESSOAIS -->
+      <div class="pasta-section">
+        <div class="pasta-section-title">👤 DADOS PESSOAIS</div>
+        <div class="pasta-form-grid">
+          <div class="pasta-field full"><div class="pasta-label">Nome Completo *</div><input class="pasta-input" id="pf-nome" type="text" placeholder="Nome completo" oninput="pastaAtualizarTitulo()"></div>
+          <div class="pasta-field"><div class="pasta-label">CPF</div><input class="pasta-input" id="pf-cpf" type="text" placeholder="000.000.000-00" maxlength="14"></div>
+          <div class="pasta-field"><div class="pasta-label">RG</div><input class="pasta-input" id="pf-rg" type="text" placeholder="00.000.000-0"></div>
+          <div class="pasta-field"><div class="pasta-label">Idade</div><input class="pasta-input" id="pf-idade" type="number" placeholder="30" min="18" max="99"></div>
+          <div class="pasta-field"><div class="pasta-label">Data de Nascimento</div><input class="pasta-input" id="pf-nasc" type="date"></div>
+          <div class="pasta-field"><div class="pasta-label">Telefone / WhatsApp</div><input class="pasta-input" id="pf-tel" type="text" placeholder="(00) 00000-0000"></div>
+          <div class="pasta-field"><div class="pasta-label">E-mail</div><input class="pasta-input" id="pf-email" type="email" placeholder="email@exemplo.com"></div>
+        </div>
+      </div>
+      <!-- ENDEREÇO -->
+      <div class="pasta-section">
+        <div class="pasta-section-title">🏠 ENDEREÇO RESIDENCIAL</div>
+        <div class="pasta-form-grid">
+          <div class="pasta-field full"><div class="pasta-label">Endereço Completo</div><input class="pasta-input" id="pf-end" type="text" placeholder="Rua, número, bairro"></div>
+          <div class="pasta-field"><div class="pasta-label">Cidade</div><input class="pasta-input" id="pf-cidade" type="text" placeholder="Cidade"></div>
+          <div class="pasta-field"><div class="pasta-label">Estado</div><input class="pasta-input" id="pf-estado" type="text" placeholder="SP" maxlength="2"></div>
+          <div class="pasta-field"><div class="pasta-label">CEP</div><input class="pasta-input" id="pf-cep" type="text" placeholder="00000-000" maxlength="9"></div>
+        </div>
+      </div>
+      <!-- RENDA / TRABALHO -->
+      <div class="pasta-section">
+        <div class="pasta-section-title">💼 RENDA & TRABALHO</div>
+        <div class="pasta-form-grid">
+          <div class="pasta-field">
+            <div class="pasta-label">Tipo de Ocupação</div>
+            <select class="pasta-input" id="pf-ocup" onchange="pastaOcupChange()">
+              <option value="">Selecione...</option>
+              <option value="clt">CLT / Empregado</option>
+              <option value="autonomo">Autônomo / Freelancer</option>
+              <option value="empresario">Empresário / Dono de empresa</option>
+              <option value="aposentado">Aposentado / Pensionista</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+          <div class="pasta-field"><div class="pasta-label">Empresa / Empregador</div><input class="pasta-input" id="pf-empresa" type="text" placeholder="Nome da empresa"></div>
+          <div class="pasta-field" id="pf-nome-empresa-wrap" style="display:none"><div class="pasta-label">Nome da Empresa (proprietário)</div><input class="pasta-input" id="pf-nome-empresa" type="text" placeholder="Razão social ou nome fantasia"></div>
+          <div class="pasta-field"><div class="pasta-label">Renda / Faturamento Mensal (R$)</div><input class="pasta-input" id="pf-renda" type="number" placeholder="0,00"></div>
+          <div class="pasta-field"><div class="pasta-label">Cargo / Função</div><input class="pasta-input" id="pf-cargo" type="text" placeholder="Ex: Gerente, Sócio..."></div>
+          <div class="pasta-field full"><div class="pasta-label">Observações</div><textarea class="pasta-textarea" id="pf-obs" placeholder="Informações adicionais sobre o cliente..."></textarea></div>
+        </div>
+      </div>
+      <!-- DOCUMENTOS & ARQUIVOS -->
+      <div class="pasta-section">
+        <div class="pasta-section-title">📎 DOCUMENTOS & ARQUIVOS</div>
+        <div class="pasta-uploads">
+          <div class="pasta-upload-box" id="box-rg-f" onclick="document.getElementById('inp-rg-f').click()">
+            <input type="file" id="inp-rg-f" accept="image/*,.pdf" class="pasta-upload-input" onchange="pastaArqChange('rg-f',this)">
+            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('rg-f')">✕</button>
+            <div class="pasta-upload-icon">🪪</div>
+            <div class="pasta-upload-lbl">RG — Frente<br><span style="font-size:0.47rem;color:var(--muted2)">imagem ou PDF</span></div>
+            <div class="pasta-upload-name" id="nome-rg-f"></div>
+          </div>
+          <div class="pasta-upload-box" id="box-rg-v" onclick="document.getElementById('inp-rg-v').click()">
+            <input type="file" id="inp-rg-v" accept="image/*,.pdf" class="pasta-upload-input" onchange="pastaArqChange('rg-v',this)">
+            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('rg-v')">✕</button>
+            <div class="pasta-upload-icon">🪪</div>
+            <div class="pasta-upload-lbl">RG — Verso<br><span style="font-size:0.47rem;color:var(--muted2)">imagem ou PDF</span></div>
+            <div class="pasta-upload-name" id="nome-rg-v"></div>
+          </div>
+          <div class="pasta-upload-box" id="box-holerite" onclick="document.getElementById('inp-holerite').click()">
+            <input type="file" id="inp-holerite" accept="image/*,.pdf" class="pasta-upload-input" onchange="pastaArqChange('holerite',this)">
+            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('holerite')">✕</button>
+            <div class="pasta-upload-icon">📄</div>
+            <div class="pasta-upload-lbl">Holerite / Extrato<br><span style="font-size:0.47rem;color:var(--muted2)">comprovante de renda</span></div>
+            <div class="pasta-upload-name" id="nome-holerite"></div>
+          </div>
+          <div class="pasta-upload-box" id="box-comp-end" onclick="document.getElementById('inp-comp-end').click()">
+            <input type="file" id="inp-comp-end" accept="image/*,.pdf" class="pasta-upload-input" onchange="pastaArqChange('comp-end',this)">
+            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('comp-end')">✕</button>
+            <div class="pasta-upload-icon">📮</div>
+            <div class="pasta-upload-lbl">Comprovante de Endereço<br><span style="font-size:0.47rem;color:var(--muted2)">conta, boleto, etc.</span></div>
+            <div class="pasta-upload-name" id="nome-comp-end"></div>
+          </div>
+          <div class="pasta-upload-box" id="box-foto-casa" onclick="document.getElementById('inp-foto-casa').click()">
+            <input type="file" id="inp-foto-casa" accept="image/*" class="pasta-upload-input" onchange="pastaArqChange('foto-casa',this)">
+            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('foto-casa')">✕</button>
+            <div class="pasta-upload-icon">🏠</div>
+            <div class="pasta-upload-lbl">Foto da Casa<br><span style="font-size:0.47rem;color:var(--muted2)">frente da residência</span></div>
+            <div class="pasta-upload-name" id="nome-foto-casa"></div>
+          </div>
+          <div class="pasta-upload-box" id="box-foto-empresa" onclick="document.getElementById('inp-foto-empresa').click()">
+            <input type="file" id="inp-foto-empresa" accept="image/*" class="pasta-upload-input" onchange="pastaArqChange('foto-empresa',this)">
+            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('foto-empresa')">✕</button>
+            <div class="pasta-upload-icon">🏢</div>
+            <div class="pasta-upload-lbl">Foto da Empresa<br><span style="font-size:0.47rem;color:var(--muted2)">frente do estabelecimento</span></div>
+            <div class="pasta-upload-name" id="nome-foto-empresa"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pasta-modal-footer">
+      <button class="pasta-btn-cancel" onclick="pastaModalClose()">Cancelar</button>
+      <button class="pasta-btn-save" onclick="pastaSalvar()">💾 SALVAR FICHA</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const SHEET_ID='1g9336ZjN2jnVoxA5CFQmlaDxTkda7tlz48_EAlKUjr4';
@@ -1629,137 +1747,7 @@ function simPDF(){
 
 </div>
 
-<!-- MODAL PASTA DE CLIENTES -->
-<div class="pasta-modal-overlay" id="pasta-modal-overlay" onclick="if(event.target===this)pastaModalClose()">
-  <div class="pasta-modal">
-    <div class="pasta-modal-top">
-      <div class="pasta-modal-avatar-wrap">
-        <div class="pasta-modal-avatar" id="pasta-av-preview" onclick="document.getElementById('pasta-foto-input').click()">
-          <span id="pasta-av-ini">?</span>
-        </div>
-        <div class="pasta-modal-avatar-btn" onclick="document.getElementById('pasta-foto-input').click()">📷</div>
-        <input type="file" id="pasta-foto-input" accept="image/*" class="pasta-upload-input" onchange="pastaFotoChange(this)">
-      </div>
-      <div class="pasta-modal-title-wrap">
-        <div class="pasta-modal-name" id="pasta-modal-title">Nova Ficha</div>
-        <div class="pasta-modal-sub">Preencha os dados do cliente. Tudo fica salvo localmente no seu navegador.</div>
-      </div>
-    </div>
-    <div class="pasta-modal-body">
-
-      <!-- DADOS PESSOAIS -->
-      <div class="pasta-section">
-        <div class="pasta-section-title">👤 DADOS PESSOAIS</div>
-        <div class="pasta-form-grid">
-          <div class="pasta-field full"><div class="pasta-label">Nome Completo *</div><input class="pasta-input" id="pf-nome" type="text" placeholder="Nome completo" oninput="pastaAtualizarTitulo()"></div>
-          <div class="pasta-field"><div class="pasta-label">CPF</div><input class="pasta-input" id="pf-cpf" type="text" placeholder="000.000.000-00" maxlength="14"></div>
-          <div class="pasta-field"><div class="pasta-label">RG</div><input class="pasta-input" id="pf-rg" type="text" placeholder="00.000.000-0"></div>
-          <div class="pasta-field"><div class="pasta-label">Idade</div><input class="pasta-input" id="pf-idade" type="number" placeholder="30" min="18" max="99"></div>
-          <div class="pasta-field"><div class="pasta-label">Data de Nascimento</div><input class="pasta-input" id="pf-nasc" type="date"></div>
-          <div class="pasta-field"><div class="pasta-label">Telefone / WhatsApp</div><input class="pasta-input" id="pf-tel" type="text" placeholder="(00) 00000-0000"></div>
-          <div class="pasta-field"><div class="pasta-label">E-mail</div><input class="pasta-input" id="pf-email" type="email" placeholder="email@exemplo.com"></div>
-        </div>
-      </div>
-
-      <!-- ENDEREÇO -->
-      <div class="pasta-section">
-        <div class="pasta-section-title">🏠 ENDEREÇO RESIDENCIAL</div>
-        <div class="pasta-form-grid">
-          <div class="pasta-field full"><div class="pasta-label">Endereço Completo</div><input class="pasta-input" id="pf-end" type="text" placeholder="Rua, número, bairro"></div>
-          <div class="pasta-field"><div class="pasta-label">Cidade</div><input class="pasta-input" id="pf-cidade" type="text" placeholder="Cidade"></div>
-          <div class="pasta-field"><div class="pasta-label">Estado</div><input class="pasta-input" id="pf-estado" type="text" placeholder="SP" maxlength="2"></div>
-          <div class="pasta-field"><div class="pasta-label">CEP</div><input class="pasta-input" id="pf-cep" type="text" placeholder="00000-000" maxlength="9"></div>
-        </div>
-      </div>
-
-      <!-- RENDA / TRABALHO -->
-      <div class="pasta-section">
-        <div class="pasta-section-title">💼 RENDA & TRABALHO</div>
-        <div class="pasta-form-grid">
-          <div class="pasta-field">
-            <div class="pasta-label">Tipo de Ocupação</div>
-            <select class="pasta-input" id="pf-ocup" onchange="pastaOcupChange()">
-              <option value="">Selecione...</option>
-              <option value="clt">CLT / Empregado</option>
-              <option value="autonomo">Autônomo / Freelancer</option>
-              <option value="empresario">Empresário / Dono de empresa</option>
-              <option value="aposentado">Aposentado / Pensionista</option>
-              <option value="outro">Outro</option>
-            </select>
-          </div>
-          <div class="pasta-field"><div class="pasta-label">Empresa / Empregador</div><input class="pasta-input" id="pf-empresa" type="text" placeholder="Nome da empresa"></div>
-          <div class="pasta-field" id="pf-nome-empresa-wrap" style="display:none"><div class="pasta-label">Nome da Empresa (proprietário)</div><input class="pasta-input" id="pf-nome-empresa" type="text" placeholder="Razão social ou nome fantasia"></div>
-          <div class="pasta-field"><div class="pasta-label">Renda / Faturamento Mensal (R$)</div><input class="pasta-input" id="pf-renda" type="number" placeholder="0,00"></div>
-          <div class="pasta-field"><div class="pasta-label">Cargo / Função</div><input class="pasta-input" id="pf-cargo" type="text" placeholder="Ex: Gerente, Sócio..."></div>
-          <div class="pasta-field full"><div class="pasta-label">Observações</div><textarea class="pasta-textarea" id="pf-obs" placeholder="Informações adicionais sobre o cliente..."></textarea></div>
-        </div>
-      </div>
-
-      <!-- DOCUMENTOS & ARQUIVOS -->
-      <div class="pasta-section">
-        <div class="pasta-section-title">📎 DOCUMENTOS & ARQUIVOS</div>
-        <div class="pasta-uploads">
-
-          <div class="pasta-upload-box" id="box-rg-f" onclick="document.getElementById('inp-rg-f').click()">
-            <input type="file" id="inp-rg-f" accept="image/*,.pdf" class="pasta-upload-input" onchange="pastaArqChange('rg-f',this)">
-            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('rg-f')">✕</button>
-            <div class="pasta-upload-icon">🪪</div>
-            <div class="pasta-upload-lbl">RG — Frente<br><span style="font-size:0.47rem;color:var(--muted2)">imagem ou PDF</span></div>
-            <div class="pasta-upload-name" id="nome-rg-f"></div>
-          </div>
-
-          <div class="pasta-upload-box" id="box-rg-v" onclick="document.getElementById('inp-rg-v').click()">
-            <input type="file" id="inp-rg-v" accept="image/*,.pdf" class="pasta-upload-input" onchange="pastaArqChange('rg-v',this)">
-            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('rg-v')">✕</button>
-            <div class="pasta-upload-icon">🪪</div>
-            <div class="pasta-upload-lbl">RG — Verso<br><span style="font-size:0.47rem;color:var(--muted2)">imagem ou PDF</span></div>
-            <div class="pasta-upload-name" id="nome-rg-v"></div>
-          </div>
-
-          <div class="pasta-upload-box" id="box-holerite" onclick="document.getElementById('inp-holerite').click()">
-            <input type="file" id="inp-holerite" accept="image/*,.pdf" class="pasta-upload-input" onchange="pastaArqChange('holerite',this)">
-            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('holerite')">✕</button>
-            <div class="pasta-upload-icon">📄</div>
-            <div class="pasta-upload-lbl">Holerite / Extrato<br><span style="font-size:0.47rem;color:var(--muted2)">comprovante de renda</span></div>
-            <div class="pasta-upload-name" id="nome-holerite"></div>
-          </div>
-
-          <div class="pasta-upload-box" id="box-comp-end" onclick="document.getElementById('inp-comp-end').click()">
-            <input type="file" id="inp-comp-end" accept="image/*,.pdf" class="pasta-upload-input" onchange="pastaArqChange('comp-end',this)">
-            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('comp-end')">✕</button>
-            <div class="pasta-upload-icon">📮</div>
-            <div class="pasta-upload-lbl">Comprovante de Endereço<br><span style="font-size:0.47rem;color:var(--muted2)">conta, boleto, etc.</span></div>
-            <div class="pasta-upload-name" id="nome-comp-end"></div>
-          </div>
-
-          <div class="pasta-upload-box" id="box-foto-casa" onclick="document.getElementById('inp-foto-casa').click()">
-            <input type="file" id="inp-foto-casa" accept="image/*" class="pasta-upload-input" onchange="pastaArqChange('foto-casa',this)">
-            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('foto-casa')">✕</button>
-            <div class="pasta-upload-icon">🏠</div>
-            <div class="pasta-upload-lbl">Foto da Casa<br><span style="font-size:0.47rem;color:var(--muted2)">frente da residência</span></div>
-            <div class="pasta-upload-name" id="nome-foto-casa"></div>
-          </div>
-
-          <div class="pasta-upload-box" id="box-foto-empresa" onclick="document.getElementById('inp-foto-empresa').click()">
-            <input type="file" id="inp-foto-empresa" accept="image/*" class="pasta-upload-input" onchange="pastaArqChange('foto-empresa',this)">
-            <button class="pasta-upload-clear" onclick="event.stopPropagation();pastaArqClear('foto-empresa')">✕</button>
-            <div class="pasta-upload-icon">🏢</div>
-            <div class="pasta-upload-lbl">Foto da Empresa<br><span style="font-size:0.47rem;color:var(--muted2)">frente do estabelecimento</span></div>
-            <div class="pasta-upload-name" id="nome-foto-empresa"></div>
-          </div>
-
-        </div>
-      </div>
-
-    </div>
-    <div class="pasta-modal-footer">
-      <button class="pasta-btn-cancel" onclick="pastaModalClose()">Cancelar</button>
-      <button class="pasta-btn-save" onclick="pastaSalvar()">💾 SALVAR FICHA</button>
-    </div>
-  </div>
-</div>
-</body></html>`;
-  const w=window.open('','_blank');
+</body></html>\`;
   w.document.write(html);
   w.document.close();
   const s=w.document.createElement('script');
