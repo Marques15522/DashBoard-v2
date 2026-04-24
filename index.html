@@ -3,186 +3,447 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Capital Investimentos — Dashboard Estratégico</title>
+<title>Dashboard Estratégico — Empréstimos</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#07090e;--s1:#0c0f18;--s2:#111521;--s3:#161b2a;--border:#1a2035;--border2:#212840;--gold:#c9922a;--gold2:#e8b84b;--gold3:#f5d080;--green:#06d6a0;--red:#ef476f;--blue:#4895ef;--purple:#9b5de5;--text:#dde1f0;--muted:#5a6282;--muted2:#3d4466;}
-*{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(ellipse 80% 50% at 20% 0%,rgba(201,146,42,0.05) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(6,214,160,0.03) 0%,transparent 60%);pointer-events:none;z-index:0;}
-#loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:999;transition:opacity 0.6s ease;}
-#loading-screen.hidden{opacity:0;pointer-events:none;}
-.load-logo-wrap{display:flex;align-items:center;gap:14px;}
-.load-logo-bars{display:flex;align-items:flex-end;gap:2px;height:36px;}
-.load-logo-bars span{display:block;width:3px;background:var(--gold);border-radius:1px;}
-.load-brand{font-family:'Cinzel',serif;font-size:1.6rem;color:var(--gold);letter-spacing:0.06em;}
-.load-sub{font-size:0.62rem;color:var(--gold);opacity:0.6;letter-spacing:0.25em;text-transform:uppercase;}
-.load-bar-wrap{width:220px;height:1px;background:var(--border);border-radius:1px;overflow:hidden;}
-.load-bar{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));animation:loadprog 2s ease forwards;}
-@keyframes loadprog{from{width:0;}to{width:100%;}}
-.load-text{font-size:0.6rem;color:var(--muted);letter-spacing:0.12em;}
-#error-screen{display:none;position:fixed;inset:0;background:var(--bg);align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:998;}
-#error-screen.show{display:flex;}
-.error-box{background:var(--s1);border:1px solid rgba(239,71,111,0.3);border-radius:14px;padding:36px;max-width:460px;text-align:center;}
-.error-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--red);margin-bottom:10px;}
-.error-msg{font-size:0.72rem;color:var(--muted);line-height:1.7;}
-.error-btn{margin-top:18px;padding:10px 28px;background:transparent;border:1px solid var(--gold);color:var(--gold);border-radius:6px;font-family:'DM Mono',monospace;font-size:0.7rem;cursor:pointer;letter-spacing:0.1em;}
-#main{opacity:0;transition:opacity 0.5s ease;position:relative;z-index:1;}
-#main.visible{opacity:1;}
-.wrap{max-width:1380px;margin:0 auto;padding:0 20px 40px;}
-header{position:sticky;top:0;z-index:50;background:rgba(7,9,14,0.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 24px;}
-.header-inner{max-width:1380px;margin:0 auto;height:58px;display:flex;align-items:center;justify-content:space-between;}
-.logo-wrap{display:flex;align-items:center;gap:12px;}
-.logo-bars{display:flex;align-items:flex-end;gap:1.5px;height:22px;}
-.logo-bars span{display:block;width:2.5px;background:var(--gold);border-radius:1px;}
-.logo-text{display:flex;flex-direction:column;gap:1px;}
-.logo-name{font-family:'Cinzel',serif;font-size:1rem;color:var(--gold);letter-spacing:0.08em;line-height:1;}
-.logo-tagline{font-size:0.48rem;color:var(--gold);opacity:0.55;letter-spacing:0.22em;text-transform:uppercase;}
-.header-right{display:flex;align-items:center;gap:12px;font-size:0.65rem;color:var(--muted);}
-.live-pill{display:flex;align-items:center;gap:5px;background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:20px;padding:4px 10px;font-size:0.58rem;color:var(--green);}
-.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(6,214,160,0.4);}50%{opacity:0.7;box-shadow:0 0 0 4px rgba(6,214,160,0);}}
-.refresh-btn{padding:5px 14px;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s;}
-.refresh-btn:hover{border-color:var(--gold);color:var(--gold);}
-.nav-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto;}
-.nav-tab{padding:12px 20px;font-size:0.65rem;letter-spacing:0.1em;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s;text-transform:uppercase;user-select:none;}
-.nav-tab:hover{color:var(--text);}
-.nav-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
-.tab-panel{display:none;}
-.tab-panel.active{display:block;}
-.section-label{font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.25em;color:var(--muted);margin:24px 0 12px;border-left:2px solid var(--gold);padding-left:10px;}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
-.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
-.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
-.grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;}
-@media(max-width:960px){.grid-4,.grid-5{grid-template-columns:repeat(2,1fr);}.grid-3{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:640px){.grid-2,.grid-3,.grid-4,.grid-5{grid-template-columns:1fr;}}
-.kpi{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px 16px;position:relative;overflow:hidden;transition:transform 0.2s;animation:fadeUp 0.4s ease both;}
-.kpi:hover{transform:translateY(-2px);}
-.kpi-accent{position:absolute;top:0;left:0;right:0;height:2px;}
-.kpi-lbl{font-size:0.58rem;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
-.kpi-val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;line-height:1;margin-bottom:4px;}
-.kpi-sub{font-size:0.55rem;color:var(--muted);}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
-.card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp 0.4s ease both;margin-bottom:16px;}
-.card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:8px;}
-.card-title{font-family:'Bebas Neue',sans-serif;font-size:0.88rem;letter-spacing:0.12em;color:var(--text);margin-bottom:2px;}
-.card-desc{font-size:0.58rem;color:var(--muted);line-height:1.5;}
-.card-badge{font-size:0.5rem;padding:3px 8px;border:1px solid var(--border2);border-radius:4px;color:var(--muted);white-space:nowrap;letter-spacing:0.1em;}
-.chart-wrap{height:200px;position:relative;}
-.chart-wrap.tall{height:240px;}
-.chart-wrap.xtall{height:280px;}
-.alert-bar{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;margin-bottom:8px;font-size:0.65rem;line-height:1.5;}
-.alert-bar.danger{background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.25);color:var(--red);}
-.alert-bar.warn{background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.25);color:var(--gold2);}
-.alert-bar.info{background:rgba(72,149,239,0.08);border:1px solid rgba(72,149,239,0.2);color:var(--blue);}
-.alert-bar.ok{background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.2);color:var(--green);}
-.alert-icon{font-size:0.9rem;flex-shrink:0;margin-top:1px;}
-.risk-list{display:flex;flex-direction:column;gap:10px;}
-.risk-row{display:flex;flex-direction:column;gap:4px;}
-.risk-top{display:flex;justify-content:space-between;align-items:flex-start;}
-.risk-name{font-size:0.68rem;color:var(--text);}
-.risk-score-val{font-family:'Bebas Neue',sans-serif;font-size:1rem;line-height:1;}
-.risk-bar-bg{height:5px;border-radius:3px;background:var(--border2);overflow:hidden;}
-.risk-bar-fill{height:100%;border-radius:3px;transition:width 1s ease;}
-.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
-.day-col{text-align:center;}
-.day-name{font-size:0.52rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px;}
-.day-box{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:7px 4px;min-height:76px;display:flex;flex-direction:column;align-items:center;gap:3px;}
-.day-box.today{border-color:var(--gold);background:rgba(201,146,42,0.04);}
-.day-box.has-payment{border-color:var(--green);background:rgba(6,214,160,0.04);}
-.day-num{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--muted);}
-.day-box.today .day-num{color:var(--gold);}
-.day-box.has-payment .day-num{color:var(--green);}
-.day-clients{display:flex;flex-direction:column;gap:2px;width:100%;margin-top:2px;}
-.day-chip{background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:3px;padding:2px 3px;font-size:0.46rem;color:var(--green);text-align:left;line-height:1.3;word-break:break-word;}
-.day-chip.atraso{background:rgba(239,71,111,0.08);border-color:rgba(239,71,111,0.25);color:var(--red);}
-.day-chip .chip-val{display:block;font-size:0.46rem;opacity:0.75;margin-top:1px;}
-.day-empty{color:var(--muted2);font-size:0.52rem;}
-.cobr-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);}
-.cobr-row:last-child{border-bottom:none;}
-.atraso-list{display:flex;flex-direction:column;gap:8px;}
-.atraso-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--s2);border-radius:8px;border-left:3px solid var(--red);}
-.atraso-row.medio{border-left-color:var(--gold2);}
-.atraso-row.baixo{border-left-color:var(--muted2);}
-.atraso-info{display:flex;flex-direction:column;gap:2px;}
-.atraso-nome{font-size:0.72rem;color:var(--text);}
-.atraso-sub{font-size:0.57rem;color:var(--muted);}
-.atraso-dias{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;text-align:right;line-height:1;}
-.atraso-dias span{display:block;font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--muted);}
-.hist-list{display:flex;flex-direction:column;gap:6px;}
-.hist-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
-.hist-row:last-child{border-bottom:none;}
-.hist-nome{font-size:0.68rem;color:var(--text);}
-.hist-badges{display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
-.badge{font-size:0.5rem;padding:2px 7px;border-radius:4px;border:1px solid;white-space:nowrap;}
-.badge.ok{color:var(--green);border-color:rgba(6,214,160,0.3);background:rgba(6,214,160,0.07);}
-.badge.warn{color:var(--gold2);border-color:rgba(240,180,41,0.3);background:rgba(240,180,41,0.07);}
-.badge.bad{color:var(--red);border-color:rgba(239,71,111,0.3);background:rgba(239,71,111,0.07);}
-.badge.muted{color:var(--muted);border-color:var(--border2);background:transparent;}
-.badge.blue{color:var(--blue);border-color:rgba(72,149,239,0.3);background:rgba(72,149,239,0.07);}
-.conc-list{display:flex;flex-direction:column;gap:10px;}
-.conc-row{display:flex;flex-direction:column;gap:4px;}
-.conc-top{display:flex;justify-content:space-between;align-items:center;}
-.conc-nome{font-size:0.68rem;color:var(--text);}
-.conc-pct{font-family:'Bebas Neue',sans-serif;font-size:0.9rem;}
-.bar-bg{height:6px;border-radius:3px;background:var(--border2);overflow:hidden;}
-.bar-fill{height:100%;border-radius:3px;transition:width 1.2s ease;}
-.profile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;}
-.profile-card{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px;}
-.profile-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.p-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1rem;color:#07090e;flex-shrink:0;}
-.p-name{font-size:0.7rem;color:var(--text);flex:1;margin:0 8px;}
-.p-cluster{font-size:0.5rem;padding:2px 8px;border-radius:12px;}
-.cl-premium{background:rgba(201,146,42,0.15);color:var(--gold2);border:1px solid rgba(201,146,42,0.3);}
-.cl-regular{background:rgba(72,149,239,0.1);color:var(--blue);border:1px solid rgba(72,149,239,0.25);}
-.cl-risco{background:rgba(239,71,111,0.1);color:var(--red);border:1px solid rgba(239,71,111,0.25);}
-.cl-inativo{background:rgba(90,98,130,0.1);color:var(--muted);border:1px solid var(--border2);}
-.p-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-.pstat{display:flex;flex-direction:column;gap:1px;}
-.pstat-lbl{font-size:0.5rem;color:var(--muted);}
-.pstat-val{font-family:'Bebas Neue',sans-serif;font-size:0.88rem;}
-.scenario-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
-.sc-card{border-radius:10px;padding:16px;text-align:center;}
-.sc-card.ot{background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.2);}
-.sc-card.re{background:rgba(201,146,42,0.06);border:1px solid rgba(201,146,42,0.2);}
-.sc-card.pe{background:rgba(239,71,111,0.06);border:1px solid rgba(239,71,111,0.2);}
-.sc-title{font-family:'Bebas Neue',sans-serif;font-size:0.85rem;letter-spacing:0.15em;margin-bottom:8px;}
-.sc-val{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;line-height:1;margin-bottom:4px;}
-.sc-sub{font-size:0.55rem;color:var(--muted);}
-.comp-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);}
-.comp-row:last-child{border-bottom:none;}
-.comp-label{font-size:0.65rem;color:var(--muted);}
-.comp-vals{display:flex;gap:12px;align-items:center;}
-.comp-prev{font-size:0.65rem;color:var(--muted2);}
-.comp-curr{font-size:0.7rem;color:var(--text);}
-.comp-delta{font-size:0.58rem;padding:2px 6px;border-radius:4px;}
-.comp-delta.up{color:var(--green);background:rgba(6,214,160,0.08);}
-.comp-delta.down{color:var(--red);background:rgba(239,71,111,0.08);}
-.comp-delta.flat{color:var(--muted);background:transparent;}
-.info-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
-.info-row:last-child{border-bottom:none;}
-.info-label{font-size:0.65rem;color:var(--muted);}
-.info-val{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;}
-footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px;align-items:center;}
-.footer-logo{font-family:'Cinzel',serif;font-size:0.75rem;color:var(--gold);opacity:0.5;letter-spacing:0.12em;}
+:root {
+  --bg:       #080a0f;
+  --s1:       #0e1118;
+  --s2:       #13161f;
+  --s3:       #181c27;
+  --border:   #1c2133;
+  --border2:  #232840;
+  --gold:     #f0b429;
+  --gold2:    #ffd166;
+  --green:    #06d6a0;
+  --red:      #ef476f;
+  --blue:     #4895ef;
+  --purple:   #9b5de5;
+  --text:     #dde1f0;
+  --muted:    #5a6282;
+  --muted2:   #3d4466;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── BG TEXTURE ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(240,180,41,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(6,214,160,0.03) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── LOADING ── */
+#loading-screen {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 18px; z-index: 999;
+  transition: opacity 0.6s ease;
+}
+#loading-screen.hidden { opacity: 0; pointer-events: none; }
+
+.load-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.5rem;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+}
+
+.load-bar-wrap {
+  width: 200px; height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.load-bar {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 2px;
+  animation: loadprog 1.8s ease forwards;
+}
+@keyframes loadprog { from { width:0; } to { width:100%; } }
+
+.load-text { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.1em; }
+
+/* ── ERROR ── */
+#error-screen {
+  display: none; position: fixed; inset: 0;
+  background: var(--bg);
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px; z-index: 998;
+}
+#error-screen.show { display: flex; }
+.error-box {
+  background: var(--s1); border: 1px solid rgba(239,71,111,0.3);
+  border-radius: 14px; padding: 36px; max-width: 460px; text-align: center;
+}
+.error-title { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; color:var(--red); margin-bottom:10px; }
+.error-msg { font-size:0.72rem; color:var(--muted); line-height:1.7; }
+.error-btn {
+  margin-top:20px; padding:10px 28px;
+  background:var(--gold); color:#000;
+  border:none; border-radius:6px;
+  font-family:'Bebas Neue',sans-serif; font-size:1rem;
+  letter-spacing:0.08em; cursor:pointer;
+}
+
+/* ── HEADER ── */
+header {
+  position: sticky; top:0; z-index: 100;
+  background: rgba(8,10,15,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  display: flex; align-items: center; gap: 10px;
+}
+
+.logo-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  border: 1px solid var(--border2);
+  padding: 2px 8px; border-radius: 4px;
+  margin-left: 4px;
+}
+
+.header-right {
+  display: flex; align-items: center; gap: 14px;
+  font-size: 0.68rem; color: var(--muted);
+}
+
+.live-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(6,214,160,0.08);
+  border: 1px solid rgba(6,214,160,0.2);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.62rem;
+  color: var(--green);
+}
+
+.live-dot {
+  width: 6px; height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: blink 2s infinite;
+}
+
+@keyframes blink {
+  0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+  50% { opacity:.6; box-shadow: 0 0 0 4px rgba(6,214,160,0); }
+}
+
+.refresh-btn {
+  background: var(--s2); border: 1px solid var(--border2);
+  color: var(--muted); padding: 6px 14px;
+  border-radius: 6px; font-family: 'DM Mono', monospace;
+  font-size: 0.65rem; cursor: pointer; transition: all 0.2s;
+}
+.refresh-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── MAIN ── */
+.main {
+  position: relative; z-index: 1;
+  max-width: 1440px; margin: 0 auto;
+  padding: 32px 40px 60px;
+  opacity: 0; transition: opacity 0.5s ease;
+}
+.main.visible { opacity: 1; }
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  color: var(--muted);
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-label::after {
+  content: ''; flex:1; height:1px;
+  background: linear-gradient(to right, var(--border2), transparent);
+}
+
+/* ── KPI STRIP ── */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.kpi {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+  animation: riseUp 0.5s ease both;
+}
+.kpi:hover { transform: translateY(-2px); border-color: var(--border2); }
+.kpi:nth-child(1){animation-delay:.05s} .kpi:nth-child(2){animation-delay:.1s}
+.kpi:nth-child(3){animation-delay:.15s} .kpi:nth-child(4){animation-delay:.2s}
+.kpi:nth-child(5){animation-delay:.25s} .kpi:nth-child(6){animation-delay:.3s}
+
+@keyframes riseUp {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.kpi-accent {
+  position: absolute; top:0; left:0; right:0; height:2px;
+}
+
+.kpi-lbl { font-size: 0.58rem; color: var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px; }
+.kpi-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem; letter-spacing:0.04em;
+  line-height:1; margin-bottom:4px;
+}
+.kpi-sub { font-size:0.6rem; color:var(--muted); }
+
+/* ── CHART GRID ── */
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.grid-2-1 { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:16px; }
+.col-span-2 { grid-column: span 2; }
+
+.card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  animation: riseUp 0.5s ease both;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--border2); }
+
+.card-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem; letter-spacing:0.08em;
+  color: var(--text); margin-bottom:3px;
+}
+.card-desc { font-size:0.62rem; color:var(--muted); line-height:1.5; }
+
+.card-badge {
+  font-size:0.55rem; padding:3px 9px;
+  border-radius:20px; border:1px solid var(--border2);
+  color:var(--muted); white-space:nowrap; letter-spacing:0.08em;
+}
+
+.chart-wrap { position:relative; height:200px; }
+.chart-wrap.tall { height:240px; }
+.chart-wrap.short { height:160px; }
+
+/* ── SCORE BARS (Risk) ── */
+.risk-list { display:flex; flex-direction:column; gap:10px; }
+
+.risk-row { display:flex; flex-direction:column; gap:4px; }
+.risk-top { display:flex; justify-content:space-between; align-items:center; }
+.risk-name { font-size:0.72rem; color:var(--text); }
+.risk-score-val { font-family:'Bebas Neue',sans-serif; font-size:0.85rem; }
+
+.risk-bar-bg {
+  height:6px; border-radius:3px;
+  background: var(--border2); overflow:hidden;
+}
+.risk-bar-fill {
+  height:100%; border-radius:3px;
+  transition: width 1s ease;
+}
+
+/* ── DOBRAMENTO TABLE ── */
+.dobra-table { width:100%; border-collapse:collapse; font-size:0.68rem; }
+.dobra-table th {
+  text-align:left; padding:8px 10px;
+  color:var(--muted); font-weight:400;
+  border-bottom:1px solid var(--border);
+  font-size:0.58rem; letter-spacing:0.08em; text-transform:uppercase;
+}
+.dobra-table td {
+  padding:10px 10px;
+  border-bottom:1px solid var(--border);
+  color:var(--text);
+}
+.dobra-table tr:last-child td { border-bottom:none; }
+.dobra-table tr.highlight td { color:var(--gold); }
+.dobra-highlight { background:rgba(240,180,41,0.06); border-radius:6px; }
+
+/* ── WEEK CALENDAR ── */
+.week-grid {
+  display:grid; grid-template-columns:repeat(7,1fr); gap:6px;
+}
+.day-col { text-align:center; }
+.day-name {
+  font-size:0.55rem; color:var(--muted); letter-spacing:0.08em;
+  text-transform:uppercase; margin-bottom:6px;
+}
+.day-box {
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:8px; padding:8px 6px;
+  min-height:80px;
+  display:flex; flex-direction:column; align-items:center;
+  gap:4px; font-size:0.6rem;
+}
+.day-box.today { border-color:var(--gold); background:rgba(240,180,41,0.05); }
+.day-box.has-payment { border-color:var(--green); background:rgba(6,214,160,0.05); }
+.day-num {
+  font-family:'Bebas Neue',sans-serif; font-size:1rem;
+  color:var(--muted);
+}
+.day-box.today .day-num { color:var(--gold); }
+.day-box.has-payment .day-num { color:var(--green); }
+.day-payment {
+  font-size:0.55rem; color:var(--green); text-align:center; line-height:1.3;
+}
+.day-empty { color:var(--muted2); font-size:0.55rem; }
+
+/* chips de cliente no calendário */
+.day-clients { display:flex; flex-direction:column; gap:3px; width:100%; margin-top:2px; }
+.day-client-chip {
+  background: rgba(6,214,160,0.1);
+  border: 1px solid rgba(6,214,160,0.25);
+  border-radius:4px;
+  padding:3px 5px;
+  font-size:0.5rem;
+  color:var(--green);
+  text-align:left;
+  line-height:1.35;
+  word-break:break-word;
+}
+.day-client-chip.atraso {
+  background:rgba(239,71,111,0.1);
+  border-color:rgba(239,71,111,0.3);
+  color:var(--red);
+}
+.day-client-chip .chip-val {
+  display:block;
+  font-size:0.52rem;
+  opacity:0.8;
+  margin-top:1px;
+}
+
+/* ── FOOTER ── */
+footer {
+  text-align:center; padding:28px;
+  font-size:0.6rem; color:var(--muted);
+  border-top:1px solid var(--border);
+}
+
+/* ── TOOLTIP OVERRIDE ── */
+.chart-tooltip {
+  background: var(--s2) !important;
+  border: 1px solid var(--border2) !important;
+}
+
+/* ── DIAS DE ATRASO LIST ── */
+.atraso-list { display:flex; flex-direction:column; gap:8px; }
+.atraso-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 12px;
+  background:var(--s2); border-radius:8px;
+  border-left:3px solid var(--red);
+}
+.atraso-row.medio { border-left-color: var(--gold); }
+.atraso-row.baixo { border-left-color: var(--muted2); }
+.atraso-info { display:flex; flex-direction:column; gap:2px; }
+.atraso-nome { font-size:0.72rem; color:var(--text); }
+.atraso-sub  { font-size:0.58rem; color:var(--muted); }
+.atraso-dias {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.3rem; text-align:right; line-height:1;
+}
+.atraso-dias span { display:block; font-family:'DM Mono',monospace; font-size:0.52rem; color:var(--muted); }
+
+/* ── HISTÓRICO CLIENTE ── */
+.hist-list { display:flex; flex-direction:column; gap:6px; }
+.hist-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 0; border-bottom:1px solid var(--border);
+}
+.hist-row:last-child { border-bottom:none; }
+.hist-nome { font-size:0.68rem; color:var(--text); }
+.hist-badges { display:flex; gap:4px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+.hist-badge {
+  font-size:0.5rem; padding:2px 7px; border-radius:4px;
+  border:1px solid; white-space:nowrap;
+}
+.hist-badge.ok    { color:var(--green); border-color:rgba(6,214,160,0.3); background:rgba(6,214,160,0.08); }
+.hist-badge.warn  { color:var(--gold);  border-color:rgba(240,180,41,0.3); background:rgba(240,180,41,0.08); }
+.hist-badge.bad   { color:var(--red);   border-color:rgba(239,71,111,0.3); background:rgba(239,71,111,0.08); }
+.hist-badge.muted { color:var(--muted); border-color:var(--border2); background:transparent; }
+
+/* ── CONCENTRAÇÃO ── */
+.conc-list { display:flex; flex-direction:column; gap:10px; }
+.conc-row { display:flex; flex-direction:column; gap:4px; }
+.conc-top { display:flex; justify-content:space-between; align-items:center; }
+.conc-nome { font-size:0.68rem; color:var(--text); }
+.conc-pct  { font-family:'Bebas Neue',sans-serif; font-size:0.9rem; }
+.conc-bar-bg { height:6px; border-radius:3px; background:var(--border2); overflow:hidden; }
+.conc-bar-fill { height:100%; border-radius:3px; transition:width 1s ease; }
+
+/* ── CAPITAL DISPONÍVEL / VENCENDO ── */
+.info-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 0; border-bottom:1px solid var(--border);
+}
+.info-row:last-child { border-bottom:none; }
+.info-label { font-size:0.65rem; color:var(--muted); }
+.info-val   { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; }
+
+/* ── EVOLUÇÃO MENSAL ── */
+.grid-3-new { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px; }
 </style>
 </head>
 <body>
 
+<!-- Loading -->
 <div id="loading-screen">
-  <div class="load-logo-wrap">
-    <div class="load-logo-bars">
-      <span style="height:30%"></span><span style="height:42%"></span><span style="height:55%"></span><span style="height:65%"></span><span style="height:75%"></span><span style="height:88%"></span><span style="height:100%"></span>
-    </div>
-    <div><div class="load-brand">Capital Investimentos</div><div class="load-sub">Soluções Financeiras Estratégicas</div></div>
-  </div>
+  <div class="load-logo">💰 CARTEIRA</div>
   <div class="load-bar-wrap"><div class="load-bar"></div></div>
-  <div class="load-text">CARREGANDO DADOS DA CARTEIRA...</div>
+  <div class="load-text">CONECTANDO AO GOOGLE SHEETS...</div>
 </div>
 
+<!-- Error -->
 <div id="error-screen">
   <div class="error-box">
     <div class="error-title">Erro de Conexão</div>
@@ -192,481 +453,1061 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 </div>
 
 <header>
-  <div class="header-inner">
-    <div class="logo-wrap">
-      <div class="logo-bars">
-        <span style="height:28%"></span><span style="height:40%"></span><span style="height:52%"></span><span style="height:64%"></span><span style="height:78%"></span><span style="height:92%"></span><span style="height:100%"></span>
-        <span style="height:20%;margin-left:3px"></span><span style="height:20%"></span><span style="height:20%"></span><span style="height:20%"></span><span style="height:20%"></span>
-      </div>
-      <div class="logo-text">
-        <div class="logo-name">Capital Investimentos</div>
-        <div class="logo-tagline">Soluções Financeiras Estratégicas</div>
-      </div>
+  <div class="logo">
+    💰 CARTEIRA
+    <span class="logo-tag">ESTRATÉGICO</span>
+  </div>
+  <div class="header-right">
+    <div class="live-pill">
+      <div class="live-dot"></div>
+      AO VIVO
     </div>
-    <div class="header-right">
-      <div class="live-pill"><div class="live-dot"></div>AO VIVO</div>
-      <span id="today-date">—</span>
-      <button class="refresh-btn" onclick="loadData()">↻ ATUALIZAR</button>
-    </div>
+    <span id="today-date">—</span>
+    <button class="refresh-btn" onclick="loadData()">↻ ATUALIZAR</button>
   </div>
 </header>
 
-<div id="main">
-<div class="wrap">
 
-<div class="nav-tabs">
-  <div class="nav-tab active" data-tab="visao">📊 Visão Geral</div>
-  <div class="nav-tab" data-tab="financeiro">💰 Financeiro</div>
-  <div class="nav-tab" data-tab="risco">⚠️ Risco & Alertas</div>
-  <div class="nav-tab" data-tab="clientes">👤 Clientes</div>
-  <div class="nav-tab" data-tab="comparativo">📈 Comparativos</div>
-  <div class="nav-tab" data-tab="agenda">📅 Agenda</div>
+<!-- DEBUG PANEL -->
+<div id="debug-panel" style="background:#1a1d27;border:1px solid #f0b429;border-radius:8px;margin:16px 40px;padding:16px;font-family:DM Mono,monospace;font-size:0.65rem;color:#dde1f0;display:none;">
+  <div style="color:#f0b429;font-weight:700;margin-bottom:8px;">🔍 DEBUG — O que chegou da planilha:</div>
+  <div id="debug-content" style="white-space:pre-wrap;color:#5a6282;line-height:1.8;"></div>
+</div>
+<div class="main" id="main">
+
+  <!-- KPIs -->
+  <div class="section-label">VISÃO GERAL DA CARTEIRA</div>
+  <div class="kpi-strip">
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--gold)"></div>
+      <div class="kpi-lbl">Capital Ativo</div>
+      <div class="kpi-val" id="kpi-capital" style="color:var(--gold)">—</div>
+      <div class="kpi-sub">em contratos abertos</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--green)"></div>
+      <div class="kpi-lbl">Lucro Previsto</div>
+      <div class="kpi-val" id="kpi-lucro" style="color:var(--green)">—</div>
+      <div class="kpi-sub">juros a receber</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--blue)"></div>
+      <div class="kpi-lbl">ROI da Carteira</div>
+      <div class="kpi-val" id="kpi-roi" style="color:var(--blue)">—</div>
+      <div class="kpi-sub">retorno sobre capital</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--purple)"></div>
+      <div class="kpi-lbl">Ticket Médio</div>
+      <div class="kpi-val" id="kpi-ticket" style="color:var(--purple)">—</div>
+      <div class="kpi-sub">por contrato ativo</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--red)"></div>
+      <div class="kpi-lbl">Inadimplência</div>
+      <div class="kpi-val" id="kpi-inadim" style="color:var(--red)">—</div>
+      <div class="kpi-sub" id="kpi-inadim-sub">contratos em atraso</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:var(--gold2)"></div>
+      <div class="kpi-lbl">Próx. Semana</div>
+      <div class="kpi-val" id="kpi-semana" style="color:var(--gold2)">—</div>
+      <div class="kpi-sub">a receber em 7 dias</div>
+    </div>
+  </div>
+
+  <!-- Row 1: Projeção + Composição -->
+  <div class="section-label">CRESCIMENTO & PREVISÃO</div>
+  <div class="grid-2 " style="margin-bottom:16px">
+    <div class="card" style="animation-delay:.1s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">📈 Projeção de Recebimentos</div>
+          <div class="card-desc">Juros previstos a entrar nas próximas 8 semanas com base nos contratos ativos</div>
+        </div>
+        <div class="card-badge">PREVISÃO</div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="chartProjecao"></canvas></div>
+    </div>
+    <div class="card" style="animation-delay:.15s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">💼 Composição da Carteira</div>
+          <div class="card-desc">Capital saudável vs em risco vs quitado</div>
+        </div>
+        <div class="card-badge">SAÚDE</div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="chartComposicao"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Row 2: Evolução + Risco -->
+  <div class="section-label">RISCO & HISTÓRICO</div>
+  <div class="grid-2" style="margin-bottom:16px">
+    <div class="card" style="animation-delay:.2s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">💰 Evolução do Capital + Lucro</div>
+          <div class="card-desc">Capital emprestado e lucro acumulado por contrato</div>
+        </div>
+        <div class="card-badge">HISTÓRICO</div>
+      </div>
+      <div class="chart-wrap"><canvas id="chartEvolucao"></canvas></div>
+    </div>
+    <div class="card" style="animation-delay:.25s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">🎯 Score de Risco por Cliente</div>
+          <div class="card-desc">Baseado em atraso, taxa e valor — quanto maior, maior o risco</div>
+        </div>
+        <div class="card-badge">RISCO</div>
+      </div>
+      <div class="risk-list" id="riskList"></div>
+    </div>
+  </div>
+
+  <!-- Row 3: Calendário + Dobramento -->
+  <div class="section-label">SEMANA & PROJEÇÃO FUTURA</div>
+  <div class="grid-2" style="margin-bottom:16px">
+    <div class="card" style="animation-delay:.3s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">📅 Vencimentos desta Semana</div>
+          <div class="card-desc">Quem paga e quanto entra cada dia</div>
+        </div>
+        <div class="card-badge">SEMANAL</div>
+      </div>
+      <div class="week-grid" id="weekCalendar"></div>
+      <div style="margin-top:20px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:0.7rem;letter-spacing:0.2em;color:var(--muted);margin-bottom:4px">
+          📋 LISTA DE COBRANÇA
+        </div>
+        <div id="cobrancaList"></div>
+      </div>
+    </div>
+    <div class="card" style="animation-delay:.35s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">🔮 Quando seu Capital Dobra?</div>
+          <div class="card-desc">Projeção de crescimento com base no ROI atual da carteira</div>
+        </div>
+        <div class="card-badge">FUTURO</div>
+      </div>
+      <div id="dobraContent"></div>
+    </div>
+  </div>
+
+  <!-- NOVA SEÇÃO: RISCO AVANÇADO -->
+  <div class="section-label">RISCO AVANÇADO</div>
+  <div class="grid-2" style="margin-bottom:16px">
+
+    <!-- Dias de atraso -->
+    <div class="card" style="animation-delay:.1s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">⏱️ Dias de Atraso por Contrato</div>
+          <div class="card-desc">Contratos inadimplentes ordenados por tempo de atraso</div>
+        </div>
+        <div class="card-badge">ATRASO</div>
+      </div>
+      <div class="atraso-list" id="atrasoList">
+        <div style="color:var(--muted);font-size:0.68rem">Nenhum contrato em atraso.</div>
+      </div>
+    </div>
+
+    <!-- Histórico por cliente -->
+    <div class="card" style="animation-delay:.15s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">📋 Histórico de Pagamentos por Cliente</div>
+          <div class="card-desc">Perfil de pontualidade com base nos pagamentos registrados</div>
+        </div>
+        <div class="card-badge">HISTÓRICO</div>
+      </div>
+      <div class="hist-list" id="histList"></div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:16px">
+    <!-- Concentração de risco -->
+    <div class="card" style="animation-delay:.2s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">⚖️ Concentração de Risco</div>
+          <div class="card-desc">% do capital total exposto por cliente</div>
+        </div>
+        <div class="card-badge">EXPOSIÇÃO</div>
+      </div>
+      <div class="conc-list" id="concList"></div>
+    </div>
+
+    <!-- Lucro realizado vs previsto -->
+    <div class="card" style="animation-delay:.25s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">💵 Lucro Realizado vs Previsto</div>
+          <div class="card-desc">O que já entrou no bolso vs o que ainda está a receber</div>
+        </div>
+        <div class="card-badge">RESULTADO</div>
+      </div>
+      <div class="chart-wrap"><canvas id="chartLucro"></canvas></div>
+    </div>
+  </div>
+
+  <!-- NOVA SEÇÃO: VISÃO ESTRATÉGICA -->
+  <div class="section-label">VISÃO ESTRATÉGICA</div>
+  <div class="grid-2" style="margin-bottom:16px">
+
+    <!-- Capital disponível + contratos vencendo -->
+    <div class="card" style="animation-delay:.1s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">🏦 Capital & Vencimentos Próximos</div>
+          <div class="card-desc">Capital disponível para reinvestir e contratos vencendo em 30 dias</div>
+        </div>
+        <div class="card-badge">ESTRATÉGIA</div>
+      </div>
+      <div id="capitalDisp"></div>
+    </div>
+
+    <!-- Evolução mensal da carteira -->
+    <div class="card" style="animation-delay:.15s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">📊 Evolução Mensal da Carteira</div>
+          <div class="card-desc">Como seu capital cresceu mês a mês com base nas datas dos contratos</div>
+        </div>
+        <div class="card-badge">CRESCIMENTO</div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="chartEvolMensal"></canvas></div>
+    </div>
+  </div>
+
+  <div style="text-align:right; margin-top:14px; font-size:0.6rem; color:var(--muted)">
+    Última atualização: <span id="last-update">—</span> · Auto-refresh a cada 5 min
+  </div>
 </div>
 
-<!-- VISÃO GERAL -->
-<div id="tab-visao" class="tab-panel active">
-  <div id="alertasBanner"></div>
-  <div class="section-label">INDICADORES ESTRATÉGICOS — KPIs PRINCIPAIS</div>
-  <div class="grid-5">
-    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Carteira Ativa</div><div class="kpi-val" id="kpi-capital" style="color:var(--gold)">—</div><div class="kpi-sub" id="kpi-cap-sub">—</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Lucro Previsto</div><div class="kpi-val" id="kpi-lucro" style="color:var(--green)">—</div><div class="kpi-sub">juros a receber</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">ROI da Carteira</div><div class="kpi-val" id="kpi-roi" style="color:var(--blue)">—</div><div class="kpi-sub">retorno sobre capital</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--red)"></div><div class="kpi-lbl">Inadimplência</div><div class="kpi-val" id="kpi-inadim" style="color:var(--red)">—</div><div class="kpi-sub" id="kpi-inadim-sub">—</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--purple)"></div><div class="kpi-lbl">Ticket Médio</div><div class="kpi-val" id="kpi-ticket" style="color:var(--purple)">—</div><div class="kpi-sub">por contrato ativo</div></div>
-  </div>
-  <div class="grid-5">
-    <div class="kpi"><div class="kpi-accent" style="background:var(--gold2)"></div><div class="kpi-lbl">A Receber (7d)</div><div class="kpi-val" id="kpi-semana" style="color:var(--gold2)">—</div><div class="kpi-sub">próximos 7 dias</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Clientes Ativos</div><div class="kpi-val" id="kpi-cli-ativos" style="color:var(--green)">—</div><div class="kpi-sub" id="kpi-cli-sub">—</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Lucro Realizado</div><div class="kpi-val" id="kpi-realizado" style="color:var(--blue)">—</div><div class="kpi-sub">juros recebidos</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Capital Retornado</div><div class="kpi-val" id="kpi-quitado" style="color:var(--gold)">—</div><div class="kpi-sub">de contratos quitados</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--purple)"></div><div class="kpi-lbl">Prazo Médio</div><div class="kpi-val" id="kpi-prazo" style="color:var(--purple)">—</div><div class="kpi-sub">meses</div></div>
-  </div>
-  <div class="grid-2">
-    <div class="card"><div class="card-header"><div><div class="card-title">📈 Evolução Mensal da Carteira</div><div class="card-desc">Capital e lucro acumulados mês a mês</div></div><div class="card-badge">CRESCIMENTO</div></div><div class="chart-wrap tall"><canvas id="chartEvolMensal"></canvas></div></div>
-    <div class="card"><div class="card-header"><div><div class="card-title">💼 Composição da Carteira</div><div class="card-desc">Capital saudável vs em risco vs quitado</div></div><div class="card-badge">SAÚDE</div></div><div class="chart-wrap tall"><canvas id="chartComposicao"></canvas></div></div>
-  </div>
-</div>
-
-<!-- FINANCEIRO -->
-<div id="tab-financeiro" class="tab-panel">
-  <div class="section-label">FLUXO DE CAIXA</div>
-  <div class="grid-2">
-    <div class="card"><div class="card-header"><div><div class="card-title">📊 Recebimentos Previstos — 8 Semanas</div><div class="card-desc">Juros previstos a entrar por semana</div></div><div class="card-badge">PREVISÃO</div></div><div class="chart-wrap tall"><canvas id="chartProjecao"></canvas></div></div>
-    <div class="card"><div class="card-header"><div><div class="card-title">💵 Lucro Realizado vs Previsto</div><div class="card-desc">Juros já recebidos vs a receber</div></div><div class="card-badge">RESULTADO</div></div><div class="chart-wrap tall"><canvas id="chartLucro"></canvas></div></div>
-  </div>
-  <div class="grid-2">
-    <div class="card"><div class="card-header"><div><div class="card-title">📉 Receita de Juros vs Perda por Inadimplência</div><div class="card-desc">Juros recebidos vs capital em risco</div></div><div class="card-badge">P&L</div></div><div class="chart-wrap tall"><canvas id="chartReceitaPerda"></canvas></div></div>
-    <div class="card"><div class="card-header"><div><div class="card-title">🏦 Saídas de Capital por Mês</div><div class="card-desc">Quanto foi emprestado mês a mês</div></div><div class="card-badge">SAÍDAS</div></div><div class="chart-wrap tall"><canvas id="chartSaidas"></canvas></div></div>
-  </div>
-  <div class="card"><div class="card-header"><div><div class="card-title">🔮 Cenários de Resultado — 12 Meses</div><div class="card-desc">Projeção de lucro com base em diferentes taxas de inadimplência</div></div><div class="card-badge">CENÁRIOS</div></div><div class="scenario-grid" id="scenarioGrid"></div><div class="chart-wrap"><canvas id="chartCenarios"></canvas></div></div>
-  <div class="card"><div class="card-header"><div><div class="card-title">💰 Saldo Projetado — 12 Meses</div><div class="card-desc">Capital + juros acumulados (cenário realista)</div></div><div class="card-badge">PROJEÇÃO</div></div><div class="chart-wrap xtall"><canvas id="chartSaldoProj"></canvas></div></div>
-</div>
-
-<!-- RISCO & ALERTAS -->
-<div id="tab-risco" class="tab-panel">
-  <div class="section-label">ALERTAS INTELIGENTES</div>
-  <div id="alertasDetalhados"></div>
-  <div class="grid-2">
-    <div class="card"><div class="card-header"><div><div class="card-title">⏱️ Dias de Atraso por Contrato</div><div class="card-desc">Inadimplentes ordenados por gravidade</div></div><div class="card-badge">ATRASO</div></div><div class="atraso-list" id="atrasoList"></div></div>
-    <div class="card"><div class="card-header"><div><div class="card-title">⚖️ Concentração de Risco</div><div class="card-desc">% do capital exposto por cliente</div></div><div class="card-badge">EXPOSIÇÃO</div></div><div class="conc-list" id="concList"></div></div>
-  </div>
-  <div class="grid-2">
-    <div class="card"><div class="card-header"><div><div class="card-title">🎯 Score de Risco por Cliente</div><div class="card-desc">Score interno baseado em atraso, taxa e exposição</div></div><div class="card-badge">SCORE</div></div><div class="risk-list" id="riskList"></div></div>
-    <div class="card"><div class="card-header"><div><div class="card-title">🔮 Previsão de Inadimplência</div><div class="card-desc">Estimativa baseada no perfil da carteira</div></div><div class="card-badge">PREVISÃO</div></div><div id="previsaoInadim"></div></div>
-  </div>
-  <div class="card"><div class="card-header"><div><div class="card-title">📊 Evolução da Inadimplência</div><div class="card-desc">Tendência de inadimplência ao longo do tempo</div></div><div class="card-badge">TENDÊNCIA</div></div><div class="chart-wrap tall"><canvas id="chartEvolInadim"></canvas></div></div>
-</div>
-
-<!-- CLIENTES -->
-<div id="tab-clientes" class="tab-panel">
-  <div class="section-label">PERFIL DA BASE DE CLIENTES</div>
-  <div class="grid-4">
-    <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Clientes Ativos</div><div class="kpi-val" id="cli-ativos-n" style="color:var(--green)">—</div><div class="kpi-sub">com contrato aberto</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--muted)"></div><div class="kpi-lbl">Clientes Inativos</div><div class="kpi-val" id="cli-inativos-n" style="color:var(--muted)">—</div><div class="kpi-sub">somente quitados</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Recorrência</div><div class="kpi-val" id="cli-recorrencia" style="color:var(--gold)">—</div><div class="kpi-sub">repetem empréstimo</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Tempo Médio Relac.</div><div class="kpi-val" id="cli-tempo-rel" style="color:var(--blue)">—</div><div class="kpi-sub">meses em média</div></div>
-  </div>
-  <div class="grid-2">
-    <div class="card"><div class="card-header"><div><div class="card-title">💰 Lucro por Cliente</div><div class="card-desc">Juros totais gerados por cliente</div></div><div class="card-badge">RESULTADO</div></div><div class="chart-wrap xtall"><canvas id="chartLucroCliente"></canvas></div></div>
-    <div class="card"><div class="card-header"><div><div class="card-title">🎫 Ticket Médio por Cliente</div><div class="card-desc">Valor médio emprestado por cliente</div></div><div class="card-badge">TICKET</div></div><div class="chart-wrap xtall"><canvas id="chartTicketCliente"></canvas></div></div>
-  </div>
-  <div class="section-label">CLUSTERIZAÇÃO DE CLIENTES</div>
-  <div class="card"><div class="card-header"><div><div class="card-title">🧩 Perfil de Clientes</div><div class="card-desc">Agrupamento automático por comportamento: Premium · Regular Fiel · Alto Risco · Inativo</div></div><div class="card-badge">IA</div></div><div class="profile-grid" id="profileGrid"></div></div>
-  <div class="card"><div class="card-header"><div><div class="card-title">📋 Histórico de Pagamentos por Cliente</div><div class="card-desc">Pontualidade e volume registrado</div></div><div class="card-badge">HISTÓRICO</div></div><div class="hist-list" id="histList"></div></div>
-</div>
-
-<!-- COMPARATIVOS -->
-<div id="tab-comparativo" class="tab-panel">
-  <div class="section-label">MÊS ATUAL vs MÊS ANTERIOR</div>
-  <div class="grid-2">
-    <div class="card"><div class="card-header"><div><div class="card-title">📊 Comparativo Mensal</div><div class="card-desc">Principais métricas comparadas</div></div><div class="card-badge">COMPARATIVO</div></div><div id="comparativoMensal"></div></div>
-    <div class="card"><div class="card-header"><div><div class="card-title">📈 Crescimento da Carteira</div><div class="card-desc">Capital ativo mês a mês</div></div><div class="card-badge">CRESCIMENTO</div></div><div class="chart-wrap tall"><canvas id="chartCrescCarteira"></canvas></div></div>
-  </div>
-  <div class="grid-2">
-    <div class="card"><div class="card-header"><div><div class="card-title">💹 Evolução do Lucro</div><div class="card-desc">Juros acumulados mês a mês</div></div><div class="card-badge">LUCRO</div></div><div class="chart-wrap tall"><canvas id="chartEvolLucro"></canvas></div></div>
-    <div class="card"><div class="card-header"><div><div class="card-title">🔮 Quando seu Capital Dobra?</div><div class="card-desc">Projeção com base no ROI atual</div></div><div class="card-badge">FUTURO</div></div><div id="dobraContent" style="padding:4px 0"></div></div>
-  </div>
-</div>
-
-<!-- AGENDA -->
-<div id="tab-agenda" class="tab-panel">
-  <div class="section-label">VENCIMENTOS DESTA SEMANA</div>
-  <div class="card">
-    <div class="card-header"><div><div class="card-title">📅 Calendário Semanal</div><div class="card-desc">Quem paga e quanto entra cada dia</div></div><div class="card-badge">SEMANAL</div></div>
-    <div class="week-grid" id="weekCalendar"></div>
-    <div style="margin-top:20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:0.7rem;letter-spacing:0.2em;color:var(--muted);margin-bottom:8px">📋 LISTA DE COBRANÇA</div><div id="cobrancaList"></div></div>
-  </div>
-  <div class="section-label">CONTRATOS VENCENDO EM 30 DIAS</div>
-  <div class="card"><div class="card-header"><div><div class="card-title">🏦 Capital a Recuperar</div><div class="card-desc">Capital e juros de contratos próximos do vencimento</div></div><div class="card-badge">ESTRATÉGIA</div></div><div id="capitalDisp"></div></div>
-</div>
-
-<div style="text-align:right;margin-top:8px;font-size:0.57rem;color:var(--muted)">última atualização: <span id="last-update">—</span> · auto-refresh 15 min</div>
-</div></div>
-
-<footer>
-  <div class="footer-logo">Capital Investimentos</div>
-  <div>Soluções Financeiras Estratégicas · Dashboard via Google Sheets</div>
-</footer>
+<footer>Dashboard Estratégico de Empréstimos · Dados via Google Sheets · Desenvolvido com IA</footer>
 
 <script>
-const SHEET_ID='1g9336ZjN2jnVoxA5CFQmlaDxTkda7tlz48_EAlKUjr4';
-const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18};
-const CP={id:0,tipo:2,valor:3,data:4,juros:5};
-const GID_EMP=147333899, GID_PAG=647642652;
-const fmt=v=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
-const pct=v=>(Number(v)*100).toFixed(1)+'%';
-let charts={};
-const TOOLTIP={backgroundColor:'#111521',borderColor:'#212840',borderWidth:1,titleColor:'#dde1f0',bodyColor:'#5a6282',padding:10,titleFont:{family:'DM Mono',size:11},bodyFont:{family:'DM Mono',size:10}};
-function destroyChart(k){if(charts[k]){charts[k].destroy();delete charts[k];}}
+// ═══════════════════════════════════════════
+const SHEET_ID = '1g9336ZjN2jnVoxA5CFQmlaDxTkda7tlz48_EAlKUjr4';
+// Colunas Empréstimos (0-indexed):
+// A=0 ID, B=1 ID Cliente, C=2 Nome, D=3 CPF, E=4 Telefone,
+// F=5 Capital, G=6 Data, H=7 Taxa, I=8 Prazo, J=9 Vencimento,
+// K=10 Tipo Juros, L=11 JurosTotal, O=14 Saldo, P=15 JurosProxMes,
+// R=17 Status, S=18 ProxVenc
+const CE = { id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18 };
+// Colunas Pagamentos (gid=647642652):
+// A=0 ID, C=2 Tipo, D=3 Valor, E=4 Data, F=5 JurosPagos
+const CP = { id:0,tipo:2,valor:3,data:4,juros:5 };
+// GIDs das abas
+const GID_EMP = 147333899;
+const GID_PAG = 647642652;
+// ═══════════════════════════════════════════
 
-// Tab switching
-document.querySelectorAll('.nav-tab').forEach(tab=>{
-  tab.addEventListener('click',()=>{
-    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
-  });
-});
+const fmt  = v => 'R$\u00a0' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+const fmtD = v => 'R$\u00a0' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct  = v => (Number(v)*100).toFixed(1)+'%';
+let charts = {};
 
-document.getElementById('today-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+document.getElementById('today-date').textContent =
+  new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
 
-async function fetchSheet(gid){
-  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}&t=${Date.now()}`;
-  const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status);
-  return csvToArray(await r.text());
+// ── Fetch ────────────────────────────────────
+async function fetchSheet(gid) {
+  const ts = Date.now();
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}&t=${ts}`;
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const text = await r.text();
+  return csvToArray(text);
 }
-async function fetchSheetPag(){return fetchSheet(GID_PAG);}
 
-function csvToArray(csv){
-  const rows=[];
-  for(const line of csv.split('\n')){
-    if(!line.trim()) continue;
-    const cols=[];let cur='',inQ=false;
-    for(let i=0;i<line.length;i++){
-      if(line[i]==='"'){inQ=!inQ;}
-      else if(line[i]===','&&!inQ){cols.push(cur);cur='';}
-      else{cur+=line[i];}
+function csvToArray(csv) {
+  const rows = [];
+  const lines = csv.split('\n');
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { inQ = !inQ; }
+      else if (line[i] === ',' && !inQ) { cols.push(cur); cur = ''; }
+      else { cur += line[i]; }
     }
-    cols.push(cur);rows.push(cols);
+    cols.push(cur);
+    rows.push(cols);
   }
   return rows;
 }
 
-function autoSkipCSV(rows){for(let i=0;i<rows.length;i++){if(rows[i]?.[0]&&String(rows[i][0]).trim().toUpperCase().startsWith('EMP'))return i;}return 0;}
-function parseDate(v){
-  if(!v)return null; if(v instanceof Date)return v;
-  const s=String(v).trim();
-  const m=s.match(/Date\((\d+),(\d+),(\d+)\)/); if(m)return new Date(+m[1],+m[2],+m[3]);
-  const br=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/); if(br){let y=+br[3];if(y<100)y+=y<50?2000:1900;return new Date(y,+br[2]-1,+br[1]);}
-  const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(iso)return new Date(+iso[1],+iso[2]-1,+iso[3]);
-  const d=new Date(s);return isNaN(d)?null:d;
+function autoSkipCSV(rows) {
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i] && rows[i][0] && String(rows[i][0]).trim().startsWith('EMP')) return i;
+  }
+  return 0;
 }
-function parseStatus(v){
-  const s=String(v||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  if(s.includes('quitad'))return 'quitado';
-  if(s.includes('atraso')||s.includes('inadimpl'))return 'atraso';
-  if(s.includes('dia')||s.includes('ativo')||s.includes('aberto'))return 'ativo';
+
+function parseRows(rows, skip = 0) {
+  return rows.slice(skip);
+}
+
+function parseDate(v) {
+  if (!v) return null;
+  if (v instanceof Date) return v;
+  const s = String(v).trim();
+  // Google Sheets Date() format
+  const m = s.match(/Date\((\d+),(\d+),(\d+)\)/);
+  if (m) return new Date(+m[1],+m[2],+m[3]);
+  // Brazilian format: dd/mm/yyyy or dd/mm/yy
+  const br = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (br) {
+    let year = +br[3];
+    if (year < 100) year += year < 50 ? 2000 : 1900;
+    return new Date(year, +br[2]-1, +br[1]);
+  }
+  // ISO format yyyy-mm-dd
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return new Date(+iso[1], +iso[2]-1, +iso[3]);
+  const d = new Date(s);
+  return isNaN(d)?null:d;
+}
+
+function parseStatus(v) {
+  const s = String(v||'').trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // remove acentos
+  if (s.includes('quitado') || s.includes('quitada')) return 'quitado';
+  if (s.includes('atraso') || s.includes('atrasado') || s.includes('inadimpl')) return 'atraso';
+  if (s.includes('dia') || s.includes('ativo') || s.includes('ativa') || s.includes('aberto')) return 'ativo';
   return null;
 }
 
-function render(empRows,pagRows){
-  const hoje=new Date();hoje.setHours(0,0,0,0);
-  function parseNum(v){
-    if(v===null||v===undefined||v==='')return 0;
-    let s=String(v).trim();const isPct=s.includes('%');
-    s=s.replace(/R\$/g,'').replace(/%/g,'').replace(/\s/g,'');
-    if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
-    else if(s.includes(',')&&!s.includes('.'))s=s.replace(',','.');
-    const n=parseFloat(s)||0;return isPct?n/100:n;
-  }
-  function parseTaxa(v){const n=parseNum(v);return n>1?n/100:n;}
+function destroyChart(id) { if(charts[id]){charts[id].destroy();delete charts[id];} }
 
-  const emps=empRows
-    .filter(r=>r[CE.id]&&String(r[CE.id]).trim().toUpperCase().startsWith('EMP'))
-    .map(r=>({id:String(r[CE.id]).trim(),nome:String(r[CE.nome]||'').trim(),capital:parseNum(r[CE.cap]),data:parseDate(r[CE.data]),taxa:parseTaxa(r[CE.taxa]),prazo:parseNum(r[CE.prazo]),tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal:parseNum(r[CE.jTotal]),saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status:parseStatus(r[CE.status]),proxVenc:parseDate(r[CE.proxVenc]),vencContrato:parseDate(r[CE.vencContrato])}))
-    .filter(e=>e.status!==null&&e.capital>0);
+const TOOLTIP = {
+  backgroundColor:'#13161f',
+  borderColor:'#232840',
+  borderWidth:1,
+  titleColor:'#f0b429',
+  bodyColor:'#dde1f0',
+  padding:10,
+};
 
-  const pags=pagRows
-    .filter(r=>r[CP.id]&&String(r[CP.id]).startsWith('EMP'))
-    .map(r=>({id:String(r[CP.id]).trim(),tipo:String(r[CP.tipo]||''),valor:parseNum(r[CP.valor]),data:parseDate(r[CP.data]),juros:parseNum(r[CP.juros])}));
+// ── RENDER ───────────────────────────────────
+function render(empRows, pagRows) {
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
 
-  const ativos=emps.filter(e=>e.status==='ativo');
-  const atrasado=emps.filter(e=>e.status==='atraso');
-  const quitados=emps.filter(e=>e.status==='quitado');
-  const abertos=[...ativos,...atrasado];
-
-  const totalCap=abertos.reduce((s,e)=>s+e.capital,0);
-  const totalJuros=abertos.reduce((s,e)=>s+e.jTotal,0);
-  const capQuit=quitados.reduce((s,e)=>s+e.capital,0);
-  const capRisco=atrasado.reduce((s,e)=>s+e.capital,0);
-  const roi=totalCap?totalJuros/totalCap:0;
-  const ticket=abertos.length?totalCap/abertos.length:0;
-  const inadimPct=abertos.length?atrasado.length/abertos.length:0;
-  const lucroReal=pags.reduce((s,p)=>s+p.juros,0);
-  const prazoMedio=abertos.length?abertos.reduce((s,e)=>s+e.prazo,0)/abertos.length:0;
-  const taxaMediaGlobal=abertos.length?abertos.reduce((s,e)=>s+e.taxa,0)/abertos.length:0.1;
-  const em7=new Date(hoje);em7.setDate(hoje.getDate()+7);
-  const proxSemana=abertos.filter(e=>e.proxVenc&&e.proxVenc>=hoje&&e.proxVenc<=em7).reduce((s,e)=>s+e.jProx,0);
-
-  // CLIENTES MAP
-  const cliMap={};
-  emps.forEach(e=>{
-    const k=e.nome||e.id;
-    if(!cliMap[k])cliMap[k]={nome:k,contratos:[],totalCap:0,totalJuros:0,totalPago:0,temAtraso:false,soQuitados:true};
-    cliMap[k].contratos.push(e);
-    cliMap[k].totalCap+=e.capital;
-    cliMap[k].totalJuros+=e.jTotal;
-    if(e.status==='atraso')cliMap[k].temAtraso=true;
-    if(e.status!=='quitado')cliMap[k].soQuitados=false;
-  });
-  pags.forEach(p=>{
-    const e=emps.find(x=>x.id===p.id);if(!e)return;
-    const k=e.nome||e.id;if(cliMap[k])cliMap[k].totalPago+=p.juros;
-  });
-  Object.values(cliMap).forEach(c=>{
-    c.qtdContratos=c.contratos.length;
-    c.qtdAtraso=c.contratos.filter(e=>e.status==='atraso').length;
-    c.taxaMedia=c.contratos.length?c.contratos.reduce((s,e)=>s+e.taxa,0)/c.contratos.length:0;
-    c.ticketMedio=c.qtdContratos?c.totalCap/c.qtdContratos:0;
-    c.ativo=!c.soQuitados;
-    c.primeiroContrato=c.contratos.reduce((m,e)=>(e.data&&(!m||e.data<m)?e.data:m),null);
-    c.mesesRelac=c.primeiroContrato?Math.max(0,Math.round((hoje-c.primeiroContrato)/2628000000)):0;
-    c.recorrente=c.qtdContratos>1;
-  });
-  const clientes=Object.values(cliMap);
-  const cliAtivos=clientes.filter(c=>c.ativo);
-  const cliInativos=clientes.filter(c=>!c.ativo);
-  const cliRecorr=clientes.filter(c=>c.recorrente);
-  const recorrPct=clientes.length?cliRecorr.length/clientes.length:0;
-  const tempoRelMed=clientes.length?clientes.reduce((s,c)=>s+c.mesesRelac,0)/clientes.length:0;
-
-  // SCORE RISCO
-  function calcScore(c){
-    const sA=c.temAtraso?50:0;
-    const sT=Math.min(c.taxaMedia/0.5,1)*20;
-    const sV=totalCap?Math.min(c.totalCap/totalCap,1)*20:0;
-    const sD=c.qtdAtraso>1?10:0;
-    return Math.min(Math.round(sA+sT+sV+sD),100);
+  // Helper: parse number from CSV string
+  function parseNum(v) {
+    if (v === null || v === undefined || v === '') return 0;
+    let s = String(v).trim();
+    const isPct = s.includes('%');
+    s = s.replace(/R\$/g,'').replace(/%/g,'').replace(/\s/g,'');
+    // Handle Brazilian format: 1.500,50 → 1500.50
+    if (s.includes(',') && s.includes('.')) {
+      s = s.replace(/\./g,'').replace(',','.');
+    } else if (s.includes(',') && !s.includes('.')) {
+      s = s.replace(',','.');
+    }
+    const n = parseFloat(s) || 0;
+    // Se veio com %, divide por 100 para virar decimal
+    if (isPct) return n / 100;
+    return n;
   }
 
-  // KPIs
-  document.getElementById('kpi-capital').textContent=fmt(totalCap);
-  document.getElementById('kpi-cap-sub').textContent=abertos.length+' contratos ativos';
-  document.getElementById('kpi-lucro').textContent=fmt(totalJuros);
-  document.getElementById('kpi-roi').textContent=pct(roi);
-  document.getElementById('kpi-inadim').textContent=pct(inadimPct);
-  document.getElementById('kpi-inadim-sub').textContent=atrasado.length+' contrato(s) em atraso';
-  document.getElementById('kpi-ticket').textContent=fmt(ticket);
-  document.getElementById('kpi-semana').textContent=fmt(proxSemana);
-  document.getElementById('kpi-cli-ativos').textContent=cliAtivos.length;
-  document.getElementById('kpi-cli-sub').textContent=cliInativos.length+' inativos';
-  document.getElementById('kpi-realizado').textContent=fmt(lucroReal);
-  document.getElementById('kpi-quitado').textContent=fmt(capQuit);
-  document.getElementById('kpi-prazo').textContent=prazoMedio.toFixed(1);
-  document.getElementById('cli-ativos-n').textContent=cliAtivos.length;
-  document.getElementById('cli-inativos-n').textContent=cliInativos.length;
-  document.getElementById('cli-recorrencia').textContent=pct(recorrPct);
-  document.getElementById('cli-tempo-rel').textContent=tempoRelMed.toFixed(1);
+  // Helper: parse taxa — se vier como 0,15 já é decimal; se vier como 15 (>1), converte
+  function parseTaxa(v) {
+    const n = parseNum(v);
+    // Se a taxa veio como percentual inteiro (ex: 15 = 15%), converte para decimal
+    return n > 1 ? n / 100 : n;
+  }
 
-  // ALERTAS
-  const alertas=[];
-  if(inadimPct>0.2)alertas.push({t:'danger',i:'🚨',m:`Inadimplência alta: ${pct(inadimPct)} — ${atrasado.length} contrato(s) em atraso totalizando ${fmt(capRisco)}.`});
-  const em3d=new Date(hoje);em3d.setDate(hoje.getDate()+3);
-  const vSem=abertos.filter(e=>e.proxVenc&&e.proxVenc>=hoje&&e.proxVenc<=em3d);
-  if(vSem.length>0)alertas.push({t:'warn',i:'⏰',m:`${vSem.length} contrato(s) vencem em 3 dias: ${vSem.map(e=>e.nome||e.id).join(', ')}.`});
-  clientes.forEach(c=>{const p=totalCap?c.totalCap/totalCap:0;if(p>0.4&&c.ativo)alertas.push({t:'warn',i:'⚖️',m:`Concentração crítica: ${c.nome} representa ${pct(p)} do capital (${fmt(c.totalCap)}).`});});
-  const graveAtraso=atrasado.filter(e=>{const d=e.proxVenc?Math.floor((hoje-e.proxVenc)/86400000):0;return d>30;});
-  if(graveAtraso.length>0)alertas.push({t:'danger',i:'💔',m:`${graveAtraso.length} contrato(s) com mais de 30 dias de atraso.`});
-  if(inadimPct<=0.05&&abertos.length>0)alertas.push({t:'ok',i:'✅',m:`Carteira saudável! Inadimplência de apenas ${pct(inadimPct)}.`});
-  const aHtml=alertas.map(a=>`<div class="alert-bar ${a.t}"><span class="alert-icon">${a.i}</span><span>${a.m}</span></div>`).join('');
-  document.getElementById('alertasBanner').innerHTML=alertas.length?aHtml:'';
-  document.getElementById('alertasDetalhados').innerHTML=alertas.length?aHtml:`<div class="alert-bar ok"><span class="alert-icon">✅</span><span>Nenhum alerta no momento.</span></div>`;
+  const emps = empRows
+    .filter(r => r[CE.id] && String(r[CE.id]).trim().toUpperCase().startsWith('EMP'))
+    .map(r => ({
+      id:           String(r[CE.id]).trim(),
+      nome:         String(r[CE.nome]||'').trim(),
+      capital:      parseNum(r[CE.cap]),
+      data:         parseDate(r[CE.data]),
+      taxa:         parseTaxa(r[CE.taxa]),
+      prazo:        parseNum(r[CE.prazo]),
+      tipoJuros:    String(r[CE.tipoJuros]||'').trim(),
+      jTotal:       parseNum(r[CE.jTotal]),
+      saldo:        parseNum(r[CE.saldo]),
+      jProx:        parseNum(r[CE.jProx]),
+      status:       parseStatus(r[CE.status]),
+      proxVenc:     parseDate(r[CE.proxVenc]),
+      vencContrato: parseDate(r[CE.vencContrato]),
+    }))
+    .filter(e => e.status !== null && e.capital > 0);
 
-  // EVOLUÇÃO MENSAL
-  const evolMap={};
-  emps.forEach(e=>{
-    if(!e.data)return;
-    const k=`${e.data.getFullYear()}-${String(e.data.getMonth()+1).padStart(2,'0')}`;
-    if(!evolMap[k])evolMap[k]={cap:0,juros:0};
-    evolMap[k].cap+=e.capital;evolMap[k].juros+=e.jTotal;
+  // Parse pagamentos
+  const pags = pagRows
+    .filter(r => r[CP.id] && String(r[CP.id]).startsWith('EMP'))
+    .map(r => ({
+      id:    String(r[CP.id]).trim(),
+      tipo:  String(r[CP.tipo]||''),
+      valor: parseNum(r[CP.valor]),
+      data:  parseDate(r[CP.data]),
+      juros: parseNum(r[CP.juros]),
+    }));
+
+  const ativos   = emps.filter(e=>e.status==='ativo');
+  const atrasado = emps.filter(e=>e.status==='atraso');
+  const quitados = emps.filter(e=>e.status==='quitado');
+  const abertos  = [...ativos,...atrasado];
+
+  const totalCap   = abertos.reduce((s,e)=>s+e.capital,0);
+  const totalJuros = abertos.reduce((s,e)=>s+e.jTotal,0);
+  const roi        = totalCap ? totalJuros/totalCap : 0;
+  const ticket     = abertos.length ? totalCap/abertos.length : 0;
+  const inadimPct  = abertos.length ? atrasado.length/abertos.length : 0;
+  const capRisco   = atrasado.reduce((s,e)=>s+e.capital,0);
+
+  // Recebimentos próximos 7 dias
+  const em7Dias = new Date(hoje); em7Dias.setDate(em7Dias.getDate()+7);
+  const proxSemana = abertos
+    .filter(e => e.proxVenc && e.proxVenc >= hoje && e.proxVenc <= em7Dias)
+    .reduce((s,e) => s+e.jProx, 0);
+
+  // ── KPIs ────────────────────────────────
+  document.getElementById('kpi-capital').textContent = fmt(totalCap);
+  document.getElementById('kpi-lucro').textContent   = fmt(totalJuros);
+  document.getElementById('kpi-roi').textContent     = pct(roi);
+  document.getElementById('kpi-ticket').textContent  = fmt(ticket);
+  document.getElementById('kpi-inadim').textContent  = pct(inadimPct);
+  document.getElementById('kpi-inadim-sub').textContent = atrasado.length+' contrato(s) em atraso';
+  document.getElementById('kpi-semana').textContent  = fmt(proxSemana);
+
+  // ── 1. PROJEÇÃO 8 SEMANAS ──────────────────
+  const semanaLabels = [];
+  const semanaRanges = [];
+
+  for(let i=0; i<8; i++){
+    const ini = new Date(hoje);
+    ini.setDate(hoje.getDate() + i*7 + 1);
+    const fim = new Date(ini);
+    fim.setDate(ini.getDate() + 6);
+    semanaLabels.push(
+      `${ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}`
+    );
+    semanaRanges.push({ ini, fim });
+  }
+
+  // Para cada semana, soma jProx dos contratos cujo proxVenc cai naquele intervalo
+  const jMesBase = abertos.reduce((s,e)=>s+e.jProx,0);
+  const jSemanaBase = jMesBase / 4.33; // fallback: distribui mensalmente em semanas
+
+  const jurosPorSemana = semanaRanges.map((r, idx) => {
+    const comVenc = abertos.filter(e =>
+      e.proxVenc && e.proxVenc >= r.ini && e.proxVenc <= r.fim
+    );
+    const semVenc = abertos.filter(e => !e.proxVenc);
+
+    const jComVenc = comVenc.reduce((s,e)=>s+e.jProx,0);
+    // Sem data: distribui proporcionalmente (1 semana ≈ 1/4.33 do mês)
+    const jSemVenc = semVenc.reduce((s,e)=>s+e.jProx,0) / 4.33;
+    const fator = 1 - idx * 0.01; // decaimento mínimo de 1% por semana
+    return jComVenc + jSemVenc * fator;
   });
-  const evolKeys=Object.keys(evolMap).sort();
-  let accCap=0,accJuros=0;const evolLabels=[],evolCap=[],evolJuros=[];
-  evolKeys.forEach(k=>{const[y,m]=k.split('-');evolLabels.push(new Date(+y,+m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));accCap+=evolMap[k].cap;accJuros+=evolMap[k].juros;evolCap.push(accCap);evolJuros.push(accJuros);});
+
+  const totalProj = jurosPorSemana.reduce((s,v)=>s+v,0);
+  const dadosFinais = totalProj > 0
+    ? jurosPorSemana
+    : semanaRanges.map((_,i) => jSemanaBase * (1 - i*0.01));
+
+  // Destaca semanas com vencimentos reais
+  const bgColors = semanaRanges.map((r) => {
+    const temVenc = abertos.some(e => e.proxVenc && e.proxVenc >= r.ini && e.proxVenc <= r.fim);
+    return temVenc ? 'rgba(6,214,160,0.85)' : 'rgba(6,214,160,0.35)';
+  });
+
+  destroyChart('proj');
+  charts.proj = new Chart(document.getElementById('chartProjecao').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels: semanaLabels,
+      datasets:[
+        {
+          label:'Juros a Receber',
+          data: dadosFinais,
+          backgroundColor: bgColors,
+          borderRadius:6,
+          borderSkipped:false,
+        },
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          ...TOOLTIP,
+          callbacks:{
+            title: (items) => {
+              const idx = items[0].dataIndex;
+              const r = semanaRanges[idx];
+              return `Semana ${idx+1}  (${r.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${r.fim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})})`;
+            },
+            label: ctx => ' Juros previstos: ' + fmt(ctx.raw),
+            afterLabel: (ctx) => {
+              const idx = ctx.dataIndex;
+              const r = semanaRanges[idx];
+              const n = abertos.filter(e => e.proxVenc && e.proxVenc >= r.ini && e.proxVenc <= r.fim).length;
+              return n > 0 ? ` ${n} contrato(s) com vencimento` : ' (sem vencimento nessa semana)';
+            }
+          }
+        },
+      },
+      scales:{
+        x:{grid:{color:'#1c2133'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},
+        y:{
+          grid:{color:'#1c2133'},
+          ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},
+          beginAtZero:true,
+        },
+      }
+    }
+  });
+
+  // ── 2. COMPOSIÇÃO ────────────────────────
+  const capSaudavel = ativos.reduce((s,e)=>s+e.capital,0);
+  const capQuitado  = quitados.reduce((s,e)=>s+e.capital,0);
+
+  destroyChart('comp');
+  charts.comp = new Chart(document.getElementById('chartComposicao').getContext('2d'),{
+    type:'doughnut',
+    data:{
+      labels:['🟢 Saudável','🔴 Em Risco','✅ Quitado'],
+      datasets:[{
+        data:[capSaudavel,capRisco,capQuitado],
+        backgroundColor:['rgba(6,214,160,0.8)','rgba(239,71,111,0.8)','rgba(90,98,130,0.5)'],
+        borderColor:'#080a0f',borderWidth:3,hoverOffset:8,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'65%',
+      plugins:{
+        legend:{position:'bottom',labels:{color:'#5a6282',font:{family:'DM Mono',size:10},padding:14,boxWidth:10,boxHeight:10}},
+        tooltip:{...TOOLTIP,callbacks:{label:ctx=>` ${ctx.label}: ${fmt(ctx.raw)}`}},
+      }
+    }
+  });
+
+  // ── 3. EVOLUÇÃO CAPITAL + LUCRO ──────────
+  destroyChart('evol');
+  charts.evol = new Chart(document.getElementById('chartEvolucao').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels: abertos.map(e=>e.id),
+      datasets:[
+        {label:'Capital',data:abertos.map(e=>e.capital),backgroundColor:'rgba(155,93,229,0.7)',borderRadius:4,borderSkipped:false},
+        {label:'Lucro Previsto',data:abertos.map(e=>e.jTotal),backgroundColor:'rgba(240,180,41,0.7)',borderRadius:4,borderSkipped:false},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:10},boxWidth:10,boxHeight:10}},
+        tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.raw)}},
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10}}},
+        y:{grid:{color:'#1c2133'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}},
+      }
+    }
+  });
+
+  // ── 4. SCORE DE RISCO ────────────────────
+  // Agrupa contratos por cliente (pelo nome)
+  const clientesMap = {};
+  emps.forEach(e => {
+    const key = e.nome || e.id;
+    if (!clientesMap[key]) {
+      clientesMap[key] = {
+        nome: key,
+        contratos: [],
+        temAtraso: false,
+        capitalTotal: 0,
+        taxaMedia: 0,
+      };
+    }
+    clientesMap[key].contratos.push(e);
+    clientesMap[key].capitalTotal += e.capital;
+    if (e.status === 'atraso') clientesMap[key].temAtraso = true;
+  });
+
+  // Calcula taxa média por cliente
+  Object.values(clientesMap).forEach(c => {
+    const abertosCliente = c.contratos.filter(e => e.status !== 'quitado');
+    c.taxaMedia = abertosCliente.length
+      ? abertosCliente.reduce((s,e)=>s+e.taxa,0) / abertosCliente.length
+      : 0;
+    c.qtdContratos = c.contratos.length;
+    c.qtdAtraso    = c.contratos.filter(e=>e.status==='atraso').length;
+  });
+
+  function calcRiscoCliente(c) {
+    const scoreAtraso = c.temAtraso ? 50 : 0;
+    const scoreTaxa   = Math.min(c.taxaMedia / 0.5, 1) * 30;
+    const scoreValor  = totalCap ? Math.min(c.capitalTotal / totalCap, 1) * 20 : 0;
+    return Math.min(Math.round(scoreAtraso + scoreTaxa + scoreValor), 100);
+  }
+
+  const clientesSorted = Object.values(clientesMap)
+    .sort((a,b) => calcRiscoCliente(b) - calcRiscoCliente(a));
+
+  const riskColors = s => s<30?'var(--green)':s<60?'var(--gold)':'var(--red)';
+
+  document.getElementById('riskList').innerHTML = clientesSorted.map(c => {
+    const score = calcRiscoCliente(c);
+    const cor   = riskColors(score);
+    const label = score<30?'BAIXO':score<60?'MÉDIO':'ALTO';
+    const sub   = c.qtdContratos > 1
+      ? `${c.qtdContratos} contratos · ${fmt(c.capitalTotal)}`
+      : `${c.qtdContratos} contrato · ${fmt(c.capitalTotal)}`;
+    return `
+      <div class="risk-row">
+        <div class="risk-top">
+          <div>
+            <span class="risk-name">${c.nome}</span>
+            <span style="font-size:0.55rem;color:var(--muted);margin-left:8px">${sub}</span>
+          </div>
+          <span class="risk-score-val" style="color:${cor}">${score} <span style="font-size:0.55rem;color:var(--muted)">${label}</span></span>
+        </div>
+        <div class="risk-bar-bg">
+          <div class="risk-bar-fill" style="width:${score}%;background:${cor}"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+
+  // ── 5. CALENDÁRIO SEMANAL ────────────────
+  const diasSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const semana = [];
+  // Pegar de segunda a domingo desta semana
+  const diaSemAtual = hoje.getDay(); // 0=dom
+  const segundaFeira = new Date(hoje);
+  segundaFeira.setDate(hoje.getDate() - (diaSemAtual===0?6:diaSemAtual-1));
+
+  for(let i=0;i<7;i++){
+    const d = new Date(segundaFeira);
+    d.setDate(segundaFeira.getDate()+i);
+    const isToday = d.toDateString()===hoje.toDateString();
+
+    // Contratos que vencem neste dia
+    const vencHoje = abertos.filter(e => {
+      if(!e.proxVenc) return false;
+      return e.proxVenc.toDateString()===d.toDateString();
+    });
+
+    const total = vencHoje.reduce((s,e)=>s+e.jProx,0);
+
+    semana.push({
+      dia: d.getDate(),
+      nome: diasSemana[d.getDay()],
+      isToday,
+      vencimentos: vencHoje,
+      total,
+    });
+  }
+
+  document.getElementById('weekCalendar').innerHTML = semana.map(d=>`
+    <div class="day-col">
+      <div class="day-name">${d.nome}</div>
+      <div class="day-box ${d.isToday?'today':''} ${d.total>0?'has-payment':''}">
+        <div class="day-num">${d.dia}</div>
+        ${d.total>0 ? `
+          <div class="day-payment">${fmt(d.total)}</div>
+          <div class="day-clients">
+            ${d.vencimentos.map(e=>`
+              <div class="day-client-chip ${e.status==='atraso'?'atraso':''}">
+                ${e.nome||e.id}
+                <span class="chip-val">${fmt(e.jProx)}${e.status==='atraso'?' ⚠️':''}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<div class="day-empty">—</div>`}
+      </div>
+    </div>
+  `).join('');
+
+  // ── LISTA DE COBRANÇAS DA SEMANA ─────────
+  const todosVencSemana = semana.flatMap(d => d.vencimentos.map(e => ({...e, diaVenc: d})));
+  const cobEl = document.getElementById('cobrancaList');
+  if (cobEl) {
+    if (todosVencSemana.length === 0) {
+      cobEl.innerHTML = `<div style="color:var(--muted);font-size:0.68rem;padding:12px 0">Nenhum vencimento esta semana.</div>`;
+    } else {
+      // Ordena: atraso primeiro, depois por dia
+      const sorted = [...todosVencSemana].sort((a,b) => {
+        if (a.status==='atraso' && b.status!=='atraso') return -1;
+        if (b.status==='atraso' && a.status!=='atraso') return 1;
+        return a.diaVenc.dia - b.diaVenc.dia;
+      });
+      cobEl.innerHTML = sorted.map(e => {
+        const isAtraso = e.status === 'atraso';
+        const cor = isAtraso ? 'var(--red)' : 'var(--green)';
+        const badge = isAtraso
+          ? `<span style="background:rgba(239,71,111,0.15);color:var(--red);border:1px solid rgba(239,71,111,0.3);border-radius:4px;padding:2px 7px;font-size:0.5rem">⚠️ ATRASO</span>`
+          : `<span style="background:rgba(6,214,160,0.1);color:var(--green);border:1px solid rgba(6,214,160,0.2);border-radius:4px;padding:2px 7px;font-size:0.5rem">✓ EM DIA</span>`;
+        return `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <span style="font-size:0.72rem;color:var(--text)">${e.nome||e.id}</span>
+              <span style="font-size:0.58rem;color:var(--muted)">${e.id} · vence ${e.diaVenc.nome} ${e.diaVenc.dia}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              ${badge}
+              <span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${cor}">${fmt(e.jProx)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  // ── 6. DOBRAMENTO DE CAPITAL ─────────────
+  // Usando regra dos juros compostos: FV = PV*(1+r)^n
+  // Quanto tempo leva para dobrar com o ROI mensal atual
+  const roiMensal = abertos.length
+    ? abertos.reduce((s,e)=>s+e.taxa,0)/abertos.length
+    : 0.1;
+
+  const mesesParaDobrar = roiMensal>0
+    ? Math.ceil(Math.log(2)/Math.log(1+roiMensal))
+    : 999;
+
+  const projecoes = [1,3,6,12,mesesParaDobrar].filter((v,i,a)=>a.indexOf(v)===i).sort((a,b)=>a-b);
+
+  document.getElementById('dobraContent').innerHTML = `
+    <div style="margin-bottom:14px;font-size:0.68rem;color:var(--muted)">
+      Com taxa média de <strong style="color:var(--gold)">${pct(roiMensal)}/mês</strong>,
+      seu capital dobra em <strong style="color:var(--green)">${mesesParaDobrar} meses</strong>
+      (${Math.round(mesesParaDobrar/12*10)/10} anos)
+    </div>
+    <table class="dobra-table">
+      <thead>
+        <tr>
+          <th>Prazo</th>
+          <th>Capital Projetado</th>
+          <th>Lucro Acumulado</th>
+          <th>Multiplicador</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${projecoes.map(m=>{
+          const fv = totalCap*Math.pow(1+roiMensal,m);
+          const lucro = fv-totalCap;
+          const mult  = fv/totalCap;
+          const isDouble = m===mesesParaDobrar;
+          return `<tr class="${isDouble?'highlight':''}">
+            <td>${isDouble?'🎯 ':''}${m} ${m===1?'mês':'meses'}</td>
+            <td>${fmt(fv)}</td>
+            <td style="color:var(--green)">+${fmt(lucro)}</td>
+            <td>${mult.toFixed(2)}x</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:0.58rem;color:var(--muted2)">
+      * Projeção assumindo reinvestimento total dos juros mensalmente
+    </div>
+  `;
+
+  document.getElementById('last-update').textContent = new Date().toLocaleTimeString('pt-BR');
+
+  // ── 7. DIAS DE ATRASO ────────────────────
+  const hoje2 = new Date(); hoje2.setHours(0,0,0,0);
+  const emAtraso = atrasado.map(e => {
+    const diasAtraso = e.proxVenc
+      ? Math.max(0, Math.floor((hoje2 - e.proxVenc) / 86400000))
+      : 0;
+    return { ...e, diasAtraso };
+  }).sort((a,b) => b.diasAtraso - a.diasAtraso);
+
+  const atrasoEl = document.getElementById('atrasoList');
+  if (emAtraso.length === 0) {
+    atrasoEl.innerHTML = `<div style="color:var(--green);font-size:0.68rem;padding:12px 0">✅ Nenhum contrato em atraso!</div>`;
+  } else {
+    atrasoEl.innerHTML = emAtraso.map(e => {
+      const cls = e.diasAtraso > 30 ? '' : e.diasAtraso > 10 ? 'medio' : 'baixo';
+      const cor = e.diasAtraso > 30 ? 'var(--red)' : e.diasAtraso > 10 ? 'var(--gold)' : 'var(--muted)';
+      return `
+        <div class="atraso-row ${cls}">
+          <div class="atraso-info">
+            <span class="atraso-nome">${e.nome || e.id}</span>
+            <span class="atraso-sub">${e.id} · ${fmt(e.capital)} · vencia ${e.proxVenc ? e.proxVenc.toLocaleDateString('pt-BR') : '—'}</span>
+          </div>
+          <div class="atraso-dias" style="color:${cor}">
+            ${e.diasAtraso > 0 ? e.diasAtraso : '?'}
+            <span>${e.diasAtraso > 0 ? 'dias' : 'sem data'}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ── 8. HISTÓRICO DE PAGAMENTOS POR CLIENTE ──
+  // Agrupa pagamentos por ID de contrato → cruza com cliente
+  const pagPorContrato = {};
+  pags.forEach(p => {
+    if (!pagPorContrato[p.id]) pagPorContrato[p.id] = [];
+    pagPorContrato[p.id].push(p);
+  });
+
+  // Agrupa contratos por cliente
+  const histClientes = {};
+  emps.forEach(e => {
+    const key = e.nome || e.id;
+    if (!histClientes[key]) histClientes[key] = { nome: key, contratos: [], totalPago: 0, totalJuros: 0, qtdPag: 0 };
+    histClientes[key].contratos.push(e);
+    const pagamentos = pagPorContrato[e.id] || [];
+    pagamentos.forEach(p => {
+      histClientes[key].totalPago  += p.valor;
+      histClientes[key].totalJuros += p.juros;
+      histClientes[key].qtdPag++;
+    });
+  });
+
+  const histSorted = Object.values(histClientes).sort((a,b) => b.totalPago - a.totalPago);
+
+  document.getElementById('histList').innerHTML = histSorted.length === 0
+    ? `<div style="color:var(--muted);font-size:0.68rem">Nenhum pagamento registrado ainda.</div>`
+    : histSorted.map(c => {
+        const temAtraso = c.contratos.some(e => e.status === 'atraso');
+        const todosQuit = c.contratos.every(e => e.status === 'quitado');
+        const statusBadge = todosQuit
+          ? `<span class="hist-badge ok">✅ QUITADO</span>`
+          : temAtraso
+            ? `<span class="hist-badge bad">⚠️ ATRASO</span>`
+            : `<span class="hist-badge ok">✓ EM DIA</span>`;
+        const pagBadge = c.qtdPag > 0
+          ? `<span class="hist-badge muted">${c.qtdPag} pgto(s)</span>`
+          : `<span class="hist-badge warn">sem pgtos</span>`;
+        return `
+          <div class="hist-row">
+            <span class="hist-nome">${c.nome}</span>
+            <div class="hist-badges">
+              ${pagBadge}
+              <span class="hist-badge muted">${fmt(c.totalPago)}</span>
+              ${statusBadge}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+  // ── 9. CONCENTRAÇÃO DE RISCO ─────────────
+  const concClientes = Object.values(histClientes).map(c => ({
+    nome: c.nome,
+    capital: c.contratos.filter(e=>e.status!=='quitado').reduce((s,e)=>s+e.capital,0),
+  })).filter(c => c.capital > 0).sort((a,b) => b.capital - a.capital);
+
+  document.getElementById('concList').innerHTML = concClientes.map(c => {
+    const pct2 = totalCap ? c.capital / totalCap : 0;
+    const cor  = pct2 > 0.4 ? 'var(--red)' : pct2 > 0.25 ? 'var(--gold)' : 'var(--green)';
+    const alerta = pct2 > 0.4 ? ' ⚠️' : '';
+    return `
+      <div class="conc-row">
+        <div class="conc-top">
+          <span class="conc-nome">${c.nome}${alerta}</span>
+          <div style="text-align:right">
+            <span class="conc-pct" style="color:${cor}">${(pct2*100).toFixed(1)}%</span>
+            <span style="font-size:0.55rem;color:var(--muted);margin-left:6px">${fmt(c.capital)}</span>
+          </div>
+        </div>
+        <div class="conc-bar-bg">
+          <div class="conc-bar-fill" style="width:${(pct2*100).toFixed(1)}%;background:${cor}"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // ── 10. LUCRO REALIZADO vs PREVISTO ──────
+  const lucroRealizado = pags.reduce((s,p) => s + p.juros, 0);
+  const lucroDevedor   = totalJuros;
+
+  destroyChart('lucro');
+  charts.lucro = new Chart(document.getElementById('chartLucro').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['Juros Recebidos', 'Juros a Receber'],
+      datasets: [{
+        data: [lucroRealizado, lucroDevedor],
+        backgroundColor: ['rgba(6,214,160,0.75)', 'rgba(240,180,41,0.6)'],
+        borderRadius: 8, borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...TOOLTIP, callbacks: { label: ctx => ' ' + fmt(ctx.raw) } },
+      },
+      scales: {
+        x: { grid:{color:'#1c2133'}, ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)} },
+        y: { grid:{display:false}, ticks:{color:'#dde1f0',font:{family:'DM Mono',size:10}} },
+      }
+    }
+  });
+
+  // ── 11. CAPITAL DISPONÍVEL + VENCENDO 30 DIAS ──
+  const capitalQuitadoTotal = quitados.reduce((s,e)=>s+e.capital,0);
+  const em30Dias = new Date(hoje); em30Dias.setDate(em30Dias.getDate()+30);
+  const vencendo30 = abertos.filter(e => e.vencContrato && e.vencContrato >= hoje && e.vencContrato <= em30Dias);
+  const capitalVencendo = vencendo30.reduce((s,e)=>s+e.capital,0);
+  const jurosVencendo   = vencendo30.reduce((s,e)=>s+e.jTotal,0);
+
+  document.getElementById('capitalDisp').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px">Capital retornado (quitados)</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--green)">${fmt(capitalQuitadoTotal)}</div>
+      <div style="font-size:0.6rem;color:var(--muted);margin-top:2px">de ${quitados.length} contrato(s) já quitado(s)</div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:16px">
+      <div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Contratos vencendo nos próximos 30 dias</div>
+      ${vencendo30.length === 0
+        ? `<div style="color:var(--muted);font-size:0.68rem">Nenhum contrato vence nos próximos 30 dias.</div>`
+        : vencendo30.sort((a,b)=>a.vencContrato-b.vencContrato).map(e=>`
+          <div class="info-row">
+            <div>
+              <div class="info-label">${e.nome || e.id} <span style="color:var(--muted2)">· ${e.id}</span></div>
+              <div style="font-size:0.55rem;color:var(--muted);margin-top:2px">vence ${e.vencContrato.toLocaleDateString('pt-BR')}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="info-val" style="color:var(--purple)">${fmt(e.capital)}</div>
+              <div style="font-size:0.55rem;color:var(--green)">+${fmt(e.jTotal)} juros</div>
+            </div>
+          </div>
+        `).join('')
+      }
+      ${vencendo30.length > 0 ? `
+        <div style="margin-top:10px;padding:10px 12px;background:rgba(72,149,239,0.08);border-radius:8px;border:1px solid rgba(72,149,239,0.2)">
+          <div style="font-size:0.6rem;color:var(--muted)">Total a recuperar</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--blue)">${fmt(capitalVencendo + jurosVencendo)}</div>
+          <div style="font-size:0.55rem;color:var(--muted)">${fmt(capitalVencendo)} capital + ${fmt(jurosVencendo)} juros</div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  // ── 12. EVOLUÇÃO MENSAL DA CARTEIRA ──────
+  // Agrupa capital ativo por mês de contratação
+  const evolMap = {};
+  emps.forEach(e => {
+    if (!e.data) return;
+    const key = `${e.data.getFullYear()}-${String(e.data.getMonth()+1).padStart(2,'0')}`;
+    if (!evolMap[key]) evolMap[key] = { capital: 0, contratos: 0 };
+    evolMap[key].capital    += e.capital;
+    evolMap[key].contratos  += 1;
+  });
+
+  const evolKeys = Object.keys(evolMap).sort();
+  // Acumula capital mês a mês
+  let acumulado = 0;
+  const evolLabels = evolKeys.map(k => {
+    const [y, m] = k.split('-');
+    return new Date(+y, +m-1, 1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});
+  });
+  const evolData = evolKeys.map(k => {
+    acumulado += evolMap[k].capital;
+    return acumulado;
+  });
 
   destroyChart('evolMensal');
-  charts.evolMensal=new Chart(document.getElementById('chartEvolMensal').getContext('2d'),{type:'line',data:{labels:evolLabels,datasets:[{label:'Capital Acumulado',data:evolCap,borderColor:'rgba(201,146,42,0.9)',backgroundColor:'rgba(201,146,42,0.07)',borderWidth:2,pointRadius:4,fill:true,tension:0.3},{label:'Lucro Previsto',data:evolJuros,borderColor:'rgba(6,214,160,0.8)',backgroundColor:'rgba(6,214,160,0.04)',borderWidth:2,pointRadius:3,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
-
-  // COMPOSIÇÃO
-  destroyChart('comp');
-  charts.comp=new Chart(document.getElementById('chartComposicao').getContext('2d'),{type:'doughnut',data:{labels:['🟢 Saudável','🔴 Em Risco','✅ Quitado'],datasets:[{data:[ativos.reduce((s,e)=>s+e.capital,0),capRisco,capQuit],backgroundColor:['rgba(6,214,160,0.8)','rgba(239,71,111,0.8)','rgba(90,98,130,0.5)'],borderColor:'#07090e',borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:'#5a6282',font:{family:'DM Mono',size:10},padding:14,boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>` ${ctx.label}: ${fmt(ctx.raw)}`}}}}});
-
-  // PROJEÇÃO 8 SEMANAS
-  const semRanges=[],semLabels=[];
-  for(let i=0;i<8;i++){const ini=new Date(hoje);ini.setDate(hoje.getDate()+i*7+1);const fim=new Date(ini);fim.setDate(ini.getDate()+6);semLabels.push(ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}));semRanges.push({ini,fim});}
-  const jBase=abertos.reduce((s,e)=>s+e.jProx,0);
-  const dadosProj=semRanges.map((r,i)=>{const cv=abertos.filter(e=>e.proxVenc&&e.proxVenc>=r.ini&&e.proxVenc<=r.fim);const sv=abertos.filter(e=>!e.proxVenc);return cv.reduce((s,e)=>s+e.jProx,0)+sv.reduce((s,e)=>s+e.jProx,0)/4.33*(1-i*0.01);});
-  const totProj=dadosProj.reduce((s,v)=>s+v,0);
-  const dFin=totProj>0?dadosProj:semRanges.map((_,i)=>jBase/4.33*(1-i*0.01));
-  const bgSem=semRanges.map(r=>abertos.some(e=>e.proxVenc&&e.proxVenc>=r.ini&&e.proxVenc<=r.fim)?'rgba(6,214,160,0.85)':'rgba(6,214,160,0.3)');
-  destroyChart('proj');
-  charts.proj=new Chart(document.getElementById('chartProjecao').getContext('2d'),{type:'bar',data:{labels:semLabels,datasets:[{label:'Juros a Receber',data:dFin,backgroundColor:bgSem,borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{title:items=>{const r=semRanges[items[0].dataIndex];return`Semana ${items[0].dataIndex+1} (${r.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}–${r.fim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})})`;},label:ctx=>' Juros: '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
-
-  // LUCRO REAL vs PREVISTO
-  destroyChart('lucro');
-  charts.lucro=new Chart(document.getElementById('chartLucro').getContext('2d'),{type:'bar',data:{labels:['Juros Recebidos','Juros a Receber'],datasets:[{data:[lucroReal,totalJuros],backgroundColor:['rgba(6,214,160,0.8)','rgba(240,180,41,0.6)'],borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}},y:{grid:{display:false},ticks:{color:'#dde1f0',font:{family:'DM Mono',size:10}}}}}});
-
-  // RECEITA vs PERDA
-  destroyChart('recPerd');
-  charts.recPerd=new Chart(document.getElementById('chartReceitaPerda').getContext('2d'),{type:'bar',data:{labels:['Receita de Juros','Capital em Risco','Juros Recuperados'],datasets:[{data:[totalJuros,capRisco,lucroReal],backgroundColor:['rgba(6,214,160,0.75)','rgba(239,71,111,0.75)','rgba(72,149,239,0.75)'],borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{display:false},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
-
-  // SAÍDAS
-  const saidasMap={};
-  emps.forEach(e=>{if(!e.data)return;const k=`${e.data.getFullYear()}-${String(e.data.getMonth()+1).padStart(2,'0')}`;if(!saidasMap[k])saidasMap[k]=0;saidasMap[k]+=e.capital;});
-  const sK=Object.keys(saidasMap).sort();
-  destroyChart('saidas');
-  charts.saidas=new Chart(document.getElementById('chartSaidas').getContext('2d'),{type:'bar',data:{labels:sK.map(k=>{const[y,m]=k.split('-');return new Date(+y,+m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});}),datasets:[{label:'Capital Emprestado',data:sK.map(k=>saidasMap[k]),backgroundColor:'rgba(155,93,229,0.7)',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
-
-  // CENÁRIOS
-  function serCen(fator){let s=totalCap;const arr=[];for(let m=0;m<12;m++){s=s*(1+taxaMediaGlobal/12)*(1-fator/12);arr.push(s);}return arr;}
-  function lucCen(fator){let s=totalCap,l=0;for(let m=0;m<12;m++){const j=s*taxaMediaGlobal/12,p=s*fator/12;l+=j-p;s=s+j-p;}return{lucro:l,saldo:s};}
-  const cOt=lucCen(0.02),cRe=lucCen(inadimPct),cPe=lucCen(Math.min(inadimPct*2+0.1,0.5));
-  const inadPe=Math.min(inadimPct*2+0.1,0.5);
-  document.getElementById('scenarioGrid').innerHTML=`
-    <div class="sc-card ot"><div class="sc-title" style="color:var(--green)">🟢 Otimista</div><div class="sc-val" style="color:var(--green)">${fmt(cOt.lucro)}</div><div class="sc-sub">Inadimplência: 2% · Saldo: ${fmt(cOt.saldo)}</div></div>
-    <div class="sc-card re"><div class="sc-title" style="color:var(--gold2)">🟡 Realista</div><div class="sc-val" style="color:var(--gold2)">${fmt(cRe.lucro)}</div><div class="sc-sub">Inadimplência: ${pct(inadimPct)} · Saldo: ${fmt(cRe.saldo)}</div></div>
-    <div class="sc-card pe"><div class="sc-title" style="color:var(--red)">🔴 Pessimista</div><div class="sc-val" style="color:var(--red)">${fmt(cPe.lucro)}</div><div class="sc-sub">Inadimplência: ${pct(inadPe)} · Saldo: ${fmt(cPe.saldo)}</div></div>`;
-  const mL=Array.from({length:12},(_,i)=>{const d=new Date(hoje);d.setMonth(d.getMonth()+i+1);return d.toLocaleDateString('pt-BR',{month:'short'});});
-  destroyChart('cenarios');
-  charts.cenarios=new Chart(document.getElementById('chartCenarios').getContext('2d'),{type:'line',data:{labels:mL,datasets:[{label:'Otimista',data:serCen(0.02),borderColor:'rgba(6,214,160,0.8)',borderWidth:2,pointRadius:2,tension:0.3,fill:false},{label:'Realista',data:serCen(inadimPct),borderColor:'rgba(240,180,41,0.8)',borderWidth:2,pointRadius:2,tension:0.3,fill:false},{label:'Pessimista',data:serCen(inadPe),borderColor:'rgba(239,71,111,0.7)',borderWidth:2,pointRadius:2,tension:0.3,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}}}}});
-
-  // SALDO PROJETADO
-  let sAcc=totalCap;const sData=[totalCap];
-  for(let m=0;m<12;m++){sAcc=sAcc*(1+taxaMediaGlobal/12)*(1-inadimPct/12);sData.push(sAcc);}
-  destroyChart('saldoProj');
-  charts.saldoProj=new Chart(document.getElementById('chartSaldoProj').getContext('2d'),{type:'line',data:{labels:['Hoje',...mL],datasets:[{label:'Saldo Projetado',data:sData,borderColor:'rgba(201,146,42,0.9)',backgroundColor:'rgba(201,146,42,0.06)',borderWidth:2,pointRadius:4,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' Saldo: '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}}}}});
-
-  // DIAS DE ATRASO
-  const emAt=atrasado.map(e=>({...e,dias:e.proxVenc?Math.max(0,Math.floor((hoje-e.proxVenc)/86400000)):0})).sort((a,b)=>b.dias-a.dias);
-  document.getElementById('atrasoList').innerHTML=emAt.length===0?`<div style="color:var(--green);font-size:0.68rem;padding:12px 0">✅ Nenhum contrato em atraso!</div>`:emAt.map(e=>{const cls=e.dias>30?'':e.dias>10?'medio':'baixo';const cor=e.dias>30?'var(--red)':e.dias>10?'var(--gold2)':'var(--muted)';return`<div class="atraso-row ${cls}"><div class="atraso-info"><span class="atraso-nome">${e.nome||e.id}</span><span class="atraso-sub">${e.id} · ${fmt(e.capital)} · vencia ${e.proxVenc?e.proxVenc.toLocaleDateString('pt-BR'):'—'}</span></div><div class="atraso-dias" style="color:${cor}">${e.dias>0?e.dias:'?'}<span>${e.dias>0?'dias':'sem data'}</span></div></div>`;}).join('');
-
-  // CONCENTRAÇÃO
-  document.getElementById('concList').innerHTML=clientes.filter(c=>c.ativo).sort((a,b)=>b.totalCap-a.totalCap).map(c=>{const p=totalCap?c.totalCap/totalCap:0;const cor=p>0.4?'var(--red)':p>0.25?'var(--gold2)':'var(--green)';return`<div class="conc-row"><div class="conc-top"><span class="conc-nome">${c.nome}${p>0.4?' ⚠️':''}</span><div style="text-align:right"><span class="conc-pct" style="color:${cor}">${(p*100).toFixed(1)}%</span><span style="font-size:0.55rem;color:var(--muted);margin-left:6px">${fmt(c.totalCap)}</span></div></div><div class="bar-bg"><div class="bar-fill" style="width:${(p*100).toFixed(1)}%;background:${cor}"></div></div></div>`;}).join('');
-
-  // SCORE RISCO
-  document.getElementById('riskList').innerHTML=clientes.sort((a,b)=>calcScore(b)-calcScore(a)).map(c=>{const sc=calcScore(c);const cor=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';const lbl=sc<30?'BAIXO':sc<60?'MÉDIO':'ALTO';return`<div class="risk-row"><div class="risk-top"><div><span class="risk-name">${c.nome}</span><span style="font-size:0.52rem;color:var(--muted);margin-left:8px">${c.qtdContratos} contrato(s) · ${fmt(c.totalCap)}</span></div><span class="risk-score-val" style="color:${cor}">${sc} <span style="font-size:0.52rem;color:var(--muted)">${lbl}</span></span></div><div class="risk-bar-bg"><div class="risk-bar-fill" style="width:${sc}%;background:${cor}"></div></div></div>`;}).join('');
-
-  // PREVISÃO INADIMPLÊNCIA
-  const scoresMed=clientes.filter(c=>c.ativo).map(c=>calcScore(c));
-  const scoreMed=scoresMed.length?scoresMed.reduce((s,v)=>s+v,0)/scoresMed.length:0;
-  const prevInadim=Math.min(scoreMed/100*0.35,0.5);
-  const risco=scoreMed<30?{lbl:'BAIXO',cor:'var(--green)'}:scoreMed<60?{lbl:'MODERADO',cor:'var(--gold2)'}:{lbl:'ALTO',cor:'var(--red)'};
-  document.getElementById('previsaoInadim').innerHTML=`<div style="text-align:center;padding:16px 0"><div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px">SCORE MÉDIO DA CARTEIRA</div><div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:${risco.cor};line-height:1">${scoreMed.toFixed(0)}</div><div class="badge ${scoreMed<30?'ok':scoreMed<60?'warn':'bad'}" style="margin:8px auto;display:inline-block">RISCO ${risco.lbl}</div></div><div style="border-top:1px solid var(--border);padding-top:12px"><div class="info-row"><span class="info-label">Inadimplência atual</span><span class="info-val" style="color:var(--red)">${pct(inadimPct)}</span></div><div class="info-row"><span class="info-label">Previsão (12 meses)</span><span class="info-val" style="color:${risco.cor}">${pct(prevInadim)}</span></div><div class="info-row"><span class="info-label">Capital em risco</span><span class="info-val" style="color:var(--red)">${fmt(capRisco)}</span></div><div class="info-row"><span class="info-label">Clientes inadimplentes</span><span class="info-val">${atrasado.length} de ${abertos.length}</span></div></div>`;
-
-  // EVOLUÇÃO INADIMPLÊNCIA
-  const inadimMap={};
-  emps.forEach(e=>{if(!e.data)return;const k=`${e.data.getFullYear()}-${String(e.data.getMonth()+1).padStart(2,'0')}`;if(!inadimMap[k])inadimMap[k]={total:0,atraso:0};inadimMap[k].total++;if(e.status==='atraso')inadimMap[k].atraso++;});
-  const iK=Object.keys(inadimMap).sort();
-  destroyChart('evolInadim');
-  charts.evolInadim=new Chart(document.getElementById('chartEvolInadim').getContext('2d'),{type:'line',data:{labels:iK.map(k=>{const[y,m]=k.split('-');return new Date(+y,+m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});}),datasets:[{label:'% Inadimplência',data:iK.map(k=>inadimMap[k].total?inadimMap[k].atraso/inadimMap[k].total:0),borderColor:'rgba(239,71,111,0.8)',backgroundColor:'rgba(239,71,111,0.06)',borderWidth:2,pointRadius:4,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' Inadimplência: '+pct(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>pct(v)},beginAtZero:true}}}});
-
-  // LUCRO POR CLIENTE
-  const cLS=[...clientes].sort((a,b)=>b.totalJuros-a.totalJuros).slice(0,10);
-  destroyChart('lucroCliente');
-  charts.lucroCliente=new Chart(document.getElementById('chartLucroCliente').getContext('2d'),{type:'bar',data:{labels:cLS.map(c=>c.nome.split(' ')[0]),datasets:[{label:'Lucro Previsto',data:cLS.map(c=>c.totalJuros),backgroundColor:'rgba(6,214,160,0.7)',borderRadius:5,borderSkipped:false},{label:'Já Recebido',data:cLS.map(c=>c.totalPago),backgroundColor:'rgba(201,146,42,0.65)',borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.raw)}}},scales:{x:{grid:{display:false},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
-
-  // TICKET POR CLIENTE
-  const cTS=[...clientes].filter(c=>c.ativo).sort((a,b)=>b.ticketMedio-a.ticketMedio).slice(0,10);
-  destroyChart('ticketCliente');
-  charts.ticketCliente=new Chart(document.getElementById('chartTicketCliente').getContext('2d'),{type:'bar',data:{labels:cTS.map(c=>c.nome.split(' ')[0]),datasets:[{label:'Ticket Médio',data:cTS.map(c=>c.ticketMedio),backgroundColor:'rgba(155,93,229,0.75)',borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}},y:{grid:{display:false},ticks:{color:'#dde1f0',font:{family:'DM Mono',size:10}}}}}});
-
-  // CLUSTERIZAÇÃO
-  function cluster(c){const sc=calcScore(c);if(!c.ativo)return{lbl:'Inativo',cls:'cl-inativo'};if(sc<20&&c.ticketMedio>ticket*1.2)return{lbl:'Premium',cls:'cl-premium'};if(sc>=50)return{lbl:'Alto Risco',cls:'cl-risco'};if(c.recorrente)return{lbl:'Regular Fiel',cls:'cl-regular'};return{lbl:'Regular',cls:'cl-regular'};}
-  document.getElementById('profileGrid').innerHTML=clientes.map(c=>{const cl=cluster(c);const ini=c.nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();const sc=calcScore(c);const corSc=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';return`<div class="profile-card"><div class="profile-top"><div class="p-avatar">${ini}</div><div class="p-name">${c.nome}</div><div class="p-cluster ${cl.cls}">${cl.lbl}</div></div><div class="p-stats"><div class="pstat"><div class="pstat-lbl">Capital Total</div><div class="pstat-val" style="color:var(--gold)">${fmt(c.totalCap)}</div></div><div class="pstat"><div class="pstat-lbl">Lucro Previsto</div><div class="pstat-val" style="color:var(--green)">${fmt(c.totalJuros)}</div></div><div class="pstat"><div class="pstat-lbl">Contratos</div><div class="pstat-val">${c.qtdContratos}</div></div><div class="pstat"><div class="pstat-lbl">Score Risco</div><div class="pstat-val" style="color:${corSc}">${sc}</div></div><div class="pstat"><div class="pstat-lbl">Relacionamento</div><div class="pstat-val" style="color:var(--blue)">${c.mesesRelac}m</div></div><div class="pstat"><div class="pstat-lbl">Status</div><div class="pstat-val" style="color:${c.ativo?'var(--green)':'var(--muted)'}">${c.ativo?'ATIVO':'INATIVO'}</div></div></div></div>`;}).join('');
-
-  // HISTÓRICO PAGAMENTOS
-  document.getElementById('histList').innerHTML=[...clientes].sort((a,b)=>b.totalPago-a.totalPago).map(c=>{const isAt=c.temAtraso,isQ=c.soQuitados;const st=isQ?`<span class="badge ok">✅ QUITADO</span>`:isAt?`<span class="badge bad">⚠️ ATRASO</span>`:`<span class="badge ok">✓ EM DIA</span>`;const rec=c.recorrente?`<span class="badge blue">↩ RECORRENTE</span>`:'';return`<div class="hist-row"><span class="hist-nome">${c.nome}</span><div class="hist-badges"><span class="badge muted">${c.qtdContratos} contrato(s)</span><span class="badge muted">${fmt(c.totalPago)}</span>${rec}${st}</div></div>`;}).join('');
-
-  // COMPARATIVO MENSAL
-  const mesAt=hoje.getMonth(),anoAt=hoje.getFullYear();
-  const mesAn=mesAt===0?11:mesAt-1,anoAn=mesAt===0?anoAt-1:anoAt;
-  const eMAt=emps.filter(e=>e.data&&e.data.getMonth()===mesAt&&e.data.getFullYear()===anoAt);
-  const eMAn=emps.filter(e=>e.data&&e.data.getMonth()===mesAn&&e.data.getFullYear()===anoAn);
-  const cAM=eMAt.reduce((s,e)=>s+e.capital,0),cAN=eMAn.reduce((s,e)=>s+e.capital,0);
-  const jAM=eMAt.reduce((s,e)=>s+e.jTotal,0),jAN=eMAn.reduce((s,e)=>s+e.jTotal,0);
-  function dH(curr,prev){if(!prev)return'<span class="comp-delta flat">—</span>';const d=(curr-prev)/prev;return`<span class="comp-delta ${d>0?'up':'down'}">${d>0?'▲':'▼'} ${Math.abs(d*100).toFixed(1)}%</span>`;}
-  const nMA=new Date(anoAt,mesAt,1).toLocaleDateString('pt-BR',{month:'long'});
-  const nMAn=new Date(anoAn,mesAn,1).toLocaleDateString('pt-BR',{month:'long'});
-  document.getElementById('comparativoMensal').innerHTML=`
-    <div style="display:flex;gap:12px;margin-bottom:10px;font-size:0.57rem;color:var(--muted)"><div style="flex:1"></div><div style="width:80px;text-align:right;color:var(--muted2)">${nMAn}</div><div style="width:80px;text-align:right;color:var(--text)">${nMA}</div><div style="width:60px;text-align:right">variação</div></div>
-    ${[['Contratos',eMAn.length,eMAt.length,v=>v+' contratos'],['Capital',cAN,cAM,fmt],['Lucro Previsto',jAN,jAM,fmt]].map(([l,p,c,f])=>`<div class="comp-row"><span class="comp-label">${l}</span><div class="comp-vals"><span class="comp-prev">${f(p)}</span><span class="comp-curr">${f(c)}</span>${dH(c,p)}</div></div>`).join('')}`;
-
-  // CRESCIMENTO & LUCRO CHARTS
-  destroyChart('crescCart');
-  charts.crescCart=new Chart(document.getElementById('chartCrescCarteira').getContext('2d'),{type:'bar',data:{labels:evolLabels,datasets:[{label:'Capital Acumulado',data:evolCap,backgroundColor:'rgba(201,146,42,0.7)',borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
-  destroyChart('evolLucro');
-  charts.evolLucro=new Chart(document.getElementById('chartEvolLucro').getContext('2d'),{type:'line',data:{labels:evolLabels,datasets:[{label:'Lucro Acumulado',data:evolJuros,borderColor:'rgba(6,214,160,0.8)',backgroundColor:'rgba(6,214,160,0.05)',borderWidth:2,pointRadius:3,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
-
-  // QUANDO DOBRA
-  const taxaAA=taxaMediaGlobal*12;
-  const mesesDobra=taxaAA>0?Math.round(Math.log(2)/Math.log(1+taxaAA)*12):null;
-  document.getElementById('dobraContent').innerHTML=mesesDobra?`<div style="text-align:center;padding:16px 0"><div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px">SEU CAPITAL DOBRA EM</div><div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--gold);line-height:1">${mesesDobra}</div><div style="font-size:0.68rem;color:var(--muted);margin-top:4px">meses (${(mesesDobra/12).toFixed(1)} anos)</div></div><div style="border-top:1px solid var(--border);padding-top:12px"><div class="info-row"><span class="info-label">Taxa média/mês</span><span class="info-val" style="color:var(--gold)">${pct(taxaMediaGlobal)}</span></div><div class="info-row"><span class="info-label">Taxa média/ano</span><span class="info-val" style="color:var(--gold)">${pct(taxaAA)}</span></div><div class="info-row"><span class="info-label">Capital atual</span><span class="info-val">${fmt(totalCap)}</span></div><div class="info-row"><span class="info-label">Capital dobrado</span><span class="info-val" style="color:var(--green)">${fmt(totalCap*2)}</span></div></div>`:`<div style="color:var(--muted);font-size:0.68rem;padding:20px 0;text-align:center">Dados insuficientes.</div>`;
-
-  // CALENDÁRIO SEMANAL
-  const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  const iniSem=new Date(hoje);iniSem.setDate(hoje.getDate()-hoje.getDay());
-  const semana=Array.from({length:7},(_,i)=>{const d=new Date(iniSem);d.setDate(iniSem.getDate()+i);d.setHours(0,0,0,0);const fim=new Date(d);fim.setHours(23,59,59,999);const venc=abertos.filter(e=>e.proxVenc&&e.proxVenc>=d&&e.proxVenc<=fim);return{dia:d.getDate(),nome:DIAS[i],isToday:d.getTime()===hoje.getTime(),total:venc.reduce((s,e)=>s+e.jProx,0),vencimentos:venc};});
-  document.getElementById('weekCalendar').innerHTML=semana.map(d=>`<div class="day-col"><div class="day-name">${d.nome}</div><div class="day-box ${d.isToday?'today':''} ${d.total>0?'has-payment':''}"><div class="day-num">${d.dia}</div>${d.total>0?`<div style="font-size:0.5rem;color:var(--green)">${fmt(d.total)}</div><div class="day-clients">${d.vencimentos.map(e=>`<div class="day-chip ${e.status==='atraso'?'atraso':''}">${e.nome||e.id}<span class="chip-val">${fmt(e.jProx)}${e.status==='atraso'?' ⚠️':''}</span></div>`).join('')}</div>`:`<div class="day-empty">—</div>`}</div></div>`).join('');
-
-  // LISTA DE COBRANÇA
-  const todosV=semana.flatMap(d=>d.vencimentos.map(e=>({...e,diaVenc:d})));
-  document.getElementById('cobrancaList').innerHTML=todosV.length===0?`<div style="color:var(--muted);font-size:0.68rem;padding:12px 0">Nenhum vencimento esta semana.</div>`:[...todosV].sort((a,b)=>(a.status==='atraso'?-1:1)-(b.status==='atraso'?-1:1)||a.diaVenc.dia-b.diaVenc.dia).map(e=>{const isAt=e.status==='atraso';return`<div class="cobr-row"><div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:0.72rem;color:var(--text)">${e.nome||e.id}</span><span style="font-size:0.57rem;color:var(--muted)">${e.id} · vence ${e.diaVenc.nome} ${e.diaVenc.dia}</span></div><div style="display:flex;align-items:center;gap:10px"><span class="badge ${isAt?'bad':'ok'}">${isAt?'⚠️ ATRASO':'✓ EM DIA'}</span><span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${isAt?'var(--red)':'var(--green)'}">${fmt(e.jProx)}</span></div></div>`;}).join('');
-
-  // CONTRATOS 30 DIAS
-  const em30=new Date(hoje);em30.setDate(hoje.getDate()+30);
-  const v30=abertos.filter(e=>e.vencContrato&&e.vencContrato>=hoje&&e.vencContrato<=em30);
-  document.getElementById('capitalDisp').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"><div style="background:var(--s2);border-radius:10px;padding:14px;border:1px solid var(--border)"><div style="font-size:0.57rem;color:var(--muted);margin-bottom:6px">CAPITAL RETORNADO (QUITADOS)</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--green)">${fmt(capQuit)}</div><div style="font-size:0.55rem;color:var(--muted)">${quitados.length} contrato(s)</div></div><div style="background:var(--s2);border-radius:10px;padding:14px;border:1px solid var(--border)"><div style="font-size:0.57rem;color:var(--muted);margin-bottom:6px">A RECUPERAR EM 30 DIAS</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold)">${fmt(v30.reduce((s,e)=>s+e.capital+e.jTotal,0))}</div><div style="font-size:0.55rem;color:var(--muted)">${v30.length} contrato(s) vencendo</div></div></div>${v30.length===0?`<div style="color:var(--muted);font-size:0.68rem">Nenhum contrato vence nos próximos 30 dias.</div>`:v30.sort((a,b)=>a.vencContrato-b.vencContrato).map(e=>`<div class="info-row"><div><div class="info-label">${e.nome||e.id} <span style="color:var(--muted2)">· ${e.id}</span></div><div style="font-size:0.55rem;color:var(--muted);margin-top:2px">vence ${e.vencContrato.toLocaleDateString('pt-BR')}</div></div><div style="text-align:right"><div class="info-val" style="color:var(--purple)">${fmt(e.capital)}</div><div style="font-size:0.55rem;color:var(--green)">+${fmt(e.jTotal)} juros</div></div></div>`).join('')}`;
-
-  document.getElementById('last-update').textContent=new Date().toLocaleTimeString('pt-BR');
+  charts.evolMensal = new Chart(document.getElementById('chartEvolMensal').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: evolLabels,
+      datasets: [{
+        label: 'Capital Acumulado',
+        data: evolData,
+        borderColor: 'rgba(240,180,41,0.9)',
+        backgroundColor: 'rgba(240,180,41,0.08)',
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(240,180,41,1)',
+        pointRadius: 4,
+        fill: true,
+        tension: 0.3,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...TOOLTIP, callbacks: { label: ctx => ' Capital acumulado: ' + fmt(ctx.raw) } },
+      },
+      scales: {
+        x: { grid:{color:'#1c2133'}, ticks:{color:'#5a6282',font:{family:'DM Mono',size:10}} },
+        y: { grid:{color:'#1c2133'}, ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}, beginAtZero:true },
+      }
+    }
+  });
 }
 
-async function loadData(){
-  const loading=document.getElementById('loading-screen'),error=document.getElementById('error-screen'),main=document.getElementById('main');
-  loading.classList.remove('hidden');error.classList.remove('show');main.classList.remove('visible');
-  try{
-    const[empT,pagT]=await Promise.all([fetchSheet(GID_EMP),fetchSheetPag()]);
-    const empRows=empT.slice(autoSkipCSV(empT)),pagRows=pagT.slice(autoSkipCSV(pagT));
-    console.log('📊 Capital Investimentos — emp:',empRows.length,'pag:',pagRows.length);
-    render(empRows,pagRows);
-    loading.classList.add('hidden');main.classList.add('visible');
-  }catch(err){
-    console.error(err);loading.classList.add('hidden');error.classList.add('show');
-    document.getElementById('error-msg').textContent='Erro: '+err.message+'. Verifique se a planilha está compartilhada publicamente.';
+// ── LOAD ─────────────────────────────────────
+
+async function fetchSheetPag() {
+  const ts = Date.now();
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID_PAG}&t=${ts}`;
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const text = await r.text();
+  return csvToArray(text);
+}
+
+async function loadData() {
+  const loading = document.getElementById('loading-screen');
+  const error   = document.getElementById('error-screen');
+  const main    = document.getElementById('main');
+
+  loading.classList.remove('hidden');
+  error.classList.remove('show');
+  main.classList.remove('visible');
+
+  try {
+    const [empT, pagT] = await Promise.all([
+      fetchSheet(GID_EMP),
+      fetchSheetPag(),
+    ]);
+
+    const empSkip = autoSkipCSV(empT);
+    const pagSkip = autoSkipCSV(pagT);
+
+    const empRows = parseRows(empT, empSkip);
+    const pagRows = parseRows(pagT, pagSkip);
+
+    // Debug no console (abra F12 para ver)
+    let dbg = '';
+    dbg += `Total de linhas brutas (emp): ${empT.length}\n`;
+    dbg += `Auto-skip detectado (emp): ${empSkip}\n`;
+    dbg += `Linhas de dados após skip: ${empRows.length}\n`;
+    dbg += `Contratos EMP encontrados: ${empRows.filter(r=>r[0]&&String(r[0]).trim().toUpperCase().startsWith('EMP')).length}\n`;
+    dbg += '\nPrimeiras 5 linhas (cols 0-8):\n';
+    empT.slice(0,5).forEach((row,i) => {
+      dbg += `  [${i}]: ${row.slice(0,9).map(v=>JSON.stringify(v)).join(' | ')}\n`;
+    });
+    console.log('📊 Dashboard Debug:\n' + dbg);
+
+    render(empRows, pagRows);
+
+    loading.classList.add('hidden');
+    main.classList.add('visible');
+
+  } catch(err) {
+    console.error(err);
+    loading.classList.add('hidden');
+    error.classList.add('show');
+    document.getElementById('error-msg').textContent =
+      'Erro: '+err.message+'. Verifique se a planilha está compartilhada publicamente.';
   }
 }
+
 loadData();
-setInterval(loadData,15*60*1000);
+setInterval(loadData, 60*1000); // auto-refresh a cada 1 minuto
 </script>
 </body>
 </html>
