@@ -470,8 +470,11 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
             <option value="composto">Composto</option>
           </select>
         </div>
-        <div class="sim-field"><label class="sim-label">👤 Nome do Cliente (opcional)</label><input class="sim-input" id="sim-cliente" type="text" placeholder="Para personalizar o relatório"></div>
-        <button class="sim-btn-pdf" onclick="simPDF()">📄 Gerar Relatório PDF</button>
+        <div class="sim-field"><label class="sim-label">👤 Nome do Cliente</label><input class="sim-input" id="sim-cliente" type="text" placeholder="Nome completo do cliente"></div>
+        <div class="sim-field"><label class="sim-label">🪪 CPF do Cliente (opcional)</label><input class="sim-input" id="sim-cpf" type="text" placeholder="000.000.000-00" maxlength="14"></div>
+        <div class="sim-field"><label class="sim-label">📞 Telefone do Cliente (opcional)</label><input class="sim-input" id="sim-tel" type="text" placeholder="(00) 00000-0000"></div>
+        <div class="sim-field"><label class="sim-label">📅 Data de Início do Contrato</label><input class="sim-input" id="sim-inicio" type="date"></div>
+        <button class="sim-btn-pdf" onclick="simPDF()">📄 Gerar Proposta para o Cliente</button>
       </div>
     </div>
     <div class="card" id="sim-resultado" style="display:none">
@@ -1328,43 +1331,227 @@ function simPDF(){
   const taxa=parseFloat(document.getElementById('sim-taxa')?.value)||0;
   const prazo=parseInt(document.getElementById('sim-prazo')?.value)||0;
   const tipo=document.getElementById('sim-tipo')?.value||'simples';
-  const cliente=document.getElementById('sim-cliente')?.value||'—';
-  if(!valor||!taxa||!prazo){alert('Preencha os campos para gerar o relatório.');return;}
+  const cliente=document.getElementById('sim-cliente')?.value||'Cliente';
+  const cpf=document.getElementById('sim-cpf')?.value||'';
+  const tel=document.getElementById('sim-tel')?.value||'';
+  const inicioRaw=document.getElementById('sim-inicio')?.value||'';
+  if(!valor||!taxa||!prazo){alert('Preencha pelo menos valor, taxa e prazo para gerar a proposta.');return;}
   const taxaM=taxa/100;
   const jurosTotal=tipo==='simples'?valor*taxaM*prazo:valor*(Math.pow(1+taxaM,prazo)-1);
   const valorTotal=valor+jurosTotal;
   const parcela=tipo==='simples'?valorTotal/prazo:valor*(taxaM*Math.pow(1+taxaM,prazo))/(Math.pow(1+taxaM,prazo)-1);
+  const roi=(jurosTotal/valor*100).toFixed(1);
   const agora=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Simulação Capital Investimentos</title>
-  <style>body{font-family:'Arial',sans-serif;color:#222;padding:40px;max-width:700px;margin:0 auto;}
-  h1{color:#c9922a;font-size:1.4rem;border-bottom:2px solid #c9922a;padding-bottom:10px;margin-bottom:20px;}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
-  .item{background:#f9f6f0;border:1px solid #e0d5c0;border-radius:8px;padding:14px;}
-  .lbl{font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
-  .val{font-size:1.1rem;font-weight:700;color:#333;}
-  table{width:100%;border-collapse:collapse;font-size:0.75rem;}
-  th{background:#c9922a;color:#fff;padding:8px;text-align:right;}th:first-child{text-align:left;}
-  td{padding:7px 8px;border-bottom:1px solid #eee;text-align:right;}td:first-child{text-align:left;}
-  tr:nth-child(even)td{background:#faf8f4;}
-  .footer{margin-top:30px;font-size:0.6rem;color:#aaa;text-align:center;}
-  </style></head><body>
-  <h1>💰 Capital Investimentos — Simulação de Empréstimo</h1>
-  <p style="color:#888;font-size:0.75rem;margin-bottom:20px">Gerado em ${agora} · Cliente: ${cliente}</p>
-  <div class="grid">
-    <div class="item"><div class="lbl">Valor Emprestado</div><div class="val">R$ ${valor.toLocaleString('pt-BR')}</div></div>
-    <div class="item"><div class="lbl">Taxa de Juros</div><div class="val">${taxa}% a.m.</div></div>
-    <div class="item"><div class="lbl">Prazo</div><div class="val">${prazo} meses</div></div>
-    <div class="item"><div class="lbl">Tipo</div><div class="val">${tipo==='simples'?'Juros Simples':'Juros Compostos'}</div></div>
-    <div class="item"><div class="lbl">Juros Total</div><div class="val" style="color:green">R$ ${Math.round(jurosTotal).toLocaleString('pt-BR')}</div></div>
-    <div class="item"><div class="lbl">Valor Total a Receber</div><div class="val" style="color:#c9922a">R$ ${Math.round(valorTotal).toLocaleString('pt-BR')}</div></div>
-    <div class="item"><div class="lbl">Parcela Mensal</div><div class="val">R$ ${Math.round(parcela).toLocaleString('pt-BR')}</div></div>
-    <div class="item"><div class="lbl">ROI</div><div class="val">${(jurosTotal/valor*100).toFixed(1)}%</div></div>
+  // Calcular datas de vencimento
+  const dataInicio=inicioRaw?new Date(inicioRaw+'T12:00:00'):new Date();
+  const vencimentos=[];
+  for(let m=1;m<=Math.min(prazo,prazo);m++){
+    const d=new Date(dataInicio);d.setMonth(d.getMonth()+m);
+    vencimentos.push(d);
+  }
+  // Tabela de parcelas
+  const tabela=[];
+  if(tipo==='simples'){
+    let saldo=valor+jurosTotal;
+    for(let m=1;m<=prazo;m++){
+      const j=valor*taxaM;
+      const amort=valor/prazo;
+      saldo-=parcela;
+      tabela.push({mes:m,juros:j,amort,parcela,saldoFinal:Math.max(0,saldo),venc:vencimentos[m-1]});
+    }
+  } else {
+    let saldo=valor;
+    for(let m=1;m<=prazo;m++){
+      const j=saldo*taxaM;
+      const amort=parcela-j;
+      saldo=Math.max(0,saldo-amort);
+      tabela.push({mes:m,juros:j,amort,parcela,saldoFinal:saldo,venc:vencimentos[m-1]});
+    }
+  }
+  const fmtR=v=>'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtD=d=>d?d.toLocaleDateString('pt-BR'):'—';
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<title>Proposta de Crédito — ${cliente}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Inter',Arial,sans-serif;color:#1a1a2e;background:#fff;padding:0;}
+  .page{max-width:720px;margin:0 auto;padding:44px 48px;}
+  /* HEADER */
+  .header{display:flex;align-items:center;justify-content:space-between;padding-bottom:20px;border-bottom:3px solid #c9922a;margin-bottom:28px;}
+  .brand{display:flex;flex-direction:column;gap:2px;}
+  .brand-name{font-size:1.3rem;font-weight:700;color:#c9922a;letter-spacing:0.04em;}
+  .brand-sub{font-size:0.62rem;color:#888;letter-spacing:0.12em;text-transform:uppercase;}
+  .doc-info{text-align:right;}
+  .doc-title{font-size:0.95rem;font-weight:600;color:#1a1a2e;}
+  .doc-date{font-size:0.65rem;color:#888;margin-top:3px;}
+  /* DESTAQUE */
+  .hero{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border-radius:14px;padding:24px 28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;}
+  .hero-left{}
+  .hero-greeting{font-size:0.7rem;color:#c9922a;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;}
+  .hero-name{font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:2px;}
+  .hero-sub{font-size:0.65rem;color:#8892b0;}
+  .hero-right{text-align:right;}
+  .hero-val-lbl{font-size:0.6rem;color:#c9922a;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:3px;}
+  .hero-val{font-size:2rem;font-weight:700;color:#fff;line-height:1;}
+  /* SEÇÃO */
+  .section-title{font-size:0.62rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:#c9922a;margin:24px 0 12px;padding-left:10px;border-left:3px solid #c9922a;}
+  /* GRID RESUMO */
+  .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+  .sum-item{background:#f8f6f2;border:1px solid #ede8df;border-radius:10px;padding:12px 14px;}
+  .sum-lbl{font-size:0.55rem;color:#888;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px;}
+  .sum-val{font-size:1rem;font-weight:700;color:#1a1a2e;}
+  .sum-val.green{color:#1a7f5a;}
+  .sum-val.gold{color:#c9922a;}
+  .sum-val.blue{color:#1a5fa0;}
+  /* DESTAQUE PARCELA */
+  .parcela-box{background:linear-gradient(135deg,#fdf6ec,#fef9f0);border:2px solid #c9922a;border-radius:12px;padding:18px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;}
+  .parcela-left{}
+  .parcela-lbl{font-size:0.6rem;color:#888;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;}
+  .parcela-val{font-size:1.9rem;font-weight:700;color:#c9922a;line-height:1;}
+  .parcela-sub{font-size:0.6rem;color:#888;margin-top:3px;}
+  .parcela-right{text-align:right;}
+  .parcela-total-lbl{font-size:0.58rem;color:#888;text-transform:uppercase;margin-bottom:3px;}
+  .parcela-total{font-size:1rem;font-weight:600;color:#1a1a2e;}
+  /* CLIENTE */
+  .client-box{background:#f8f6f2;border:1px solid #ede8df;border-radius:10px;padding:16px 20px;margin-bottom:20px;}
+  .client-row{display:flex;gap:32px;flex-wrap:wrap;}
+  .client-item{display:flex;flex-direction:column;gap:2px;}
+  .client-lbl{font-size:0.55rem;color:#888;text-transform:uppercase;letter-spacing:0.07em;}
+  .client-val{font-size:0.78rem;font-weight:600;color:#1a1a2e;}
+  /* TABELA */
+  table{width:100%;border-collapse:collapse;font-size:0.68rem;margin-bottom:20px;}
+  thead tr{background:#1a1a2e;}
+  th{color:#fff;padding:9px 10px;text-align:right;font-weight:600;font-size:0.6rem;letter-spacing:0.05em;}
+  th:first-child{text-align:left;}
+  td{padding:8px 10px;border-bottom:1px solid #f0ebe0;text-align:right;color:#333;}
+  td:first-child{text-align:left;color:#555;}
+  tr:nth-child(even) td{background:#fdfaf5;}
+  tr:last-child td{font-weight:600;background:#fdf6ec;color:#c9922a;}
+  .td-juros{color:#1a7f5a!important;}
+  .td-saldo-zero{color:#1a7f5a!important;font-weight:600!important;}
+  /* AVISO */
+  .notice{background:#fff8ed;border:1px solid #f0d9a0;border-radius:8px;padding:12px 16px;font-size:0.6rem;color:#7a5c1e;line-height:1.7;margin-bottom:20px;}
+  /* FOOTER */
+  .footer{border-top:1px solid #eee;padding-top:14px;display:flex;justify-content:space-between;align-items:flex-end;}
+  .footer-brand{font-size:0.7rem;font-weight:600;color:#c9922a;}
+  .footer-txt{font-size:0.55rem;color:#aaa;text-align:right;line-height:1.6;}
+  .badge-tipo{display:inline-block;background:#e8f4ec;color:#1a7f5a;border:1px solid #a8d8b8;border-radius:4px;font-size:0.52rem;padding:2px 8px;font-weight:600;letter-spacing:0.05em;vertical-align:middle;margin-left:6px;}
+  @media print{body{padding:0;}button{display:none!important;}}
+</style>
+</head><body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="brand">
+      <div class="brand-name">Capital Investimentos</div>
+      <div class="brand-sub">Soluções Financeiras Estratégicas</div>
+    </div>
+    <div class="doc-info">
+      <div class="doc-title">Proposta de Crédito</div>
+      <div class="doc-date">Emitida em ${agora}</div>
+    </div>
   </div>
-  <div class="footer">Capital Investimentos · Soluções Financeiras Estratégicas · Este documento é uma simulação e não tem valor contratual.</div>
-  </body></html>`;
+
+  <!-- DESTAQUE CLIENTE -->
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-greeting">Proposta exclusiva para</div>
+      <div class="hero-name">${cliente}</div>
+      <div class="hero-sub">${cpf?'CPF: '+cpf:''}${cpf&&tel?' · ':''}${tel?'Tel: '+tel:''}</div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-val-lbl">Valor solicitado</div>
+      <div class="hero-val">${fmtR(valor)}</div>
+    </div>
+  </div>
+
+  <!-- RESUMO -->
+  <div class="section-title">Resumo da Operação</div>
+  <div class="summary-grid">
+    <div class="sum-item"><div class="sum-lbl">Valor do Crédito</div><div class="sum-val gold">${fmtR(valor)}</div></div>
+    <div class="sum-item"><div class="sum-lbl">Taxa de Juros</div><div class="sum-val">${taxa}% a.m.</div></div>
+    <div class="sum-item"><div class="sum-lbl">Prazo</div><div class="sum-val">${prazo} mês${prazo>1?'es':''}</div></div>
+    <div class="sum-item"><div class="sum-lbl">Modalidade</div><div class="sum-val">${tipo==='simples'?'Simples':'Composto'}</div></div>
+    <div class="sum-item"><div class="sum-lbl">Total de Juros</div><div class="sum-val green">${fmtR(jurosTotal)}</div></div>
+    <div class="sum-item"><div class="sum-lbl">Total a Pagar</div><div class="sum-val">${fmtR(valorTotal)}</div></div>
+    <div class="sum-item"><div class="sum-lbl">Custo Efetivo</div><div class="sum-val blue">${roi}%</div></div>
+    <div class="sum-item"><div class="sum-lbl">Início</div><div class="sum-val">${fmtD(dataInicio)}</div></div>
+  </div>
+
+  <!-- PARCELA DESTAQUE -->
+  <div class="parcela-box">
+    <div class="parcela-left">
+      <div class="parcela-lbl">Valor da parcela mensal</div>
+      <div class="parcela-val">${fmtR(parcela)}</div>
+      <div class="parcela-sub">${prazo} parcela${prazo>1?'s':''} · juros ${tipo==='simples'?'simples':'compostos'}</div>
+    </div>
+    <div class="parcela-right">
+      <div class="parcela-total-lbl">Valor total do contrato</div>
+      <div class="parcela-total">${fmtR(valorTotal)}</div>
+    </div>
+  </div>
+
+  <!-- DADOS DO CLIENTE -->
+  ${cpf||tel?`<div class="section-title">Dados do Contratante</div>
+  <div class="client-box"><div class="client-row">
+    <div class="client-item"><div class="client-lbl">Nome</div><div class="client-val">${cliente}</div></div>
+    ${cpf?`<div class="client-item"><div class="client-lbl">CPF</div><div class="client-val">${cpf}</div></div>`:''}
+    ${tel?`<div class="client-item"><div class="client-lbl">Telefone</div><div class="client-val">${tel}</div></div>`:''}
+  </div></div>`:''}
+
+  <!-- TABELA DE VENCIMENTOS -->
+  <div class="section-title">Cronograma de Pagamentos</div>
+  <table>
+    <thead><tr>
+      <th>Parcela</th>
+      <th>Vencimento</th>
+      <th>Juros</th>
+      <th>Amortização</th>
+      <th>Valor a Pagar</th>
+      <th>Saldo Devedor</th>
+    </tr></thead>
+    <tbody>
+      ${tabela.map(t=>`<tr>
+        <td>${t.mes}ª parcela</td>
+        <td>${fmtD(t.venc)}</td>
+        <td class="td-juros">${fmtR(t.juros)}</td>
+        <td>${fmtR(t.amort)}</td>
+        <td style="font-weight:600;color:#c9922a">${fmtR(t.parcela)}</td>
+        <td class="${t.saldoFinal<1?'td-saldo-zero':''}">${t.saldoFinal<1?'✓ Quitado':fmtR(t.saldoFinal)}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>
+
+  <!-- AVISO -->
+  <div class="notice">
+    ⚠️ <strong>Importante:</strong> Este documento é uma <strong>proposta de simulação</strong> e não constitui contrato. Os valores são baseados nos parâmetros informados e podem variar conforme as condições finais acordadas. Em caso de atraso, poderão ser aplicados encargos adicionais conforme contrato. Para dúvidas, entre em contato com a Capital Investimentos.
+  </div>
+
+  <!-- ASSINATURAS -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin:28px 0 20px;">
+    <div style="text-align:center;">
+      <div style="border-top:1px solid #ccc;padding-top:8px;font-size:0.65rem;color:#555;">Capital Investimentos</div>
+      <div style="font-size:0.55rem;color:#aaa;margin-top:2px;">Credor / Representante</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="border-top:1px solid #ccc;padding-top:8px;font-size:0.65rem;color:#555;">${cliente}</div>
+      <div style="font-size:0.55rem;color:#aaa;margin-top:2px;">${cpf?'CPF: '+cpf:'Contratante'}</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-brand">Capital Investimentos</div>
+    <div class="footer-txt">Soluções Financeiras Estratégicas<br>Documento gerado em ${agora} · Válido por 7 dias</div>
+  </div>
+
+</div>
+<script>window.onload=()=>setTimeout(()=>window.print(),300);</script>
+</body></html>`;
   const w=window.open('','_blank');
   w.document.write(html);w.document.close();
-  setTimeout(()=>w.print(),400);
 }
 
 // ════════════════════════════════════════════════════════
