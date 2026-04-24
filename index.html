@@ -274,6 +274,100 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .tpl-btn-cancel{background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer;}
 .wa-tpl-edit-btn{font-size:0.55rem;padding:4px 12px;border-radius:20px;border:1px solid rgba(201,146,42,0.3);color:var(--gold2);background:rgba(201,146,42,0.07);cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:0.06em;transition:all 0.2s;margin-left:auto;}
 .wa-tpl-edit-btn:hover{background:rgba(201,146,42,0.15);}
+
+/* ── PASTAS DE CLIENTES ── */
+.pasta-search-bar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.pasta-search-input{flex:1;min-width:200px;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:9px 12px;outline:none;transition:border-color 0.2s;}
+.pasta-search-input:focus{border-color:var(--gold);}
+.pasta-new-btn{padding:9px 18px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.62rem;font-weight:700;cursor:pointer;letter-spacing:0.06em;white-space:nowrap;}
+.pasta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+.pasta-card{background:var(--s2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:transform 0.2s,border-color 0.2s;cursor:pointer;}
+.pasta-card:hover{transform:translateY(-2px);border-color:var(--border2);}
+.pasta-card-top{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);}
+.pasta-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:#07090e;flex-shrink:0;}
+.pasta-card-name{font-size:0.72rem;color:var(--text);font-weight:600;}
+.pasta-card-cpf{font-size:0.52rem;color:var(--muted);margin-top:2px;}
+.pasta-card-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
+.pasta-card-body{padding:12px 16px;}
+.pasta-info-line{display:flex;align-items:center;gap:6px;font-size:0.6rem;color:var(--muted);margin-bottom:5px;}
+.pasta-info-line strong{color:var(--text);}
+.pasta-info-icon{font-size:0.72rem;flex-shrink:0;}
+.pasta-card-footer{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:6px;justify-content:flex-end;}
+.pasta-btn-edit{background:rgba(201,146,42,0.1);border:1px solid rgba(201,146,42,0.25);color:var(--gold2);border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:0.55rem;cursor:pointer;letter-spacing:0.05em;transition:all 0.2s;}
+.pasta-btn-edit:hover{background:rgba(201,146,42,0.2);}
+.pasta-btn-del{background:rgba(239,71,111,0.07);border:1px solid rgba(239,71,111,0.2);color:var(--red);border-radius:6px;padding:5px 10px;font-family:'DM Mono',monospace;font-size:0.55rem;cursor:pointer;transition:all 0.2s;}
+.pasta-btn-del:hover{background:rgba(239,71,111,0.15);}
+.pasta-btn-ver{background:rgba(72,149,239,0.08);border:1px solid rgba(72,149,239,0.25);color:var(--blue);border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:0.55rem;cursor:pointer;transition:all 0.2s;}
+.pasta-btn-ver:hover{background:rgba(72,149,239,0.18);}
+.pasta-empty{text-align:center;padding:50px;color:var(--muted);font-size:0.68rem;grid-column:1/-1;}
+
+/* ── MODAL PASTA ── */
+.pasta-modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,8,18,0.92);z-index:1100;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.pasta-modal-overlay.open{display:flex;}
+.pasta-modal{background:var(--s1);border:1px solid var(--border);border-radius:18px;width:min(700px,98vw);padding:30px;margin:auto;}
+.pasta-modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gold2);letter-spacing:0.07em;margin-bottom:4px;}
+.pasta-modal-sub{font-size:0.58rem;color:var(--muted);margin-bottom:24px;}
+.pasta-form-section{font-family:'Bebas Neue',sans-serif;font-size:0.65rem;letter-spacing:0.2em;color:var(--muted);margin:18px 0 10px;border-left:2px solid var(--gold);padding-left:8px;}
+.pasta-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.pasta-form-grid.single{grid-template-columns:1fr;}
+.pasta-field{display:flex;flex-direction:column;gap:4px;}
+.pasta-label{font-size:0.52rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;}
+.pasta-input{background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:9px 12px;outline:none;transition:border-color 0.2s;}
+.pasta-input:focus{border-color:var(--gold);}
+.pasta-select{background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:9px 12px;outline:none;cursor:pointer;}
+.pasta-select:focus{border-color:var(--gold);}
+.pasta-modal-footer{display:flex;gap:10px;margin-top:24px;justify-content:flex-end;}
+.pasta-btn-cancel-modal{background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:10px 18px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer;}
+.pasta-btn-save-modal{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:8px;padding:10px 24px;font-family:'DM Mono',monospace;font-size:0.62rem;font-weight:700;cursor:pointer;letter-spacing:0.06em;}
+
+/* ── DOCS UPLOAD ── */
+.docs-upload-area{border:1.5px dashed var(--border2);border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:border-color 0.2s;background:var(--s2);margin-top:8px;}
+.docs-upload-area:hover{border-color:var(--gold);}
+.docs-upload-icon{font-size:1.4rem;margin-bottom:6px;}
+.docs-upload-txt{font-size:0.58rem;color:var(--muted);}
+.docs-list{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.doc-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--s3);border:1px solid var(--border);border-radius:8px;}
+.doc-icon{font-size:0.9rem;flex-shrink:0;}
+.doc-name{font-size:0.6rem;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.doc-size{font-size:0.5rem;color:var(--muted);flex-shrink:0;}
+.doc-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.7rem;padding:0 2px;flex-shrink:0;}
+.doc-del:hover{color:var(--red);}
+.doc-preview{width:32px;height:32px;object-fit:cover;border-radius:4px;flex-shrink:0;border:1px solid var(--border);}
+.doc-type-chip{font-size:0.44rem;padding:2px 6px;border-radius:4px;flex-shrink:0;letter-spacing:0.04em;}
+.doc-chip-rg{background:rgba(72,149,239,0.12);color:var(--blue);border:1px solid rgba(72,149,239,0.25);}
+.doc-chip-holerite{background:rgba(6,214,160,0.1);color:var(--green);border:1px solid rgba(6,214,160,0.2);}
+.doc-chip-foto{background:rgba(201,146,42,0.1);color:var(--gold2);border:1px solid rgba(201,146,42,0.25);}
+.doc-chip-outro{background:rgba(155,93,229,0.1);color:var(--purple);border:1px solid rgba(155,93,229,0.25);}
+
+/* ── MODAL VISUALIZAR PASTA ── */
+.pasta-view-overlay{display:none;position:fixed;inset:0;background:rgba(5,8,18,0.92);z-index:1200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.pasta-view-overlay.open{display:flex;}
+.pasta-view-modal{background:var(--s1);border:1px solid var(--border);border-radius:18px;width:min(760px,98vw);padding:32px;margin:auto;}
+.pasta-view-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.pasta-view-avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:#07090e;flex-shrink:0;}
+.pasta-view-name{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--text);letter-spacing:0.04em;line-height:1.1;}
+.pasta-view-cpf{font-size:0.58rem;color:var(--muted);margin-top:3px;}
+.pasta-view-section{font-family:'Bebas Neue',sans-serif;font-size:0.62rem;letter-spacing:0.18em;color:var(--muted);margin:18px 0 8px;border-left:2px solid var(--gold);padding-left:8px;}
+.pasta-view-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+.pasta-view-field{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.pasta-view-lbl{font-size:0.48rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px;}
+.pasta-view-val{font-size:0.68rem;color:var(--text);}
+.pasta-view-docs{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:8px;}
+.pasta-view-doc{background:var(--s2);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color 0.2s;}
+.pasta-view-doc:hover{border-color:var(--gold);}
+.pasta-view-doc img{width:100%;height:90px;object-fit:cover;display:block;}
+.pasta-view-doc-noimg{height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
+.pasta-view-doc-noimg span{font-size:1.5rem;}
+.pasta-view-doc-info{padding:7px 8px;}
+.pasta-view-doc-name{font-size:0.55rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pasta-view-doc-type{font-size:0.44rem;color:var(--muted);margin-top:2px;}
+.pasta-view-footer{display:flex;gap:10px;margin-top:24px;justify-content:flex-end;border-top:1px solid var(--border);padding-top:18px;}
+.pasta-btn-close-view{background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:10px 18px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer;}
+.pasta-btn-edit-view{background:rgba(201,146,42,0.1);border:1px solid rgba(201,146,42,0.3);color:var(--gold2);border-radius:8px;padding:10px 18px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer;}
+.pasta-stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.pasta-stat-box{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center;}
+.pasta-stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;}
+.pasta-stat-lbl{font-size:0.48rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-top:2px;}
 </style>
 </head>
 <body>
@@ -427,6 +521,142 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="section-label">CLUSTERIZAÇÃO DE CLIENTES</div>
   <div class="card"><div class="card-header"><div><div class="card-title">🧩 Perfil de Clientes</div><div class="card-desc">Agrupamento automático por comportamento: Premium · Regular Fiel · Alto Risco · Inativo</div></div><div class="card-badge">IA</div></div><div class="profile-grid" id="profileGrid"></div></div>
   <div class="card"><div class="card-header"><div><div class="card-title">📋 Histórico de Pagamentos por Cliente</div><div class="card-desc">Pontualidade e volume registrado</div></div><div class="card-badge">HISTÓRICO</div></div><div class="hist-list" id="histList"></div></div>
+
+  <!-- PASTAS DE CLIENTES -->
+  <div class="section-label" style="margin-top:28px">🗂️ PASTAS DE CLIENTES — DADOS PESSOAIS & DOCUMENTOS</div>
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">🗂️ Dossiê de Clientes</div>
+        <div class="card-desc">Cadastro completo com dados pessoais, profissionais e documentos. Clique em um cliente da planilha para pré-preencher automaticamente.</div>
+      </div>
+      <div class="card-badge">PASTAS</div>
+    </div>
+    <div class="pasta-search-bar">
+      <input class="pasta-search-input" id="pasta-search" type="text" placeholder="🔍 Buscar pasta por nome, CPF ou telefone..." oninput="pastaSearchChange()">
+      <button class="pasta-new-btn" onclick="pastaModalOpen(null)">＋ Nova Pasta</button>
+    </div>
+    <div class="pasta-stats-strip" id="pasta-stats-strip">
+      <div class="pasta-stat-box"><div class="pasta-stat-val" id="ps-total" style="color:var(--gold)">0</div><div class="pasta-stat-lbl">Pastas Abertas</div></div>
+      <div class="pasta-stat-box"><div class="pasta-stat-val" id="ps-docs" style="color:var(--blue)">0</div><div class="pasta-stat-lbl">Documentos</div></div>
+      <div class="pasta-stat-box"><div class="pasta-stat-val" id="ps-completas" style="color:var(--green)">0</div><div class="pasta-stat-lbl">Pastas Completas</div></div>
+    </div>
+    <div class="pasta-grid" id="pasta-grid">
+      <div class="pasta-empty">Nenhuma pasta cadastrada. Clique em <strong>+ Nova Pasta</strong> para começar.</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CRIAR/EDITAR PASTA -->
+<div class="pasta-modal-overlay" id="pasta-modal-overlay" onclick="if(event.target===this)pastaModalClose()">
+  <div class="pasta-modal">
+    <div class="pasta-modal-title" id="pasta-modal-titulo">📁 Nova Pasta de Cliente</div>
+    <div class="pasta-modal-sub">Preencha os dados do cliente. Campos com * são obrigatórios.</div>
+
+    <div class="pasta-form-section">IDENTIFICAÇÃO</div>
+    <div class="pasta-form-grid">
+      <div class="pasta-field"><label class="pasta-label">👤 Nome Completo *</label><input class="pasta-input" id="pf-nome" type="text" placeholder="Nome completo do cliente"></div>
+      <div class="pasta-field"><label class="pasta-label">🪪 CPF</label><input class="pasta-input" id="pf-cpf" type="text" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)"></div>
+      <div class="pasta-field"><label class="pasta-label">📞 Telefone</label><input class="pasta-input" id="pf-tel" type="text" placeholder="(00) 00000-0000"></div>
+      <div class="pasta-field"><label class="pasta-label">🏠 Onde Mora (endereço)</label><input class="pasta-input" id="pf-endereco" type="text" placeholder="Rua, número, bairro, cidade"></div>
+    </div>
+
+    <div class="pasta-form-section">SITUAÇÃO PROFISSIONAL</div>
+    <div class="pasta-form-grid">
+      <div class="pasta-field"><label class="pasta-label">⚙️ Tipo de Renda</label>
+        <select class="pasta-select" id="pf-tipo-renda" onchange="pastaTipoRendaChange()">
+          <option value="empregado">Empregado CLT / Funcionário</option>
+          <option value="empresario">Empresário / Sócio</option>
+          <option value="autonomo">Autônomo / Freelancer</option>
+          <option value="aposentado">Aposentado / Pensionista</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+      <div class="pasta-field"><label class="pasta-label">💼 Cargo / Função</label><input class="pasta-input" id="pf-cargo" type="text" placeholder="Ex: Gerente, Vendedor, Diretor..."></div>
+    </div>
+    <!-- Empregado -->
+    <div id="pf-bloco-emp" class="pasta-form-grid">
+      <div class="pasta-field"><label class="pasta-label">🏢 Empresa onde trabalha</label><input class="pasta-input" id="pf-empresa" type="text" placeholder="Nome da empresa"></div>
+      <div class="pasta-field"><label class="pasta-label">💰 Salário / Renda Mensal (R$)</label><input class="pasta-input" id="pf-salario" type="number" placeholder="0"></div>
+    </div>
+    <!-- Empresário -->
+    <div id="pf-bloco-emp2" style="display:none" class="pasta-form-grid">
+      <div class="pasta-field"><label class="pasta-label">🏭 Nome da Empresa</label><input class="pasta-input" id="pf-emp-nome" type="text" placeholder="Razão social ou nome fantasia"></div>
+      <div class="pasta-field"><label class="pasta-label">📍 Endereço da Empresa</label><input class="pasta-input" id="pf-emp-end" type="text" placeholder="Rua, número, cidade"></div>
+      <div class="pasta-field"><label class="pasta-label">📊 Faturamento Mensal Estimado (R$)</label><input class="pasta-input" id="pf-faturamento" type="number" placeholder="0"></div>
+      <div class="pasta-field"><label class="pasta-label">💰 Retirada / Pró-labore Mensal (R$)</label><input class="pasta-input" id="pf-prolabore" type="number" placeholder="0"></div>
+    </div>
+
+    <div class="pasta-form-section">OBSERVAÇÕES</div>
+    <div class="pasta-form-grid single">
+      <div class="pasta-field"><label class="pasta-label">📝 Observações Gerais</label><textarea class="pasta-input" id="pf-obs" rows="3" style="resize:vertical" placeholder="Anotações relevantes sobre o cliente, garantias, referencias, etc."></textarea></div>
+    </div>
+
+    <div class="pasta-form-section">DOCUMENTOS & FOTOS</div>
+    <div style="font-size:0.58rem;color:var(--muted);margin-bottom:8px">Aceita fotos e documentos em PDF, JPG, PNG. Máx. 5MB por arquivo.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div>
+        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">RG / CNH</div>
+        <div class="docs-upload-area" onclick="document.getElementById('pf-upload-rg').click()">
+          <div class="docs-upload-icon">🪪</div>
+          <div class="docs-upload-txt">Clique para anexar RG ou CNH</div>
+        </div>
+        <input id="pf-upload-rg" type="file" accept="image/*,.pdf" multiple style="display:none" onchange="pastaAddDoc('rg',this)">
+        <div class="docs-list" id="pf-docs-rg"></div>
+      </div>
+      <div>
+        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">Holerite / Comprovante de Renda</div>
+        <div class="docs-upload-area" onclick="document.getElementById('pf-upload-holerite').click()">
+          <div class="docs-upload-icon">💵</div>
+          <div class="docs-upload-txt">Clique para anexar holerite ou extrato</div>
+        </div>
+        <input id="pf-upload-holerite" type="file" accept="image/*,.pdf" multiple style="display:none" onchange="pastaAddDoc('holerite',this)">
+        <div class="docs-list" id="pf-docs-holerite"></div>
+      </div>
+      <div>
+        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">Fotos do Cliente</div>
+        <div class="docs-upload-area" onclick="document.getElementById('pf-upload-foto').click()">
+          <div class="docs-upload-icon">📷</div>
+          <div class="docs-upload-txt">Clique para adicionar fotos</div>
+        </div>
+        <input id="pf-upload-foto" type="file" accept="image/*" multiple style="display:none" onchange="pastaAddDoc('foto',this)">
+        <div class="docs-list" id="pf-docs-foto"></div>
+      </div>
+      <div>
+        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">Outros Documentos</div>
+        <div class="docs-upload-area" onclick="document.getElementById('pf-upload-outro').click()">
+          <div class="docs-upload-icon">📄</div>
+          <div class="docs-upload-txt">Contratos, comprovantes, etc.</div>
+        </div>
+        <input id="pf-upload-outro" type="file" accept="image/*,.pdf" multiple style="display:none" onchange="pastaAddDoc('outro',this)">
+        <div class="docs-list" id="pf-docs-outro"></div>
+      </div>
+    </div>
+
+    <div class="pasta-modal-footer">
+      <button class="pasta-btn-cancel-modal" onclick="pastaModalClose()">Cancelar</button>
+      <button class="pasta-btn-save-modal" onclick="pastaSalvar()">💾 SALVAR PASTA</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VISUALIZAR PASTA -->
+<div class="pasta-view-overlay" id="pasta-view-overlay" onclick="if(event.target===this)pastaViewClose()">
+  <div class="pasta-view-modal">
+    <div class="pasta-view-header">
+      <div class="pasta-view-avatar" id="pv-avatar"></div>
+      <div>
+        <div class="pasta-view-name" id="pv-nome"></div>
+        <div class="pasta-view-cpf" id="pv-cpf"></div>
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap" id="pv-badges"></div>
+      </div>
+    </div>
+    <div id="pv-body"></div>
+    <div class="pasta-view-footer">
+      <button class="pasta-btn-close-view" onclick="pastaViewClose()">✕ Fechar</button>
+      <button class="pasta-btn-edit-view" onclick="pastaViewEditar()">✏️ Editar Pasta</button>
+    </div>
+  </div>
 </div>
 
 <!-- COMPARATIVOS -->
@@ -1716,6 +1946,279 @@ function pagSalvar(){
   alert(`✅ Pagamento de ${fmt(valor)} registrado para ${_pagClienteAtual}!`);
 }
 
+
+// ════════════════════════════════════════════════════════
+// PASTAS DE CLIENTES
+// ════════════════════════════════════════════════════════
+let _pastas = {};
+let _pastaEditId = null;
+let _pastaViewId = null;
+let _pastaDocs = {rg:[], holerite:[], foto:[], outro:[]};
+const PASTA_COLORS = ['#c9922a','#06d6a0','#4895ef','#9b5de5','#e8b84b','#ef476f','#f5d080','#128c7e'];
+function pastaColor(nome){if(!nome)return PASTA_COLORS[0];let h=0;for(let c of nome)h=(h*31+c.charCodeAt(0))%PASTA_COLORS.length;return PASTA_COLORS[Math.abs(h)];}
+function pastaInitials(nome){if(!nome)return '?';return nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+
+function pastaCarregar(){try{const s=localStorage.getItem('pastas_cli');if(s)_pastas=JSON.parse(s);}catch(e){_pastas={};}}
+function pastaSalvarLocal(){try{localStorage.setItem('pastas_cli',JSON.stringify(_pastas));}catch(e){}}
+pastaCarregar();
+
+function pastaTipoRendaChange(){
+  const v=document.getElementById('pf-tipo-renda').value;
+  document.getElementById('pf-bloco-emp').style.display=v==='empresario'?'none':'grid';
+  document.getElementById('pf-bloco-emp2').style.display=v==='empresario'?'grid':'none';
+}
+
+function maskCPF(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/,'$1.$2.$3-$4');
+  else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{0,3})/,'$1.$2.$3');
+  else if(v.length>3)v=v.replace(/(\d{3})(\d{0,3})/,'$1.$2');
+  el.value=v;
+}
+
+function pastaModalOpen(id){
+  _pastaEditId = id;
+  _pastaDocs = {rg:[], holerite:[], foto:[], outro:[]};
+  ['rg','holerite','foto','outro'].forEach(t=>{
+    document.getElementById('pf-docs-'+t).innerHTML='';
+    document.getElementById('pf-upload-'+t).value='';
+  });
+  if(id && _pastas[id]){
+    const p=_pastas[id];
+    document.getElementById('pasta-modal-titulo').textContent='✏️ Editar Pasta — '+p.nome;
+    document.getElementById('pf-nome').value=p.nome||'';
+    document.getElementById('pf-cpf').value=p.cpf||'';
+    document.getElementById('pf-tel').value=p.tel||'';
+    document.getElementById('pf-endereco').value=p.endereco||'';
+    document.getElementById('pf-tipo-renda').value=p.tipoRenda||'empregado';
+    document.getElementById('pf-cargo').value=p.cargo||'';
+    document.getElementById('pf-empresa').value=p.empresa||'';
+    document.getElementById('pf-salario').value=p.salario||'';
+    document.getElementById('pf-emp-nome').value=p.empNome||'';
+    document.getElementById('pf-emp-end').value=p.empEnd||'';
+    document.getElementById('pf-faturamento').value=p.faturamento||'';
+    document.getElementById('pf-prolabore').value=p.prolabore||'';
+    document.getElementById('pf-obs').value=p.obs||'';
+    pastaTipoRendaChange();
+    // re-carregar docs
+    if(p.docs){
+      _pastaDocs=JSON.parse(JSON.stringify(p.docs));
+      ['rg','holerite','foto','outro'].forEach(t=>pastaRenderDocs(t));
+    }
+  } else {
+    document.getElementById('pasta-modal-titulo').textContent='📁 Nova Pasta de Cliente';
+    ['pf-nome','pf-cpf','pf-tel','pf-endereco','pf-cargo','pf-empresa','pf-salario','pf-emp-nome','pf-emp-end','pf-faturamento','pf-prolabore','pf-obs'].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.value='';
+    });
+    document.getElementById('pf-tipo-renda').value='empregado';
+    pastaTipoRendaChange();
+  }
+  document.getElementById('pasta-modal-overlay').classList.add('open');
+}
+function pastaModalClose(){document.getElementById('pasta-modal-overlay').classList.remove('open');}
+
+function pastaAddDoc(tipo, input){
+  const files=Array.from(input.files);
+  files.forEach(file=>{
+    if(file.size>5*1024*1024){alert('Arquivo muito grande (máx 5MB): '+file.name);return;}
+    const reader=new FileReader();
+    reader.onload=e=>{
+      _pastaDocs[tipo].push({name:file.name,size:file.size,data:e.target.result,mime:file.type});
+      pastaRenderDocs(tipo);
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value='';
+}
+function pastaRenderDocs(tipo){
+  const el=document.getElementById('pf-docs-'+tipo);
+  const typeLabels={rg:'RG/CNH',holerite:'Holerite',foto:'Foto',outro:'Outro'};
+  const typeChip={rg:'doc-chip-rg',holerite:'doc-chip-holerite',foto:'doc-chip-foto',outro:'doc-chip-outro'};
+  el.innerHTML=_pastaDocs[tipo].map((d,i)=>{
+    const isImg=d.mime&&d.mime.startsWith('image/');
+    const kb=Math.round(d.size/1024);
+    return `<div class="doc-item">
+      ${isImg?`<img class="doc-preview" src="${d.data}" alt="">`:(`<span class="doc-icon">📄</span>`)}
+      <span class="doc-name" title="${d.name}">${d.name}</span>
+      <span class="doc-type-chip ${typeChip[tipo]}">${typeLabels[tipo]}</span>
+      <span class="doc-size">${kb}kb</span>
+      <button class="doc-del" onclick="pastaDelDoc('${tipo}',${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+function pastaDelDoc(tipo,idx){_pastaDocs[tipo].splice(idx,1);pastaRenderDocs(tipo);}
+
+function pastaSalvar(){
+  const nome=document.getElementById('pf-nome').value.trim();
+  if(!nome){alert('Informe o nome do cliente.');return;}
+  const id=_pastaEditId||('pasta_'+Date.now());
+  const tipoRenda=document.getElementById('pf-tipo-renda').value;
+  _pastas[id]={
+    id,nome,
+    cpf:document.getElementById('pf-cpf').value.trim(),
+    tel:document.getElementById('pf-tel').value.trim(),
+    endereco:document.getElementById('pf-endereco').value.trim(),
+    tipoRenda,
+    cargo:document.getElementById('pf-cargo').value.trim(),
+    empresa:tipoRenda!=='empresario'?document.getElementById('pf-empresa').value.trim():'',
+    salario:tipoRenda!=='empresario'?parseFloat(document.getElementById('pf-salario').value)||0:0,
+    empNome:tipoRenda==='empresario'?document.getElementById('pf-emp-nome').value.trim():'',
+    empEnd:tipoRenda==='empresario'?document.getElementById('pf-emp-end').value.trim():'',
+    faturamento:tipoRenda==='empresario'?parseFloat(document.getElementById('pf-faturamento').value)||0:0,
+    prolabore:tipoRenda==='empresario'?parseFloat(document.getElementById('pf-prolabore').value)||0:0,
+    obs:document.getElementById('pf-obs').value.trim(),
+    docs:JSON.parse(JSON.stringify(_pastaDocs)),
+    updatedAt:Date.now()
+  };
+  pastaSalvarLocal();
+  pastaModalClose();
+  pastaRender();
+}
+
+function pastaSearchChange(){pastaRender();}
+
+function pastaRender(){
+  const q=(document.getElementById('pasta-search')?.value||'').toLowerCase();
+  const grid=document.getElementById('pasta-grid');
+  if(!grid)return;
+  const all=Object.values(_pastas);
+  const filtered=q?all.filter(p=>
+    (p.nome||'').toLowerCase().includes(q)||
+    (p.cpf||'').includes(q)||
+    (p.tel||'').includes(q)
+  ):all;
+  // stats
+  const totalDocs=all.reduce((s,p)=>s+Object.values(p.docs||{}).flat().length,0);
+  const completas=all.filter(p=>p.nome&&p.cpf&&p.tel&&Object.values(p.docs||{}).flat().length>0).length;
+  const ps=document.getElementById('ps-total');if(ps)ps.textContent=all.length;
+  const pd=document.getElementById('ps-docs');if(pd)pd.textContent=totalDocs;
+  const pc=document.getElementById('ps-completas');if(pc)pc.textContent=completas;
+  if(!filtered.length){
+    grid.innerHTML=`<div class="pasta-empty">${q?'Nenhuma pasta encontrada para "'+q+'"':'Nenhuma pasta cadastrada. Clique em <strong>+ Nova Pasta</strong> para começar.'}</div>`;
+    return;
+  }
+  const tipoLabel={empregado:'CLT',empresario:'Empresário',autonomo:'Autônomo',aposentado:'Aposentado',outro:'Outro'};
+  grid.innerHTML=filtered.sort((a,b)=>b.updatedAt-a.updatedAt).map(p=>{
+    const color=pastaColor(p.nome);
+    const totalD=Object.values(p.docs||{}).flat().length;
+    const renda=p.tipoRenda==='empresario'?fmt(p.faturamento||0)+'/mês fat.':p.salario?fmt(p.salario)+'/mês':'—';
+    const local=p.tipoRenda==='empresario'?(p.empEnd||p.empNome||'—'):(p.empresa||'—');
+    return `<div class="pasta-card" onclick="pastaViewOpen('${p.id}')">
+      <div class="pasta-card-top">
+        <div class="pasta-avatar" style="background:${color}">${pastaInitials(p.nome)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="pasta-card-name">${p.nome}</div>
+          <div class="pasta-card-cpf">${p.cpf||'CPF não cadastrado'}</div>
+          <div class="pasta-card-badges">
+            ${p.tipoRenda?`<span class="badge blue">${tipoLabel[p.tipoRenda]||p.tipoRenda}</span>`:''}
+            ${totalD>0?`<span class="badge ok">${totalD} doc${totalD>1?'s':''}</span>`:'<span class="badge muted">Sem docs</span>'}
+            ${(p.cpf&&p.tel&&totalD>0)?`<span class="badge ok">✓ Completa</span>`:''}
+          </div>
+        </div>
+      </div>
+      <div class="pasta-card-body">
+        ${p.tel?`<div class="pasta-info-line"><span class="pasta-info-icon">📞</span><strong>${p.tel}</strong></div>`:''}
+        ${local&&local!=='—'?`<div class="pasta-info-line"><span class="pasta-info-icon">🏢</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${local}</span></div>`:''}
+        ${renda!=='—'?`<div class="pasta-info-line"><span class="pasta-info-icon">💰</span><strong style="color:var(--green)">${renda}</strong></div>`:''}
+        ${p.endereco?`<div class="pasta-info-line"><span class="pasta-info-icon">📍</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.endereco}</span></div>`:''}
+      </div>
+      <div class="pasta-card-footer">
+        <button class="pasta-btn-ver" onclick="event.stopPropagation();pastaViewOpen('${p.id}')">👁 Ver</button>
+        <button class="pasta-btn-edit" onclick="event.stopPropagation();pastaModalOpen('${p.id}')">✏️ Editar</button>
+        <button class="pasta-btn-del" onclick="event.stopPropagation();pastaExcluir('${p.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function pastaExcluir(id){
+  if(!_pastas[id])return;
+  if(!confirm('Excluir a pasta de '+_pastas[id].nome+'? Esta ação não pode ser desfeita.'))return;
+  delete _pastas[id];
+  pastaSalvarLocal();
+  pastaRender();
+}
+
+function pastaViewOpen(id){
+  const p=_pastas[id];if(!p)return;
+  _pastaViewId=id;
+  const color=pastaColor(p.nome);
+  const tipoLabel={empregado:'CLT / Funcionário',empresario:'Empresário',autonomo:'Autônomo',aposentado:'Aposentado / Pensionista',outro:'Outro'};
+  document.getElementById('pv-avatar').textContent=pastaInitials(p.nome);
+  document.getElementById('pv-avatar').style.background=color;
+  document.getElementById('pv-nome').textContent=p.nome;
+  document.getElementById('pv-cpf').textContent=p.cpf?'CPF: '+p.cpf:'CPF não cadastrado';
+  const totalD=Object.values(p.docs||{}).flat().length;
+  document.getElementById('pv-badges').innerHTML=[
+    p.tipoRenda?`<span class="badge blue">${tipoLabel[p.tipoRenda]||p.tipoRenda}</span>`:'',
+    p.cargo?`<span class="badge muted">${p.cargo}</span>`:'',
+    totalD>0?`<span class="badge ok">${totalD} documento${totalD>1?'s':''}</span>`:'<span class="badge muted">Sem documentos</span>',
+  ].filter(Boolean).join('');
+
+  // Body
+  let html='';
+  // Contato
+  html+=`<div class="pasta-view-section">CONTATO & LOCALIZAÇÃO</div><div class="pasta-view-grid">`;
+  html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">📞 Telefone</div><div class="pasta-view-val">${p.tel||'—'}</div></div>`;
+  html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">🏠 Endereço</div><div class="pasta-view-val">${p.endereco||'—'}</div></div>`;
+  html+=`</div>`;
+  // Profissional
+  html+=`<div class="pasta-view-section">SITUAÇÃO PROFISSIONAL</div><div class="pasta-view-grid">`;
+  html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">⚙️ Tipo</div><div class="pasta-view-val">${tipoLabel[p.tipoRenda]||'—'}</div></div>`;
+  html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">💼 Cargo</div><div class="pasta-view-val">${p.cargo||'—'}</div></div>`;
+  if(p.tipoRenda==='empresario'){
+    html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">🏭 Empresa</div><div class="pasta-view-val">${p.empNome||'—'}</div></div>`;
+    html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">📍 Endereço Empresa</div><div class="pasta-view-val">${p.empEnd||'—'}</div></div>`;
+    html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">📊 Faturamento Mensal</div><div class="pasta-view-val" style="color:var(--green)">${p.faturamento?fmt(p.faturamento):'—'}</div></div>`;
+    html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">💰 Pró-labore</div><div class="pasta-view-val" style="color:var(--gold2)">${p.prolabore?fmt(p.prolabore):'—'}</div></div>`;
+  } else {
+    html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">🏢 Empresa</div><div class="pasta-view-val">${p.empresa||'—'}</div></div>`;
+    html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">💰 Salário</div><div class="pasta-view-val" style="color:var(--green)">${p.salario?fmt(p.salario):'—'}</div></div>`;
+  }
+  html+=`</div>`;
+  // Obs
+  if(p.obs)html+=`<div class="pasta-view-section">OBSERVAÇÕES</div><div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.65rem;color:var(--text);line-height:1.7">${p.obs}</div>`;
+  // Docs
+  const docTypes=[{key:'rg',label:'RG / CNH',icon:'🪪'},{key:'holerite',label:'Holerite / Extrato',icon:'💵'},{key:'foto',label:'Fotos',icon:'📷'},{key:'outro',label:'Outros Documentos',icon:'📄'}];
+  const hasDocs=docTypes.some(t=>(p.docs||{})[t.key]?.length>0);
+  if(hasDocs){
+    html+=`<div class="pasta-view-section">DOCUMENTOS ANEXADOS</div>`;
+    docTypes.forEach(t=>{
+      const docs=(p.docs||{})[t.key]||[];
+      if(!docs.length)return;
+      html+=`<div style="font-size:0.55rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin:10px 0 6px">${t.icon} ${t.label}</div>`;
+      html+=`<div class="pasta-view-docs">`;
+      docs.forEach(d=>{
+        const isImg=d.mime&&d.mime.startsWith('image/');
+        html+=`<div class="pasta-view-doc" onclick="pastaViewDoc('${encodeURIComponent(d.data)}','${encodeURIComponent(d.name)}')">
+          ${isImg?`<img src="${d.data}" alt="${d.name}">`:`<div class="pasta-view-doc-noimg"><span>📄</span></div>`}
+          <div class="pasta-view-doc-info"><div class="pasta-view-doc-name">${d.name}</div><div class="pasta-view-doc-type">${Math.round(d.size/1024)}kb</div></div>
+        </div>`;
+      });
+      html+=`</div>`;
+    });
+  }
+  document.getElementById('pv-body').innerHTML=html;
+  document.getElementById('pasta-view-overlay').classList.add('open');
+}
+function pastaViewClose(){document.getElementById('pasta-view-overlay').classList.remove('open');}
+function pastaViewEditar(){pastaViewClose();pastaModalOpen(_pastaViewId);}
+function pastaViewDoc(dataEnc,nameEnc){
+  const data=decodeURIComponent(dataEnc),name=decodeURIComponent(nameEnc);
+  const a=document.createElement('a');a.href=data;a.download=name;a.click();
+}
+
+// Pré-preencher pasta a partir de cliente da planilha
+function pastaAbrirParaCliente(nome, tel, cpf){
+  pastaModalOpen(null);
+  if(nome)document.getElementById('pf-nome').value=nome;
+  if(tel)document.getElementById('pf-tel').value=tel;
+  if(cpf)document.getElementById('pf-cpf').value=cpf;
+  // scroll ao modal
+  document.getElementById('pasta-modal-overlay').scrollTop=0;
+}
+
+pastaRender();
 
 async function loadData(){
   const loading=document.getElementById('loading-screen'),error=document.getElementById('error-screen'),main=document.getElementById('main');
