@@ -676,7 +676,12 @@ function render(empRows,pagRows){
 
   const pags=pagRows
     .filter(r=>r[CP.id]&&String(r[CP.id]).startsWith('EMP'))
-    .map(r=>({id:String(r[CP.id]).trim(),tipo:String(r[CP.tipo]||''),valor:parseNum(r[CP.valor]),data:parseDate(r[CP.data]),juros:parseNum(r[CP.juros])}));
+    .map(r=>{
+      const valor=parseNum(r[CP.valor]);
+      const jurosRaw=parseNum(r[CP.juros]);
+      const juros=jurosRaw>0?jurosRaw:valor;
+      return{id:String(r[CP.id]).trim(),tipo:String(r[CP.tipo]||''),valor,data:parseDate(r[CP.data]),juros};
+    });
 
   const ativos=emps.filter(e=>e.status==='ativo');
   const atrasado=emps.filter(e=>e.status==='atraso');
@@ -803,7 +808,8 @@ function render(empRows,pagRows){
 
   // LUCRO REAL vs PREVISTO
   destroyChart('lucro');
-  charts.lucro=new Chart(document.getElementById('chartLucro').getContext('2d'),{type:'bar',data:{labels:['Juros Recebidos','Juros a Receber'],datasets:[{data:[lucroReal,totalJuros],backgroundColor:['rgba(6,214,160,0.8)','rgba(240,180,41,0.6)'],borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}},y:{grid:{display:false},ticks:{color:'#dde1f0',font:{family:'DM Mono',size:10}}}}}});
+  const lucroRealShow=lucroReal>0?lucroReal:0.01;
+  charts.lucro=new Chart(document.getElementById('chartLucro').getContext('2d'),{type:'bar',data:{labels:['Juros Recebidos','Juros a Receber'],datasets:[{data:[lucroRealShow,totalJuros],backgroundColor:['rgba(6,214,160,0.8)','rgba(240,180,41,0.6)'],borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>{const v=ctx.dataIndex===0?lucroReal:ctx.raw;return' '+fmt(v);}}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}},y:{grid:{display:false},ticks:{color:'#dde1f0',font:{family:'DM Mono',size:10}}}}}});
 
   // RECEITA vs PERDA
   destroyChart('recPerd');
