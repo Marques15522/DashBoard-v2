@@ -2225,10 +2225,12 @@ function maskCPF(el){
 
 function pastaModalOpen(id){
   _pastaEditId = id;
-  _pastaDocs = {rg:[], holerite:[], foto:[], outro:[]};
-  ['rg','holerite','foto','outro'].forEach(t=>{
-    document.getElementById('pf-docs-'+t).innerHTML='';
-    document.getElementById('pf-upload-'+t).value='';
+  const docKeys=['rg-frente','rg-verso','selfie-rg','holerite','imovel','empresa-foto','outro'];
+  _pastaDocs = {};
+  docKeys.forEach(t=>{ _pastaDocs[t]=[]; });
+  docKeys.forEach(t=>{
+    const el=document.getElementById('pf-docs-'+t); if(el) el.innerHTML='';
+    const inp=document.getElementById('pf-upload-'+t); if(inp) inp.value='';
   });
   if(id && _pastas[id]){
     const p=_pastas[id];
@@ -2271,7 +2273,9 @@ function pastaModalOpen(id){
     // re-carregar docs
     if(p.docs){
       _pastaDocs=JSON.parse(JSON.stringify(p.docs));
-      ['rg','holerite','foto','outro'].forEach(t=>pastaRenderDocs(t));
+      // garante que todas as chaves existam
+      docKeys.forEach(t=>{ if(!_pastaDocs[t]) _pastaDocs[t]=[]; });
+      docKeys.forEach(t=>pastaRenderDocs(t));
     }
   } else {
     document.getElementById('pasta-modal-titulo').textContent='📁 Nova Pasta de Cliente';
@@ -2300,8 +2304,9 @@ function pastaAddDoc(tipo, input){
 }
 function pastaRenderDocs(tipo){
   const el=document.getElementById('pf-docs-'+tipo);
-  const typeLabels={rg:'RG/CNH',holerite:'Holerite',foto:'Foto',outro:'Outro'};
-  const typeChip={rg:'doc-chip-rg',holerite:'doc-chip-holerite',foto:'doc-chip-foto',outro:'doc-chip-outro'};
+  if(!el) return;
+  const typeLabels={'rg-frente':'RG Frente','rg-verso':'RG Verso','selfie-rg':'Selfie RG','holerite':'Holerite','imovel':'Imóvel','empresa-foto':'Empresa','outro':'Outro'};
+  const typeChip={'rg-frente':'doc-chip-rg','rg-verso':'doc-chip-rg','selfie-rg':'doc-chip-foto','holerite':'doc-chip-holerite','imovel':'doc-chip-foto','empresa-foto':'doc-chip-foto','outro':'doc-chip-outro'};
   el.innerHTML=_pastaDocs[tipo].map((d,i)=>{
     const isImg=d.mime&&d.mime.startsWith('image/');
     const kb=Math.round(d.size/1024);
