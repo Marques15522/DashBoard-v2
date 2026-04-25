@@ -2335,8 +2335,48 @@ const PASTA_COLORS = ['#c9922a','#06d6a0','#4895ef','#9b5de5','#e8b84b','#ef476f
 function pastaColor(nome){if(!nome)return PASTA_COLORS[0];let h=0;for(let c of nome)h=(h*31+c.charCodeAt(0))%PASTA_COLORS.length;return PASTA_COLORS[Math.abs(h)];}
 function pastaInitials(nome){if(!nome)return '?';return nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
 
-function pastaCarregar(){try{const s=localStorage.getItem('pastas_cli');if(s)_pastas=JSON.parse(s);}catch(e){_pastas={};}}
-function pastaSalvarLocal(){try{localStorage.setItem('pastas_cli',JSON.stringify(_pastas));}catch(e){}}
+function pastaCarregar(){
+  try{
+    const s=localStorage.getItem('pastas_cli');
+    if(s){
+      _pastas=JSON.parse(s);
+      // Carrega docs separados de volta para cada pasta
+      Object.keys(_pastas).forEach(id=>{
+        try{
+          const d=localStorage.getItem('pastas_docs_'+id);
+          if(d) _pastas[id].docs=JSON.parse(d);
+          else if(!_pastas[id].docs) _pastas[id].docs={};
+        }catch(e){ _pastas[id].docs={}; }
+      });
+    }
+  }catch(e){_pastas={};}
+}
+
+function pastaSalvarLocal(){
+  try{
+    // Salva pasta SEM docs (só metadados) — docs ficam em chave separada
+    const semDocs={};
+    Object.entries(_pastas).forEach(([id,p])=>{
+      const {docs,...resto}=p;
+      semDocs[id]=resto;
+      // Salva docs separadamente por pasta
+      try{
+        localStorage.setItem('pastas_docs_'+id, JSON.stringify(docs||{}));
+      }catch(e){
+        // Se docs são grandes demais, salva sem imagens (só nomes)
+        const semImgs={};
+        Object.entries(docs||{}).forEach(([tipo,lista])=>{
+          semImgs[tipo]=(lista||[]).map(d=>({name:d.name,size:d.size,mime:d.mime,data:''}));
+        });
+        try{localStorage.setItem('pastas_docs_'+id,JSON.stringify(semImgs));}catch(e2){}
+        console.warn('Docs de '+p.nome+' muito grandes para localStorage — imagens não salvas.');
+      }
+    });
+    localStorage.setItem('pastas_cli', JSON.stringify(semDocs));
+  }catch(e){
+    alert('⚠️ Erro ao salvar: armazenamento do navegador cheio. Tente remover arquivos antigos ou documentos grandes das pastas.');
+  }
+}
 pastaCarregar();
 
 function pastaTipoRendaChange(){
@@ -2422,11 +2462,30 @@ function pastaModalClose(){document.getElementById('pasta-modal-overlay').classL
 function pastaAddDoc(tipo, input){
   const files=Array.from(input.files);
   files.forEach(file=>{
-    if(file.size>5*1024*1024){alert('Arquivo muito grande (máx 5MB): '+file.name);return;}
+    if(file.size>10*1024*1024){alert('Arquivo muito grande (máx 10MB): '+file.name);return;}
     const reader=new FileReader();
     reader.onload=e=>{
-      _pastaDocs[tipo].push({name:file.name,size:file.size,data:e.target.result,mime:file.type});
-      pastaRenderDocs(tipo);
+      const isImg=file.type.startsWith('image/');
+      if(isImg){
+        // Comprime a imagem para max 800px e qualidade 0.65 antes de salvar
+        const img=new Image();
+        img.onload=()=>{
+          const MAX=800;
+          let w=img.width,h=img.height;
+          if(w>MAX||h>MAX){const r=Math.min(MAX/w,MAX/h);w=Math.round(w*r);h=Math.round(h*r);}
+          const canvas=document.createElement('canvas');
+          canvas.width=w;canvas.height=h;
+          canvas.getContext('2d').drawImage(img,0,0,w,h);
+          const compressed=canvas.toDataURL('image/jpeg',0.65);
+          const compressedSize=Math.round(compressed.length*0.75);
+          _pastaDocs[tipo].push({name:file.name,size:compressedSize,data:compressed,mime:'image/jpeg'});
+          pastaRenderDocs(tipo);
+        };
+        img.src=e.target.result;
+      } else {
+        _pastaDocs[tipo].push({name:file.name,size:file.size,data:e.target.result,mime:file.type});
+        pastaRenderDocs(tipo);
+      }
     };
     reader.readAsDataURL(file);
   });
@@ -2556,6 +2615,8 @@ function pastaRender(){
 function pastaExcluir(id){
   if(!_pastas[id])return;
   if(!confirm('Excluir a pasta de '+_pastas[id].nome+'? Esta ação não pode ser desfeita.'))return;
+  // Remove também a chave de docs separada
+  try{localStorage.removeItem('pastas_docs_'+id);}catch(e){}
   delete _pastas[id];
   pastaSalvarLocal();
   pastaRender();
