@@ -1134,7 +1134,7 @@ function render(empRows,pagRows){
     const k=e.nome||e.id;
     if(!cliMap[k])cliMap[k]={nome:k,contratos:[],totalCap:0,totalJuros:0,totalPago:0,temAtraso:false,soQuitados:true,tel:''};
     cliMap[k].contratos.push(e);
-    cliMap[k].totalCap+=e.capital;
+    if(e.status!=='quitado') cliMap[k].totalCap+=e.capital; // só contratos abertos
     cliMap[k].totalJuros+=e.jTotal;
     if(e.status==='atraso')cliMap[k].temAtraso=true;
     if(e.status!=='quitado')cliMap[k].soQuitados=false;
@@ -1146,9 +1146,10 @@ function render(empRows,pagRows){
   });
   Object.values(cliMap).forEach(c=>{
     c.qtdContratos=c.contratos.length;
+    c.qtdAbertos=c.contratos.filter(e=>e.status!=='quitado').length;
     c.qtdAtraso=c.contratos.filter(e=>e.status==='atraso').length;
     c.taxaMedia=c.contratos.length?c.contratos.reduce((s,e)=>s+e.taxa,0)/c.contratos.length:0;
-    c.ticketMedio=c.qtdContratos?c.totalCap/c.qtdContratos:0;
+    c.ticketMedio=c.qtdAbertos?c.totalCap/c.qtdAbertos:0;
     c.ativo=!c.soQuitados;
     c.primeiroContrato=c.contratos.reduce((m,e)=>(e.data&&(!m||e.data<m)?e.data:m),null);
     c.mesesRelac=c.primeiroContrato?Math.max(0,Math.round((hoje-c.primeiroContrato)/2628000000)):0;
@@ -1188,7 +1189,7 @@ function render(empRows,pagRows){
   const em3d=new Date(hoje);em3d.setDate(hoje.getDate()+3);
   const vSem=abertos.filter(e=>e.proxVenc&&e.proxVenc>=hoje&&e.proxVenc<=em3d);
   if(vSem.length>0)alertas.push({t:'warn',i:'⏰',titulo:'Vencimentos Próximos',m:`${vSem.length} contrato(s) vencem nos próximos 3 dias: ${vSem.map(e=>e.nome||e.id).join(', ')}.`});
-  clientes.forEach(c=>{const p=totalCap?c.totalCap/totalCap:0;if(p>0.4&&c.ativo)alertas.push({t:'warn',i:'⚖️',titulo:'Concentração de Risco',m:`${c.nome} representa ${pct(p)} do capital total (${fmt(c.totalCap)}). Considere diversificar.`});});
+  clientes.forEach(c=>{const p=totalCap?c.totalCap/totalCap:0;if(p>0.4&&c.ativo)alertas.push({t:'warn',i:'⚖️',titulo:'Concentração de Risco',m:`${c.nome} representa ${(p*100).toFixed(0)}% do capital em aberto (${fmt(c.totalCap)} de ${fmt(totalCap)}). Considere diversificar.`});});
   const graveAtraso=atrasado.filter(e=>{const d=e.proxVenc?Math.floor((hoje-e.proxVenc)/86400000):0;return d>30;});
   if(graveAtraso.length>0)alertas.push({t:'danger',i:'💔',titulo:'Atraso Grave (+30 dias)',m:`${graveAtraso.length} contrato(s) ultrapassaram 30 dias de atraso. Multa acumulada pode ser significativa.`});
   if(inadimPct<=0.05&&abertos.length>0)alertas.push({t:'ok',i:'✅',titulo:'Carteira Saudável',m:`Parabéns! Inadimplência de apenas ${pct(inadimPct)}. Sua carteira está bem gerenciada.`});
@@ -2233,13 +2234,16 @@ function renderFluxo90(abertos, hoje){
 // ════════════════════════════════════════════════════════
 function verificarConcentracao(clientes, totalCap, alertasBanner){
   if(!totalCap) return;
-  const LIMITE=0.40; // alerta acima de 40%
-  const concentrados=clientes.filter(c=>c.ativo&&(c.totalCap/totalCap)>LIMITE);
+  const cliAtivos=clientes.filter(c=>c.ativo);
+  // Só alerta quando tiver 5+ clientes ativos — abaixo disso é normal ter concentração
+  if(cliAtivos.length < 5) return;
+  const LIMITE=0.40;
+  const concentrados=cliAtivos.filter(c=>(c.totalCap/totalCap)>LIMITE);
   if(concentrados.length&&alertasBanner){
     const html=concentrados.map(c=>`
-      <div class="alert-bar danger" style="margin-bottom:8px">
-        <span class="alert-icon">⚠️</span>
-        <div><strong>${c.nome}</strong> representa <strong>${(c.totalCap/totalCap*100).toFixed(0)}%</strong> da sua carteira (${fmt(c.totalCap)}). Considere diversificar para reduzir o risco de concentração.</div>
+      <div class="alert-bar warn" style="margin-bottom:8px">
+        <span class="alert-icon">⚖️</span>
+        <div><strong>${c.nome}</strong> representa <strong>${(c.totalCap/totalCap*100).toFixed(0)}%</strong> da carteira (${fmt(c.totalCap)}). Considere diversificar para reduzir concentração.</div>
       </div>`).join('');
     alertasBanner.insertAdjacentHTML('afterbegin',html);
   }
