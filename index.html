@@ -1268,9 +1268,36 @@ function render(empRows,pagRows){
   destroyChart('saldoProj');
   charts.saldoProj=new Chart(document.getElementById('chartSaldoProj').getContext('2d'),{type:'line',data:{labels:['Hoje',...mL],datasets:[{label:'Saldo Projetado',data:sData,borderColor:'rgba(201,146,42,0.9)',backgroundColor:'rgba(201,146,42,0.06)',borderWidth:2,pointRadius:4,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' Saldo: '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}}}}});
 
-  // DIAS DE ATRASO
-  const emAt=atrasado.map(e=>({...e,dias:e.proxVenc?Math.max(0,Math.floor((hoje-e.proxVenc)/86400000)):0})).sort((a,b)=>b.dias-a.dias);
-  document.getElementById('atrasoList').innerHTML=emAt.length===0?`<div style="color:var(--green);font-size:0.68rem;padding:12px 0">✅ Nenhum contrato em atraso!</div>`:emAt.map(e=>{const cls=e.dias>30?'':e.dias>10?'medio':'baixo';const cor=e.dias>30?'var(--red)':e.dias>10?'var(--gold2)':'var(--muted)';return`<div class="atraso-row ${cls}"><div class="atraso-info"><span class="atraso-nome">${e.nome||e.id}</span><span class="atraso-sub">${e.id} · ${fmt(e.capital)} · vencia ${e.proxVenc?e.proxVenc.toLocaleDateString('pt-BR'):'—'}</span></div><div class="atraso-dias" style="color:${cor}">${e.dias>0?e.dias:'?'}<span>${e.dias>0?'dias':'sem data'}</span></div></div>`;}).join('');
+  // DIAS DE ATRASO + MULTA R$30/dia
+  const MULTA_DIA=30;
+  const emAt=atrasado.map(e=>{
+    const dias=e.proxVenc?Math.max(0,Math.floor((hoje-e.proxVenc)/86400000)):0;
+    const multa=dias*MULTA_DIA;
+    const totalDevido=(e.saldo||e.capital)+multa;
+    return{...e,dias,multa,totalDevido};
+  }).sort((a,b)=>b.dias-a.dias);
+  document.getElementById('atrasoList').innerHTML=emAt.length===0?`<div style="color:var(--green);font-size:0.68rem;padding:12px 0">✅ Nenhum contrato em atraso!</div>`:emAt.map(e=>{
+    const cls=e.dias>30?'':e.dias>10?'medio':'baixo';
+    const cor=e.dias>30?'var(--red)':e.dias>10?'var(--gold2)':'var(--muted)';
+    const multaHtml=e.dias>0?`<div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px;padding:5px 8px;background:rgba(239,71,111,0.07);border:1px solid rgba(239,71,111,0.2);border-radius:6px;font-size:0.6rem">
+      <span style="color:var(--muted)">🔴 Multa (${e.dias}d × R$30)</span>
+      <span style="color:var(--red);font-weight:700">+ ${fmt(e.multa)}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px;padding:4px 8px;background:rgba(239,71,111,0.04);border-radius:6px;font-size:0.6rem">
+      <span style="color:var(--muted)">💰 Total a receber</span>
+      <span style="color:var(--red);font-weight:700;font-size:0.7rem">${fmt(e.totalDevido)}</span>
+    </div>`:'';
+    return`<div class="atraso-row ${cls}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="atraso-info">
+          <span class="atraso-nome">${e.nome||e.id}</span>
+          <span class="atraso-sub">${e.id} · Capital: ${fmt(e.capital)} · Saldo: ${fmt(e.saldo||e.capital)} · vencia ${e.proxVenc?e.proxVenc.toLocaleDateString('pt-BR'):'—'}</span>
+        </div>
+        <div class="atraso-dias" style="color:${cor};flex-shrink:0;margin-left:12px">${e.dias>0?e.dias:'?'}<span>${e.dias>0?'dias':'sem data'}</span></div>
+      </div>
+      ${multaHtml}
+    </div>`;
+  }).join('');
 
   // CONCENTRAÇÃO
   document.getElementById('concList').innerHTML=clientes.filter(c=>c.ativo).sort((a,b)=>b.totalCap-a.totalCap).map(c=>{const p=totalCap?c.totalCap/totalCap:0;const cor=p>0.4?'var(--red)':p>0.25?'var(--gold2)':'var(--green)';return`<div class="conc-row"><div class="conc-top"><span class="conc-nome">${c.nome}${p>0.4?' ⚠️':''}</span><div style="text-align:right"><span class="conc-pct" style="color:${cor}">${(p*100).toFixed(1)}%</span><span style="font-size:0.55rem;color:var(--muted);margin-left:6px">${fmt(c.totalCap)}</span></div></div><div class="bar-bg"><div class="bar-fill" style="width:${(p*100).toFixed(1)}%;background:${cor}"></div></div></div>`;}).join('');
@@ -1283,7 +1310,7 @@ function render(empRows,pagRows){
   const scoreMed=scoresMed.length?scoresMed.reduce((s,v)=>s+v,0)/scoresMed.length:0;
   const prevInadim=Math.min(scoreMed/100*0.35,0.5);
   const risco=scoreMed<30?{lbl:'BAIXO',cor:'var(--green)'}:scoreMed<60?{lbl:'MODERADO',cor:'var(--gold2)'}:{lbl:'ALTO',cor:'var(--red)'};
-  document.getElementById('previsaoInadim').innerHTML=`<div style="text-align:center;padding:16px 0"><div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px">SCORE MÉDIO DA CARTEIRA</div><div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:${risco.cor};line-height:1">${scoreMed.toFixed(0)}</div><div class="badge ${scoreMed<30?'ok':scoreMed<60?'warn':'bad'}" style="margin:8px auto;display:inline-block">RISCO ${risco.lbl}</div></div><div style="border-top:1px solid var(--border);padding-top:12px"><div class="info-row"><span class="info-label">Inadimplência atual</span><span class="info-val" style="color:var(--red)">${pct(inadimPct)}</span></div><div class="info-row"><span class="info-label">Previsão (12 meses)</span><span class="info-val" style="color:${risco.cor}">${pct(prevInadim)}</span></div><div class="info-row"><span class="info-label">Capital em risco</span><span class="info-val" style="color:var(--red)">${fmt(capRisco)}</span></div><div class="info-row"><span class="info-label">Clientes inadimplentes</span><span class="info-val">${atrasado.length} de ${abertos.length}</span></div></div>`;
+  document.getElementById('previsaoInadim').innerHTML=`<div style="text-align:center;padding:16px 0"><div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px">SCORE MÉDIO DA CARTEIRA</div><div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:${risco.cor};line-height:1">${scoreMed.toFixed(0)}</div><div class="badge ${scoreMed<30?'ok':scoreMed<60?'warn':'bad'}" style="margin:8px auto;display:inline-block">RISCO ${risco.lbl}</div></div><div style="border-top:1px solid var(--border);padding-top:12px"><div class="info-row"><span class="info-label">Inadimplência atual</span><span class="info-val" style="color:var(--red)">${pct(inadimPct)}</span></div><div class="info-row"><span class="info-label">Previsão (12 meses)</span><span class="info-val" style="color:${risco.cor}">${pct(prevInadim)}</span></div><div class="info-row"><span class="info-label">Capital em risco</span><span class="info-val" style="color:var(--red)">${fmt(capRisco)}</span></div><div class="info-row"><span class="info-label">Multa acumulada (R$30/dia)</span><span class="info-val" style="color:var(--red)">${fmt(emAt.reduce((s,e)=>s+e.multa,0))}</span></div><div class="info-row"><span class="info-label">Total a receber (c/ multa)</span><span class="info-val" style="color:var(--red);font-weight:700">${fmt(capRisco+emAt.reduce((s,e)=>s+e.multa,0))}</span></div><div class="info-row"><span class="info-label">Clientes inadimplentes</span><span class="info-val">${atrasado.length} de ${abertos.length}</span></div></div>`;
 
   // EVOLUÇÃO INADIMPLÊNCIA
   const inadimMap={};
@@ -1391,8 +1418,8 @@ let _waCli=[], _waFiltro='todos', _waBusca='';
 const TPL_DEFAULT = {
   suave:       {lbl:'💬 Cobrança Suave',         txt:`Olá, {nome}! Tudo bem? 😊\n\nPassando para lembrar que temos uma parcela de *{valor}* com vencimento em *{vencimento}*.\n\nQualquer dúvida, estou à disposição! 🙏`},
   formal:      {lbl:'📋 Cobrança Formal',         txt:`Olá, {nome}.\n\nIdentificamos a parcela de *{valor}* como pendente (vencimento: *{vencimento}*).\n\nPor favor, entre em contato para regularizarmos.\n\nAtenciosamente, Capital Investimentos.`},
-  atraso_leve: {lbl:'⚠️ Atraso (até 15 dias)',   txt:`Olá, {nome}! Como vai?\n\nSua parcela de *{valor}* está em atraso há *{dias_atraso} dia(s)*.\n\nPodemos resolver rapidinho — me avise quando puder! 😊`},
-  atraso_grav: {lbl:'🔴 Atraso Grave (+15 dias)', txt:`{nome}, bom dia.\n\nSua parcela de *{valor}* está em atraso há *{dias_atraso} dias*. Precisamos regularizar urgente para evitar encargos adicionais.\n\nAguardo seu contato. Obrigado.`},
+  atraso_leve: {lbl:'⚠️ Atraso (até 15 dias)',   txt:`Olá, {nome}! Como vai?\n\nSua parcela de *{valor}* está em atraso há *{dias_atraso} dia(s)*.\n\n⚠️ Está sendo cobrada uma multa de *R$ 30,00 por dia* de atraso. Valor atual da multa: *{multa}*.\n\nPodemos resolver rapidinho — me avise quando puder! 😊`},
+  atraso_grav: {lbl:'🔴 Atraso Grave (+15 dias)', txt:`{nome}, bom dia.\n\nSua parcela de *{valor}* está em atraso há *{dias_atraso} dias*.\n\n🔴 Multa acumulada: *{multa}* (R$ 30,00/dia)\n💰 *Total a regularizar: {total_devido}*\n\nPrecisamos resolver urgente. Aguardo seu contato.`},
   vencimento:  {lbl:'⏰ Aviso de Vencimento',     txt:`Olá, {nome}! 👋\n\nAvisando que sua parcela de *{valor}* vence em *{vencimento}*.\n\nPosso enviar os dados para pagamento agora, é só falar! 😉`},
   renovacao:   {lbl:'🔄 Proposta de Renovação',   txt:`Olá, {nome}! Espero que esteja bem 😊\n\nSeu contrato de *{capital}* está chegando ao fim. Quer renovar ou ampliar o limite?\n\nTenho condições especiais para você. Vamos conversar?`},
   quitacao:    {lbl:'🎉 Parabéns pela Quitação',  txt:`{nome}! 🎉 Parabéns pela quitação!\n\nFoi um prazer trabalhar com você. Quando precisar, estarei aqui — com condições especiais para quem já é cliente!\n\nObrigado pela confiança! 🙏`},
@@ -1441,7 +1468,9 @@ function tplApply(txt, c){
     .replace(/\{valor\}/g, val)
     .replace(/\{capital\}/g, cap)
     .replace(/\{vencimento\}/g, venc)
-    .replace(/\{dias_atraso\}/g, c.diasAtraso||0);
+    .replace(/\{dias_atraso\}/g, c.diasAtraso||0)
+    .replace(/\{multa\}/g, 'R$ '+((c.diasAtraso||0)*30).toLocaleString('pt-BR',{minimumFractionDigits:2}))
+    .replace(/\{total_devido\}/g, fmt((c.saldo||c.capital||0)+(c.diasAtraso||0)*30));
 }
 
 // ── MODAL EDITOR ─────────────────────────────────────────
