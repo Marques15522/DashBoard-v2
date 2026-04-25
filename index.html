@@ -2861,11 +2861,15 @@ async function loadData(){
     const empRows=empT.slice(autoSkipCSV(empT)),pagRows=pagT.slice(autoSkipCSV(pagT));
     console.log('📊 Capital Investimentos — emp:',empRows.length,'pag:',pagRows.length);
     render(empRows,pagRows);
-    pastaRender(); // renderiza pastas salvas no localStorage após DOM estar visível
     loading.classList.add('hidden');main.classList.add('visible');
   }catch(err){
     console.error(err);loading.classList.add('hidden');error.classList.add('show');
     document.getElementById('error-msg').textContent='Erro: '+err.message+'. Verifique se a planilha está compartilhada publicamente.';
+    // Mesmo com erro na planilha, mostra o main para o dossiê funcionar
+    main.classList.add('visible');
+  } finally {
+    // Sempre renderiza as pastas do dossiê, independente de erro na planilha
+    pastaRender();
   }
 }
 loadData();
