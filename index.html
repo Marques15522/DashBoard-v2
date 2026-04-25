@@ -1567,11 +1567,17 @@ function waRender(clientes,abertos,atrasado,hoje){
   const em7=new Date(hoje);em7.setDate(hoje.getDate()+7);
   _waCli=clientes.map(c=>{
     const ab=c.contratos.filter(e=>e.status!=='quitado');
+    const atrasados=ab.filter(e=>e.status==='atraso');
+    // proxVenc para badge de vencimento: menor data futura
     const proxVenc=ab.map(e=>e.proxVenc).filter(Boolean).sort((a,b)=>a-b)[0]||null;
-    const diasAtraso=(proxVenc&&proxVenc<hoje)?Math.floor((hoje-proxVenc)/86400000):0;
+    // diasAtraso: calculado pelo contrato atrasado mais antigo
+    const vencAtrasados=atrasados.map(e=>e.proxVenc).filter(Boolean).sort((a,b)=>a-b);
+    const vencMaisAntigo=vencAtrasados[0]||null;
+    const diasAtraso=vencMaisAntigo?Math.max(0,Math.floor((hoje-vencMaisAntigo)/86400000)):0;
     const vence7=!!(proxVenc&&proxVenc>=hoje&&proxVenc<=em7);
-    // Saldo devedor: soma dos contratos atrasados
-    const saldoTotal=ab.filter(e=>e.status==='atraso').reduce((s,e)=>s+(e.saldo||e.capital||0),0)||c.totalCap||0;
+    // Saldo: soma de todos os contratos atrasados (com fallback para capital)
+    const saldoTotal=atrasados.reduce((s,e)=>s+(e.saldo||e.capital||0),0)||
+                     (diasAtraso>0?c.totalCap:0);
     const multa=diasAtraso*30;
     const totalDevido=saldoTotal+multa;
     return{...c,proxVenc,diasAtraso,vence7,saldoTotal,multa,totalDevido};
@@ -1618,7 +1624,7 @@ function waCard(c){
   const ini=c.nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   const tid='wa_'+c.nome.replace(/[^a-zA-Z0-9]/g,'_');
   const opts=Object.entries(tpls).map(([k,v])=>`<option value="${k}"${k===def?' selected':''}>${v.lbl}</option>`).join('');
-  const extra=c.diasAtraso>0?` · <span style="color:var(--red)">${c.diasAtraso}d atraso</span>`:'';
+  const extra=c.diasAtraso>0?` · <span style="color:var(--red)">${c.diasAtraso}d atraso · multa: ${fmt(c.multa||0)}</span>`:'';
   const nomeSafe=c.nome.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
   const telLimpo=(c.tel||'').replace(/\D/g,'');
   const telClass=telLimpo?'has-number':'';
