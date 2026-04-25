@@ -368,6 +368,29 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .pasta-stat-box{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center;}
 .pasta-stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;}
 .pasta-stat-lbl{font-size:0.48rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-top:2px;}
+/* ── SCORE DE CRÉDITO ── */
+.score-panel{background:var(--s2);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;margin-top:18px;}
+.score-panel-title{font-family:'Bebas Neue',sans-serif;font-size:0.7rem;letter-spacing:0.2em;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.score-gauge{display:flex;align-items:center;gap:18px;margin-bottom:14px;}
+.score-circle{position:relative;width:88px;height:88px;flex-shrink:0;}
+.score-circle svg{transform:rotate(-90deg);}
+.score-circle-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-circle-val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;line-height:1;}
+.score-circle-lbl{font-size:0.45rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;}
+.score-info{flex:1;}
+.score-decisao{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.06em;margin-bottom:4px;}
+.score-recomend{font-size:0.62rem;color:var(--text);line-height:1.6;}
+.score-bars{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;}
+.score-bar-row{display:flex;align-items:center;gap:8px;}
+.score-bar-lbl{font-size:0.58rem;color:var(--muted);width:140px;flex-shrink:0;}
+.score-bar-bg{flex:1;height:5px;background:var(--border2);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;}
+.score-bar-val{font-size:0.58rem;color:var(--muted);width:28px;text-align:right;flex-shrink:0;}
+.score-rec-box{border-radius:8px;padding:12px 14px;font-size:0.65rem;line-height:1.65;margin-top:10px;}
+.score-rec-box.aprovado{background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.25);color:var(--green);}
+.score-rec-box.atencao{background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.25);color:var(--gold2);}
+.score-rec-box.reprovado{background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.25);color:var(--red);}
+.score-rec-title{font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:0.1em;margin-bottom:5px;}
 </style>
 </head>
 <body>
@@ -551,20 +574,57 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 <div class="pasta-modal-overlay" id="pasta-modal-overlay" onclick="if(event.target===this)pastaModalClose()">
   <div class="pasta-modal">
     <div class="pasta-modal-title" id="pasta-modal-titulo">📁 Nova Pasta de Cliente</div>
-    <div class="pasta-modal-sub">Preencha os dados do cliente. Campos com * são obrigatórios.</div>
+    <div class="pasta-modal-sub">Preencha os dados do cliente. Campos com * são obrigatórios. O score é calculado automaticamente.</div>
 
     <div class="pasta-form-section">IDENTIFICAÇÃO</div>
     <div class="pasta-form-grid">
-      <div class="pasta-field"><label class="pasta-label">👤 Nome Completo *</label><input class="pasta-input" id="pf-nome" type="text" placeholder="Nome completo do cliente"></div>
+      <div class="pasta-field"><label class="pasta-label">👤 Nome Completo *</label><input class="pasta-input" id="pf-nome" type="text" placeholder="Nome completo do cliente" oninput="pastaScoreAuto()"></div>
       <div class="pasta-field"><label class="pasta-label">🪪 CPF</label><input class="pasta-input" id="pf-cpf" type="text" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)"></div>
       <div class="pasta-field"><label class="pasta-label">📞 Telefone</label><input class="pasta-input" id="pf-tel" type="text" placeholder="(00) 00000-0000"></div>
-      <div class="pasta-field"><label class="pasta-label">🏠 Onde Mora (endereço)</label><input class="pasta-input" id="pf-endereco" type="text" placeholder="Rua, número, bairro, cidade"></div>
+      <div class="pasta-field"><label class="pasta-label">📞 Telefone 2 / Recado</label><input class="pasta-input" id="pf-tel2" type="text" placeholder="Contato alternativo"></div>
+      <div class="pasta-field"><label class="pasta-label">📅 Data de Nascimento</label><input class="pasta-input" id="pf-nasc" type="date" onchange="pastaScoreAuto()"></div>
+      <div class="pasta-field"><label class="pasta-label">💍 Estado Civil</label>
+        <select class="pasta-select" id="pf-estado-civil" onchange="pastaScoreAuto()">
+          <option value="">Selecione...</option>
+          <option value="solteiro">Solteiro(a)</option>
+          <option value="casado">Casado(a)</option>
+          <option value="uniao">União Estável</option>
+          <option value="divorciado">Divorciado(a)</option>
+          <option value="viuvo">Viúvo(a)</option>
+        </select>
+      </div>
+      <div class="pasta-field"><label class="pasta-label">👩 Nome da Mãe</label><input class="pasta-input" id="pf-mae" type="text" placeholder="Nome completo da mãe"></div>
+    </div>
+
+    <div class="pasta-form-section">MORADIA</div>
+    <div class="pasta-form-grid">
+      <div class="pasta-field"><label class="pasta-label">🏠 Situação de Moradia</label>
+        <select class="pasta-select" id="pf-moradia" onchange="pastaScoreAuto()">
+          <option value="">Selecione...</option>
+          <option value="proprio">Imóvel Próprio (quitado)</option>
+          <option value="financiado">Imóvel Financiado</option>
+          <option value="alugado">Alugado</option>
+          <option value="familiar">Com familiares (sem custo)</option>
+          <option value="cedido">Cedido / Funcional</option>
+        </select>
+      </div>
+      <div class="pasta-field"><label class="pasta-label">💸 Valor do Aluguel (R$)</label><input class="pasta-input" id="pf-aluguel" type="number" placeholder="0 se próprio" oninput="pastaScoreAuto()"></div>
+      <div class="pasta-field"><label class="pasta-label">📅 Há quanto tempo mora aqui?</label>
+        <select class="pasta-select" id="pf-tempo-moradia" onchange="pastaScoreAuto()">
+          <option value="">Selecione...</option>
+          <option value="menos6">Menos de 6 meses</option>
+          <option value="6a12">6 a 12 meses</option>
+          <option value="1a3">1 a 3 anos</option>
+          <option value="mais3">Mais de 3 anos</option>
+        </select>
+      </div>
+      <div class="pasta-field"><label class="pasta-label">🏠 Endereço Completo</label><input class="pasta-input" id="pf-endereco" type="text" placeholder="Rua, número, bairro, cidade"></div>
     </div>
 
     <div class="pasta-form-section">SITUAÇÃO PROFISSIONAL</div>
     <div class="pasta-form-grid">
       <div class="pasta-field"><label class="pasta-label">⚙️ Tipo de Renda</label>
-        <select class="pasta-select" id="pf-tipo-renda" onchange="pastaTipoRendaChange()">
+        <select class="pasta-select" id="pf-tipo-renda" onchange="pastaTipoRendaChange();pastaScoreAuto()">
           <option value="empregado">Empregado CLT / Funcionário</option>
           <option value="empresario">Empresário / Sócio</option>
           <option value="autonomo">Autônomo / Freelancer</option>
@@ -573,23 +633,130 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
         </select>
       </div>
       <div class="pasta-field"><label class="pasta-label">💼 Cargo / Função</label><input class="pasta-input" id="pf-cargo" type="text" placeholder="Ex: Gerente, Vendedor, Diretor..."></div>
+      <div class="pasta-field"><label class="pasta-label">📅 Tempo no emprego/atividade atual</label>
+        <select class="pasta-select" id="pf-tempo-emprego" onchange="pastaScoreAuto()">
+          <option value="">Selecione...</option>
+          <option value="menos3">Menos de 3 meses</option>
+          <option value="3a6">3 a 6 meses</option>
+          <option value="6a12">6 a 12 meses</option>
+          <option value="1a3">1 a 3 anos</option>
+          <option value="mais3">Mais de 3 anos</option>
+        </select>
+      </div>
+      <div class="pasta-field"><label class="pasta-label">📱 Telefone do Trabalho</label><input class="pasta-input" id="pf-tel-trabalho" type="text" placeholder="Número fixo do trabalho"></div>
     </div>
     <!-- Empregado -->
     <div id="pf-bloco-emp" class="pasta-form-grid">
       <div class="pasta-field"><label class="pasta-label">🏢 Empresa onde trabalha</label><input class="pasta-input" id="pf-empresa" type="text" placeholder="Nome da empresa"></div>
-      <div class="pasta-field"><label class="pasta-label">💰 Salário / Renda Mensal (R$)</label><input class="pasta-input" id="pf-salario" type="number" placeholder="0"></div>
+      <div class="pasta-field"><label class="pasta-label">💰 Salário / Renda Mensal (R$)</label><input class="pasta-input" id="pf-salario" type="number" placeholder="0" oninput="pastaScoreAuto()"></div>
     </div>
     <!-- Empresário -->
     <div id="pf-bloco-emp2" style="display:none" class="pasta-form-grid">
       <div class="pasta-field"><label class="pasta-label">🏭 Nome da Empresa</label><input class="pasta-input" id="pf-emp-nome" type="text" placeholder="Razão social ou nome fantasia"></div>
       <div class="pasta-field"><label class="pasta-label">📍 Endereço da Empresa</label><input class="pasta-input" id="pf-emp-end" type="text" placeholder="Rua, número, cidade"></div>
-      <div class="pasta-field"><label class="pasta-label">📊 Faturamento Mensal Estimado (R$)</label><input class="pasta-input" id="pf-faturamento" type="number" placeholder="0"></div>
-      <div class="pasta-field"><label class="pasta-label">💰 Retirada / Pró-labore Mensal (R$)</label><input class="pasta-input" id="pf-prolabore" type="number" placeholder="0"></div>
+      <div class="pasta-field"><label class="pasta-label">📊 Faturamento Mensal Estimado (R$)</label><input class="pasta-input" id="pf-faturamento" type="number" placeholder="0" oninput="pastaScoreAuto()"></div>
+      <div class="pasta-field"><label class="pasta-label">💰 Retirada / Pró-labore Mensal (R$)</label><input class="pasta-input" id="pf-prolabore" type="number" placeholder="0" oninput="pastaScoreAuto()"></div>
+    </div>
+
+    <div class="pasta-form-section">COMPROMETIMENTO FINANCEIRO</div>
+    <div class="pasta-form-grid">
+      <div class="pasta-field"><label class="pasta-label">💳 Tem outros empréstimos em aberto?</label>
+        <select class="pasta-select" id="pf-outros-emp" onchange="pastaScoreAuto()">
+          <option value="nao">Não</option>
+          <option value="sim_baixo">Sim — menos de 20% da renda</option>
+          <option value="sim_medio">Sim — entre 20% e 40% da renda</option>
+          <option value="sim_alto">Sim — mais de 40% da renda</option>
+        </select>
+      </div>
+      <div class="pasta-field"><label class="pasta-label">💳 Tem financiamento de veículo/imóvel?</label>
+        <select class="pasta-select" id="pf-financiamento" onchange="pastaScoreAuto()">
+          <option value="nao">Não</option>
+          <option value="sim">Sim</option>
+        </select>
+      </div>
+      <div class="pasta-field"><label class="pasta-label">❌ Já teve nome negativado?</label>
+        <select class="pasta-select" id="pf-negativado" onchange="pastaScoreAuto()">
+          <option value="nunca">Nunca</option>
+          <option value="passado">Sim, no passado (resolvido)</option>
+          <option value="atual">Sim, atualmente</option>
+        </select>
+      </div>
+      <div class="pasta-field"><label class="pasta-label">🎯 Finalidade do empréstimo</label>
+        <select class="pasta-select" id="pf-finalidade" onchange="pastaScoreAuto()">
+          <option value="">Selecione...</option>
+          <option value="emergencia">Emergência médica / familiar</option>
+          <option value="capital">Capital de giro / negócio</option>
+          <option value="reforma">Reforma / investimento</option>
+          <option value="consumo">Consumo / compras</option>
+          <option value="pagar_divida">Pagar outra dívida</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+      <div class="pasta-field"><label class="pasta-label">🚗 Possui veículo próprio?</label>
+        <select class="pasta-select" id="pf-veiculo" onchange="pastaScoreAuto()">
+          <option value="nao">Não</option>
+          <option value="sim">Sim</option>
+        </select>
+      </div>
+      <div class="pasta-field" id="pf-veiculo-det-wrap" style="display:none"><label class="pasta-label">🚗 Dados do veículo (placa/modelo/ano)</label><input class="pasta-input" id="pf-veiculo-det" type="text" placeholder="Ex: ABC-1234 / Gol 2020"></div>
+    </div>
+
+    <div class="pasta-form-section">REFERÊNCIAS PESSOAIS</div>
+    <div class="pasta-form-grid">
+      <div class="pasta-field"><label class="pasta-label">👤 Referência 1 — Nome</label><input class="pasta-input" id="pf-ref1-nome" type="text" placeholder="Nome completo"></div>
+      <div class="pasta-field"><label class="pasta-label">📞 Referência 1 — Telefone</label><input class="pasta-input" id="pf-ref1-tel" type="text" placeholder="(00) 00000-0000"></div>
+      <div class="pasta-field"><label class="pasta-label">🔗 Referência 1 — Grau</label>
+        <select class="pasta-select" id="pf-ref1-grau">
+          <option value="">Selecione...</option>
+          <option value="familiar">Familiar</option>
+          <option value="amigo">Amigo próximo</option>
+          <option value="colega">Colega de trabalho</option>
+          <option value="vizinho">Vizinho</option>
+        </select>
+      </div>
+      <div class="pasta-field"><label class="pasta-label">👤 Referência 2 — Nome</label><input class="pasta-input" id="pf-ref2-nome" type="text" placeholder="Nome completo"></div>
+      <div class="pasta-field"><label class="pasta-label">📞 Referência 2 — Telefone</label><input class="pasta-input" id="pf-ref2-tel" type="text" placeholder="(00) 00000-0000"></div>
+      <div class="pasta-field"><label class="pasta-label">🔗 Referência 2 — Grau</label>
+        <select class="pasta-select" id="pf-ref2-grau">
+          <option value="">Selecione...</option>
+          <option value="familiar">Familiar</option>
+          <option value="amigo">Amigo próximo</option>
+          <option value="colega">Colega de trabalho</option>
+          <option value="vizinho">Vizinho</option>
+        </select>
+      </div>
     </div>
 
     <div class="pasta-form-section">OBSERVAÇÕES</div>
     <div class="pasta-form-grid single">
       <div class="pasta-field"><label class="pasta-label">📝 Observações Gerais</label><textarea class="pasta-input" id="pf-obs" rows="3" style="resize:vertical" placeholder="Anotações relevantes sobre o cliente, garantias, referencias, etc."></textarea></div>
+    </div>
+
+    <!-- SCORE AUTOMÁTICO -->
+    <div class="score-panel" id="score-panel">
+      <div class="score-panel-title">🎯 SCORE DE CRÉDITO — ANÁLISE AUTOMÁTICA</div>
+      <div class="score-gauge">
+        <div class="score-circle">
+          <svg width="88" height="88" viewBox="0 0 88 88">
+            <circle cx="44" cy="44" r="36" fill="none" stroke="var(--border2)" stroke-width="8"/>
+            <circle id="score-arc" cx="44" cy="44" r="36" fill="none" stroke="var(--gold)" stroke-width="8"
+              stroke-dasharray="226" stroke-dashoffset="226" stroke-linecap="round" style="transition:all 0.6s ease"/>
+          </svg>
+          <div class="score-circle-num">
+            <div class="score-circle-val" id="score-num" style="color:var(--gold)">—</div>
+            <div class="score-circle-lbl">/ 1000</div>
+          </div>
+        </div>
+        <div class="score-info">
+          <div class="score-decisao" id="score-decisao" style="color:var(--muted)">Preencha os dados</div>
+          <div class="score-recomend" id="score-recomend" style="color:var(--muted)">Complete o formulário para ver a análise de crédito.</div>
+        </div>
+      </div>
+      <div class="score-bars" id="score-bars"></div>
+      <div class="score-rec-box atencao" id="score-rec-box" style="display:none">
+        <div class="score-rec-title" id="score-rec-title"></div>
+        <div id="score-rec-body"></div>
+      </div>
     </div>
 
     <div class="pasta-form-section">DOCUMENTOS & FOTOS</div>
@@ -2042,15 +2209,36 @@ function pastaModalOpen(id){
     document.getElementById('pf-nome').value=p.nome||'';
     document.getElementById('pf-cpf').value=p.cpf||'';
     document.getElementById('pf-tel').value=p.tel||'';
+    if(g('pf-tel2'))g('pf-tel2').value=p.tel2||'';
+    if(g('pf-nasc'))g('pf-nasc').value=p.nasc||'';
+    if(g('pf-estado-civil'))g('pf-estado-civil').value=p.estadoCivil||'';
+    if(g('pf-mae'))g('pf-mae').value=p.mae||'';
     document.getElementById('pf-endereco').value=p.endereco||'';
+    if(g('pf-moradia'))g('pf-moradia').value=p.moradia||'';
+    if(g('pf-aluguel'))g('pf-aluguel').value=p.aluguel||'';
+    if(g('pf-tempo-moradia'))g('pf-tempo-moradia').value=p.tempoMoradia||'';
     document.getElementById('pf-tipo-renda').value=p.tipoRenda||'empregado';
     document.getElementById('pf-cargo').value=p.cargo||'';
+    if(g('pf-tempo-emprego'))g('pf-tempo-emprego').value=p.tempoEmprego||'';
+    if(g('pf-tel-trabalho'))g('pf-tel-trabalho').value=p.telTrabalho||'';
     document.getElementById('pf-empresa').value=p.empresa||'';
     document.getElementById('pf-salario').value=p.salario||'';
     document.getElementById('pf-emp-nome').value=p.empNome||'';
     document.getElementById('pf-emp-end').value=p.empEnd||'';
     document.getElementById('pf-faturamento').value=p.faturamento||'';
     document.getElementById('pf-prolabore').value=p.prolabore||'';
+    if(g('pf-outros-emp'))g('pf-outros-emp').value=p.outrosEmp||'nao';
+    if(g('pf-financiamento'))g('pf-financiamento').value=p.financiamento||'nao';
+    if(g('pf-negativado'))g('pf-negativado').value=p.negativado||'nunca';
+    if(g('pf-finalidade'))g('pf-finalidade').value=p.finalidade||'';
+    if(g('pf-veiculo'))g('pf-veiculo').value=p.veiculo||'nao';
+    if(g('pf-veiculo-det'))g('pf-veiculo-det').value=p.veiculoDet||'';
+    if(g('pf-ref1-nome'))g('pf-ref1-nome').value=p.ref1Nome||'';
+    if(g('pf-ref1-tel'))g('pf-ref1-tel').value=p.ref1Tel||'';
+    if(g('pf-ref1-grau'))g('pf-ref1-grau').value=p.ref1Grau||'';
+    if(g('pf-ref2-nome'))g('pf-ref2-nome').value=p.ref2Nome||'';
+    if(g('pf-ref2-tel'))g('pf-ref2-tel').value=p.ref2Tel||'';
+    if(g('pf-ref2-grau'))g('pf-ref2-grau').value=p.ref2Grau||'';
     document.getElementById('pf-obs').value=p.obs||'';
     pastaTipoRendaChange();
     // re-carregar docs
@@ -2060,7 +2248,7 @@ function pastaModalOpen(id){
     }
   } else {
     document.getElementById('pasta-modal-titulo').textContent='📁 Nova Pasta de Cliente';
-    ['pf-nome','pf-cpf','pf-tel','pf-endereco','pf-cargo','pf-empresa','pf-salario','pf-emp-nome','pf-emp-end','pf-faturamento','pf-prolabore','pf-obs'].forEach(id=>{
+    ['pf-nome','pf-cpf','pf-tel','pf-tel2','pf-nasc','pf-mae','pf-endereco','pf-cargo','pf-empresa','pf-salario','pf-emp-nome','pf-emp-end','pf-faturamento','pf-prolabore','pf-aluguel','pf-tel-trabalho','pf-veiculo-det','pf-ref1-nome','pf-ref1-tel','pf-ref2-nome','pf-ref2-tel','pf-obs'].forEach(id=>{
       const el=document.getElementById(id);if(el)el.value='';
     });
     document.getElementById('pf-tipo-renda').value='empregado';
@@ -2106,20 +2294,39 @@ function pastaSalvar(){
   if(!nome){alert('Informe o nome do cliente.');return;}
   const id=_pastaEditId||('pasta_'+Date.now());
   const tipoRenda=document.getElementById('pf-tipo-renda').value;
+  const {total:scoreCredito}=calcScoreCredito();
   _pastas[id]={
     id,nome,
-    cpf:document.getElementById('pf-cpf').value.trim(),
-    tel:document.getElementById('pf-tel').value.trim(),
-    endereco:document.getElementById('pf-endereco').value.trim(),
+    cpf:gv('pf-cpf'),
+    tel:gv('pf-tel'),
+    tel2:gv('pf-tel2'),
+    nasc:gv('pf-nasc'),
+    estadoCivil:gv('pf-estado-civil'),
+    mae:gv('pf-mae'),
+    endereco:gv('pf-endereco'),
+    moradia:gv('pf-moradia'),
+    aluguel:gn('pf-aluguel'),
+    tempoMoradia:gv('pf-tempo-moradia'),
     tipoRenda,
-    cargo:document.getElementById('pf-cargo').value.trim(),
-    empresa:tipoRenda!=='empresario'?document.getElementById('pf-empresa').value.trim():'',
-    salario:tipoRenda!=='empresario'?parseFloat(document.getElementById('pf-salario').value)||0:0,
-    empNome:tipoRenda==='empresario'?document.getElementById('pf-emp-nome').value.trim():'',
-    empEnd:tipoRenda==='empresario'?document.getElementById('pf-emp-end').value.trim():'',
-    faturamento:tipoRenda==='empresario'?parseFloat(document.getElementById('pf-faturamento').value)||0:0,
-    prolabore:tipoRenda==='empresario'?parseFloat(document.getElementById('pf-prolabore').value)||0:0,
-    obs:document.getElementById('pf-obs').value.trim(),
+    cargo:gv('pf-cargo'),
+    tempoEmprego:gv('pf-tempo-emprego'),
+    telTrabalho:gv('pf-tel-trabalho'),
+    empresa:tipoRenda!=='empresario'?gv('pf-empresa'):'',
+    salario:tipoRenda!=='empresario'?gn('pf-salario'):0,
+    empNome:tipoRenda==='empresario'?gv('pf-emp-nome'):'',
+    empEnd:tipoRenda==='empresario'?gv('pf-emp-end'):'',
+    faturamento:tipoRenda==='empresario'?gn('pf-faturamento'):0,
+    prolabore:tipoRenda==='empresario'?gn('pf-prolabore'):0,
+    outrosEmp:gv('pf-outros-emp'),
+    financiamento:gv('pf-financiamento'),
+    negativado:gv('pf-negativado'),
+    finalidade:gv('pf-finalidade'),
+    veiculo:gv('pf-veiculo'),
+    veiculoDet:gv('pf-veiculo-det'),
+    ref1Nome:gv('pf-ref1-nome'),ref1Tel:gv('pf-ref1-tel'),ref1Grau:gv('pf-ref1-grau'),
+    ref2Nome:gv('pf-ref2-nome'),ref2Tel:gv('pf-ref2-tel'),ref2Grau:gv('pf-ref2-grau'),
+    obs:gv('pf-obs'),
+    scoreCredito,
     docs:JSON.parse(JSON.stringify(_pastaDocs)),
     updatedAt:Date.now()
   };
@@ -2271,7 +2478,147 @@ function pastaAbrirParaCliente(nome, tel, cpf){
   document.getElementById('pasta-modal-overlay').scrollTop=0;
 }
 
-pastaRender();
+// ── SCORE DE CRÉDITO ─────────────────────────────────────
+function g(id){return document.getElementById(id);}
+function gv(id){const el=g(id);return el?el.value:'';}
+function gn(id){return parseFloat(gv(id))||0;}
+
+function calcScoreCredito(){
+  const criterios=[];
+  let total=0;
+
+  // 1. TIPO DE RENDA (0-180)
+  const tipoRenda=gv('pf-tipo-renda');
+  const rendas={aposentado:180,empregado:150,empresario:110,autonomo:80,outro:50,'':0};
+  const ptRenda=rendas[tipoRenda]||0;
+  criterios.push({lbl:'Tipo de renda',pts:ptRenda,max:180});
+  total+=ptRenda;
+
+  // 2. RENDA MENSAL (0-150)
+  const renda=tipoRenda==='empresario'?gn('pf-prolabore'):gn('pf-salario');
+  const ptRend=renda<=0?0:renda<1000?40:renda<2000?80:renda<4000?110:renda<8000?135:150;
+  criterios.push({lbl:'Renda mensal',pts:ptRend,max:150});
+  total+=ptRend;
+
+  // 3. TEMPO DE EMPREGO (0-150)
+  const tempoEmp=gv('pf-tempo-emprego');
+  const tempos={menos3:0,'3a6':50,'6a12':90,'1a3':120,mais3:150,'':0};
+  const ptTempo=tempos[tempoEmp]||0;
+  criterios.push({lbl:'Tempo no emprego',pts:ptTempo,max:150});
+  total+=ptTempo;
+
+  // 4. SITUAÇÃO DE MORADIA (0-120)
+  const moradia=gv('pf-moradia');
+  const moradias={proprio:120,financiado:90,familiar:70,cedido:60,alugado:50,'':0};
+  const ptMor=moradias[moradia]||0;
+  criterios.push({lbl:'Situação de moradia',pts:ptMor,max:120});
+  total+=ptMor;
+
+  // 5. TEMPO NA MORADIA (0-80)
+  const tempoMor=gv('pf-tempo-moradia');
+  const tMor={menos6:0,'6a12':30,'1a3':55,mais3:80,'':0};
+  const ptTM=tMor[tempoMor]||0;
+  criterios.push({lbl:'Tempo na moradia',pts:ptTM,max:80});
+  total+=ptTM;
+
+  // 6. COMPROMETIMENTO (0-120)
+  const outros=gv('pf-outros-emp');
+  const comprom={nao:120,sim_baixo:70,sim_medio:30,sim_alto:0,'':60};
+  const ptComp=comprom[outros]||60;
+  criterios.push({lbl:'Comprometimento renda',pts:ptComp,max:120});
+  total+=ptComp;
+
+  // 7. HISTÓRICO DE NEGATIVAÇÃO (0-120)
+  const neg=gv('pf-negativado');
+  const negs={nunca:120,passado:60,atual:0,'':60};
+  const ptNeg=negs[neg]||60;
+  criterios.push({lbl:'Histórico de negativação',pts:ptNeg,max:120});
+  total+=ptNeg;
+
+  // 8. FINALIDADE (0-80)
+  const final=gv('pf-finalidade');
+  const fins={emergencia:80,capital:70,reforma:65,consumo:40,pagar_divida:10,outro:40,'':40};
+  const ptFin=fins[final]||40;
+  criterios.push({lbl:'Finalidade do empréstimo',pts:ptFin,max:80});
+  total+=ptFin;
+
+  return{total:Math.min(total,1000),criterios};
+}
+
+function pastaScoreAuto(){
+  const veiculo=gv('pf-veiculo');
+  const wrapV=g('pf-veiculo-det-wrap');
+  if(wrapV)wrapV.style.display=veiculo==='sim'?'':'none';
+
+  const {total,criterios}=calcScoreCredito();
+  if(!g('score-num'))return;
+
+  // Círculo SVG
+  const circ=226;
+  const offset=circ-(circ*(total/1000));
+  const arc=g('score-arc');
+  const cor=total>=700?'var(--green)':total>=450?'var(--gold)':'var(--red)';
+  if(arc){arc.style.strokeDashoffset=offset;arc.style.stroke=cor;}
+  g('score-num').textContent=total;
+  g('score-num').style.color=cor;
+
+  // Decisão
+  let decisao,recomend,classe,titulo,corpo;
+  const renda=gv('pf-tipo-renda')==='empresario'?gn('pf-prolabore'):gn('pf-salario');
+  // Limite sugerido = % da renda conforme score
+  let pctLimite,taxaSug;
+  if(total>=750){
+    decisao='✅ APROVADO';classe='aprovado';
+    pctLimite=50;taxaSug='15% a 20%';
+    titulo='💚 CRÉDITO RECOMENDADO';
+    corpo=`Score excelente. Cliente de baixo risco. Você pode emprestar com segurança.\n• Limite sugerido: até ${renda>0?'R$ '+Math.round(renda*pctLimite/100).toLocaleString('pt-BR'):'50% da renda declarada'}\n• Taxa recomendada: ${taxaSug} a.m.\n• Prazo seguro: até 6 meses`;
+  } else if(total>=600){
+    decisao='✅ APROVADO';classe='aprovado';
+    pctLimite=35;taxaSug='18% a 25%';
+    titulo='💚 CRÉDITO APROVADO COM ATENÇÃO';
+    corpo=`Bom perfil, risco controlado. Empréstimo viável com limites moderados.\n• Limite sugerido: até ${renda>0?'R$ '+Math.round(renda*pctLimite/100).toLocaleString('pt-BR'):'35% da renda declarada'}\n• Taxa recomendada: ${taxaSug} a.m.\n• Prazo seguro: até 4 meses`;
+  } else if(total>=450){
+    decisao='⚠️ ATENÇÃO';classe='atencao';
+    pctLimite=20;taxaSug='25% a 30%';
+    titulo='🟡 CRÉDITO COM RESTRIÇÕES';
+    corpo=`Perfil de risco médio. Empreste com cautela e exija garantias.\n• Limite sugerido: até ${renda>0?'R$ '+Math.round(renda*pctLimite/100).toLocaleString('pt-BR'):'20% da renda declarada'}\n• Taxa recomendada: ${taxaSug} a.m. (compensa o risco)\n• Prazo seguro: até 2 meses\n• Exija 2 referências confirmadas e comprovante de renda`;
+  } else if(total>=250){
+    decisao='🔴 ALTO RISCO';classe='reprovado';
+    pctLimite=10;taxaSug='30%+ a.m.';
+    titulo='🔴 EMPRÉSTIMO DE ALTO RISCO';
+    corpo=`Perfil preocupante. Se decidir emprestar, proteja-se ao máximo.\n• Limite máximo: ${renda>0?'R$ '+Math.round(renda*pctLimite/100).toLocaleString('pt-BR'):'valor mínimo'}\n• Taxa mínima: ${taxaSug}\n• Prazo: máximo 1 mês\n• Exija avalista, garantia real ou cheque caução`;
+  } else {
+    decisao='🚫 REPROVADO';classe='reprovado';
+    pctLimite=0;taxaSug='—';
+    titulo='🚫 NÃO RECOMENDADO';
+    corpo='Score muito baixo. Alta probabilidade de inadimplência. Recomendamos não realizar este empréstimo nas condições atuais.';
+  }
+
+  g('score-decisao').textContent=decisao;
+  g('score-decisao').style.color=cor;
+  g('score-recomend').textContent=`Score ${total}/1000 · ${classe==='aprovado'?'Baixo':classe==='atencao'?'Médio':'Alto'} risco`;
+  g('score-recomend').style.color=cor;
+
+  // Barras de critérios
+  g('score-bars').innerHTML=criterios.map(c=>{
+    const pct=c.max>0?Math.round(c.pts/c.max*100):0;
+    const bc=pct>=70?'var(--green)':pct>=40?'var(--gold)':'var(--red)';
+    return`<div class="score-bar-row">
+      <span class="score-bar-lbl">${c.lbl}</span>
+      <div class="score-bar-bg"><div class="score-bar-fill" style="width:${pct}%;background:${bc}"></div></div>
+      <span class="score-bar-val">${c.pts}</span>
+    </div>`;
+  }).join('');
+
+  // Caixa de recomendação
+  const box=g('score-rec-box');
+  box.className='score-rec-box '+classe;
+  box.style.display='';
+  g('score-rec-title').textContent=titulo;
+  g('score-rec-body').innerHTML=corpo.replace(/\n/g,'<br>');
+}
+
+pastaScoreAuto();
 
 async function loadData(){
   const loading=document.getElementById('loading-screen'),error=document.getElementById('error-screen'),main=document.getElementById('main');
