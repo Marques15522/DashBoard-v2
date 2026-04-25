@@ -1014,6 +1014,78 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
 <script>
 const SHEET_ID='1g9336ZjN2jnVoxA5CFQmlaDxTkda7tlz48_EAlKUjr4';
+
+// ── Cole aqui a URL do Apps Script após implantar ────────
+// Ex: 'https://script.google.com/macros/s/SEU_ID_AQUI/exec'
+const DOSSIE_SCRIPT_URL = localStorage.getItem('dossie_script_url') || '';
+
+// ── SYNC COM GOOGLE SHEETS ───────────────────────────────
+let _syncPendente = false;
+
+async function dossieSyncSalvar(pasta) {
+  const url = DOSSIE_SCRIPT_URL || localStorage.getItem('dossie_script_url');
+  if (!url) return; // sem URL configurada, usa só localStorage
+  try {
+    await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'save', pasta }),
+    });
+  } catch(e) {
+    console.warn('Sync dossiê falhou (offline?):', e.message);
+  }
+}
+
+async function dossieSyncExcluir(id) {
+  const url = DOSSIE_SCRIPT_URL || localStorage.getItem('dossie_script_url');
+  if (!url) return;
+  try {
+    await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'delete', id }),
+    });
+  } catch(e) {
+    console.warn('Sync exclusão falhou:', e.message);
+  }
+}
+
+async function dossieSyncCarregar() {
+  const url = DOSSIE_SCRIPT_URL || localStorage.getItem('dossie_script_url');
+  if (!url) return false;
+  try {
+    const res = await fetch(url + '?action=list&t=' + Date.now());
+    const data = await res.json();
+    if (data.pastas && Object.keys(data.pastas).length >= 0) {
+      // Merge: sheet tem prioridade se updatedAt for maior
+      Object.entries(data.pastas).forEach(([id, pSheet]) => {
+        const pLocal = _pastas[id];
+        if (!pLocal || (pSheet.updatedAt > (pLocal.updatedAt || 0))) {
+          _pastas[id] = pSheet;
+        }
+      });
+      pastaSalvarLocal(); // espelha no localStorage
+      return true;
+    }
+  } catch(e) {
+    console.warn('Falha ao carregar dossiê da planilha:', e.message);
+  }
+  return false;
+}
+
+// ── Configura URL do script ───────────────────────────────
+function dossieConfigurarURL() {
+  const atual = localStorage.getItem('dossie_script_url') || '';
+  const url = prompt('Cole a URL do Apps Script implantado:\n(Extensões → Apps Script → Implantar → Gerenciar implantações → URL)', atual);
+  if (url && url.startsWith('https://script.google.com')) {
+    localStorage.setItem('dossie_script_url', url);
+    alert('✅ URL salva! Sincronizando pastas...');
+    dossieSyncCarregar().then(ok => {
+      pastaRender();
+      if (ok) alert('✅ Pastas sincronizadas com sucesso!');
+    });
+  } else if (url !== null) {
+    alert('URL inválida. Deve começar com https://script.google.com');
+  }
+}
 const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18};
 const CP={id:0,tipo:2,valor:3,data:4,juros:5};
 const GID_EMP=147333899, GID_PAG=647642652;
@@ -2562,6 +2634,7 @@ function pastaSalvar(){
     updatedAt:Date.now()
   };
   pastaSalvarLocal();
+  dossieSyncSalvar(_pastas[id]); // sincroniza com a planilha
   pastaModalClose();
   pastaRender();
 }
@@ -2628,6 +2701,7 @@ function pastaExcluir(id){
   // Remove também a chave de docs separada
   try{localStorage.removeItem('pastas_docs_'+id);}catch(e){}
   delete _pastas[id];
+  dossieSyncExcluir(id); // sincroniza exclusão com a planilha
   pastaSalvarLocal();
   pastaRender();
 }
