@@ -2378,6 +2378,7 @@ function pastaSalvarLocal(){
   }
 }
 pastaCarregar();
+// pastaRender() é chamado dentro de loadData após o DOM estar visível
 
 function pastaTipoRendaChange(){
   const v=document.getElementById('pf-tipo-renda').value;
@@ -2851,6 +2852,7 @@ async function loadData(){
     const empRows=empT.slice(autoSkipCSV(empT)),pagRows=pagT.slice(autoSkipCSV(pagT));
     console.log('📊 Capital Investimentos — emp:',empRows.length,'pag:',pagRows.length);
     render(empRows,pagRows);
+    pastaRender(); // renderiza pastas salvas no localStorage após DOM estar visível
     loading.classList.add('hidden');main.classList.add('visible');
   }catch(err){
     console.error(err);loading.classList.add('hidden');error.classList.add('show');
