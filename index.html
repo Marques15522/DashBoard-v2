@@ -2340,13 +2340,18 @@ function pastaCarregar(){
     const s=localStorage.getItem('pastas_cli');
     if(s){
       _pastas=JSON.parse(s);
-      // Carrega docs separados de volta para cada pasta
       Object.keys(_pastas).forEach(id=>{
+        // Tenta carregar docs da chave separada (formato novo)
         try{
           const d=localStorage.getItem('pastas_docs_'+id);
-          if(d) _pastas[id].docs=JSON.parse(d);
-          else if(!_pastas[id].docs) _pastas[id].docs={};
-        }catch(e){ _pastas[id].docs={}; }
+          if(d){
+            _pastas[id].docs=JSON.parse(d);
+          } else if(!_pastas[id].docs){
+            // Formato antigo sem docs — inicializa vazio
+            _pastas[id].docs={};
+          }
+          // Formato antigo: docs já estão dentro do objeto — mantém como está
+        }catch(e){ _pastas[id].docs=_pastas[id].docs||{}; }
       });
     }
   }catch(e){_pastas={};}
