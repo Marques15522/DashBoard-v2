@@ -74,12 +74,12 @@ header{position:sticky;top:0;z-index:50;background:rgba(7,9,14,0.93);backdrop-fi
 .chart-wrap{height:200px;position:relative;}
 .chart-wrap.tall{height:240px;}
 .chart-wrap.xtall{height:280px;}
-.alert-bar{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;margin-bottom:8px;font-size:0.65rem;line-height:1.5;}
-.alert-bar.danger{background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.25);color:var(--red);}
-.alert-bar.warn{background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.25);color:var(--gold2);}
-.alert-bar.info{background:rgba(72,149,239,0.08);border:1px solid rgba(72,149,239,0.2);color:var(--blue);}
-.alert-bar.ok{background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.2);color:var(--green);}
-.alert-icon{font-size:0.9rem;flex-shrink:0;margin-top:1px;}
+.alert-bar{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-radius:10px;margin-bottom:10px;font-size:0.75rem;line-height:1.6;font-weight:500;}
+.alert-bar.danger{background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.35);color:var(--red);}
+.alert-bar.warn{background:rgba(240,180,41,0.1);border:1px solid rgba(240,180,41,0.35);color:var(--gold2);}
+.alert-bar.info{background:rgba(72,149,239,0.1);border:1px solid rgba(72,149,239,0.3);color:var(--blue);}
+.alert-bar.ok{background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.3);color:var(--green);}
+.alert-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px;}
 .risk-list{display:flex;flex-direction:column;gap:10px;}
 .risk-row{display:flex;flex-direction:column;gap:4px;}
 .risk-top{display:flex;justify-content:space-between;align-items:flex-start;}
@@ -1191,15 +1191,15 @@ function render(empRows,pagRows){
 
   // ALERTAS
   const alertas=[];
-  if(inadimPct>0.2)alertas.push({t:'danger',i:'🚨',m:`Inadimplência alta: ${pct(inadimPct)} — ${atrasado.length} contrato(s) em atraso totalizando ${fmt(capRisco)}.`});
+  if(inadimPct>0.2)alertas.push({t:'danger',i:'🚨',titulo:'Inadimplência Alta',m:`${atrasado.length} contrato(s) em atraso totalizando ${fmt(capRisco)}. Taxa atual: ${pct(inadimPct)}.`});
   const em3d=new Date(hoje);em3d.setDate(hoje.getDate()+3);
   const vSem=abertos.filter(e=>e.proxVenc&&e.proxVenc>=hoje&&e.proxVenc<=em3d);
-  if(vSem.length>0)alertas.push({t:'warn',i:'⏰',m:`${vSem.length} contrato(s) vencem em 3 dias: ${vSem.map(e=>e.nome||e.id).join(', ')}.`});
-  clientes.forEach(c=>{const p=totalCap?c.totalCap/totalCap:0;if(p>0.4&&c.ativo)alertas.push({t:'warn',i:'⚖️',m:`Concentração crítica: ${c.nome} representa ${pct(p)} do capital (${fmt(c.totalCap)}).`});});
+  if(vSem.length>0)alertas.push({t:'warn',i:'⏰',titulo:'Vencimentos Próximos',m:`${vSem.length} contrato(s) vencem nos próximos 3 dias: ${vSem.map(e=>e.nome||e.id).join(', ')}.`});
+  clientes.forEach(c=>{const p=totalCap?c.totalCap/totalCap:0;if(p>0.4&&c.ativo)alertas.push({t:'warn',i:'⚖️',titulo:'Concentração de Risco',m:`${c.nome} representa ${pct(p)} do capital total (${fmt(c.totalCap)}). Considere diversificar.`});});
   const graveAtraso=atrasado.filter(e=>{const d=e.proxVenc?Math.floor((hoje-e.proxVenc)/86400000):0;return d>30;});
-  if(graveAtraso.length>0)alertas.push({t:'danger',i:'💔',m:`${graveAtraso.length} contrato(s) com mais de 30 dias de atraso.`});
-  if(inadimPct<=0.05&&abertos.length>0)alertas.push({t:'ok',i:'✅',m:`Carteira saudável! Inadimplência de apenas ${pct(inadimPct)}.`});
-  const aHtml=alertas.map(a=>`<div class="alert-bar ${a.t}"><span class="alert-icon">${a.i}</span><span>${a.m}</span></div>`).join('');
+  if(graveAtraso.length>0)alertas.push({t:'danger',i:'💔',titulo:'Atraso Grave (+30 dias)',m:`${graveAtraso.length} contrato(s) ultrapassaram 30 dias de atraso. Multa acumulada pode ser significativa.`});
+  if(inadimPct<=0.05&&abertos.length>0)alertas.push({t:'ok',i:'✅',titulo:'Carteira Saudável',m:`Parabéns! Inadimplência de apenas ${pct(inadimPct)}. Sua carteira está bem gerenciada.`});
+  const aHtml=alertas.map(a=>`<div class="alert-bar ${a.t}"><span class="alert-icon">${a.i}</span><div style="flex:1"><strong style="display:block;margin-bottom:2px;font-size:0.78rem">${a.titulo||''}</strong><span style="opacity:0.9">${a.m}</span></div></div>`).join('');
   document.getElementById('alertasBanner').innerHTML=alertas.length?aHtml:'';
   document.getElementById('alertasDetalhados').innerHTML=alertas.length?aHtml:`<div class="alert-bar ok"><span class="alert-icon">✅</span><span>Nenhum alerta no momento.</span></div>`;
 
@@ -1313,11 +1313,41 @@ function render(empRows,pagRows){
   document.getElementById('previsaoInadim').innerHTML=`<div style="text-align:center;padding:16px 0"><div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px">SCORE MÉDIO DA CARTEIRA</div><div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:${risco.cor};line-height:1">${scoreMed.toFixed(0)}</div><div class="badge ${scoreMed<30?'ok':scoreMed<60?'warn':'bad'}" style="margin:8px auto;display:inline-block">RISCO ${risco.lbl}</div></div><div style="border-top:1px solid var(--border);padding-top:12px"><div class="info-row"><span class="info-label">Inadimplência atual</span><span class="info-val" style="color:var(--red)">${pct(inadimPct)}</span></div><div class="info-row"><span class="info-label">Previsão (12 meses)</span><span class="info-val" style="color:${risco.cor}">${pct(prevInadim)}</span></div><div class="info-row"><span class="info-label">Capital em risco</span><span class="info-val" style="color:var(--red)">${fmt(capRisco)}</span></div><div class="info-row"><span class="info-label">Multa acumulada (R$30/dia)</span><span class="info-val" style="color:var(--red)">${fmt(emAt.reduce((s,e)=>s+e.multa,0))}</span></div><div class="info-row"><span class="info-label">Total a receber (c/ multa)</span><span class="info-val" style="color:var(--red);font-weight:700">${fmt(capRisco+emAt.reduce((s,e)=>s+e.multa,0))}</span></div><div class="info-row"><span class="info-label">Clientes inadimplentes</span><span class="info-val">${atrasado.length} de ${abertos.length}</span></div></div>`;
 
   // EVOLUÇÃO INADIMPLÊNCIA
+  // Evolução inadimplência: por mês de vencimento do contrato
   const inadimMap={};
-  emps.forEach(e=>{if(!e.data)return;const k=`${e.data.getFullYear()}-${String(e.data.getMonth()+1).padStart(2,'0')}`;if(!inadimMap[k])inadimMap[k]={total:0,atraso:0};inadimMap[k].total++;if(e.status==='atraso')inadimMap[k].atraso++;});
-  const iK=Object.keys(inadimMap).sort();
+  emps.forEach(e=>{
+    const ref=e.proxVenc||e.vencContrato||e.data;
+    if(!ref)return;
+    const k=`${ref.getFullYear()}-${String(ref.getMonth()+1).padStart(2,'0')}`;
+    if(!inadimMap[k])inadimMap[k]={total:0,atraso:0,multa:0};
+    inadimMap[k].total++;
+    if(e.status==='atraso'){
+      inadimMap[k].atraso++;
+      const dias=e.proxVenc?Math.max(0,Math.floor((hoje-e.proxVenc)/86400000)):0;
+      inadimMap[k].multa+=dias*30;
+    }
+  });
+  const iK=Object.keys(inadimMap).sort().slice(-12); // últimos 12 meses
   destroyChart('evolInadim');
-  charts.evolInadim=new Chart(document.getElementById('chartEvolInadim').getContext('2d'),{type:'line',data:{labels:iK.map(k=>{const[y,m]=k.split('-');return new Date(+y,+m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});}),datasets:[{label:'% Inadimplência',data:iK.map(k=>inadimMap[k].total?inadimMap[k].atraso/inadimMap[k].total:0),borderColor:'rgba(239,71,111,0.8)',backgroundColor:'rgba(239,71,111,0.06)',borderWidth:2,pointRadius:4,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' Inadimplência: '+pct(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>pct(v)},beginAtZero:true}}}});
+  charts.evolInadim=new Chart(document.getElementById('chartEvolInadim').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels:iK.map(k=>{const[y,m]=k.split('-');return new Date(+y,+m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});}),
+      datasets:[
+        {label:'Inadimplentes',data:iK.map(k=>inadimMap[k].atraso),backgroundColor:'rgba(239,71,111,0.7)',borderRadius:4,yAxisID:'y'},
+        {label:'Total contratos',data:iK.map(k=>inadimMap[k].total),backgroundColor:'rgba(72,149,239,0.25)',borderRadius:4,yAxisID:'y'},
+        {label:'Multa acumulada',data:iK.map(k=>inadimMap[k].multa),type:'line',borderColor:'rgba(240,180,41,0.9)',backgroundColor:'transparent',borderWidth:2,pointRadius:3,yAxisID:'y2',tension:0.3}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{
+      legend:{display:true,labels:{color:'#8892b0',font:{family:'DM Mono',size:9},boxWidth:10}},
+      tooltip:{...TOOLTIP,callbacks:{label:ctx=>ctx.dataset.yAxisID==='y2'?' Multa: '+fmt(ctx.raw):` ${ctx.dataset.label}: ${ctx.raw}`}}
+    },scales:{
+      x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},
+      y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},stepSize:1},beginAtZero:true,title:{display:true,text:'Contratos',color:'#5a6282',font:{size:9}}},
+      y2:{position:'right',grid:{display:false},ticks:{color:'var(--gold2)',font:{family:'DM Mono',size:9},callback:v=>fmt(v)},beginAtZero:true,title:{display:true,text:'Multa R$',color:'var(--gold2)',font:{size:9}}}
+    }}
+  });
 
   // LUCRO POR CLIENTE
   const cLS=[...clientes].sort((a,b)=>b.totalJuros-a.totalJuros).slice(0,10);
@@ -1469,8 +1499,8 @@ function tplApply(txt, c){
     .replace(/\{capital\}/g, cap)
     .replace(/\{vencimento\}/g, venc)
     .replace(/\{dias_atraso\}/g, c.diasAtraso||0)
-    .replace(/\{multa\}/g, 'R$ '+((c.diasAtraso||0)*30).toLocaleString('pt-BR',{minimumFractionDigits:2}))
-    .replace(/\{total_devido\}/g, fmt((c.saldo||c.capital||0)+(c.diasAtraso||0)*30));
+    .replace(/\{multa\}/g, fmt(c.multa||0))
+    .replace(/\{total_devido\}/g, fmt(c.totalDevido||0));
 }
 
 // ── MODAL EDITOR ─────────────────────────────────────────
@@ -1540,7 +1570,11 @@ function waRender(clientes,abertos,atrasado,hoje){
     const proxVenc=ab.map(e=>e.proxVenc).filter(Boolean).sort((a,b)=>a-b)[0]||null;
     const diasAtraso=(proxVenc&&proxVenc<hoje)?Math.floor((hoje-proxVenc)/86400000):0;
     const vence7=!!(proxVenc&&proxVenc>=hoje&&proxVenc<=em7);
-    return{...c,proxVenc,diasAtraso,vence7};
+    // Saldo devedor: soma dos contratos atrasados
+    const saldoTotal=ab.filter(e=>e.status==='atraso').reduce((s,e)=>s+(e.saldo||e.capital||0),0)||c.totalCap||0;
+    const multa=diasAtraso*30;
+    const totalDevido=saldoTotal+multa;
+    return{...c,proxVenc,diasAtraso,vence7,saldoTotal,multa,totalDevido};
   }).sort((a,b)=>{const o={atraso:0,vence:1,emdia:2,inativo:3};return(o[waSit(a).tipo]||9)-(o[waSit(b).tipo]||9);});
   const nA=_waCli.filter(c=>c.diasAtraso>0).length;
   const nV=_waCli.filter(c=>c.vence7&&!c.diasAtraso).length;
@@ -2027,8 +2061,17 @@ function simPDF(){
   </table>
 
   <!-- AVISO -->
+  <!-- CLÁUSULA DE MULTA -->
+  <div style="background:#fff3f5;border:1.5px solid #f5c0c8;border-radius:10px;padding:14px 18px;margin-bottom:16px;">
+    <div style="font-size:0.68rem;font-weight:700;color:#c0392b;margin-bottom:6px;letter-spacing:0.04em">⚠️ MULTA POR ATRASO</div>
+    <div style="font-size:0.62rem;color:#7a1a2e;line-height:1.8">
+      Em caso de não pagamento na data de vencimento, será cobrada <strong>multa de R$ 30,00 (trinta reais) por dia de atraso</strong>, contados a partir do dia seguinte ao vencimento.<br>
+      Exemplo: 10 dias de atraso = <strong>R$ 300,00</strong> de multa adicional sobre o valor devido.
+    </div>
+  </div>
+
   <div class="notice">
-    ⚠️ <strong>Importante:</strong> Este documento é uma <strong>proposta de simulação</strong> e não constitui contrato. Os valores são baseados nos parâmetros informados e podem variar conforme as condições finais acordadas. Em caso de atraso, poderão ser aplicados encargos adicionais conforme contrato. Para dúvidas, entre em contato com a Capital Investimentos.
+    ⚠️ <strong>Importante:</strong> Este documento é uma <strong>proposta de simulação</strong> e não constitui contrato. Os valores são baseados nos parâmetros informados e podem variar conforme as condições finais acordadas. Para dúvidas, entre em contato com a Capital Investimentos.
   </div>
 
   <!-- ASSINATURAS -->
