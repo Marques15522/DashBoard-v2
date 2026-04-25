@@ -1161,14 +1161,7 @@ function render(empRows,pagRows){
   const recorrPct=clientes.length?cliRecorr.length/clientes.length:0;
   const tempoRelMed=clientes.length?clientes.reduce((s,c)=>s+c.mesesRelac,0)/clientes.length:0;
 
-  // SCORE RISCO
-  function calcScore(c){
-    const sA=c.temAtraso?50:0;
-    const sT=Math.min(c.taxaMedia/0.5,1)*20;
-    const sV=totalCap?Math.min(c.totalCap/totalCap,1)*20:0;
-    const sD=c.qtdAtraso>1?10:0;
-    return Math.min(Math.round(sA+sT+sV+sD),100);
-  }
+  // SCORE RISCO — definido após concentração (usa totalCapAtivo)
 
   // KPIs
   document.getElementById('kpi-capital').textContent=fmt(totalCap);
@@ -1199,8 +1192,24 @@ function render(empRows,pagRows){
   const graveAtraso=atrasado.filter(e=>{const d=e.proxVenc?Math.floor((hoje-e.proxVenc)/86400000):0;return d>30;});
   if(graveAtraso.length>0)alertas.push({t:'danger',i:'💔',titulo:'Atraso Grave (+30 dias)',m:`${graveAtraso.length} contrato(s) ultrapassaram 30 dias de atraso. Multa acumulada pode ser significativa.`});
   if(inadimPct<=0.05&&abertos.length>0)alertas.push({t:'ok',i:'✅',titulo:'Carteira Saudável',m:`Parabéns! Inadimplência de apenas ${pct(inadimPct)}. Sua carteira está bem gerenciada.`});
+  // ALERTAS — banner compacto na visão geral
+  const alertasCriticos=alertas.filter(a=>a.t==='danger'||a.t==='warn');
+  const alertasOk=alertas.filter(a=>a.t==='ok'||a.t==='info');
+  let bannerHtml='';
+  if(alertasCriticos.length){
+    const icons=alertasCriticos.map(a=>a.i).join(' ');
+    const resumo=alertasCriticos.map(a=>`<strong>${a.titulo}</strong>`).join(' · ');
+    bannerHtml=`<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;margin-bottom:10px;background:rgba(239,71,111,0.07);border:1px solid rgba(239,71,111,0.25);cursor:pointer" onclick="document.querySelector('[data-tab=risco]').click()">
+      <span style="font-size:1rem">${icons}</span>
+      <span style="font-size:0.68rem;color:var(--gold2);flex:1">${resumo}</span>
+      <span style="font-size:0.58rem;color:var(--muted)">Ver detalhes →</span>
+    </div>`;
+  }
+  if(alertasOk.length){
+    bannerHtml+=alertasOk.map(a=>`<div class="alert-bar ${a.t}" style="padding:8px 14px;margin-bottom:6px"><span class="alert-icon" style="font-size:0.9rem">${a.i}</span><span style="font-size:0.68rem">${a.m}</span></div>`).join('');
+  }
+  document.getElementById('alertasBanner').innerHTML=bannerHtml;
   const aHtml=alertas.map(a=>`<div class="alert-bar ${a.t}"><span class="alert-icon">${a.i}</span><div style="flex:1"><strong style="display:block;margin-bottom:2px;font-size:0.78rem">${a.titulo||''}</strong><span style="opacity:0.9">${a.m}</span></div></div>`).join('');
-  document.getElementById('alertasBanner').innerHTML=alertas.length?aHtml:'';
   document.getElementById('alertasDetalhados').innerHTML=alertas.length?aHtml:`<div class="alert-bar ok"><span class="alert-icon">✅</span><span>Nenhum alerta no momento.</span></div>`;
 
   // EVOLUÇÃO MENSAL
@@ -1249,18 +1258,41 @@ function render(empRows,pagRows){
   destroyChart('saidas');
   charts.saidas=new Chart(document.getElementById('chartSaidas').getContext('2d'),{type:'bar',data:{labels:sK.map(k=>{const[y,m]=k.split('-');return new Date(+y,+m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});}),datasets:[{label:'Capital Emprestado',data:sK.map(k=>saidasMap[k]),backgroundColor:'rgba(155,93,229,0.7)',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
 
-  // CENÁRIOS
-  function serCen(fator){let s=totalCap;const arr=[];for(let m=0;m<12;m++){s=s*(1+taxaMediaGlobal/12)*(1-fator/12);arr.push(s);}return arr;}
-  function lucCen(fator){let s=totalCap,l=0;for(let m=0;m<12;m++){const j=s*taxaMediaGlobal/12,p=s*fator/12;l+=j-p;s=s+j-p;}return{lucro:l,saldo:s};}
-  const cOt=lucCen(0.02),cRe=lucCen(inadimPct),cPe=lucCen(Math.min(inadimPct*2+0.1,0.5));
-  const inadPe=Math.min(inadimPct*2+0.1,0.5);
+  // CENÁRIOS — baseado nos contratos atuais e juros reais
+  // lucro = soma dos juros que serão recebidos, descontando perdas por inadimplência estimada
+  function lucCen(taxaInadim){
+    // Lucro bruto = juros totais dos contratos ativos
+    const lucBruto=totalJuros;
+    // Perda estimada = capital em risco * taxa de inadimplência projetada
+    const perda=totalCap*taxaInadim;
+    const lucroLiq=Math.max(0, lucBruto - perda);
+    // Saldo final = capital + lucro - perdas
+    const saldoFinal=totalCap+lucroLiq-capRisco;
+    return{lucro:lucroLiq, saldo:Math.max(0,saldoFinal)};
+  }
+  // Série mensal para o gráfico: acúmulo de juros mês a mês
+  function serCen(taxaInadim){
+    const arr=[];
+    let acum=totalCap;
+    const jMes=totalJuros/Math.max(prazoMedio,1); // juros mensais médios
+    const perdaMes=totalCap*taxaInadim/12;
+    for(let m=0;m<12;m++){
+      acum+=jMes-perdaMes;
+      arr.push(Math.max(totalCap*0.5, acum));
+    }
+    return arr;
+  }
+  const inadPe=Math.min(inadimPct+0.1, 0.5); // pessimista = atual + 10%
+  const inadOt=Math.max(0.02, inadimPct*0.5); // otimista = metade do atual, mín 2%
+  const inadRe=inadimPct; // realista = situação atual
+  const cOt=lucCen(inadOt),cRe=lucCen(inadRe),cPe=lucCen(inadPe);
   document.getElementById('scenarioGrid').innerHTML=`
-    <div class="sc-card ot"><div class="sc-title" style="color:var(--green)">🟢 Otimista</div><div class="sc-val" style="color:var(--green)">${fmt(cOt.lucro)}</div><div class="sc-sub">Inadimplência: 2% · Saldo: ${fmt(cOt.saldo)}</div></div>
-    <div class="sc-card re"><div class="sc-title" style="color:var(--gold2)">🟡 Realista</div><div class="sc-val" style="color:var(--gold2)">${fmt(cRe.lucro)}</div><div class="sc-sub">Inadimplência: ${pct(inadimPct)} · Saldo: ${fmt(cRe.saldo)}</div></div>
-    <div class="sc-card pe"><div class="sc-title" style="color:var(--red)">🔴 Pessimista</div><div class="sc-val" style="color:var(--red)">${fmt(cPe.lucro)}</div><div class="sc-sub">Inadimplência: ${pct(inadPe)} · Saldo: ${fmt(cPe.saldo)}</div></div>`;
+    <div class="sc-card ot"><div class="sc-title" style="color:var(--green)">🟢 Otimista</div><div class="sc-val" style="color:var(--green)">${fmt(cOt.lucro)}</div><div class="sc-sub">Inadimplência: ${(inadOt*100).toFixed(1)}% · Saldo: ${fmt(cOt.saldo)}</div></div>
+    <div class="sc-card re"><div class="sc-title" style="color:var(--gold2)">🟡 Realista</div><div class="sc-val" style="color:var(--gold2)">${fmt(cRe.lucro)}</div><div class="sc-sub">Inadimplência: ${pct(inadRe)} · Saldo: ${fmt(cRe.saldo)}</div></div>
+    <div class="sc-card pe"><div class="sc-title" style="color:var(--red)">🔴 Pessimista</div><div class="sc-val" style="color:var(--red)">${fmt(cPe.lucro)}</div><div class="sc-sub">Inadimplência: ${(inadPe*100).toFixed(1)}% · Saldo: ${fmt(cPe.saldo)}</div></div>`;
   const mL=Array.from({length:12},(_,i)=>{const d=new Date(hoje);d.setMonth(d.getMonth()+i+1);return d.toLocaleDateString('pt-BR',{month:'short'});});
   destroyChart('cenarios');
-  charts.cenarios=new Chart(document.getElementById('chartCenarios').getContext('2d'),{type:'line',data:{labels:mL,datasets:[{label:'Otimista',data:serCen(0.02),borderColor:'rgba(6,214,160,0.8)',borderWidth:2,pointRadius:2,tension:0.3,fill:false},{label:'Realista',data:serCen(inadimPct),borderColor:'rgba(240,180,41,0.8)',borderWidth:2,pointRadius:2,tension:0.3,fill:false},{label:'Pessimista',data:serCen(inadPe),borderColor:'rgba(239,71,111,0.7)',borderWidth:2,pointRadius:2,tension:0.3,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}}}}});
+  charts.cenarios=new Chart(document.getElementById('chartCenarios').getContext('2d'),{type:'line',data:{labels:mL,datasets:[{label:'Otimista',data:serCen(inadOt),borderColor:'rgba(6,214,160,0.8)',borderWidth:2,pointRadius:2,tension:0.3,fill:false},{label:'Realista',data:serCen(inadRe),borderColor:'rgba(240,180,41,0.8)',borderWidth:2,pointRadius:2,tension:0.3,fill:false},{label:'Pessimista',data:serCen(inadPe),borderColor:'rgba(239,71,111,0.7)',borderWidth:2,pointRadius:2,tension:0.3,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}}}}});
 
   // SALDO PROJETADO
   let sAcc=totalCap;const sData=[totalCap];
@@ -1299,14 +1331,35 @@ function render(empRows,pagRows){
     </div>`;
   }).join('');
 
-  // CONCENTRAÇÃO
-  document.getElementById('concList').innerHTML=clientes.filter(c=>c.ativo).sort((a,b)=>b.totalCap-a.totalCap).map(c=>{const p=totalCap?c.totalCap/totalCap:0;const cor=p>0.4?'var(--red)':p>0.25?'var(--gold2)':'var(--green)';return`<div class="conc-row"><div class="conc-top"><span class="conc-nome">${c.nome}${p>0.4?' ⚠️':''}</span><div style="text-align:right"><span class="conc-pct" style="color:${cor}">${(p*100).toFixed(1)}%</span><span style="font-size:0.55rem;color:var(--muted);margin-left:6px">${fmt(c.totalCap)}</span></div></div><div class="bar-bg"><div class="bar-fill" style="width:${(p*100).toFixed(1)}%;background:${cor}"></div></div></div>`;}).join('');
+  // CONCENTRAÇÃO — usa apenas capital ativo (abertos)
+  const totalCapAtivo=abertos.reduce((s,e)=>s+e.capital,0);
+  const cliMapAtivo={};
+  abertos.forEach(e=>{
+    const k=e.nome||e.id;
+    if(!cliMapAtivo[k])cliMapAtivo[k]={nome:k,cap:0};
+    cliMapAtivo[k].cap+=e.capital;
+  });
+  document.getElementById('concList').innerHTML=Object.values(cliMapAtivo).sort((a,b)=>b.cap-a.cap).map(c=>{const p=totalCapAtivo?c.cap/totalCapAtivo:0;const cor=p>0.4?'var(--red)':p>0.25?'var(--gold2)':'var(--green)';return`<div class="conc-row"><div class="conc-top"><span class="conc-nome">${c.nome}${p>0.4?' ⚠️':''}</span><div style="text-align:right"><span class="conc-pct" style="color:${cor}">${(p*100).toFixed(1)}%</span><span style="font-size:0.55rem;color:var(--muted);margin-left:6px">${fmt(c.cap)}</span></div></div><div class="bar-bg"><div class="bar-fill" style="width:${(p*100).toFixed(1)}%;background:${cor}"></div></div></div>`;}).join('');
 
-  // SCORE RISCO
-  document.getElementById('riskList').innerHTML=clientes.sort((a,b)=>calcScore(b)-calcScore(a)).map(c=>{const sc=calcScore(c);const cor=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';const lbl=sc<30?'BAIXO':sc<60?'MÉDIO':'ALTO';return`<div class="risk-row"><div class="risk-top"><div><span class="risk-name">${c.nome}</span><span style="font-size:0.52rem;color:var(--muted);margin-left:8px">${c.qtdContratos} contrato(s) · ${fmt(c.totalCap)}</span></div><span class="risk-score-val" style="color:${cor}">${sc} <span style="font-size:0.52rem;color:var(--muted)">${lbl}</span></span></div><div class="risk-bar-bg"><div class="risk-bar-fill" style="width:${sc}%;background:${cor}"></div></div></div>`;}).join('');
+  // SCORE RISCO — apenas clientes com contratos ativos
+  function calcScore(c){
+    const contratosAtivos=c.contratos.filter(e=>e.status!=='quitado');
+    if(!contratosAtivos.length) return 0;
+    const capAtivo=contratosAtivos.reduce((s,e)=>s+e.capital,0);
+    const taxaAtiva=contratosAtivos.reduce((s,e)=>s+e.taxa,0)/contratosAtivos.length;
+    const temAtrasoAtivo=contratosAtivos.some(e=>e.status==='atraso');
+    const qtdAtrasoAtivo=contratosAtivos.filter(e=>e.status==='atraso').length;
+    const sA=temAtrasoAtivo?50:0;
+    const sT=Math.min(taxaAtiva/0.5,1)*20;
+    const sV=totalCapAtivo?Math.min(capAtivo/totalCapAtivo,1)*20:0;
+    const sD=qtdAtrasoAtivo>1?10:0;
+    return Math.min(Math.round(sA+sT+sV+sD),100);
+  }
+  document.getElementById('riskList').innerHTML=cliAtivos.sort((a,b)=>calcScore(b)-calcScore(a)).map(c=>{const sc=calcScore(c);const capAt=c.contratos.filter(e=>e.status!=='quitado').reduce((s,e)=>s+e.capital,0);const qtdAt=c.contratos.filter(e=>e.status!=='quitado').length;const cor=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';const lbl=sc<30?'BAIXO':sc<60?'MÉDIO':'ALTO';return`<div class="risk-row"><div class="risk-top"><div><span class="risk-name">${c.nome}</span><span style="font-size:0.52rem;color:var(--muted);margin-left:8px">${qtdAt} contrato(s) ativo(s) · ${fmt(capAt)}</span></div><span class="risk-score-val" style="color:${cor}">${sc} <span style="font-size:0.52rem;color:var(--muted)">${lbl}</span></span></div><div class="risk-bar-bg"><div class="risk-bar-fill" style="width:${sc}%;background:${cor}"></div></div></div>`;}).join('');
 
+  // Fix old calcScore reference - move calcScore above cliAtivos usage
   // PREVISÃO INADIMPLÊNCIA
-  const scoresMed=clientes.filter(c=>c.ativo).map(c=>calcScore(c));
+  const scoresMed=cliAtivos.map(c=>calcScore(c));
   const scoreMed=scoresMed.length?scoresMed.reduce((s,v)=>s+v,0)/scoresMed.length:0;
   const prevInadim=Math.min(scoreMed/100*0.35,0.5);
   const risco=scoreMed<30?{lbl:'BAIXO',cor:'var(--green)'}:scoreMed<60?{lbl:'MODERADO',cor:'var(--gold2)'}:{lbl:'ALTO',cor:'var(--red)'};
@@ -1437,7 +1490,6 @@ function render(empRows,pagRows){
   verificarVencimentos(abertos, hoje);
   atualizarMetaBar(lucroReal);
   renderFluxo90(abertos, hoje);
-  verificarConcentracao(clientes, totalCap, document.getElementById('alertasBanner'));
   waHistRender();
 }
 
