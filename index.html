@@ -1039,24 +1039,62 @@ const SHEET_ID='1g9336ZjN2jnVoxA5CFQmlaDxTkda7tlz48_EAlKUjr4';
 // Ex: 'https://script.google.com/macros/s/SEU_ID_AQUI/exec'
 const DOSSIE_SCRIPT_URL = localStorage.getItem('dossie_script_url') || '';
 
-// ── JSONP helper — contorna CORS do Apps Script ──────────
+// ── SYNC ENGINE — usa fetch com mode:'no-cors' para salvar (POST)
+// e JSONP para leitura (GET retorna JSONP = funciona com CORS)
+// ─────────────────────────────────────────────────────────────
+
+// Remove docs binários grandes antes de enviar (URL tem limite)
+function pastaSemDocs(pasta) {
+  const p = JSON.parse(JSON.stringify(pasta));
+  if (p.docs) {
+    Object.keys(p.docs).forEach(tipo => {
+      if (Array.isArray(p.docs[tipo])) {
+        p.docs[tipo] = p.docs[tipo].map(d => ({
+          name: d.name, size: d.size, mime: d.mime,
+          data: (d.data && d.data.length < 500000) ? d.data : '__arquivo_grande__'
+        }));
+      }
+    });
+  }
+  return p;
+}
+
+// POST via fetch (salvar/excluir) — no-cors porque Apps Script redireciona
+// Funciona mas não recebe resposta — é "fire and forget" confiável
+async function syncPost(action, payload) {
+  const url = localStorage.getItem('dossie_script_url');
+  if (!url) return;
+  await fetch(url, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ action, ...payload })
+  });
+}
+
+// GET via JSONP (listar) — único método que retorna dados com CORS do Apps Script
 function jsonpRequest(url) {
   return new Promise((resolve, reject) => {
-    const cbName = '_jsonp_' + Date.now() + '_' + Math.floor(Math.random()*9999);
+    const cbName = '_cb_' + Date.now() + '_' + Math.floor(Math.random()*9999);
     const script = document.createElement('script');
     const timeout = setTimeout(() => {
       delete window[cbName];
-      document.body.removeChild(script);
-      reject(new Error('Timeout JSONP'));
-    }, 10000);
+      if (script.parentNode) document.body.removeChild(script);
+      reject(new Error('Timeout — verifique a URL do Apps Script'));
+    }, 15000);
     window[cbName] = (data) => {
       clearTimeout(timeout);
       delete window[cbName];
-      document.body.removeChild(script);
+      if (script.parentNode) document.body.removeChild(script);
       resolve(data);
     };
-    script.src = url + (url.includes('?')?'&':'?') + 'callback=' + cbName + '&t=' + Date.now();
-    script.onerror = () => { clearTimeout(timeout); reject(new Error('Erro ao carregar script JSONP')); };
+    const sep = url.includes('?') ? '&' : '?';
+    script.src = url + sep + 'callback=' + cbName + '&t=' + Date.now();
+    script.onerror = () => {
+      clearTimeout(timeout);
+      if (script.parentNode) document.body.removeChild(script);
+      reject(new Error('Erro de rede — verifique a URL'));
+    };
     document.body.appendChild(script);
   });
 }
@@ -1065,9 +1103,7 @@ async function dossieSyncSalvar(pasta) {
   const url = localStorage.getItem('dossie_script_url');
   if (!url) return;
   try {
-    // Salva via GET+JSONP (POST tem CORS, GET com JSONP funciona)
-    const pastaEnc = encodeURIComponent(JSON.stringify(pasta));
-    await jsonpRequest(url + '?action=save&pasta=' + pastaEnc);
+    await syncPost('save', { pasta: pastaSemDocs(pasta) });
   } catch(e) {
     console.warn('Sync salvar falhou:', e.message);
   }
@@ -1077,7 +1113,7 @@ async function dossieSyncExcluir(id) {
   const url = localStorage.getItem('dossie_script_url');
   if (!url) return;
   try {
-    await jsonpRequest(url + '?action=delete&id=' + encodeURIComponent(id));
+    await syncPost('delete', { id });
   } catch(e) {
     console.warn('Sync excluir falhou:', e.message);
   }
@@ -1089,21 +1125,23 @@ async function dossieSyncCarregar() {
   try {
     const data = await jsonpRequest(url + '?action=list');
     if (data && data.pastas) {
-      // Merge: sheet tem prioridade sempre (fonte da verdade)
+      let novos = 0;
       Object.entries(data.pastas).forEach(([id, pSheet]) => {
         const pLocal = _pastas[id];
         if (!pLocal || (pSheet.updatedAt >= (pLocal.updatedAt || 0))) {
           _pastas[id] = pSheet;
+          novos++;
         }
       });
       pastaSalvarLocal();
-      pastaRender(); // força re-render imediato
-      return true;
+      pastaRender();
+      return novos;
     }
   } catch(e) {
     console.warn('Sync carregar falhou:', e.message);
+    throw e;
   }
-  return false;
+  return 0;
 }
 
 function syncStatusUpdate(msg, cor) {
@@ -1116,14 +1154,18 @@ async function dossieSyncManual() {
   if (!url) { dossieConfigurarURL(); return; }
   const btn = document.getElementById('sync-btn');
   if (btn) { btn.textContent = '⏳ Sincronizando...'; btn.disabled = true; }
-  syncStatusUpdate('Sincronizando...', 'var(--gold2)');
+  syncStatusUpdate('Enviando pastas locais...', 'var(--gold2)');
   try {
-    // 1. Envia pastas locais para a planilha
-    for (const pasta of Object.values(_pastas)) {
+    // 1. Envia todas as pastas locais para o servidor
+    const pastas = Object.values(_pastas);
+    for (const pasta of pastas) {
       await dossieSyncSalvar(pasta);
     }
-    // 2. Baixa da planilha (já chama pastaRender internamente)
-    await dossieSyncCarregar();
+    // 2. Aguarda o servidor processar (POST é fire-and-forget)
+    await new Promise(r => setTimeout(r, 1500));
+    // 3. Baixa tudo do servidor
+    syncStatusUpdate('Baixando pastas do servidor...', 'var(--gold2)');
+    const novos = await dossieSyncCarregar();
     const agora = new Date().toLocaleTimeString('pt-BR');
     syncStatusUpdate(`✅ Sincronizado às ${agora} · ${Object.keys(_pastas).length} pasta(s)`, 'var(--green)');
   } catch(e) {
@@ -1135,13 +1177,13 @@ async function dossieSyncManual() {
 
 function dossieConfigurarURL() {
   const atual = localStorage.getItem('dossie_script_url') || '';
-  const url = prompt('Cole a URL do Apps Script:\n(Apps Script → Implantar → Gerenciar implantações → URL)', atual);
+  const url = prompt('Cole a URL do Apps Script:\n(script.google.com → Implantar → Gerenciar implantações → Copiar URL)', atual);
   if (url && url.startsWith('https://script.google.com')) {
     localStorage.setItem('dossie_script_url', url.trim());
-    syncStatusUpdate('URL configurada. Clique em Sincronizar.', 'var(--gold2)');
+    syncStatusUpdate('✅ URL configurada! Clique em Sincronizar.', 'var(--gold2)');
     dossieSyncManual();
   } else if (url !== null) {
-    alert('URL inválida. Deve começar com https://script.google.com');
+    alert('URL inválida. Deve começar com https://script.google.com/macros/s/...');
   }
 }
 const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18};
