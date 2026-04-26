@@ -450,6 +450,40 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .score-rec-box.atencao{background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.25);color:var(--gold2);}
 .score-rec-box.reprovado{background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.25);color:var(--red);}
 .score-rec-title{font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:0.1em;margin-bottom:5px;}
+
+/* ── PARCELA IDEAL ── */
+.pi-panel{background:var(--s1);border:1px solid var(--border2);border-radius:14px;padding:20px;margin-top:14px;}
+.pi-title{font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.2em;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.pi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.pi-box{border-radius:10px;padding:14px 16px;text-align:center;position:relative;}
+.pi-box.parcela{background:rgba(6,214,160,0.07);border:1px solid rgba(6,214,160,0.25);}
+.pi-box.capital{background:rgba(201,146,42,0.07);border:1px solid rgba(201,146,42,0.25);}
+.pi-box.taxa{background:rgba(72,149,239,0.07);border:1px solid rgba(72,149,239,0.25);}
+.pi-box.reprovado{background:rgba(239,71,111,0.07);border:1px solid rgba(239,71,111,0.25);}
+.pi-lbl{font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;}
+.pi-val{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;line-height:1;}
+.pi-sub{font-size:0.5rem;opacity:0.7;margin-top:4px;}
+.pi-comprometimento{margin-top:10px;}
+.pi-comp-bar-bg{height:7px;background:var(--border2);border-radius:4px;overflow:hidden;margin:6px 0 3px;}
+.pi-comp-bar-fill{height:100%;border-radius:4px;transition:width 0.8s ease;}
+.pi-comp-labels{display:flex;justify-content:space-between;font-size:0.5rem;color:var(--muted);}
+.pi-nota{background:var(--s2);border-radius:8px;padding:10px 14px;font-size:0.6rem;color:var(--muted);line-height:1.7;margin-top:10px;}
+/* No simulador */
+.sim-pi-banner{background:linear-gradient(135deg,rgba(6,214,160,0.06) 0%,rgba(72,149,239,0.04) 100%);border:1px solid rgba(6,214,160,0.2);border-radius:12px;padding:16px 18px;margin-top:14px;}
+.sim-pi-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.sim-pi-icon{font-size:1.4rem;}
+.sim-pi-title{font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:0.12em;color:var(--green);}
+.sim-pi-sub{font-size:0.55rem;color:var(--muted);}
+.sim-pi-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.sim-pi-row:last-child{border-bottom:none;}
+.sim-pi-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sim-pi-label{font-size:0.6rem;color:var(--muted);flex:1;}
+.sim-pi-val{font-family:'Bebas Neue',sans-serif;font-size:0.95rem;}
+.sim-pi-status{font-size:0.5rem;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+.sim-pi-status.ok{background:rgba(6,214,160,0.12);color:var(--green);border:1px solid rgba(6,214,160,0.25);}
+.sim-pi-status.warn{background:rgba(240,180,41,0.12);color:var(--gold2);border:1px solid rgba(240,180,41,0.3);}
+.sim-pi-status.bad{background:rgba(239,71,111,0.1);color:var(--red);border:1px solid rgba(239,71,111,0.25);}
+.sim-pi-status.nd{background:var(--s2);color:var(--muted);border:1px solid var(--border2);}
 </style>
 </head>
 <body>
@@ -844,6 +878,14 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
         <div class="score-rec-title" id="score-rec-title"></div>
         <div id="score-rec-body"></div>
       </div>
+
+      <!-- PARCELA IDEAL -->
+      <div class="pi-panel" id="pi-panel" style="display:none">
+        <div class="pi-title">💳 CAPACIDADE DE PAGAMENTO — PARCELA IDEAL</div>
+        <div class="pi-grid" id="pi-grid"></div>
+        <div class="pi-comprometimento" id="pi-comprometimento"></div>
+        <div class="pi-nota" id="pi-nota"></div>
+      </div>
     </div>
 
     <div class="pasta-form-section">DOCUMENTOS & FOTOS</div>
@@ -997,7 +1039,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
             <option value="composto">Composto</option>
           </select>
         </div>
-        <div class="sim-field"><label class="sim-label">👤 Nome do Cliente <span style="color:var(--red)">*</span></label><input class="sim-input" id="sim-cliente" type="text" placeholder="Nome completo do cliente"></div>
+        <div class="sim-field"><label class="sim-label">👤 Nome do Cliente <span style="color:var(--red)">*</span></label><input class="sim-input" id="sim-cliente" type="text" placeholder="Nome completo do cliente" oninput="simParcelaIdealRender()"></div>
         <div class="sim-field"><label class="sim-label">🪪 CPF do Cliente <span style="color:var(--muted);font-size:0.5rem">(opcional)</span></label><input class="sim-input" id="sim-cpf" type="text" placeholder="000.000.000-00" maxlength="14"></div>
         <div class="sim-field"><label class="sim-label">📞 Telefone do Cliente <span style="color:var(--muted);font-size:0.5rem">(opcional)</span></label><input class="sim-input" id="sim-tel" type="text" placeholder="(00) 00000-0000" required></div>
         <div class="sim-field"><label class="sim-label">📅 Data de Início do Contrato</label><input class="sim-input" id="sim-inicio" type="date"></div>
@@ -1008,6 +1050,14 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       <div class="card-header"><div><div class="card-title">📊 Resultado da Simulação</div><div class="card-desc">Projeção detalhada do contrato</div></div><div class="card-badge">RESULTADO</div></div>
       <div class="sim-results" id="sim-results-content"></div>
       <div class="chart-wrap" style="margin-top:16px"><canvas id="chartSim"></canvas></div>
+      <!-- PARCELA IDEAL NO SIMULADOR -->
+      <div class="sim-pi-banner" id="sim-pi-banner" style="display:none">
+        <div class="sim-pi-head">
+          <div class="sim-pi-icon">💳</div>
+          <div><div class="sim-pi-title">ANÁLISE DE CAPACIDADE — PARCELA IDEAL</div><div class="sim-pi-sub">Baseado no score e renda do cliente buscado na pasta</div></div>
+        </div>
+        <div id="sim-pi-rows"></div>
+      </div>
     </div>
   </div>
   <div class="card" id="sim-tabela-card" style="display:none">
@@ -2573,6 +2623,8 @@ function simCalc(){
   document.getElementById('sim-tabela-card').style.display='';
   const thPeriodo = document.getElementById('sim-th-periodo');
   if(thPeriodo) thPeriodo.textContent = periodoLabel;
+  // Parcela ideal
+  simParcelaIdealRender();
 
   // Label do prazo para exibição (mostra original do usuário)
   const prazoLabel = prazoUnidade === 'semanas' ? `${prazo} semanas` : `${prazo} mês/meses (${prazoNorm} semanas)`;
@@ -3139,33 +3191,6 @@ function simPDF(){
         <td>${fmtR(t.parcela)}</td>
         <td class="${t.saldoFinal<1?'td-saldo-zero':''}">${t.saldoFinal<1?'✓ Quitado':fmtR(t.saldoFinal)}</td>
       </tr>`).join('')}
-    </tbody>
-  </table>
-
-  <!-- TABELA DE AMORTIZAÇÃO ANTECIPADA -->
-  <div class="section-title" style="margin-top:24px">Simulação de Amortização Antecipada</div>
-  <p style="font-size:0.72rem;color:#888;margin-bottom:12px">Caso o cliente opte por amortizar o saldo devedor antecipadamente, os valores abaixo representam o desconto no saldo a cada pagamento extra realizado sobre o principal.</p>
-  <table>
-    <thead><tr>
-      <th>Após a Parcela</th>
-      <th>Saldo Devedor</th>
-      <th>Amortização Extra de 10%</th>
-      <th>Novo Saldo</th>
-      <th>Parcelas Restantes</th>
-    </tr></thead>
-    <tbody>
-      ${tabela.filter(t=>t.saldoFinal>=1).map(t=>{
-        const amortExtra=t.saldoFinal*0.10;
-        const novoSaldo=Math.max(0,t.saldoFinal-amortExtra);
-        const parcelasRest=prazo-t.mes;
-        return `<tr>
-          <td>${t.mes}ª parcela</td>
-          <td>${fmtR(t.saldoFinal)}</td>
-          <td class="td-juros">${fmtR(amortExtra)}</td>
-          <td>${fmtR(novoSaldo)}</td>
-          <td>${parcelasRest} restante${parcelasRest!==1?'s':''}</td>
-        </tr>`;
-      }).join('')}
     </tbody>
   </table>
 
@@ -4024,9 +4049,250 @@ function pastaScoreAuto(){
   box.style.display='';
   g('score-rec-title').textContent=titulo;
   g('score-rec-body').innerHTML=corpo.replace(/\n/g,'<br>');
+
+  // PARCELA IDEAL
+  const renda2 = renda; // já calculada acima
+  renderParcelaIdeal(
+    total, renda2,
+    g('pi-grid'), g('pi-comprometimento'), g('pi-nota'), g('pi-panel')
+  );
 }
 
-// ── MAPA COMPORTAMENTAL GLOBAL (atualizado pela planilha) ──
+// ════════════════════════════════════════════════════════
+// PARCELA IDEAL — baseada em score + renda
+// ════════════════════════════════════════════════════════
+
+// Tabela: score → % máximo da renda comprometível com parcela
+// Regra: score alto = pode comprometer mais renda
+function piPctPorScore(score) {
+  if (score >= 800) return 0.50;  // até 50% da renda
+  if (score >= 700) return 0.40;  // até 40%
+  if (score >= 600) return 0.30;  // até 30%
+  if (score >= 450) return 0.20;  // até 20%
+  if (score >= 250) return 0.10;  // até 10%
+  return 0;                       // não emprestar
+}
+
+// Taxa mínima sugerida por faixa de score
+function piTaxaSug(score) {
+  if (score >= 800) return { min: 10, max: 18, label: '10% a 18% a.m.' };
+  if (score >= 700) return { min: 15, max: 22, label: '15% a 22% a.m.' };
+  if (score >= 600) return { min: 20, max: 28, label: '20% a 28% a.m.' };
+  if (score >= 450) return { min: 25, max: 35, label: '25% a 35% a.m.' };
+  if (score >= 250) return { min: 35, max: 50, label: '35%+ a.m. (alto risco)' };
+  return { min: 0, max: 0, label: '— não recomendado' };
+}
+
+// Prazo máximo sugerido por score
+function piPrazoMax(score) {
+  if (score >= 800) return 6;
+  if (score >= 700) return 5;
+  if (score >= 600) return 4;
+  if (score >= 450) return 2;
+  if (score >= 250) return 1;
+  return 0;
+}
+
+// Capital máximo: parcela_max / taxa_min  (juros simples, prazo padrão)
+function piCapitalMax(parcelaMax, taxaMinPct, prazo) {
+  if (!taxaMinPct || !prazo) return 0;
+  const t = taxaMinPct / 100;
+  // Parcela simples = capital * (1 + t * prazo) / prazo  →  capital = parcela * prazo / (1 + t*prazo)
+  return parcelaMax * prazo / (1 + t * prazo);
+}
+
+// Render no painel da pasta do cliente
+function renderParcelaIdeal(score, renda, container, comprContainer, notaContainer, panelEl) {
+  const fmt2 = v => v > 0 ? 'R$ ' + Math.round(v).toLocaleString('pt-BR') : '—';
+  const pct   = piPctPorScore(score);
+  const taxa  = piTaxaSug(score);
+  const prazo = piPrazoMax(score);
+
+  if (!panelEl) return;
+
+  if (score < 50 && renda <= 0) {
+    panelEl.style.display = 'none';
+    return;
+  }
+  panelEl.style.display = '';
+
+  const parcelaMax = renda > 0 ? renda * pct : 0;
+  const capMax     = renda > 0 ? piCapitalMax(parcelaMax, taxa.min, Math.max(prazo, 1)) : 0;
+  const corScore   = score >= 700 ? 'var(--green)' : score >= 450 ? 'var(--gold2)' : 'var(--red)';
+
+  if (container) {
+    if (pct === 0) {
+      container.innerHTML = `
+        <div class="pi-box reprovado" style="grid-column:1/-1;text-align:center">
+          <div class="pi-lbl" style="color:var(--red)">⛔ Score insuficiente</div>
+          <div class="pi-val" style="color:var(--red);font-size:1rem">Não emprestar</div>
+          <div class="pi-sub">Score ${score}/1000 — risco muito alto</div>
+        </div>`;
+    } else {
+      container.innerHTML = `
+        <div class="pi-box parcela">
+          <div class="pi-lbl" style="color:var(--green)">💳 Parcela Máx.</div>
+          <div class="pi-val" style="color:var(--green)">${renda > 0 ? fmt2(parcelaMax) : '—'}</div>
+          <div class="pi-sub">${(pct*100).toFixed(0)}% da renda ${renda>0?'(R$ '+Math.round(renda).toLocaleString('pt-BR')+')':''}</div>
+        </div>
+        <div class="pi-box capital">
+          <div class="pi-lbl" style="color:var(--gold2)">🏦 Capital Máx.</div>
+          <div class="pi-val" style="color:var(--gold2)">${renda > 0 ? fmt2(capMax) : '—'}</div>
+          <div class="pi-sub">em ${prazo} mês${prazo!==1?'es':''} · taxa ${taxa.min}%</div>
+        </div>
+        <div class="pi-box taxa">
+          <div class="pi-lbl" style="color:var(--blue)">📈 Taxa Sugerida</div>
+          <div class="pi-val" style="color:var(--blue);font-size:1rem">${taxa.label.split(' ')[0]}</div>
+          <div class="pi-sub">${taxa.label} · até ${prazo} mês${prazo!==1?'es':''}</div>
+        </div>`;
+    }
+  }
+
+  // Barra de comprometimento
+  if (comprContainer && renda > 0 && pct > 0) {
+    comprContainer.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+        <span style="font-size:0.55rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase">Comprometimento Máximo Recomendado</span>
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:0.9rem;color:${corScore}">${(pct*100).toFixed(0)}%</span>
+      </div>
+      <div class="pi-comp-bar-bg">
+        <div class="pi-comp-bar-fill" style="width:${pct*100}%;background:${corScore}"></div>
+      </div>
+      <div class="pi-comp-labels">
+        <span>0%</span>
+        <span style="color:var(--red)">30% (padrão mercado)</span>
+        <span>50%</span>
+      </div>`;
+  }
+
+  // Nota explicativa
+  if (notaContainer) {
+    const notas = {
+      ok:   `✅ Score <strong style="color:var(--green)">${score}/1000</strong> — cliente confiável. Pode comprometer até <strong>${(pct*100).toFixed(0)}%</strong> da renda (${fmt2(parcelaMax)}/mês). Capital máx. sugerido: <strong>${fmt2(capMax)}</strong>.`,
+      med:  `⚠️ Score <strong style="color:var(--gold2)">${score}/1000</strong> — risco moderado. Limite de ${(pct*100).toFixed(0)}% da renda (${fmt2(parcelaMax)}/mês). Exija comprovante atualizado e use taxa mínima de ${taxa.min}%.`,
+      bad:  `🔴 Score <strong style="color:var(--red)">${score}/1000</strong> — alto risco. Limite máximo: ${(pct*100).toFixed(0)}% da renda (${fmt2(parcelaMax)}/mês). Prazo não deve passar de ${prazo} mês. Exija garantias.`,
+      zero: `🚫 Score <strong style="color:var(--red)">${score}/1000</strong> — não recomendado. Probabilidade alta de inadimplência.`
+    };
+    const chave = score >= 700 ? 'ok' : score >= 450 ? 'med' : score >= 250 ? 'bad' : 'zero';
+    notaContainer.innerHTML = notas[chave] + (renda <= 0 ? '<br><em style="opacity:0.6">ℹ️ Informe a renda para ver os valores calculados.</em>' : '');
+  }
+}
+
+// Análise no simulador: busca cliente por nome na pasta e compara com o empréstimo simulado
+function simParcelaIdealRender() {
+  const banner  = document.getElementById('sim-pi-banner');
+  const rowsEl  = document.getElementById('sim-pi-rows');
+  if (!banner || !rowsEl) return;
+
+  const nomeDigitado = (document.getElementById('sim-cliente')?.value || '').toLowerCase().trim();
+  if (!nomeDigitado) { banner.style.display = 'none'; return; }
+
+  // Busca pasta pelo nome (match parcial)
+  const pasta = Object.values(_pastas).find(p =>
+    (p.nome || '').toLowerCase().includes(nomeDigitado) ||
+    nomeDigitado.includes((p.nome || '').toLowerCase().split(' ')[0])
+  );
+
+  const valor  = parseFloat(document.getElementById('sim-valor')?.value) || 0;
+  const taxa   = parseFloat(document.getElementById('sim-taxa')?.value) || 0;
+  const prazo  = parseInt(document.getElementById('sim-prazo')?.value) || 1;
+  const tipo   = document.getElementById('sim-tipo')?.value || 'simples';
+
+  // Calcular parcela real do contrato
+  const taxaP = taxa / 100;
+  let parcelaReal;
+  if (tipo === 'simples') {
+    parcelaReal = (valor + valor * taxaP * prazo) / prazo;
+  } else {
+    parcelaReal = valor * (taxaP * Math.pow(1+taxaP, prazo)) / (Math.pow(1+taxaP, prazo) - 1);
+  }
+
+  const fmt2 = v => v > 0 ? 'R$ ' + Math.round(v).toLocaleString('pt-BR') : '—';
+
+  // Sem pasta: sem renda nem score
+  if (!pasta) {
+    banner.style.display = '';
+    rowsEl.innerHTML = `
+      <div class="sim-pi-row">
+        <div class="sim-pi-dot" style="background:var(--muted)"></div>
+        <div class="sim-pi-label">Cliente não encontrado nas pastas — sem dados de renda/score</div>
+        <span class="sim-pi-status nd">SEM DADOS</span>
+      </div>
+      <div class="sim-pi-row">
+        <div class="sim-pi-dot" style="background:var(--gold)"></div>
+        <div class="sim-pi-label">Parcela calculada para este contrato</div>
+        <div class="sim-pi-val" style="color:var(--gold)">${fmt2(parcelaReal)}/mês</div>
+        <span class="sim-pi-status nd">CALCULE NA PASTA</span>
+      </div>`;
+    return;
+  }
+
+  // Tem pasta — calcula score e renda
+  const renda = pasta.tipoRenda === 'empresario'
+    ? (pasta.prolabore || pasta.faturamento * 0.3 || 0)
+    : (pasta.salario || 0);
+  const score = pasta.scoreCredito || 0;
+  const pct   = piPctPorScore(score);
+  const taxa2 = piTaxaSug(score);
+  const prazoMax = piPrazoMax(score);
+  const parcelaMax = renda > 0 ? renda * pct : 0;
+  const capMax = renda > 0 ? piCapitalMax(parcelaMax, taxa2.min, Math.max(prazoMax, 1)) : 0;
+
+  // Avalia o contrato atual vs capacidade
+  const okParcela = parcelaMax > 0 && parcelaReal <= parcelaMax;
+  const okCapital = capMax > 0 && valor <= capMax;
+  const okTaxa    = taxa >= taxa2.min;
+  const okPrazo   = prazo <= prazoMax;
+  const semRenda  = renda <= 0;
+  const semScore  = score < 50;
+
+  const statusPill = (ok, nd, txtOk, txtWarn, txtBad) => {
+    if (nd) return `<span class="sim-pi-status nd">SEM DADOS</span>`;
+    if (ok) return `<span class="sim-pi-status ok">✓ ${txtOk}</span>`;
+    return `<span class="sim-pi-status ${ok===null?'warn':'bad'}">${ok===null?'⚠️ '+txtWarn:'✗ '+txtBad}</span>`;
+  };
+
+  banner.style.display = '';
+  rowsEl.innerHTML = `
+    <div class="sim-pi-row">
+      <div class="sim-pi-dot" style="background:${score>=700?'var(--green)':score>=450?'var(--gold)':'var(--red)'}"></div>
+      <div class="sim-pi-label">Score de crédito — <strong>${pasta.nome}</strong></div>
+      <div class="sim-pi-val" style="color:${score>=700?'var(--green)':score>=450?'var(--gold2)':'var(--red)'}">${semScore?'—':score+'/1000'}</div>
+      ${semScore?`<span class="sim-pi-status nd">SEM SCORE</span>`:score>=700?`<span class="sim-pi-status ok">✓ BOM</span>`:score>=450?`<span class="sim-pi-status warn">⚠️ MÉDIO</span>`:`<span class="sim-pi-status bad">✗ ALTO RISCO</span>`}
+    </div>
+    <div class="sim-pi-row">
+      <div class="sim-pi-dot" style="background:var(--text)"></div>
+      <div class="sim-pi-label">Renda mensal declarada</div>
+      <div class="sim-pi-val">${semRenda?'—':fmt2(renda)}</div>
+      ${semRenda?`<span class="sim-pi-status nd">SEM RENDA</span>`:renda>=parcelaReal*3?`<span class="sim-pi-status ok">✓ ADEQUADA</span>`:`<span class="sim-pi-status warn">⚠️ APERTADA</span>`}
+    </div>
+    <div class="sim-pi-row">
+      <div class="sim-pi-dot" style="background:${okParcela||semRenda?'var(--green)':'var(--red)'}"></div>
+      <div class="sim-pi-label">Parcela deste contrato vs máximo recomendado <span style="color:var(--muted)">(${fmt2(parcelaMax)}/mês)</span></div>
+      <div class="sim-pi-val" style="color:${okParcela||semRenda?'var(--gold2)':'var(--red)'}">${fmt2(parcelaReal)}</div>
+      ${semRenda?`<span class="sim-pi-status nd">SEM RENDA</span>`:okParcela?`<span class="sim-pi-status ok">✓ DENTRO DO LIMITE</span>`:`<span class="sim-pi-status bad">✗ ACIMA DO LIMITE</span>`}
+    </div>
+    <div class="sim-pi-row">
+      <div class="sim-pi-dot" style="background:${okCapital||semRenda?'var(--green)':'var(--red)'}"></div>
+      <div class="sim-pi-label">Capital solicitado vs máximo sugerido <span style="color:var(--muted)">(${fmt2(capMax)})</span></div>
+      <div class="sim-pi-val" style="color:${okCapital||semRenda?'var(--gold2)':'var(--red)'}">${fmt2(valor)}</div>
+      ${semRenda?`<span class="sim-pi-status nd">SEM RENDA</span>`:okCapital?`<span class="sim-pi-status ok">✓ APROVADO</span>`:`<span class="sim-pi-status bad">✗ ACIMA DO LIMITE</span>`}
+    </div>
+    <div class="sim-pi-row">
+      <div class="sim-pi-dot" style="background:${okTaxa?'var(--green)':'var(--red)'}"></div>
+      <div class="sim-pi-label">Taxa cobrada vs mínima recomendada pelo score <span style="color:var(--muted)">(${taxa2.label})</span></div>
+      <div class="sim-pi-val" style="color:${okTaxa?'var(--green)':'var(--red)'}">${taxa}%</div>
+      ${okTaxa?`<span class="sim-pi-status ok">✓ ADEQUADA</span>`:`<span class="sim-pi-status warn">⚠️ ABAIXO DO RECOMENDADO</span>`}
+    </div>
+    <div class="sim-pi-row">
+      <div class="sim-pi-dot" style="background:${okPrazo?'var(--green)':'var(--red)'}"></div>
+      <div class="sim-pi-label">Prazo vs máximo recomendado pelo score <span style="color:var(--muted)">(${prazoMax} meses)</span></div>
+      <div class="sim-pi-val" style="color:${okPrazo?'var(--green)':'var(--red)'}">${prazo} meses</div>
+      ${okPrazo?`<span class="sim-pi-status ok">✓ OK</span>`:`<span class="sim-pi-status bad">✗ PRAZO LONGO</span>`}
+    </div>`;
+}
+
+
 // nome → { qtdContratos, qtdAtraso, qtdQuitados, mesesRelac, recorrente }
 let _comportamento = {};
 
