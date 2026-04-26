@@ -987,8 +987,12 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     </div>
   </div>
   <div class="card" id="sim-tabela-card" style="display:none">
-    <div class="card-header"><div><div class="card-title">📋 Tabela de Amortização</div><div class="card-desc">Evolução mês a mês do contrato</div></div><div class="card-badge">DETALHAMENTO</div></div>
+    <div class="card-header"><div><div class="card-title">📋 Tabela de Amortização</div><div class="card-desc">Evolução período a período do contrato</div></div><div class="card-badge">DETALHAMENTO</div></div>
     <div class="table-wrap"><table class="sim-table"><thead><tr><th id="sim-th-periodo">Período</th><th>Saldo Inicial</th><th>Juros</th><th>Amortização</th><th>Parcela</th><th>Saldo Final</th></tr></thead><tbody id="sim-tbody"></tbody></table></div>
+  </div>
+  <div class="card" id="sim-oportunidade" style="display:none">
+    <div class="card-header"><div><div class="card-title">💸 Custo de Oportunidade</div><div class="card-desc">Quanto você deixa de ganhar ao parcelar em vez de reinvestir o capital mês a mês</div></div><div class="card-badge">ANÁLISE</div></div>
+    <div id="sim-op-content"></div>
   </div>
 </div>
 
@@ -2487,6 +2491,81 @@ function simCalc(){
       <td style="color:${t.saldoFinal<1?'var(--green)':'var(--text)'}">${fmt(t.saldoFinal)}</td>
     </tr>
   `).join('');
+
+  // ── CUSTO DE OPORTUNIDADE ─────────────────────────────
+  // Cenário A: este contrato parcelado (já calculado acima)
+  // Cenário B: reinvestimento — recebe tudo no fim de cada período e reinveste
+  // Ex: R$1.000 a 20% por 1 mês, reinvestindo 5x → 1000 × (1.2)^5 = R$2.488,32
+  const taxaMensalParaOp = taxaUnidade==='semanal'
+    ? taxaPeriodo * SEMANAS_POR_MES   // converte para mensal proporcional
+    : taxaPeriodo;                     // já é mensal
+  const prazoMesesParaOp = isSemanal ? prazoNorm / SEMANAS_POR_MES : prazoNorm;
+
+  // Bola de neve: reinveste capital+juros a cada ciclo
+  const bolaDeNeve = valor * Math.pow(1 + taxaMensalParaOp * SEMANAS_POR_MES, prazoMesesParaOp);
+  // (usa juros simples por ciclo: 1 mês rende 20%, então cada ciclo multiplica por 1.20)
+  const taxaCiclo = taxaUnidade==='semanal' ? taxaPeriodo * SEMANAS_POR_MES : taxaPeriodo;
+  const bolaDeNeveReal = valor * Math.pow(1 + taxaCiclo, prazoMesesParaOp);
+  const custOp = bolaDeNeveReal - valorTotal;
+  const custOpPct = (custOp / valorTotal * 100);
+
+  // Tabela bola de neve
+  let capitalBola = valor;
+  const tabelaBola = [];
+  for(let m = 1; m <= prazoMesesParaOp; m++){
+    const jBola = capitalBola * taxaCiclo;
+    const capitalAntes = capitalBola;
+    capitalBola = capitalBola + jBola;
+    tabelaBola.push({mes: m, capital: capitalAntes, juros: jBola, total: capitalBola});
+  }
+
+  const opEl = document.getElementById('sim-oportunidade');
+  if(opEl) opEl.style.display='';
+  const opContent = document.getElementById('sim-op-content');
+  if(opContent) opContent.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px">
+        <div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">📋 Cenário A — Parcelado</div>
+        <div style="font-size:0.6rem;color:var(--muted);margin-bottom:8px">Você parcela em ${prazoMesesParaOp} meses, recebe aos poucos</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold)">${fmt(valorTotal)}</div>
+        <div style="font-size:0.55rem;color:var(--muted);margin-top:4px">Juros: ${fmt(jurosTotal)} · ROI: ${roi.toFixed(1)}%</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid rgba(6,214,160,0.3);border-radius:10px;padding:14px">
+        <div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">🔄 Cenário B — Reinvestimento</div>
+        <div style="font-size:0.6rem;color:var(--muted);margin-bottom:8px">Você recebe tudo a cada mês e reinveste ${prazoMesesParaOp}x</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--green)">${fmt(bolaDeNeveReal)}</div>
+        <div style="font-size:0.55rem;color:var(--muted);margin-top:4px">Juros: ${fmt(bolaDeNeveReal-valor)} · ROI: ${((bolaDeNeveReal-valor)/valor*100).toFixed(1)}%</div>
+      </div>
+    </div>
+    <div style="background:rgba(239,71,111,0.07);border:1px solid rgba(239,71,111,0.2);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:14px">
+      <div style="font-size:1.8rem">💸</div>
+      <div>
+        <div style="font-size:0.58rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">Custo de Oportunidade do Parcelamento</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--red)">− ${fmt(custOp)} <span style="font-size:0.7rem;color:var(--muted)">(−${custOpPct.toFixed(1)}% a menos que reinvestindo)</span></div>
+        <div style="font-size:0.58rem;color:var(--muted);margin-top:4px">Parcelando em ${prazoMesesParaOp} meses você deixa de ganhar <strong style="color:var(--red)">${fmt(custOp)}</strong> em relação a reinvestir o capital mês a mês.</div>
+      </div>
+    </div>
+    <div style="font-size:0.55rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px">📈 Evolução da Bola de Neve (reinvestimento)</div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:0.6rem">
+        <thead><tr style="background:var(--s2)">
+          <th style="padding:8px;text-align:left;color:var(--muted);font-weight:500">Ciclo</th>
+          <th style="padding:8px;text-align:right;color:var(--muted);font-weight:500">Capital Inicial</th>
+          <th style="padding:8px;text-align:right;color:var(--muted);font-weight:500">Juros Ganhos</th>
+          <th style="padding:8px;text-align:right;color:var(--muted);font-weight:500">Capital Final</th>
+        </tr></thead>
+        <tbody>${tabelaBola.map(r=>`
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:8px;color:var(--muted)">Mês ${r.mes}</td>
+            <td style="padding:8px;text-align:right;font-family:'DM Mono',monospace">${fmt(r.capital)}</td>
+            <td style="padding:8px;text-align:right;font-family:'DM Mono',monospace;color:var(--green)">${fmt(r.juros)}</td>
+            <td style="padding:8px;text-align:right;font-family:'DM Mono',monospace;color:var(--gold);font-weight:600">${fmt(r.total)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
   destroyChart('sim');
   charts.sim=new Chart(document.getElementById('chartSim').getContext('2d'),{
     type:'bar',
@@ -2517,15 +2596,16 @@ function simPDF(){
   const periodoSufixo = isSemanal ? 'semana' : 'mês';
   const periodosSufixo = isSemanal ? 'semanas' : 'meses';
 
-  // Converte taxa para a unidade do prazo
+  const SEMANAS_POR_MES_PDF = 4;
   let taxaPeriodo;
   if(taxaUnidade==='mensal' && isSemanal){
-    taxaPeriodo = tipo==='composto' ? Math.pow(1+taxa/100,1/4.33333)-1 : (taxa/100)/4.33333;
+    taxaPeriodo = tipo==='composto' ? Math.pow(1+taxa/100,1/SEMANAS_POR_MES_PDF)-1 : (taxa/100)/SEMANAS_POR_MES_PDF;
   } else if(taxaUnidade==='semanal' && !isSemanal){
-    taxaPeriodo = tipo==='composto' ? Math.pow(1+taxa/100,4.33333)-1 : (taxa/100)*4.33333;
+    taxaPeriodo = tipo==='composto' ? Math.pow(1+taxa/100,SEMANAS_POR_MES_PDF)-1 : (taxa/100)*SEMANAS_POR_MES_PDF;
   } else {
     taxaPeriodo = taxa/100;
   }
+  const prazoNormPDF = (taxaUnidade==='semanal' && !isSemanal) ? prazo * SEMANAS_POR_MES_PDF : prazo;
 
   // Taxa para exibição no PDF
   const taxaMensalEqPdf = taxaUnidade==='semanal'
