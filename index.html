@@ -1195,23 +1195,46 @@ let charts={};
 const TOOLTIP={backgroundColor:'#111521',borderColor:'#212840',borderWidth:1,titleColor:'#dde1f0',bodyColor:'#5a6282',padding:10,titleFont:{family:'DM Mono',size:11},bodyFont:{family:'DM Mono',size:10}};
 function destroyChart(k){if(charts[k]){charts[k].destroy();delete charts[k];}}
 
-// Tab switching
+// Tab switching + auto-sync polling
+let _syncInterval = null;
+
+function iniciarSyncPolling() {
+  if (_syncInterval) return; // já rodando
+  const url = localStorage.getItem('dossie_script_url');
+  if (!url) return;
+  // Sincroniza imediatamente ao entrar na aba
+  _executarSyncSilencioso();
+  // Depois a cada 30 segundos
+  _syncInterval = setInterval(_executarSyncSilencioso, 30000);
+}
+
+function pararSyncPolling() {
+  if (_syncInterval) { clearInterval(_syncInterval); _syncInterval = null; }
+}
+
+async function _executarSyncSilencioso() {
+  const url = localStorage.getItem('dossie_script_url');
+  if (!url) return;
+  try {
+    syncStatusUpdate('⏳ Sincronizando...', 'var(--gold2)');
+    const novos = await dossieSyncCarregar();
+    const agora = new Date().toLocaleTimeString('pt-BR');
+    syncStatusUpdate('✅ Atualizado às ' + agora + ' · ' + Object.keys(_pastas).length + ' pasta(s)', 'var(--green)');
+  } catch(e) {
+    syncStatusUpdate('⚠️ Sem conexão — dados locais', 'var(--muted)');
+  }
+}
+
 document.querySelectorAll('.nav-tab').forEach(tab=>{
   tab.addEventListener('click',()=>{
     document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
-    // Ao abrir a aba Clientes, sincroniza automaticamente em background
-    if(tab.dataset.tab === 'clientes' && localStorage.getItem('dossie_script_url')) {
-      syncStatusUpdate('⏳ Buscando atualizações...', 'var(--gold2)');
-      dossieSyncCarregar().then(ok => {
-        pastaRender();
-        if(ok) {
-          const agora = new Date().toLocaleTimeString('pt-BR');
-          syncStatusUpdate('✅ Atualizado às ' + agora + ' · ' + Object.keys(_pastas).length + ' pasta(s)', 'var(--green)');
-        }
-      }).catch(()=> syncStatusUpdate('⚠️ Sem conexão — exibindo dados locais', 'var(--muted)'));
+    if(tab.dataset.tab === 'clientes') {
+      iniciarSyncPolling();
+    } else {
+      pararSyncPolling();
     }
   });
 });
@@ -2752,13 +2775,16 @@ function pastaSalvar(){
     updatedAt:Date.now()
   };
   pastaSalvarLocal();
-  // Sync automático — sem precisar clicar em nada
-  syncStatusUpdate('⏳ Salvando na planilha...', 'var(--gold2)');
-  dossieSyncSalvar(_pastas[id]).then(()=>{
+  // 1. Sobe para o servidor
+  syncStatusUpdate('⏳ Salvando na nuvem...', 'var(--gold2)');
+  dossieSyncSalvar(_pastas[id]).then(async () => {
+    // 2. Aguarda servidor processar e baixa tudo atualizado
+    await new Promise(r => setTimeout(r, 800));
+    await dossieSyncCarregar();
     const agora = new Date().toLocaleTimeString('pt-BR');
-    syncStatusUpdate('✅ Salvo e sincronizado às ' + agora, 'var(--green)');
+    syncStatusUpdate('✅ Sincronizado às ' + agora, 'var(--green)');
   }).catch(()=>{
-    syncStatusUpdate('⚠️ Salvo localmente (sync falhou — tente sincronizar manualmente)', 'var(--red)');
+    syncStatusUpdate('⚠️ Salvo localmente — sem conexão com servidor', 'var(--muted)');
   });
   pastaModalClose();
   pastaRender();
