@@ -573,9 +573,10 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     <!-- BARRA DE SYNC -->
     <div id="sync-bar" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;flex-wrap:wrap;">
       <div style="flex:1;min-width:0">
-        <div style="font-size:0.58rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">🔗 Sincronização com a Planilha</div>
+        <div style="font-size:0.58rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">🔗 Sincronização — fotos e documentos incluídos</div>
         <div id="sync-status-txt" style="font-size:0.62rem;color:var(--muted)">Não configurada — dados salvos só neste dispositivo</div>
       </div>
+      <button onclick="mostrarAppsScript()" style="background:rgba(155,93,229,0.1);border:1px solid rgba(155,93,229,0.3);color:var(--purple);border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.58rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">📋 Ver Código</button>
       <button onclick="dossieConfigurarURL()" style="background:rgba(201,146,42,0.1);border:1px solid rgba(201,146,42,0.3);color:var(--gold2);border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.58rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">⚙️ Configurar URL</button>
       <button onclick="dossieSyncManual()" id="sync-btn" style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.25);color:var(--green);border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.58rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">🔄 Sincronizar</button>
     </div>
@@ -1039,59 +1040,40 @@ const SHEET_ID='1g9336ZjN2jnVoxA5CFQmlaDxTkda7tlz48_EAlKUjr4';
 // Ex: 'https://script.google.com/macros/s/SEU_ID_AQUI/exec'
 const DOSSIE_SCRIPT_URL = localStorage.getItem('dossie_script_url') || '';
 
-// ── SYNC ENGINE — usa fetch com mode:'no-cors' para salvar (POST)
-// e JSONP para leitura (GET retorna JSONP = funciona com CORS)
-// ─────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// SYNC ENGINE v3 — docs sincronizam entre dispositivos
+// Estratégia: metadados via POST JSON + docs em chunks via
+// requisições POST separadas por arquivo. O Apps Script salva
+// tudo no PropertiesService e retorna via JSONP.
+// ════════════════════════════════════════════════════════
 
-// Remove docs binários grandes antes de enviar (URL tem limite)
-function pastaSemDocs(pasta) {
-  const p = JSON.parse(JSON.stringify(pasta));
-  if (p.docs) {
-    Object.keys(p.docs).forEach(tipo => {
-      if (Array.isArray(p.docs[tipo])) {
-        p.docs[tipo] = p.docs[tipo].map(d => ({
-          name: d.name, size: d.size, mime: d.mime,
-          data: (d.data && d.data.length < 500000) ? d.data : '__arquivo_grande__'
-        }));
-      }
-    });
-  }
-  return p;
+// Tamanho máximo por chunk de POST (Apps Script aceita ~50KB seguros por campo)
+const CHUNK_SIZE = 40000; // chars de base64 por chunk
+
+function syncStatusUpdate(msg, cor) {
+  const el = document.getElementById('sync-status-txt');
+  if (el) { el.textContent = msg; el.style.color = cor || 'var(--muted)'; }
 }
 
-// POST via fetch (salvar/excluir) — no-cors porque Apps Script redireciona
-// Funciona mas não recebe resposta — é "fire and forget" confiável
-async function syncPost(action, payload) {
-  const url = localStorage.getItem('dossie_script_url');
-  if (!url) return;
-  await fetch(url, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify({ action, ...payload })
-  });
-}
-
-// GET via JSONP (listar) — único método que retorna dados com CORS do Apps Script
-function jsonpRequest(url) {
+// GET via JSONP — único método com resposta de CORS no Apps Script
+function jsonpRequest(url, timeoutMs = 20000) {
   return new Promise((resolve, reject) => {
-    const cbName = '_cb_' + Date.now() + '_' + Math.floor(Math.random()*9999);
+    const cbName = '_cb_' + Date.now() + '_' + Math.floor(Math.random()*99999);
     const script = document.createElement('script');
-    const timeout = setTimeout(() => {
+    const timer = setTimeout(() => {
       delete window[cbName];
       if (script.parentNode) document.body.removeChild(script);
       reject(new Error('Timeout — verifique a URL do Apps Script'));
-    }, 15000);
+    }, timeoutMs);
     window[cbName] = (data) => {
-      clearTimeout(timeout);
+      clearTimeout(timer);
       delete window[cbName];
       if (script.parentNode) document.body.removeChild(script);
       resolve(data);
     };
-    const sep = url.includes('?') ? '&' : '?';
-    script.src = url + sep + 'callback=' + cbName + '&t=' + Date.now();
+    script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName + '&t=' + Date.now();
     script.onerror = () => {
-      clearTimeout(timeout);
+      clearTimeout(timer);
       if (script.parentNode) document.body.removeChild(script);
       reject(new Error('Erro de rede — verifique a URL'));
     };
@@ -1099,11 +1081,118 @@ function jsonpRequest(url) {
   });
 }
 
+// POST que aguarda resposta via JSONP (GET com token de retorno)
+// Fluxo: POST dispara a ação → resposta chega via polling JSONP com token
+async function syncPostComResposta(action, payload) {
+  const url = localStorage.getItem('dossie_script_url');
+  if (!url) return null;
+  const token = 'tok_' + Date.now() + '_' + Math.floor(Math.random()*99999);
+  // Envia POST com token para o servidor guardar a resposta
+  await fetch(url, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ action, token, ...payload })
+  });
+  // Polling: tenta buscar resposta por até 15s
+  for (let i = 0; i < 15; i++) {
+    await new Promise(r => setTimeout(r, 1000));
+    try {
+      const resp = await jsonpRequest(url + '?action=getResponse&token=' + token, 5000);
+      if (resp && resp.ok !== undefined) return resp;
+    } catch(e) { /* continua tentando */ }
+  }
+  return null; // fire-and-forget fallback
+}
+
+// Serializa pasta SEM dados binários (apenas metadados dos docs)
+function pastaMetaDocs(pasta) {
+  const p = JSON.parse(JSON.stringify(pasta));
+  if (p.docs) {
+    Object.keys(p.docs).forEach(tipo => {
+      if (Array.isArray(p.docs[tipo])) {
+        p.docs[tipo] = p.docs[tipo].map(d => ({
+          name: d.name, size: d.size, mime: d.mime,
+          // marca se o arquivo precisa de upload separado
+          syncStatus: d.data ? 'local' : (d.driveUrl ? 'synced' : 'missing'),
+          driveUrl: d.driveUrl || null
+        }));
+      }
+    });
+  }
+  return p;
+}
+
+// Sobe um arquivo individual ao servidor via POST chunked
+// O servidor recebe chunks e reconstrói o arquivo, salvando no PropertiesService
+async function syncUploadDoc(pastaId, tipo, idx, doc) {
+  const url = localStorage.getItem('dossie_script_url');
+  if (!url || !doc.data) return null;
+  const data = doc.data;
+  const totalChunks = Math.ceil(data.length / CHUNK_SIZE);
+  const fileId = pastaId + '__' + tipo + '__' + idx + '__' + Date.now();
+  // Envia chunk por chunk
+  for (let c = 0; c < totalChunks; c++) {
+    const chunk = data.slice(c * CHUNK_SIZE, (c + 1) * CHUNK_SIZE);
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'saveDocChunk',
+        fileId, pastaId, tipo, idx,
+        name: doc.name, mime: doc.mime, size: doc.size,
+        chunk: c, totalChunks, data: chunk
+      })
+    });
+    // Pequena pausa entre chunks para não sobrecarregar
+    if (totalChunks > 1) await new Promise(r => setTimeout(r, 200));
+  }
+  return fileId;
+}
+
+// Salva pasta no servidor: metadados + faz upload dos docs que ainda não sincronizaram
 async function dossieSyncSalvar(pasta) {
   const url = localStorage.getItem('dossie_script_url');
   if (!url) return;
   try {
-    await syncPost('save', { pasta: pastaSemDocs(pasta) });
+    // 1. Primeiro envia os docs binários que ainda não foram sincronizados
+    const docs = pasta.docs || {};
+    let docsAtualizados = JSON.parse(JSON.stringify(docs));
+    for (const tipo of Object.keys(docs)) {
+      const lista = docs[tipo] || [];
+      for (let i = 0; i < lista.length; i++) {
+        const doc = lista[i];
+        // Só faz upload se tem dados locais E ainda não tem driveUrl (não foi sincronizado)
+        if (doc.data && !doc.driveUrl) {
+          try {
+            syncStatusUpdate(`⏳ Enviando doc ${doc.name}...`, 'var(--gold2)');
+            const fileId = await syncUploadDoc(pasta.id, tipo, i, doc);
+            if (fileId) {
+              // Marca como sincronizado — driveUrl = fileId (servidor usa para remontar)
+              docsAtualizados[tipo][i] = { ...doc, driveUrl: fileId };
+              // Atualiza também no _pastas local para não reenviar depois
+              if (_pastas[pasta.id] && _pastas[pasta.id].docs && _pastas[pasta.id].docs[tipo]) {
+                _pastas[pasta.id].docs[tipo][i] = { ...doc, driveUrl: fileId };
+              }
+            }
+          } catch(e) {
+            console.warn('Upload doc falhou:', doc.name, e.message);
+          }
+        }
+      }
+    }
+    // 2. Salva os metadados da pasta (com referências aos docs, sem binários)
+    const pastaParaSalvar = { ...pasta, docs: docsAtualizados };
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'save', pasta: pastaMetaDocs(pastaParaSalvar) })
+    });
+    // Atualiza local com driveUrls
+    _pastas[pasta.id].docs = docsAtualizados;
+    pastaSalvarLocal();
   } catch(e) {
     console.warn('Sync salvar falhou:', e.message);
   }
@@ -1112,13 +1201,21 @@ async function dossieSyncSalvar(pasta) {
 async function dossieSyncExcluir(id) {
   const url = localStorage.getItem('dossie_script_url');
   if (!url) return;
-  // Usa JSONP GET (igual ao list) para ter confirmação real do servidor
-  // POST com no-cors é fire-and-forget e não garante que o servidor processou
-  const data = await jsonpRequest(url + '?action=delete&id=' + encodeURIComponent(id));
-  if (!data || !data.ok) throw new Error(data?.erro || 'Servidor não confirmou o delete');
-  return data;
+  try {
+    const data = await jsonpRequest(url + '?action=delete&id=' + encodeURIComponent(id));
+    if (!data || !data.ok) throw new Error(data?.erro || 'Servidor não confirmou o delete');
+    return data;
+  } catch(e) {
+    // fire-and-forget fallback
+    await fetch(url, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'delete', id })
+    });
+  }
 }
 
+// Baixa pastas do servidor e reconstrói docs a partir dos chunks armazenados
 async function dossieSyncCarregar() {
   const url = localStorage.getItem('dossie_script_url');
   if (!url) return false;
@@ -1126,20 +1223,54 @@ async function dossieSyncCarregar() {
     const data = await jsonpRequest(url + '?action=list');
     if (data && data.pastas) {
       let novos = 0;
+      const idsServidor = new Set(Object.keys(data.pastas));
 
-      // 1. Adiciona/atualiza — mas NUNCA restaura um ID que foi deletado localmente
-      Object.entries(data.pastas).forEach(([id, pSheet]) => {
-        if (_deletedIds.has(id)) return; // ignorar — foi apagado localmente
+      for (const [id, pSheet] of Object.entries(data.pastas)) {
+        if (_deletedIds.has(id)) continue;
         const pLocal = _pastas[id];
         if (!pLocal || (pSheet.updatedAt >= (pLocal.updatedAt || 0))) {
-          _pastas[id] = pSheet;
+          // Pasta do servidor é mais nova — baixa docs faltantes
+          const pMerged = { ...pSheet };
+          pMerged.docs = pMerged.docs || {};
+
+          // Para cada doc que tem fileId mas não tem data local, baixa do servidor
+          for (const tipo of Object.keys(pMerged.docs)) {
+            const lista = pMerged.docs[tipo] || [];
+            const listaLocal = (pLocal?.docs?.[tipo]) || [];
+            for (let i = 0; i < lista.length; i++) {
+              const docServer = lista[i];
+              const docLocal = listaLocal[i];
+              // Se já temos o dado local para este arquivo, mantém
+              if (docLocal && docLocal.data && docLocal.name === docServer.name) {
+                pMerged.docs[tipo][i] = docLocal;
+              } else if (docServer.driveUrl) {
+                // Busca o arquivo montado no servidor
+                try {
+                  syncStatusUpdate(`⏳ Baixando ${docServer.name}...`, 'var(--gold2)');
+                  const fileData = await jsonpRequest(
+                    url + '?action=getDoc&fileId=' + encodeURIComponent(docServer.driveUrl), 30000
+                  );
+                  if (fileData && fileData.data) {
+                    pMerged.docs[tipo][i] = {
+                      name: docServer.name, size: docServer.size,
+                      mime: docServer.mime, data: fileData.data,
+                      driveUrl: docServer.driveUrl
+                    };
+                  }
+                } catch(e) {
+                  console.warn('Falha ao baixar doc:', docServer.name, e.message);
+                  // Mantém referência sem dado — mostrará ícone indicando pendência
+                  pMerged.docs[tipo][i] = { ...docServer, data: null };
+                }
+              }
+            }
+          }
+          _pastas[id] = pMerged;
           novos++;
         }
-      });
+      }
 
-      // 2. Remove localmente qualquer ID que sumiu do servidor
-      // (exceto os que já estão na lista negra — já foram tratados)
-      const idsServidor = new Set(Object.keys(data.pastas));
+      // Remove localmente IDs que sumiram do servidor
       Object.keys(_pastas).forEach(id => {
         if (!idsServidor.has(id) && !_deletedIds.has(id)) {
           delete _pastas[id];
@@ -1158,27 +1289,24 @@ async function dossieSyncCarregar() {
   return 0;
 }
 
-function syncStatusUpdate(msg, cor) {
-  const el = document.getElementById('sync-status-txt');
-  if (el) { el.textContent = msg; el.style.color = cor || 'var(--muted)'; }
-}
-
 async function dossieSyncManual() {
   const url = localStorage.getItem('dossie_script_url');
   if (!url) { dossieConfigurarURL(); return; }
   const btn = document.getElementById('sync-btn');
   if (btn) { btn.textContent = '⏳ Sincronizando...'; btn.disabled = true; }
-  syncStatusUpdate('Enviando pastas locais...', 'var(--gold2)');
   try {
-    // 1. Envia todas as pastas locais para o servidor
+    // 1. Envia todas as pastas locais (incluindo docs ainda não sincronizados)
     const pastas = Object.values(_pastas);
+    let i = 0;
     for (const pasta of pastas) {
+      i++;
+      syncStatusUpdate(`⏳ Enviando pasta ${i}/${pastas.length}: ${pasta.nome}...`, 'var(--gold2)');
       await dossieSyncSalvar(pasta);
     }
-    // 2. Aguarda o servidor processar (POST é fire-and-forget)
-    await new Promise(r => setTimeout(r, 1500));
-    // 3. Baixa tudo do servidor
-    syncStatusUpdate('Baixando pastas do servidor...', 'var(--gold2)');
+    // 2. Aguarda servidor processar
+    await new Promise(r => setTimeout(r, 1200));
+    // 3. Baixa tudo do servidor (incluindo docs de outros dispositivos)
+    syncStatusUpdate('⬇️ Baixando do servidor...', 'var(--gold2)');
     const novos = await dossieSyncCarregar();
     const agora = new Date().toLocaleTimeString('pt-BR');
     syncStatusUpdate(`✅ Sincronizado às ${agora} · ${Object.keys(_pastas).length} pasta(s)`, 'var(--green)');
@@ -1199,6 +1327,136 @@ function dossieConfigurarURL() {
   } else if (url !== null) {
     alert('URL inválida. Deve começar com https://script.google.com/macros/s/...');
   }
+}
+
+// Botão para ver/copiar o código Apps Script atualizado
+function mostrarAppsScript() {
+  const codigo = `// ═══════════════════════════════════════════════════════
+// Capital Investimentos — Apps Script v3 (com sync de docs)
+// Implante como: Executar como: Eu | Acesso: Qualquer pessoa
+// ═══════════════════════════════════════════════════════
+const PROP = PropertiesService.getScriptProperties();
+
+function doPost(e) {
+  try {
+    const body = JSON.parse(e.postData.contents);
+    const action = body.action;
+    if (action === 'save') {
+      const pasta = body.pasta;
+      PROP.setProperty('pasta_' + pasta.id, JSON.stringify(pasta));
+      return ContentService.createTextOutput('ok');
+    }
+    if (action === 'delete') {
+      PROP.deleteProperty('pasta_' + body.id);
+      // Apaga chunks de docs desta pasta
+      const all = PROP.getProperties();
+      Object.keys(all).forEach(k => {
+        if (k.startsWith('doc_' + body.id + '__')) PROP.deleteProperty(k);
+      });
+      return ContentService.createTextOutput('ok');
+    }
+    if (action === 'saveDocChunk') {
+      const { fileId, chunk, totalChunks, data } = body;
+      // Acumula chunks
+      const key = 'docchunk_' + fileId + '_' + chunk;
+      PROP.setProperty(key, data);
+      // Se foi o último chunk, remonta o arquivo completo
+      if (chunk === totalChunks - 1) {
+        let full = '';
+        for (let c = 0; c < totalChunks; c++) {
+          full += PROP.getProperty('docchunk_' + fileId + '_' + c) || '';
+          PROP.deleteProperty('docchunk_' + fileId + '_' + c);
+        }
+        // Salva arquivo completo (base64 data URL)
+        // PropertiesService tem limite de 9KB por chave — usa split se necessário
+        const MAX = 8500;
+        const parts = Math.ceil(full.length / MAX);
+        PROP.setProperty('doc_' + fileId + '_parts', String(parts));
+        for (let p = 0; p < parts; p++) {
+          PROP.setProperty('doc_' + fileId + '_p' + p, full.slice(p * MAX, (p + 1) * MAX));
+        }
+      }
+      return ContentService.createTextOutput('ok');
+    }
+  } catch(err) {
+    return ContentService.createTextOutput('erro: ' + err.message);
+  }
+}
+
+function doGet(e) {
+  const cb = e.parameter.callback || 'cb';
+  const action = e.parameter.action || 'list';
+  let result;
+  try {
+    if (action === 'list') {
+      const all = PROP.getProperties();
+      const pastas = {};
+      Object.entries(all).forEach(([k, v]) => {
+        if (k.startsWith('pasta_')) {
+          try { pastas[k.slice(6)] = JSON.parse(v); } catch(e) {}
+        }
+      });
+      result = { ok: true, pastas };
+    } else if (action === 'delete') {
+      const id = e.parameter.id;
+      PROP.deleteProperty('pasta_' + id);
+      const all = PROP.getProperties();
+      Object.keys(all).forEach(k => {
+        if (k.startsWith('doc_' + id + '__') || k.startsWith('docchunk_' + id + '__'))
+          PROP.deleteProperty(k);
+      });
+      result = { ok: true };
+    } else if (action === 'getDoc') {
+      const fileId = e.parameter.fileId;
+      const parts = parseInt(PROP.getProperty('doc_' + fileId + '_parts') || '0');
+      if (!parts) { result = { ok: false, erro: 'Arquivo não encontrado' }; }
+      else {
+        let data = '';
+        for (let p = 0; p < parts; p++) {
+          data += PROP.getProperty('doc_' + fileId + '_p' + p) || '';
+        }
+        result = { ok: true, data };
+      }
+    } else {
+      result = { ok: false, erro: 'Ação desconhecida' };
+    }
+  } catch(err) {
+    result = { ok: false, erro: err.message };
+  }
+  return ContentService.createTextOutput(cb + '(' + JSON.stringify(result) + ')')
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
+}`;
+
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = `
+    <div style="background:#0c0f18;border:1px solid #212840;border-radius:14px;max-width:760px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden">
+      <div style="padding:18px 20px;border-bottom:1px solid #1a2035;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.12em;color:#dde1f0">📋 CÓDIGO APPS SCRIPT ATUALIZADO</div>
+          <div style="font-size:0.58rem;color:#5a6282;margin-top:3px">Versão 3 — sincroniza fotos e documentos entre dispositivos</div>
+        </div>
+        <button onclick="this.closest('[style*=fixed]').remove()" style="background:none;border:none;color:#5a6282;cursor:pointer;font-size:1.2rem">✕</button>
+      </div>
+      <div style="padding:14px 20px;background:rgba(201,146,42,0.06);border-bottom:1px solid #1a2035">
+        <div style="font-size:0.65rem;color:#e8b84b;line-height:1.8">
+          <strong>Como atualizar:</strong><br>
+          1. Acesse <a href="https://script.google.com" target="_blank" style="color:#4895ef">script.google.com</a> → abra seu projeto existente<br>
+          2. Selecione todo o código atual (Ctrl+A) e cole o código abaixo<br>
+          3. Salve (Ctrl+S) → Implantar → <strong>Nova implantação</strong> → tipo: App da Web<br>
+          4. Executar como: <strong>Eu</strong> · Acesso: <strong>Qualquer pessoa</strong> → Implantar<br>
+          5. Copie a nova URL e cole em <strong>⚙️ Configurar URL</strong> no dashboard
+        </div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:14px 20px">
+        <pre id="script-code" style="background:#07090e;border:1px solid #1a2035;border-radius:8px;padding:14px;font-size:0.6rem;color:#dde1f0;white-space:pre-wrap;word-break:break-all;line-height:1.7;font-family:'DM Mono',monospace;overflow:auto;max-height:400px">${codigo.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+      </div>
+      <div style="padding:14px 20px;border-top:1px solid #1a2035;display:flex;gap:8px;justify-content:flex-end">
+        <button onclick="navigator.clipboard.writeText(document.getElementById('script-code').textContent);this.textContent='✅ Copiado!';setTimeout(()=>this.textContent='📋 Copiar Código',2000)" style="background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.3);color:#06d6a0;border-radius:8px;padding:8px 18px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer">📋 Copiar Código</button>
+        <button onclick="this.closest('[style*=fixed]').remove()" style="background:rgba(201,146,42,0.1);border:1px solid rgba(201,146,42,0.3);color:#e8b84b;border-radius:8px;padding:8px 18px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer">Fechar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
 }
 const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18};
 const CP={id:0,tipo:2,valor:3,data:4,juros:5};
@@ -2734,11 +2992,18 @@ function pastaRenderDocs(tipo){
   const typeChip={'rg-frente':'doc-chip-rg','rg-verso':'doc-chip-rg','selfie-rg':'doc-chip-foto','holerite':'doc-chip-holerite','imovel':'doc-chip-foto','empresa-foto':'doc-chip-foto','outro':'doc-chip-outro'};
   el.innerHTML=_pastaDocs[tipo].map((d,i)=>{
     const isImg=d.mime&&d.mime.startsWith('image/');
-    const kb=Math.round(d.size/1024);
+    const kb=Math.round((d.size||0)/1024);
+    const temDado=!!(d.data);
+    const syncBadge=d.driveUrl&&temDado
+      ? `<span style="font-size:0.42rem;color:var(--green);background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.2);border-radius:3px;padding:1px 5px">✓ sync</span>`
+      : !temDado && d.driveUrl
+        ? `<span style="font-size:0.42rem;color:var(--gold2);background:rgba(240,180,41,0.1);border:1px solid rgba(240,180,41,0.2);border-radius:3px;padding:1px 5px">⏳ baixando</span>`
+        : `<span style="font-size:0.42rem;color:var(--muted);background:var(--s2);border:1px solid var(--border2);border-radius:3px;padding:1px 5px">local</span>`;
     return `<div class="doc-item">
-      ${isImg?`<img class="doc-preview" src="${d.data}" alt="">`:(`<span class="doc-icon">📄</span>`)}
+      ${isImg&&temDado?`<img class="doc-preview" src="${d.data}" alt="">`:isImg&&!temDado?`<span class="doc-icon" title="Aguardando sync">🖼️</span>`:`<span class="doc-icon">📄</span>`}
       <span class="doc-name" title="${d.name}">${d.name}</span>
       <span class="doc-type-chip ${typeChip[tipo]}">${typeLabels[tipo]}</span>
+      ${syncBadge}
       <span class="doc-size">${kb}kb</span>
       <button class="doc-del" onclick="pastaDelDoc('${tipo}',${i})">✕</button>
     </div>`;
@@ -2991,11 +3256,17 @@ function pastaViewOpen(id){
       if(!docs.length)return;
       html+=`<div style="font-size:0.55rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin:10px 0 6px">${t.icon} ${t.label}</div>`;
       html+=`<div class="pasta-view-docs">`;
-      docs.forEach(d=>{
+      docs.forEach((d,di)=>{
         const isImg=d.mime&&d.mime.startsWith('image/');
-        html+=`<div class="pasta-view-doc" onclick="pastaViewDoc('${encodeURIComponent(d.data)}','${encodeURIComponent(d.name)}')">
-          ${isImg?`<img src="${d.data}" alt="${d.name}">`:`<div class="pasta-view-doc-noimg"><span>📄</span></div>`}
-          <div class="pasta-view-doc-info"><div class="pasta-view-doc-name">${d.name}</div><div class="pasta-view-doc-type">${Math.round(d.size/1024)}kb</div></div>
+        const temDado=!!(d.data);
+        const syncLabel=d.driveUrl&&temDado?'<span style="font-size:0.45rem;color:var(--green)">✓ sync</span>'
+          :!temDado&&d.driveUrl?'<span style="font-size:0.45rem;color:var(--gold2)">⏳ pendente</span>'
+          :'<span style="font-size:0.45rem;color:var(--muted)">local</span>';
+        const clickAttr=temDado?`onclick="pastaViewDoc('${encodeURIComponent(d.data)}','${encodeURIComponent(d.name)}')"`:
+          d.driveUrl?`onclick="pastaDownloadDoc('${id}','${t.key}',${di})"`:''
+        html+=`<div class="pasta-view-doc" ${clickAttr} style="${!temDado?'opacity:0.6':''}">
+          ${isImg&&temDado?`<img src="${d.data}" alt="${d.name}">`:isImg&&!temDado?`<div class="pasta-view-doc-noimg"><span>🖼️</span><div style="font-size:0.45rem;color:var(--gold2);margin-top:4px">clique p/ baixar</div></div>`:`<div class="pasta-view-doc-noimg"><span>📄</span></div>`}
+          <div class="pasta-view-doc-info"><div class="pasta-view-doc-name">${d.name}</div><div class="pasta-view-doc-type">${Math.round((d.size||0)/1024)}kb ${syncLabel}</div></div>
         </div>`;
       });
       html+=`</div>`;
@@ -3009,6 +3280,30 @@ function pastaViewEditar(){pastaViewClose();pastaModalOpen(_pastaViewId);}
 function pastaViewDoc(dataEnc,nameEnc){
   const data=decodeURIComponent(dataEnc),name=decodeURIComponent(nameEnc);
   const a=document.createElement('a');a.href=data;a.download=name;a.click();
+}
+
+// Baixa um doc específico do servidor quando não tem dado local
+async function pastaDownloadDoc(pastaId, tipo, idx) {
+  const url = localStorage.getItem('dossie_script_url');
+  const pasta = _pastas[pastaId];
+  if (!url || !pasta) return;
+  const doc = pasta.docs?.[tipo]?.[idx];
+  if (!doc || !doc.driveUrl) return;
+  try {
+    syncStatusUpdate('⬇️ Baixando ' + doc.name + '...', 'var(--gold2)');
+    const resp = await jsonpRequest(url + '?action=getDoc&fileId=' + encodeURIComponent(doc.driveUrl), 30000);
+    if (resp && resp.data) {
+      // Salva localmente
+      _pastas[pastaId].docs[tipo][idx] = { ...doc, data: resp.data };
+      pastaSalvarLocal();
+      const agora = new Date().toLocaleTimeString('pt-BR');
+      syncStatusUpdate('✅ ' + doc.name + ' baixado às ' + agora, 'var(--green)');
+      // Reabre a view atualizada
+      pastaViewOpen(pastaId);
+    }
+  } catch(e) {
+    syncStatusUpdate('❌ Falha ao baixar: ' + e.message, 'var(--red)');
+  }
 }
 
 // Pré-preencher pasta a partir de cliente da planilha
