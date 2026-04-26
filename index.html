@@ -14,6 +14,30 @@ body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-
 body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(ellipse 80% 50% at 20% 0%,rgba(201,146,42,0.05) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(6,214,160,0.03) 0%,transparent 60%);pointer-events:none;z-index:0;}
 #loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:999;transition:opacity 0.6s ease;}
 #loading-screen.hidden{opacity:0;pointer-events:none;}
+
+/* ── TELA DE LOGIN ── */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;z-index:1000;}
+#login-screen.hidden{display:none;}
+#login-screen::before{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(201,146,42,0.08) 0%,transparent 65%);pointer-events:none;}
+.login-box{background:var(--s1);border:1px solid var(--border2);border-radius:18px;padding:40px 36px;width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:0;position:relative;box-shadow:0 24px 60px rgba(0,0,0,0.5);}
+.login-bars{display:flex;align-items:flex-end;gap:2px;height:28px;margin-bottom:14px;}
+.login-bars span{display:block;width:3px;background:var(--gold);border-radius:1px;}
+.login-brand{font-family:'Cinzel',serif;font-size:1.3rem;color:var(--gold);letter-spacing:0.08em;margin-bottom:3px;}
+.login-sub{font-size:0.5rem;color:var(--gold);opacity:0.5;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:28px;}
+.login-lbl{font-size:0.58rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;align-self:flex-start;margin-bottom:6px;}
+.login-input{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.85rem;padding:12px 14px;outline:none;letter-spacing:0.12em;transition:border-color 0.2s;margin-bottom:6px;}
+.login-input:focus{border-color:var(--gold);}
+.login-input.erro{border-color:var(--red);animation:shake 0.35s ease;}
+@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px);}40%{transform:translateX(8px);}60%{transform:translateX(-5px);}80%{transform:translateX(5px);}}
+.login-erro-txt{font-size:0.58rem;color:var(--red);align-self:flex-start;margin-bottom:12px;min-height:14px;}
+.login-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:8px;padding:13px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.15em;cursor:pointer;margin-top:6px;transition:opacity 0.2s;}
+.login-btn:hover{opacity:0.88;}
+.login-btn:active{opacity:0.75;}
+.login-footer{font-size:0.5rem;color:var(--muted2);margin-top:20px;text-align:center;line-height:1.8;}
+.login-change{font-size:0.52rem;color:var(--muted);text-decoration:underline;cursor:pointer;margin-top:10px;align-self:center;}
+.login-change:hover{color:var(--gold);}
+/* Dots de senha oculta */
+.login-input[type=password]{font-size:1.1rem;letter-spacing:0.25em;}
 .load-logo-wrap{display:flex;align-items:center;gap:14px;}
 .load-logo-bars{display:flex;align-items:flex-end;gap:2px;height:36px;}
 .load-logo-bars span{display:block;width:3px;background:var(--gold);border-radius:1px;}
@@ -406,7 +430,24 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 </head>
 <body>
 
-<div id="loading-screen">
+<!-- TELA DE LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-bars">
+      <span style="height:30%"></span><span style="height:44%"></span><span style="height:58%"></span><span style="height:70%"></span><span style="height:84%"></span><span style="height:94%"></span><span style="height:100%"></span>
+    </div>
+    <div class="login-brand">Capital Investimentos</div>
+    <div class="login-sub">Soluções Financeiras Estratégicas</div>
+    <div class="login-lbl">🔑 Senha de Acesso</div>
+    <input class="login-input" id="login-senha" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginTentar()" autocomplete="current-password">
+    <div class="login-erro-txt" id="login-erro"></div>
+    <button class="login-btn" onclick="loginTentar()">ENTRAR</button>
+    <div class="login-footer">Acesso restrito · Capital Investimentos<br>Todos os dados são criptografados localmente</div>
+    <span class="login-change" id="login-change-link" onclick="loginAlterarSenha()" style="display:none">Alterar senha</span>
+  </div>
+</div>
+
+<div id="loading-screen" class="hidden">
   <div class="load-logo-wrap">
     <div class="load-logo-bars">
       <span style="height:30%"></span><span style="height:42%"></span><span style="height:55%"></span><span style="height:65%"></span><span style="height:75%"></span><span style="height:88%"></span><span style="height:100%"></span>
@@ -421,7 +462,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="error-box">
     <div class="error-title">Erro de Conexão</div>
     <div class="error-msg" id="error-msg">Verifique se a planilha está compartilhada publicamente.</div>
-    <button class="error-btn" onclick="loadData()">TENTAR NOVAMENTE</button>
+    <button class="error-btn" onclick="loadData(true)">TENTAR NOVAMENTE</button>
   </div>
 </div>
 
@@ -440,7 +481,8 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     <div class="header-right">
       <div class="live-pill"><div class="live-dot"></div>AO VIVO</div>
       <span id="today-date">—</span>
-      <button class="refresh-btn" onclick="loadData()">↻ ATUALIZAR</button>
+      <button class="refresh-btn" onclick="loadData(true)">↻ ATUALIZAR</button>
+      <button class="refresh-btn" onclick="loginSair()" style="border-color:rgba(239,71,111,0.3);color:var(--red)" title="Sair">🔒 SAIR</button>
     </div>
   </div>
 </header>
@@ -3533,11 +3575,20 @@ function scoreBadgeHtml(total, temHistorico) {
 
 let _primeiraVez = true;
 
-async function loadData(){
+async function loadData(mostrarLoading){
   const loading=document.getElementById('loading-screen'),error=document.getElementById('error-screen'),main=document.getElementById('main');
-  // Só mostra a tela de loading na primeira vez — recargas silenciosas não escondem o dashboard
-  if(_primeiraVez){
+  if(mostrarLoading || _primeiraVez){
+    // Reinicia a animação da barra recriando o elemento
+    const barWrap=loading.querySelector('.load-bar-wrap');
+    if(barWrap){
+      const novaBar=document.createElement('div');
+      novaBar.className='load-bar';
+      barWrap.innerHTML='';
+      barWrap.appendChild(novaBar);
+    }
     loading.classList.remove('hidden');
+    loading.style.opacity='1';
+    loading.style.pointerEvents='auto';
     error.classList.remove('show');
     main.classList.remove('visible');
   }
@@ -3553,7 +3604,7 @@ async function loadData(){
     console.error(err);
     loading.classList.add('hidden');
     main.classList.add('visible');
-    if(_primeiraVez){
+    if(_primeiraVez || mostrarLoading){
       error.classList.add('show');
       document.getElementById('error-msg').textContent='Erro: '+err.message+'. Verifique se a planilha está compartilhada publicamente.';
     }
@@ -3562,8 +3613,128 @@ async function loadData(){
     pastaRender();
   }
 }
-loadData();
-setInterval(loadData, 15*60*1000);
+// ════════════════════════════════════════════════════════
+// AUTENTICAÇÃO — senha local com hash simples
+// ════════════════════════════════════════════════════════
+const SENHA_KEY = 'cap_inv_hash';
+const SESSAO_KEY = 'cap_inv_sessao';
+const SESSAO_DURACAO = 8 * 60 * 60 * 1000; // 8 horas
+
+// Hash simples (djb2) — suficiente para uso local
+function hashSenha(s) {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i);
+  return (h >>> 0).toString(36);
+}
+
+function loginSessaoValida() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SESSAO_KEY) || 'null');
+    return s && s.ts && (Date.now() - s.ts) < SESSAO_DURACAO;
+  } catch(e) { return false; }
+}
+
+function loginSalvarSessao() {
+  try { localStorage.setItem(SESSAO_KEY, JSON.stringify({ ts: Date.now() })); } catch(e) {}
+}
+
+function loginTentar() {
+  const input = document.getElementById('login-senha');
+  const erro = document.getElementById('login-erro');
+  const senha = input.value;
+  if (!senha) { erro.textContent = 'Digite a senha.'; return; }
+
+  const hashSalvo = localStorage.getItem(SENHA_KEY);
+
+  // Primeira vez: define a senha
+  if (!hashSalvo) {
+    if (senha.length < 4) { erro.textContent = 'Mínimo de 4 caracteres.'; input.classList.add('erro'); setTimeout(()=>input.classList.remove('erro'),400); return; }
+    localStorage.setItem(SENHA_KEY, hashSenha(senha));
+    loginSalvarSessao();
+    loginEntrar();
+    return;
+  }
+
+  // Verifica senha
+  if (hashSenha(senha) === hashSalvo) {
+    erro.textContent = '';
+    loginSalvarSessao();
+    loginEntrar();
+  } else {
+    erro.textContent = 'Senha incorreta. Tente novamente.';
+    input.value = '';
+    input.classList.add('erro');
+    setTimeout(() => input.classList.remove('erro'), 400);
+    input.focus();
+  }
+}
+
+function loginEntrar() {
+  const tela = document.getElementById('login-screen');
+  tela.style.transition = 'opacity 0.4s ease';
+  tela.style.opacity = '0';
+  setTimeout(() => { tela.classList.add('hidden'); }, 420);
+  // Mostra link de alterar senha no header
+  document.getElementById('login-change-link').style.display = '';
+  loadData();
+}
+
+function loginAlterarSenha() {
+  const nova = prompt('Digite a nova senha (mínimo 4 caracteres):');
+  if (nova === null) return;
+  if (nova.length < 4) { alert('Mínimo de 4 caracteres.'); return; }
+  const confirm = prompt('Confirme a nova senha:');
+  if (nova !== confirm) { alert('As senhas não coincidem.'); return; }
+  localStorage.setItem(SENHA_KEY, hashSenha(nova));
+  alert('✅ Senha alterada com sucesso!');
+}
+
+function loginSair() {
+  if (!confirm('Deseja sair? Será necessário digitar a senha novamente.')) return;
+  try { localStorage.removeItem(SESSAO_KEY); } catch(e) {}
+  // Esconde dashboard e mostra login
+  document.getElementById('main').classList.remove('visible');
+  document.getElementById('loading-screen').classList.add('hidden');
+  const tela = document.getElementById('login-screen');
+  tela.classList.remove('hidden');
+  tela.style.opacity = '0';
+  tela.style.transition = 'opacity 0.3s ease';
+  setTimeout(() => { tela.style.opacity = '1'; }, 10);
+  document.getElementById('login-senha').value = '';
+  document.getElementById('login-erro').textContent = '';
+  setTimeout(() => document.getElementById('login-senha').focus(), 350);
+}
+
+// Inicialização — verifica sessão ou mostra login
+(function iniciarApp() {
+  const temSenha = !!localStorage.getItem(SENHA_KEY);
+  const sessaoOk = loginSessaoValida();
+
+  // Mostra link de alterar senha se já tem senha cadastrada
+  if (temSenha) {
+    const link = document.getElementById('login-change-link');
+    if (link) link.style.display = '';
+  }
+
+  if (!temSenha) {
+    // Primeira vez: mostra tela de login com instrução de criação
+    const lbl = document.querySelector('.login-lbl');
+    if (lbl) lbl.textContent = '🔑 Criar Senha de Acesso';
+    const sub = document.querySelector('.login-sub');
+    if (sub) { sub.textContent = 'Defina uma senha para proteger o dashboard'; sub.style.letterSpacing='0.08em'; }
+    document.getElementById('login-screen').classList.remove('hidden');
+  } else if (sessaoOk) {
+    // Sessão ativa — entra direto
+    document.getElementById('login-screen').classList.add('hidden');
+    loadData();
+  } else {
+    // Sessão expirada — pede senha
+    document.getElementById('login-screen').classList.remove('hidden');
+    setTimeout(() => document.getElementById('login-senha').focus(), 200);
+  }
+})();
+
+setInterval(()=>loadData(false), 15*60*1000);
 </script>
 </body>
 </html>
