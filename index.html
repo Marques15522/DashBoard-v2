@@ -1585,6 +1585,7 @@ document.querySelectorAll('.nav-tab').forEach(tab=>{
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
+    if(tab.dataset.tab === 'simulador') calcDesagio();
     if(tab.dataset.tab === 'clientes') {
       iniciarSyncPolling();
     } else {
@@ -2713,8 +2714,7 @@ function calcDesagio(){
   `;
 }
 
-// Inicializa a calculadora ao carregar
-setTimeout(calcDesagio, 500);
+// calcDesagio é chamado quando o usuário abre a aba Simulador
 
 function simPDF(){
   const valor=parseFloat(document.getElementById('sim-valor')?.value)||0;
