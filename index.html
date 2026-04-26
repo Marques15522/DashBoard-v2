@@ -3674,9 +3674,9 @@ function loginEntrar() {
   tela.style.transition = 'opacity 0.4s ease';
   tela.style.opacity = '0';
   setTimeout(() => { tela.classList.add('hidden'); }, 420);
-  // Mostra link de alterar senha no header
   document.getElementById('login-change-link').style.display = '';
-  loadData();
+  _primeiraVez = true;
+  loadData(true);
 }
 
 function loginAlterarSenha() {
@@ -3726,7 +3726,7 @@ function loginSair() {
   } else if (sessaoOk) {
     // Sessão ativa — entra direto
     document.getElementById('login-screen').classList.add('hidden');
-    loadData();
+    loadData(true);
   } else {
     // Sessão expirada — pede senha
     document.getElementById('login-screen').classList.remove('hidden');
