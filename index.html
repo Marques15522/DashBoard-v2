@@ -368,7 +368,18 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .pasta-stat-box{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center;}
 .pasta-stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;}
 .pasta-stat-lbl{font-size:0.48rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-top:2px;}
-/* ── SCORE DE CRÉDITO ── */
+/* ── SCORE BADGE NOS CARDS ── */
+.score-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-family:'Bebas Neue',sans-serif;font-size:0.75rem;letter-spacing:0.06em;border:1px solid transparent;white-space:nowrap;}
+.score-badge.excelente{background:rgba(6,214,160,0.12);border-color:rgba(6,214,160,0.35);color:#06d6a0;}
+.score-badge.bom{background:rgba(6,214,160,0.07);border-color:rgba(6,214,160,0.2);color:#06d6a0;}
+.score-badge.medio{background:rgba(240,180,41,0.1);border-color:rgba(240,180,41,0.3);color:#f0b429;}
+.score-badge.alto-risco{background:rgba(239,71,111,0.1);border-color:rgba(239,71,111,0.3);color:#ef476f;}
+.score-badge.reprovado{background:rgba(239,71,111,0.15);border-color:rgba(239,71,111,0.4);color:#ef476f;}
+.score-badge.sem-dados{background:rgba(90,98,130,0.1);border-color:rgba(90,98,130,0.2);color:#5a6282;}
+.pasta-card-name-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;}
+.score-mini-bar{width:48px;height:3px;border-radius:2px;background:var(--border2);overflow:hidden;margin-top:3px;}
+.score-mini-fill{height:100%;border-radius:2px;transition:width 0.6s ease;}
+
 .score-panel{background:var(--s2);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;margin-top:18px;}
 .score-panel-title{font-family:'Bebas Neue',sans-serif;font-size:0.7rem;letter-spacing:0.2em;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
 .score-gauge{display:flex;align-items:center;gap:18px;margin-bottom:14px;}
@@ -1233,6 +1244,9 @@ function render(empRows,pagRows){
   const cliRecorr=clientes.filter(c=>c.recorrente);
   const recorrPct=clientes.length?cliRecorr.length/clientes.length:0;
   const tempoRelMed=clientes.length?clientes.reduce((s,c)=>s+c.mesesRelac,0)/clientes.length:0;
+
+  // Atualiza mapa comportamental para uso no score das pastas
+  atualizarComportamento(clientes);
 
   // SCORE RISCO — definido após concentração (usa totalCapAtivo)
 
@@ -2667,11 +2681,15 @@ function pastaRender(){
     const totalD=Object.values(p.docs||{}).flat().length;
     const renda=p.tipoRenda==='empresario'?fmt(p.faturamento||0)+'/mês fat.':p.salario?fmt(p.salario)+'/mês':'—';
     const local=p.tipoRenda==='empresario'?(p.empEnd||p.empNome||'—'):(p.empresa||'—');
+    const { total: scoreFinal, temHistorico } = calcScoreFinal(p);
     return `<div class="pasta-card" onclick="pastaViewOpen('${p.id}')">
       <div class="pasta-card-top">
         <div class="pasta-avatar" style="background:${color}">${pastaInitials(p.nome)}</div>
         <div style="flex:1;min-width:0">
-          <div class="pasta-card-name">${p.nome}</div>
+          <div class="pasta-card-name-row">
+            <div class="pasta-card-name">${p.nome}</div>
+          </div>
+          ${scoreBadgeHtml(scoreFinal, temHistorico)}
           <div class="pasta-card-cpf">${p.cpf||'CPF não cadastrado'}</div>
           <div class="pasta-card-badges">
             ${p.tipoRenda?`<span class="badge blue">${tipoLabel[p.tipoRenda]||p.tipoRenda}</span>`:''}
@@ -2722,8 +2740,59 @@ function pastaViewOpen(id){
     totalD>0?`<span class="badge ok">${totalD} documento${totalD>1?'s':''}</span>`:'<span class="badge muted">Sem documentos</span>',
   ].filter(Boolean).join('');
 
-  // Body
-  let html='';
+  // SCORE FINAL — seção no topo do modal de visualização
+  const {total:scoreFinal, temHistorico, scoreComp} = calcScoreFinal(p);
+  const scoreFichaVal = p.scoreCredito || 0;
+  const nome = (p.nome||'').toLowerCase().trim();
+  const comp = _comportamento[nome];
+  const scoreCor = scoreFinal>=650?'var(--green)':scoreFinal>=500?'var(--gold)':'var(--red)';
+  const scoreLabel = scoreFinal>=800?'EXCELENTE':scoreFinal>=650?'BOM':scoreFinal>=500?'MÉDIO':scoreFinal>=300?'ALTO RISCO':'CRÍTICO';
+  const circ=226, offset=circ-(circ*(scoreFinal/1000));
+
+  let html=`<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;">
+    <div style="font-size:0.55rem;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:12px">🎯 SCORE FINAL DE CRÉDITO</div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+      <div style="position:relative;width:80px;height:80px;flex-shrink:0">
+        <svg width="80" height="80" viewBox="0 0 88 88"><circle cx="44" cy="44" r="36" fill="none" stroke="var(--border2)" stroke-width="8"/><circle cx="44" cy="44" r="36" fill="none" stroke="${scoreCor}" stroke-width="8" stroke-dasharray="226" stroke-dashoffset="${offset}" stroke-linecap="round" style="transform:rotate(-90deg);transform-origin:44px 44px;transition:stroke-dashoffset 0.8s ease"/></svg>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;line-height:1;color:${scoreCor}">${scoreFinal}</div>
+          <div style="font-size:0.42rem;color:var(--muted);letter-spacing:0.06em">/ 1000</div>
+        </div>
+      </div>
+      <div style="flex:1">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${scoreCor};letter-spacing:0.06em">${scoreLabel}</div>
+        <div style="font-size:0.6rem;color:var(--muted);margin-top:4px;line-height:1.6">
+          ${temHistorico
+            ?`Baseado na ficha cadastral e no histórico real de pagamentos.<br>Ficha: <strong style="color:var(--text)">${scoreFichaVal}/1000</strong> · Comportamento: <strong style="color:${scoreCor}">${scoreComp||0}/1000</strong>`
+            :`Baseado somente na ficha cadastral (sem contratos ainda).<br>Score ficha: <strong style="color:var(--text)">${scoreFichaVal}/1000</strong>`}
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.6rem">
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:10px">
+        <div style="color:var(--muted);font-size:0.52rem;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">📋 Score da Ficha</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${scoreFichaVal>=650?'var(--green)':scoreFichaVal>=500?'var(--gold)':'var(--red)'}">${scoreFichaVal}<span style="font-size:0.55rem;color:var(--muted)">/1000</span></div>
+        <div style="font-size:0.5rem;color:var(--muted);margin-top:2px">Renda, moradia, emprego...</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:10px">
+        <div style="color:var(--muted);font-size:0.52rem;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">📈 Score Comportamental</div>
+        ${comp && comp.qtdContratos>0
+          ?`<div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${(scoreComp||0)>=650?'var(--green)':(scoreComp||0)>=500?'var(--gold)':'var(--red)'}">${scoreComp||0}<span style="font-size:0.55rem;color:var(--muted)">/1000</span></div>
+            <div style="font-size:0.5rem;color:var(--muted);margin-top:2px">${comp.qtdContratos} contrato(s) · ${comp.qtdAtraso} atraso(s)</div>`
+          :`<div style="font-size:0.65rem;color:var(--muted);margin-top:4px">Sem histórico ainda</div>`}
+      </div>
+    </div>
+    ${comp && comp.qtdContratos>0 ? `
+    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;font-size:0.58rem">
+      <span style="color:var(--muted)">Contratos: <strong style="color:var(--text)">${comp.qtdContratos}</strong></span>
+      <span style="color:var(--muted)">Quitados: <strong style="color:var(--green)">${comp.qtdQuitados||0}</strong></span>
+      <span style="color:var(--muted)">Atrasos: <strong style="color:${comp.qtdAtraso>0?'var(--red)':'var(--green)'}">${comp.qtdAtraso}</strong></span>
+      <span style="color:var(--muted)">Relacionamento: <strong style="color:var(--text)">${comp.mesesRelac} meses</strong></span>
+      ${comp.recorrente?`<span style="color:var(--green)">✓ Cliente recorrente</span>`:''}
+      ${comp.temAtraso?`<span style="color:var(--red)">⚠ Em atraso atualmente</span>`:''}
+    </div>` : ''}
+  </div>`;
+
   // Contato
   html+=`<div class="pasta-view-section">CONTATO & LOCALIZAÇÃO</div><div class="pasta-view-grid">`;
   html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">📞 Telefone</div><div class="pasta-view-val">${p.tel||'—'}</div></div>`;
@@ -2925,29 +2994,114 @@ function pastaScoreAuto(){
   g('score-rec-body').innerHTML=corpo.replace(/\n/g,'<br>');
 }
 
-pastaScoreAuto();
+// ── MAPA COMPORTAMENTAL GLOBAL (atualizado pela planilha) ──
+// nome → { qtdContratos, qtdAtraso, qtdQuitados, mesesRelac, recorrente }
+let _comportamento = {};
+
+function atualizarComportamento(clientes) {
+  _comportamento = {};
+  clientes.forEach(c => {
+    _comportamento[c.nome.toLowerCase().trim()] = {
+      qtdContratos: c.qtdContratos || 0,
+      qtdAtraso:    c.qtdAtraso    || 0,
+      qtdQuitados:  c.contratos ? c.contratos.filter(e => e.status === 'quitado').length : 0,
+      mesesRelac:   c.mesesRelac   || 0,
+      recorrente:   c.recorrente   || false,
+      temAtraso:    c.temAtraso    || false,
+      ativo:        c.ativo        || false,
+    };
+  });
+  // NÃO chama pastaRender() aqui — é chamado no finally do loadData
+}
+
+// ── CALCULA SCORE FINAL: ficha (60%) + comportamento (40%) ──
+function calcScoreFinal(pasta) {
+  // Score da ficha (0–1000), salvo na pasta
+  const scoreFicha = pasta.scoreCredito || 0;
+
+  // Dados comportamentais da planilha
+  const nome = (pasta.nome || '').toLowerCase().trim();
+  const comp  = _comportamento[nome];
+
+  if (!comp || comp.qtdContratos === 0) {
+    // Sem histórico — usa só a ficha com peso menor
+    const total = Math.round(scoreFicha * 0.7);
+    return { total, temHistorico: false };
+  }
+
+  // Score comportamental (0–1000)
+  let scoreComp = 500; // base neutra
+
+  // Pontualidade: cada contrato quitado sem atraso = +60, cada atraso = -120
+  const quitSemAtraso = Math.max(0, comp.qtdQuitados - comp.qtdAtraso);
+  scoreComp += quitSemAtraso * 60;
+  scoreComp -= comp.qtdAtraso * 120;
+
+  // Recorrência: cliente que volta é sinal positivo
+  if (comp.recorrente) scoreComp += 80;
+
+  // Relacionamento longo = bom sinal
+  if (comp.mesesRelac >= 12) scoreComp += 60;
+  else if (comp.mesesRelac >= 6) scoreComp += 30;
+
+  // Atualmente em atraso = penalidade forte
+  if (comp.temAtraso) scoreComp -= 200;
+
+  scoreComp = Math.max(0, Math.min(1000, scoreComp));
+
+  // Score final: 60% ficha + 40% comportamento
+  const total = Math.round(scoreFicha * 0.6 + scoreComp * 0.4);
+  return { total: Math.max(0, Math.min(1000, total)), temHistorico: true, scoreComp };
+}
+
+function scoreBadgeHtml(total, temHistorico) {
+  let cls, label, emoji;
+  if (!temHistorico && total === 0) {
+    return `<span class="score-badge sem-dados">— sem dados</span>`;
+  }
+  if (total >= 800)      { cls = 'excelente';  emoji = '🟢'; label = total + ' EXCELENTE'; }
+  else if (total >= 650) { cls = 'bom';        emoji = '🟢'; label = total + ' BOM'; }
+  else if (total >= 500) { cls = 'medio';      emoji = '🟡'; label = total + ' MÉDIO'; }
+  else if (total >= 300) { cls = 'alto-risco'; emoji = '🔴'; label = total + ' RISCO'; }
+  else                   { cls = 'reprovado';  emoji = '🔴'; label = total + ' CRÍTICO'; }
+  const barColor = total >= 650 ? '#06d6a0' : total >= 500 ? '#f0b429' : '#ef476f';
+  return `<span class="score-badge ${cls}" title="Score: ${total}/1000${temHistorico?' (ficha + histórico real)':' (só ficha — sem contratos ainda)'}">${emoji} ${label}</span>
+    <div class="score-mini-bar"><div class="score-mini-fill" style="width:${total/10}%;background:${barColor}"></div></div>`;
+}
+
+let _primeiraVez = true;
 
 async function loadData(){
   const loading=document.getElementById('loading-screen'),error=document.getElementById('error-screen'),main=document.getElementById('main');
-  loading.classList.remove('hidden');error.classList.remove('show');main.classList.remove('visible');
+  // Só mostra a tela de loading na primeira vez — recargas silenciosas não escondem o dashboard
+  if(_primeiraVez){
+    loading.classList.remove('hidden');
+    error.classList.remove('show');
+    main.classList.remove('visible');
+  }
   try{
     const[empT,pagT]=await Promise.all([fetchSheet(GID_EMP),fetchSheetPag()]);
     const empRows=empT.slice(autoSkipCSV(empT)),pagRows=pagT.slice(autoSkipCSV(pagT));
     console.log('📊 Capital Investimentos — emp:',empRows.length,'pag:',pagRows.length);
     render(empRows,pagRows);
-    loading.classList.add('hidden');main.classList.add('visible');
-  }catch(err){
-    console.error(err);loading.classList.add('hidden');error.classList.add('show');
-    document.getElementById('error-msg').textContent='Erro: '+err.message+'. Verifique se a planilha está compartilhada publicamente.';
-    // Mesmo com erro na planilha, mostra o main para o dossiê funcionar
+    loading.classList.add('hidden');
     main.classList.add('visible');
+    error.classList.remove('show');
+  }catch(err){
+    console.error(err);
+    loading.classList.add('hidden');
+    main.classList.add('visible');
+    if(_primeiraVez){
+      error.classList.add('show');
+      document.getElementById('error-msg').textContent='Erro: '+err.message+'. Verifique se a planilha está compartilhada publicamente.';
+    }
   } finally {
-    // Sempre renderiza as pastas do dossiê, independente de erro na planilha
+    _primeiraVez = false;
     pastaRender();
   }
 }
 loadData();
-setInterval(loadData,15*60*1000);
+setInterval(loadData, 15*60*1000);
 </script>
 </body>
 </html>
