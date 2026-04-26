@@ -990,9 +990,48 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     <div class="card-header"><div><div class="card-title">📋 Tabela de Amortização</div><div class="card-desc">Evolução período a período do contrato</div></div><div class="card-badge">DETALHAMENTO</div></div>
     <div class="table-wrap"><table class="sim-table"><thead><tr><th id="sim-th-periodo">Período</th><th>Saldo Inicial</th><th>Juros</th><th>Amortização</th><th>Parcela</th><th>Saldo Final</th></tr></thead><tbody id="sim-tbody"></tbody></table></div>
   </div>
-  <div class="card" id="sim-oportunidade" style="display:none">
-    <div class="card-header"><div><div class="card-title">💸 Custo de Oportunidade</div><div class="card-desc">Quanto você deixa de ganhar ao parcelar em vez de reinvestir o capital mês a mês</div></div><div class="card-badge">ANÁLISE</div></div>
-    <div id="sim-op-content"></div>
+  <div class="card" id="sim-oportunidade">
+    <div class="card-header">
+      <div>
+        <div class="card-title">💸 Custo de Oportunidade — Parcelar vs Reinvestir</div>
+        <div class="card-desc">Compare quanto você recebe parcelando vs reinvestindo o capital a cada ciclo (bola de neve)</div>
+      </div>
+      <div class="card-badge">ANÁLISE</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+      <div>
+        <div class="sim-label" style="margin-bottom:6px">💰 Capital Emprestado (R$)</div>
+        <input class="sim-input" id="op-capital" type="number" placeholder="1000" value="1000" oninput="calcOportunidade()">
+      </div>
+      <div>
+        <div class="sim-label" style="margin-bottom:6px">📈 Taxa de Juros (%)</div>
+        <div style="display:flex;gap:6px">
+          <input class="sim-input" id="op-taxa" type="number" placeholder="10" value="10" step="0.5" oninput="calcOportunidade()" style="flex:1;min-width:0">
+          <select class="sim-select" id="op-taxa-unidade" onchange="calcOportunidade()" style="width:90px;flex-shrink:0">
+            <option value="mensal">% a.m.</option>
+            <option value="semanal">% a.s.</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <div class="sim-label" style="margin-bottom:6px">📅 Prazo</div>
+        <div style="display:flex;gap:6px">
+          <input class="sim-input" id="op-prazo" type="number" placeholder="6" value="6" min="1" oninput="calcOportunidade()" style="flex:1;min-width:0">
+          <select class="sim-select" id="op-prazo-unidade" onchange="calcOportunidade()" style="width:110px;flex-shrink:0">
+            <option value="meses">Meses</option>
+            <option value="semanas">Semanas</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <div class="sim-label" style="margin-bottom:6px">⚙️ Tipo de Juros</div>
+        <select class="sim-select" id="op-tipo" onchange="calcOportunidade()">
+          <option value="simples">Simples</option>
+          <option value="composto">Composto</option>
+        </select>
+      </div>
+    </div>
+    <div id="sim-op-content"><div style="text-align:center;padding:24px;color:var(--muted);font-size:0.72rem">Preencha os parâmetros acima para calcular</div></div>
   </div>
 
   <!-- CALCULADORA DE DESÁGIO MENSAL x SEMANAL -->
@@ -1585,7 +1624,7 @@ document.querySelectorAll('.nav-tab').forEach(tab=>{
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
-    if(tab.dataset.tab === 'simulador') calcDesagio();
+    if(tab.dataset.tab === 'simulador'){ calcDesagio(); calcOportunidade(); }
     if(tab.dataset.tab === 'clientes') {
       iniciarSyncPolling();
     } else {
@@ -2514,62 +2553,83 @@ function simCalc(){
     </tr>
   `).join('');
 
-  // ── CUSTO DE OPORTUNIDADE ─────────────────────────────
-  // Usa a unidade de tempo escolhida pelo usuário (semanas ou meses)
-  // para que a tabela reflita exatamente o que foi configurado na simulação.
-  // ciclosOp  = número de ciclos na unidade do usuário (prazo original)
-  // taxaOp    = taxa por ciclo nessa mesma unidade
 
-  const ciclosOp  = prazo;                          // usa o prazo ORIGINAL do usuário
-  const labelCiclo = prazoUnidade === 'semanas' ? 'Semana' : 'Mês';
+
+  destroyChart('sim');
+  charts.sim=new Chart(document.getElementById('chartSim').getContext('2d'),{
+    type:'bar',
+    data:{labels:tabela.map(t=>`${periodoLabel[0]}${t.periodo}`),datasets:[
+      {label:'Juros',data:tabela.map(t=>t.juros),backgroundColor:'rgba(6,214,160,0.7)',borderRadius:4,borderSkipped:false},
+      {label:'Amortização',data:tabela.map(t=>t.amort),backgroundColor:'rgba(201,146,42,0.7)',borderRadius:4,borderSkipped:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#5a6282',font:{family:'DM Mono',size:10}}},tooltip:{...TOOLTIP}},scales:{x:{stacked:true,grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{stacked:true,grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}
+  });
+}
+
+
+// ── CUSTO DE OPORTUNIDADE — calculadora independente ──────
+function calcOportunidade(){
+  const valor       = parseFloat(document.getElementById('op-capital')?.value) || 1000;
+  const taxa        = parseFloat(document.getElementById('op-taxa')?.value)    || 10;
+  const prazo       = parseInt(document.getElementById('op-prazo')?.value)     || 6;
+  const taxaUnidade = document.getElementById('op-taxa-unidade')?.value        || 'mensal';
+  const prazoUnidade= document.getElementById('op-prazo-unidade')?.value       || 'meses';
+  const tipo        = document.getElementById('op-tipo')?.value                || 'simples';
+  const el          = document.getElementById('sim-op-content');
+  if(!el) return;
+
+  const SEMANAS_POR_MES = 4;
+  const labelCiclo  = prazoUnidade === 'semanas' ? 'Semana' : 'Mês';
   const unidadePlural = prazoUnidade === 'semanas' ? 'semanas' : 'meses';
 
-  // Taxa por ciclo na unidade escolhida pelo usuário
+  // Taxa por ciclo na unidade do prazo escolhido pelo usuário
   let taxaOp;
-  if (prazoUnidade === 'semanas') {
-    // Custo de oportunidade em semanas → usa taxaPeriodo (já está em semanas)
-    taxaOp = taxaPeriodo;
+  if(prazoUnidade === 'semanas'){
+    taxaOp = taxaUnidade === 'mensal'
+      ? (tipo === 'composto' ? Math.pow(1+taxa/100,1/SEMANAS_POR_MES)-1 : (taxa/100)/SEMANAS_POR_MES)
+      : taxa/100;
   } else {
-    // Custo de oportunidade em meses → converte taxaPeriodo para mensal
-    if (taxaUnidade === 'semanal') {
-      taxaOp = tipo === 'composto'
-        ? Math.pow(1 + taxaPeriodo, SEMANAS_POR_MES) - 1   // equiv. composta
-        : taxaPeriodo * SEMANAS_POR_MES;                     // proporcional
-    } else {
-      taxaOp = taxaPeriodo; // já é mensal
-    }
+    taxaOp = taxaUnidade === 'semanal'
+      ? (tipo === 'composto' ? Math.pow(1+taxa/100,SEMANAS_POR_MES)-1 : (taxa/100)*SEMANAS_POR_MES)
+      : taxa/100;
   }
 
-  // Bola de neve: reinveste capital + juros a cada ciclo (juros compostos)
-  let capitalBola = valor;
+  // CENÁRIO A — parcelado (juros simples sobre capital original, prazo = ciclosOp)
+  const jurosA   = tipo === 'simples'
+    ? valor * taxaOp * prazo
+    : valor * (Math.pow(1+taxaOp, prazo) - 1);
+  const totalA   = valor + jurosA;
+  const roiA     = jurosA / valor * 100;
+
+  // CENÁRIO B — bola de neve: reinveste capital+juros a cada ciclo
+  let cap = valor;
   const tabelaBola = [];
-  for(let m = 1; m <= ciclosOp; m++){
-    const jBola = capitalBola * taxaOp;
-    const capitalAntes = capitalBola;
-    capitalBola = capitalAntes + jBola;
-    tabelaBola.push({ciclo: m, capital: capitalAntes, juros: jBola, total: capitalBola});
+  for(let m = 1; m <= prazo; m++){
+    const jBola = cap * taxaOp;
+    const antes = cap;
+    cap = cap + jBola;
+    tabelaBola.push({ciclo:m, capital:antes, juros:jBola, total:cap});
   }
-  const bolaDeNeveReal = capitalBola;
-  const custOp = bolaDeNeveReal - valorTotal;
-  const custOpPct = (custOp / valorTotal * 100);
+  const totalB  = cap;
+  const roiB    = (totalB - valor) / valor * 100;
+  const custOp  = totalB - totalA;
+  const custOpPct = (custOp / totalA * 100);
 
-  const fmtOp = v => 'R$\u00a0' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
-  const opEl = document.getElementById('sim-oportunidade');
-  if(opEl) opEl.style.display='';
-  const opContent = document.getElementById('sim-op-content');
-  if(opContent) opContent.innerHTML=`
+  const fmtOp = v => 'R$\u00a0' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  el.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
       <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px">
         <div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">📋 Cenário A — Parcelado</div>
-        <div style="font-size:0.6rem;color:var(--muted);margin-bottom:8px">Você parcela em ${ciclosOp} ${unidadePlural}, recebe aos poucos</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold)">${fmtOp(valorTotal)}</div>
-        <div style="font-size:0.55rem;color:var(--muted);margin-top:4px">Juros: ${fmtOp(jurosTotal)} · ROI: ${roi.toFixed(1)}%</div>
+        <div style="font-size:0.6rem;color:var(--muted);margin-bottom:8px">Você parcela em ${prazo} ${unidadePlural}, recebe aos poucos</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold)">${fmtOp(totalA)}</div>
+        <div style="font-size:0.55rem;color:var(--muted);margin-top:4px">Juros: ${fmtOp(jurosA)} · ROI: ${roiA.toFixed(1)}%</div>
       </div>
       <div style="background:var(--s1);border:1px solid rgba(6,214,160,0.3);border-radius:10px;padding:14px">
         <div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">🔄 Cenário B — Reinvestimento</div>
-        <div style="font-size:0.6rem;color:var(--muted);margin-bottom:8px">Você empresta por ${ciclosOp} ${unidadePlural} consecutivos, reinvestindo tudo a cada ciclo</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--green)">${fmtOp(bolaDeNeveReal)}</div>
-        <div style="font-size:0.55rem;color:var(--muted);margin-top:4px">Juros: ${fmtOp(bolaDeNeveReal-valor)} · ROI: ${((bolaDeNeveReal-valor)/valor*100).toFixed(1)}%</div>
+        <div style="font-size:0.6rem;color:var(--muted);margin-bottom:8px">Você empresta por ${prazo} ${unidadePlural} consecutivos, reinvestindo tudo a cada ciclo</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--green)">${fmtOp(totalB)}</div>
+        <div style="font-size:0.55rem;color:var(--muted);margin-top:4px">Juros: ${fmtOp(totalB-valor)} · ROI: ${roiB.toFixed(1)}%</div>
       </div>
     </div>
     <div style="background:rgba(239,71,111,0.07);border:1px solid rgba(239,71,111,0.2);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:14px">
@@ -2577,7 +2637,7 @@ function simCalc(){
       <div>
         <div style="font-size:0.58rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">Custo de Oportunidade do Parcelamento</div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--red)">− ${fmtOp(custOp)} <span style="font-size:0.7rem;color:var(--muted)">(−${custOpPct.toFixed(2)}% a menos que reinvestindo)</span></div>
-        <div style="font-size:0.58rem;color:var(--muted);margin-top:4px">Parcelando em ${ciclosOp} ${unidadePlural} você deixa de ganhar <strong style="color:var(--red)">${fmtOp(custOp)}</strong> em relação a contratos de 1 ${labelCiclo.toLowerCase()} reinvestidos consecutivamente.</div>
+        <div style="font-size:0.58rem;color:var(--muted);margin-top:4px">Parcelando em ${prazo} ${unidadePlural} você deixa de ganhar <strong style="color:var(--red)">${fmtOp(custOp)}</strong> em relação a reinvestir a cada ${labelCiclo.toLowerCase()}.</div>
       </div>
     </div>
     <div style="font-size:0.55rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px">📈 Evolução da Bola de Neve (reinvestimento a cada ${labelCiclo.toLowerCase()})</div>
@@ -2600,16 +2660,6 @@ function simCalc(){
       </table>
     </div>
   `;
-
-  destroyChart('sim');
-  charts.sim=new Chart(document.getElementById('chartSim').getContext('2d'),{
-    type:'bar',
-    data:{labels:tabela.map(t=>`${periodoLabel[0]}${t.periodo}`),datasets:[
-      {label:'Juros',data:tabela.map(t=>t.juros),backgroundColor:'rgba(6,214,160,0.7)',borderRadius:4,borderSkipped:false},
-      {label:'Amortização',data:tabela.map(t=>t.amort),backgroundColor:'rgba(201,146,42,0.7)',borderRadius:4,borderSkipped:false}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#5a6282',font:{family:'DM Mono',size:10}}},tooltip:{...TOOLTIP}},scales:{x:{stacked:true,grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{stacked:true,grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}
-  });
 }
 
 // ── CALCULADORA DE DESÁGIO MENSAL x SEMANAL ──────────────
@@ -2727,7 +2777,8 @@ function calcDesagio(){
   `;
 }
 
-// calcDesagio é chamado quando o usuário abre a aba Simulador
+// calcDesagio e calcOportunidade são chamados quando o usuário abre a aba Simulador
+calcOportunidade(); // inicializa com valores padrão
 
 function simPDF(){
   const valor=parseFloat(document.getElementById('sim-valor')?.value)||0;
