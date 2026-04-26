@@ -2863,20 +2863,32 @@ function pastaRender(){
   }).join('');
 }
 
-function pastaExcluir(id){
+async function pastaExcluir(id){
   if(!_pastas[id])return;
   if(!confirm('Excluir a pasta de '+_pastas[id].nome+'? Esta ação não pode ser desfeita.'))return;
-  // Remove também a chave de docs separada
+
+  // 1. Para o polling para não reaparecer durante o processo
+  pararSyncPolling();
+
+  // 2. Remove localmente
   try{localStorage.removeItem('pastas_docs_'+id);}catch(e){}
   delete _pastas[id];
   pastaSalvarLocal();
-  syncStatusUpdate('⏳ Removendo da planilha...', 'var(--gold2)');
-  dossieSyncExcluir(id).then(()=>{
-    syncStatusUpdate('✅ Removido e sincronizado', 'var(--green)');
-  }).catch(()=>{
-    syncStatusUpdate('⚠️ Removido localmente (sync falhou)', 'var(--red)');
-  });
   pastaRender();
+  syncStatusUpdate('⏳ Removendo da planilha...', 'var(--gold2)');
+
+  // 3. Manda o delete pro servidor e aguarda confirmação
+  try{
+    await dossieSyncExcluir(id);
+    // 4. Aguarda o servidor processar
+    await new Promise(r=>setTimeout(r, 1500));
+    syncStatusUpdate('✅ Removido e sincronizado', 'var(--green)');
+  }catch(e){
+    syncStatusUpdate('⚠️ Removido localmente (sync falhou)', 'var(--muted)');
+  }
+
+  // 5. Retoma o polling normalmente
+  iniciarSyncPolling();
 }
 
 function pastaViewOpen(id){
