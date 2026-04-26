@@ -949,8 +949,24 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       <div class="card-header"><div><div class="card-title">🧮 Parâmetros do Empréstimo</div><div class="card-desc">Simule antes de fechar o contrato</div></div><div class="card-badge">SIMULAÇÃO</div></div>
       <div class="sim-form">
         <div class="sim-field"><label class="sim-label">💰 Valor Emprestado (R$)</label><input class="sim-input" id="sim-valor" type="number" placeholder="5000" oninput="simCalc()"></div>
-        <div class="sim-field"><label class="sim-label">📈 Taxa de Juros (% a.m.)</label><input class="sim-input" id="sim-taxa" type="number" placeholder="10" step="0.1" oninput="simCalc()"></div>
-        <div class="sim-field"><label class="sim-label">📅 Prazo (meses)</label><input class="sim-input" id="sim-prazo" type="number" placeholder="3" oninput="simCalc()"></div>
+        <div class="sim-field"><label class="sim-label">📈 Taxa de Juros</label>
+          <div style="display:flex;gap:8px">
+            <input class="sim-input" id="sim-taxa" type="number" placeholder="10" step="0.1" oninput="simCalc()" style="flex:1">
+            <select class="sim-input" id="sim-taxa-unidade" onchange="simCalc()" style="width:110px">
+              <option value="mensal">% a.m.</option>
+              <option value="semanal">% a.s.</option>
+            </select>
+          </div>
+        </div>
+        <div class="sim-field"><label class="sim-label">📅 Prazo</label>
+          <div style="display:flex;gap:8px">
+            <input class="sim-input" id="sim-prazo" type="number" placeholder="3" oninput="simCalc()" style="flex:1">
+            <select class="sim-input" id="sim-prazo-unidade" onchange="simCalc()" style="width:110px">
+              <option value="meses">Meses</option>
+              <option value="semanas">Semanas</option>
+            </select>
+          </div>
+        </div>
         <div class="sim-field"><label class="sim-label">⚙️ Tipo de Juros</label>
           <select class="sim-input" id="sim-tipo" onchange="simCalc()">
             <option value="simples">Simples</option>
@@ -972,7 +988,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   </div>
   <div class="card" id="sim-tabela-card" style="display:none">
     <div class="card-header"><div><div class="card-title">📋 Tabela de Amortização</div><div class="card-desc">Evolução mês a mês do contrato</div></div><div class="card-badge">DETALHAMENTO</div></div>
-    <div class="table-wrap"><table class="sim-table"><thead><tr><th>Mês</th><th>Saldo Inicial</th><th>Juros</th><th>Amortização</th><th>Parcela</th><th>Saldo Final</th></tr></thead><tbody id="sim-tbody"></tbody></table></div>
+    <div class="table-wrap"><table class="sim-table"><thead><tr><th id="sim-th-periodo">Período</th><th>Saldo Inicial</th><th>Juros</th><th>Amortização</th><th>Parcela</th><th>Saldo Final</th></tr></thead><tbody id="sim-tbody"></tbody></table></div>
   </div>
 </div>
 
@@ -2360,49 +2376,78 @@ function simCalc(){
   const taxa=parseFloat(document.getElementById('sim-taxa')?.value)||0;
   const prazo=parseInt(document.getElementById('sim-prazo')?.value)||0;
   const tipo=document.getElementById('sim-tipo')?.value||'simples';
+  const taxaUnidade=document.getElementById('sim-taxa-unidade')?.value||'mensal';
+  const prazoUnidade=document.getElementById('sim-prazo-unidade')?.value||'meses';
   if(!valor||!taxa||!prazo) return;
-  const taxaM=taxa/100;
+
+  const isSemanal = prazoUnidade==='semanas';
+  const periodoLabel = isSemanal ? 'Semana' : 'Mês';
+
+  // Converte taxa para a unidade do prazo
+  // Se taxa é mensal e prazo em semanas: taxa semanal = (1 + taxaMensal)^(1/4.333) - 1
+  // Se taxa é semanal e prazo em meses: taxa mensal = (1 + taxaSemanal)^4.333 - 1
+  let taxaPeriodo;
+  if(taxaUnidade==='mensal' && isSemanal){
+    taxaPeriodo = Math.pow(1 + taxa/100, 1/4.33333) - 1; // mensal → semanal
+  } else if(taxaUnidade==='semanal' && !isSemanal){
+    taxaPeriodo = Math.pow(1 + taxa/100, 4.33333) - 1; // semanal → mensal
+  } else {
+    taxaPeriodo = taxa/100; // mesma unidade
+  }
+
   let jurosTotal,valorTotal,parcela;
   const tabela=[];
+
   if(tipo==='simples'){
-    jurosTotal=valor*taxaM*prazo;
+    jurosTotal=valor*taxaPeriodo*prazo;
     valorTotal=valor+jurosTotal;
     parcela=valorTotal/prazo;
     let saldo=valorTotal;
-    for(let m=1;m<=prazo;m++){
-      const j=valor*taxaM;
+    for(let p=1;p<=prazo;p++){
+      const j=valor*taxaPeriodo;
       const amort=valor/prazo;
       saldo-=parcela;
-      tabela.push({mes:m,saldoInicial:saldo+parcela,juros:j,amort,parcela,saldoFinal:Math.max(0,saldo)});
+      tabela.push({periodo:p,saldoInicial:saldo+parcela,juros:j,amort,parcela,saldoFinal:Math.max(0,saldo)});
     }
   } else {
-    valorTotal=valor*Math.pow(1+taxaM,prazo);
+    valorTotal=valor*Math.pow(1+taxaPeriodo,prazo);
     jurosTotal=valorTotal-valor;
-    parcela=valor*(taxaM*Math.pow(1+taxaM,prazo))/(Math.pow(1+taxaM,prazo)-1);
+    parcela=valor*(taxaPeriodo*Math.pow(1+taxaPeriodo,prazo))/(Math.pow(1+taxaPeriodo,prazo)-1);
     let saldo=valor;
-    for(let m=1;m<=prazo;m++){
-      const j=saldo*taxaM;
+    for(let p=1;p<=prazo;p++){
+      const j=saldo*taxaPeriodo;
       const amort=parcela-j;
       const saldoI=saldo;
       saldo=Math.max(0,saldo-amort);
-      tabela.push({mes:m,saldoInicial:saldoI,juros:j,amort,parcela,saldoFinal:saldo});
+      tabela.push({periodo:p,saldoInicial:saldoI,juros:j,amort,parcela,saldoFinal:saldo});
     }
   }
+
   const roi=jurosTotal/valor*100;
-  // Mostrar resultado
+  // Taxa equivalente para exibição
+  const taxaMensalEq = taxaUnidade==='semanal' ? (Math.pow(1+taxa/100,4.33333)-1)*100 : taxa;
+  const taxaSemanalEq = taxaUnidade==='mensal' ? (Math.pow(1+taxa/100,1/4.33333)-1)*100 : taxa;
+  const taxaEqInfo = isSemanal
+    ? `<div class="sim-res-item"><div class="sim-res-lbl">Taxa Equiv. Mensal</div><div class="sim-res-val" style="color:var(--muted)">${taxaMensalEq.toFixed(2)}% a.m.</div></div>`
+    : `<div class="sim-res-item"><div class="sim-res-lbl">Taxa Equiv. Semanal</div><div class="sim-res-val" style="color:var(--muted)">${taxaSemanalEq.toFixed(2)}% a.s.</div></div>`;
+
   document.getElementById('sim-resultado').style.display='';
   document.getElementById('sim-tabela-card').style.display='';
+  const thPeriodo = document.getElementById('sim-th-periodo');
+  if(thPeriodo) thPeriodo.textContent = periodoLabel;
+
   document.getElementById('sim-results-content').innerHTML=`
     <div class="sim-res-item"><div class="sim-res-lbl">Juros Total</div><div class="sim-res-val" style="color:var(--green)">${fmt(jurosTotal)}</div></div>
     <div class="sim-res-item"><div class="sim-res-lbl">Valor Total</div><div class="sim-res-val" style="color:var(--gold)">${fmt(valorTotal)}</div></div>
-    <div class="sim-res-item"><div class="sim-res-lbl">Parcela Mensal</div><div class="sim-res-val" style="color:var(--blue)">${fmt(parcela)}</div></div>
+    <div class="sim-res-item"><div class="sim-res-lbl">Parcela por ${periodoLabel}</div><div class="sim-res-val" style="color:var(--blue)">${fmt(parcela)}</div></div>
     <div class="sim-res-item"><div class="sim-res-lbl">ROI</div><div class="sim-res-val" style="color:var(--purple)">${roi.toFixed(1)}%</div></div>
     <div class="sim-res-item"><div class="sim-res-lbl">Capital</div><div class="sim-res-val">${fmt(valor)}</div></div>
-    <div class="sim-res-item"><div class="sim-res-lbl">Prazo</div><div class="sim-res-val">${prazo} meses</div></div>
+    <div class="sim-res-item"><div class="sim-res-lbl">Prazo</div><div class="sim-res-val">${prazo} ${isSemanal?'semanas':'meses'}</div></div>
+    ${taxaEqInfo}
   `;
   document.getElementById('sim-tbody').innerHTML=tabela.map(t=>`
     <tr>
-      <td>Mês ${t.mes}</td>
+      <td>${periodoLabel} ${t.periodo}</td>
       <td>${fmt(t.saldoInicial)}</td>
       <td style="color:var(--green)">${fmt(t.juros)}</td>
       <td>${fmt(t.amort)}</td>
@@ -2410,11 +2455,10 @@ function simCalc(){
       <td style="color:${t.saldoFinal<1?'var(--green)':'var(--text)'}">${fmt(t.saldoFinal)}</td>
     </tr>
   `).join('');
-  // Gráfico
   destroyChart('sim');
   charts.sim=new Chart(document.getElementById('chartSim').getContext('2d'),{
     type:'bar',
-    data:{labels:tabela.map(t=>`Mês ${t.mes}`),datasets:[
+    data:{labels:tabela.map(t=>`${periodoLabel[0]}${t.periodo}`),datasets:[
       {label:'Juros',data:tabela.map(t=>t.juros),backgroundColor:'rgba(6,214,160,0.7)',borderRadius:4,borderSkipped:false},
       {label:'Amortização',data:tabela.map(t=>t.amort),backgroundColor:'rgba(201,146,42,0.7)',borderRadius:4,borderSkipped:false}
     ]},
@@ -2427,42 +2471,64 @@ function simPDF(){
   const taxa=parseFloat(document.getElementById('sim-taxa')?.value)||0;
   const prazo=parseInt(document.getElementById('sim-prazo')?.value)||0;
   const tipo=document.getElementById('sim-tipo')?.value||'simples';
+  const taxaUnidade=document.getElementById('sim-taxa-unidade')?.value||'mensal';
+  const prazoUnidade=document.getElementById('sim-prazo-unidade')?.value||'meses';
   const cliente=document.getElementById('sim-cliente')?.value||'Cliente';
   const cpf=document.getElementById('sim-cpf')?.value||'';
   const tel=document.getElementById('sim-tel')?.value||'';
   const inicioRaw=document.getElementById('sim-inicio')?.value||'';
   if(!valor||!taxa||!prazo){alert('Preencha valor, taxa e prazo para gerar a proposta.');return;}
   if(!cliente.trim()||cliente==='Cliente'){alert('Informe o nome do cliente.');return;}
-  const taxaM=taxa/100;
-  const jurosTotal=tipo==='simples'?valor*taxaM*prazo:valor*(Math.pow(1+taxaM,prazo)-1);
+
+  const isSemanal = prazoUnidade==='semanas';
+  const periodoLabel = isSemanal ? 'Semana' : 'Mês';
+  const periodoSufixo = isSemanal ? 'semana' : 'mês';
+  const periodosSufixo = isSemanal ? 'semanas' : 'meses';
+
+  // Converte taxa para a unidade do prazo
+  let taxaPeriodo;
+  if(taxaUnidade==='mensal' && isSemanal) taxaPeriodo = Math.pow(1+taxa/100, 1/4.33333)-1;
+  else if(taxaUnidade==='semanal' && !isSemanal) taxaPeriodo = Math.pow(1+taxa/100, 4.33333)-1;
+  else taxaPeriodo = taxa/100;
+
+  const jurosTotal=tipo==='simples'?valor*taxaPeriodo*prazo:valor*(Math.pow(1+taxaPeriodo,prazo)-1);
   const valorTotal=valor+jurosTotal;
-  const parcela=tipo==='simples'?valorTotal/prazo:valor*(taxaM*Math.pow(1+taxaM,prazo))/(Math.pow(1+taxaM,prazo)-1);
+  const parcela=tipo==='simples'?valorTotal/prazo:valor*(taxaPeriodo*Math.pow(1+taxaPeriodo,prazo))/(Math.pow(1+taxaPeriodo,prazo)-1);
   const roi=(jurosTotal/valor*100).toFixed(1);
   const agora=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+
+  // Taxa equivalente para exibição no PDF
+  const taxaExibicao = taxaUnidade==='mensal'
+    ? `${taxa}% a.m.${isSemanal?' (≈ '+(taxaPeriodo*100).toFixed(2)+'% a.s.)':''}`
+    : `${taxa}% a.s.${!isSemanal?' (≈ '+(taxaPeriodo*100).toFixed(2)+'% a.m.)':''}`;
+
   // Calcular datas de vencimento
   const dataInicio=inicioRaw?new Date(inicioRaw+'T12:00:00'):new Date();
   const vencimentos=[];
-  for(let m=1;m<=Math.min(prazo,prazo);m++){
-    const d=new Date(dataInicio);d.setMonth(d.getMonth()+m);
+  for(let p=1;p<=prazo;p++){
+    const d=new Date(dataInicio);
+    if(isSemanal) d.setDate(dataInicio.getDate()+p*7);
+    else d.setMonth(dataInicio.getMonth()+p);
     vencimentos.push(d);
   }
+
   // Tabela de parcelas
   const tabela=[];
   if(tipo==='simples'){
     let saldo=valor+jurosTotal;
-    for(let m=1;m<=prazo;m++){
-      const j=valor*taxaM;
+    for(let p=1;p<=prazo;p++){
+      const j=valor*taxaPeriodo;
       const amort=valor/prazo;
       saldo-=parcela;
-      tabela.push({mes:m,juros:j,amort,parcela,saldoFinal:Math.max(0,saldo),venc:vencimentos[m-1]});
+      tabela.push({periodo:p,juros:j,amort,parcela,saldoFinal:Math.max(0,saldo),venc:vencimentos[p-1]});
     }
   } else {
     let saldo=valor;
-    for(let m=1;m<=prazo;m++){
-      const j=saldo*taxaM;
+    for(let p=1;p<=prazo;p++){
+      const j=saldo*taxaPeriodo;
       const amort=parcela-j;
       saldo=Math.max(0,saldo-amort);
-      tabela.push({mes:m,juros:j,amort,parcela,saldoFinal:saldo,venc:vencimentos[m-1]});
+      tabela.push({periodo:p,juros:j,amort,parcela,saldoFinal:saldo,venc:vencimentos[p-1]});
     }
   }
   const fmtR=v=>'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -2568,8 +2634,8 @@ function simPDF(){
   <div class="section-title">Resumo da Operação</div>
   <div class="summary-grid">
     <div class="sum-item"><div class="sum-lbl">Valor do Crédito</div><div class="sum-val gold">${fmtR(valor)}</div></div>
-    <div class="sum-item"><div class="sum-lbl">Taxa de Juros</div><div class="sum-val">${taxa}% a.m.</div></div>
-    <div class="sum-item"><div class="sum-lbl">Prazo</div><div class="sum-val">${prazo} mês${prazo>1?'es':''}</div></div>
+    <div class="sum-item"><div class="sum-lbl">Taxa de Juros</div><div class="sum-val">${taxaExibicao}</div></div>
+    <div class="sum-item"><div class="sum-lbl">Prazo</div><div class="sum-val">${prazo} ${prazo>1?periodosSufixo:periodoSufixo}</div></div>
     <div class="sum-item"><div class="sum-lbl">Modalidade</div><div class="sum-val">${tipo==='simples'?'Simples':'Composto'}</div></div>
     <div class="sum-item"><div class="sum-lbl">Total de Juros</div><div class="sum-val green">${fmtR(jurosTotal)}</div></div>
     <div class="sum-item"><div class="sum-lbl">Total a Pagar</div><div class="sum-val">${fmtR(valorTotal)}</div></div>
@@ -2579,9 +2645,9 @@ function simPDF(){
   <!-- PARCELA DESTAQUE -->
   <div class="parcela-box">
     <div class="parcela-left">
-      <div class="parcela-lbl">Valor da parcela mensal</div>
+      <div class="parcela-lbl">Valor da parcela por ${periodoSufixo}</div>
       <div class="parcela-val">${fmtR(parcela)}</div>
-      <div class="parcela-sub">${prazo} parcela${prazo>1?'s':''} · juros ${tipo==='simples'?'simples':'compostos'}</div>
+      <div class="parcela-sub">${prazo} parcela${prazo>1?'s':''} ${isSemanal?'semanais':'mensais'} · juros ${tipo==='simples'?'simples':'compostos'}</div>
     </div>
     <div class="parcela-right">
       <div class="parcela-total-lbl">Valor total do contrato</div>
@@ -2610,7 +2676,7 @@ function simPDF(){
     </tr></thead>
     <tbody>
       ${tabela.map(t=>`<tr>
-        <td>${t.mes}ª parcela</td>
+        <td>${periodoLabel} ${t.periodo}</td>
         <td>${fmtD(t.venc)}</td>
         <td class="td-juros">${fmtR(t.juros)}</td>
         <td>${fmtR(t.amort)}</td>
