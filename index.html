@@ -2623,18 +2623,13 @@ function calcDesagio(){
     { label: 'Equivalência Composta',      taxa: taxaSemEquivComposta,          desc: 'Taxa que dá exatamente o mesmo montante final via juros compostos em 4 semanas.' },
   ];
 
-  // Calcula retorno acumulado de cada cenário (4 semanas reinvestindo)
+  // Calcula retorno acumulado de cada cenário (4 semanas reinvestindo com juros compostos)
+  const fmtDec = v => 'R ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
   const rows = cenarios.map(c => {
     const taxaS = c.taxa / 100;
-    // Reinvestindo 4x (bola de neve simples por semana):
-    let cap = capital;
-    let jurosAcum = 0;
-    for(let i = 0; i < 4; i++){
-      const j = cap * taxaS;
-      jurosAcum += j;
-      cap += j;
-    }
-    const totalAcum = cap;
+    // Juros compostos: capital x (1 + taxa)^4
+    const totalAcum = capital * Math.pow(1 + taxaS, 4);
+    const jurosAcum = totalAcum - capital;
     const roiAcum = (totalAcum - capital) / capital * 100;
     const diffVsMensal = totalAcum - totalMensal;
     return { ...c, taxaS: c.taxa, totalAcum, roiAcum, diffVsMensal, jurosAcum };
@@ -2680,11 +2675,11 @@ function calcDesagio(){
                 <div style="font-size:0.5rem;color:var(--muted)">taxa semanal</div>
               </div>
               <div>
-                <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--green)">${fmt(r.totalAcum)}</div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--green)">${fmtDec(r.totalAcum)}</div>
                 <div style="font-size:0.5rem;color:var(--muted)">acum. 4 semanas</div>
               </div>
               <div>
-                <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${cor}">${sinal}${fmt(r.diffVsMensal)}</div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${cor}">${sinal}${fmtDec(r.diffVsMensal)}</div>
                 <div style="font-size:0.5rem;color:var(--muted)">vs mensal</div>
               </div>
               <div>
