@@ -12,8 +12,8 @@
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh;overflow-x:hidden;}
 body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(ellipse 80% 50% at 20% 0%,rgba(201,146,42,0.05) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(6,214,160,0.03) 0%,transparent 60%);pointer-events:none;z-index:0;}
-#loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:999;transition:opacity 0.6s ease;}
-#loading-screen.hidden{opacity:0;pointer-events:none;}
+#loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:999;}
+#loading-screen.hidden{display:none;}
 
 /* ── TELA DE LOGIN ── */
 #login-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;z-index:1000;}
@@ -431,7 +431,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 <body>
 
 <!-- TELA DE LOGIN -->
-<div id="login-screen">
+<div id="login-screen" class="hidden">
   <div class="login-box">
     <div class="login-bars">
       <span style="height:30%"></span><span style="height:44%"></span><span style="height:58%"></span><span style="height:70%"></span><span style="height:84%"></span><span style="height:94%"></span><span style="height:100%"></span>
@@ -3578,7 +3578,6 @@ let _primeiraVez = true;
 async function loadData(mostrarLoading){
   const loading=document.getElementById('loading-screen'),error=document.getElementById('error-screen'),main=document.getElementById('main');
   if(mostrarLoading || _primeiraVez){
-    // Reinicia a animação da barra recriando o elemento
     const barWrap=loading.querySelector('.load-bar-wrap');
     if(barWrap){
       const novaBar=document.createElement('div');
@@ -3597,18 +3596,17 @@ async function loadData(mostrarLoading){
     const empRows=empT.slice(autoSkipCSV(empT)),pagRows=pagT.slice(autoSkipCSV(pagT));
     console.log('📊 Capital Investimentos — emp:',empRows.length,'pag:',pagRows.length);
     render(empRows,pagRows);
-    loading.classList.add('hidden');
-    main.classList.add('visible');
     error.classList.remove('show');
   }catch(err){
     console.error(err);
-    loading.classList.add('hidden');
-    main.classList.add('visible');
     if(_primeiraVez || mostrarLoading){
       error.classList.add('show');
       document.getElementById('error-msg').textContent='Erro: '+err.message+'. Verifique se a planilha está compartilhada publicamente.';
     }
   } finally {
+    // SEMPRE esconde o loading e mostra o main — independente de erro
+    loading.classList.add('hidden');
+    main.classList.add('visible');
     _primeiraVez = false;
     pastaRender();
   }
@@ -3671,12 +3669,16 @@ function loginTentar() {
 
 function loginEntrar() {
   const tela = document.getElementById('login-screen');
-  tela.style.transition = 'opacity 0.4s ease';
+  tela.style.transition = 'opacity 0.35s ease';
   tela.style.opacity = '0';
-  setTimeout(() => { tela.classList.add('hidden'); }, 420);
   document.getElementById('login-change-link').style.display = '';
-  _primeiraVez = true;
-  loadData(true);
+  setTimeout(() => {
+    tela.classList.add('hidden');
+    tela.style.opacity = '';
+    tela.style.transition = '';
+    _primeiraVez = true;
+    loadData(true);
+  }, 380);
 }
 
 function loginAlterarSenha() {
