@@ -994,6 +994,27 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     <div class="card-header"><div><div class="card-title">💸 Custo de Oportunidade</div><div class="card-desc">Quanto você deixa de ganhar ao parcelar em vez de reinvestir o capital mês a mês</div></div><div class="card-badge">ANÁLISE</div></div>
     <div id="sim-op-content"></div>
   </div>
+
+  <!-- CALCULADORA DE DESÁGIO MENSAL x SEMANAL -->
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">⚖️ Calculadora de Deságio — Mensal vs Semanal</div><div class="card-desc">Encontre a taxa semanal justa em relação à taxa mensal, considerando a velocidade de retorno do capital</div></div>
+      <div class="card-badge">ESTRATÉGIA</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div>
+        <div class="sim-label" style="margin-bottom:6px">📅 Sua taxa mensal de referência (%)</div>
+        <input class="sim-input" id="dag-taxa-mensal" type="number" placeholder="20" step="0.5" value="20" oninput="calcDesagio()">
+        <div style="font-size:0.55rem;color:var(--muted);margin-top:4px">Ex: 20% ao mês em contrato de 1 mês</div>
+      </div>
+      <div>
+        <div class="sim-label" style="margin-bottom:6px">💰 Capital de referência (R$)</div>
+        <input class="sim-input" id="dag-capital" type="number" placeholder="1000" value="1000" oninput="calcDesagio()">
+        <div style="font-size:0.55rem;color:var(--muted);margin-top:4px">Valor que você emprestaria</div>
+      </div>
+    </div>
+    <div id="dag-resultado"></div>
+  </div>
 </div>
 
 <!-- FLUXO 90 DIAS -->
@@ -2495,29 +2516,24 @@ function simCalc(){
   // ── CUSTO DE OPORTUNIDADE ─────────────────────────────
   // Cenário A: este contrato parcelado (já calculado acima)
   // Cenário B: reinvestimento — recebe tudo no fim de cada período e reinveste
-  // Ex: R$1.000 a 20% por 1 mês, reinvestindo 5x → 1000 × (1.2)^5 = R$2.488,32
-  const taxaMensalParaOp = taxaUnidade==='semanal'
-    ? taxaPeriodo * SEMANAS_POR_MES   // converte para mensal proporcional
-    : taxaPeriodo;                     // já é mensal
-  const prazoMesesParaOp = isSemanal ? prazoNorm / SEMANAS_POR_MES : prazoNorm;
+  // Trabalhamos sempre na unidade do prazo normalizado (semanas ou meses)
+  // taxaPeriodo já está na unidade correta (semanal ou mensal)
 
-  // Bola de neve: reinveste capital+juros a cada ciclo
-  const bolaDeNeve = valor * Math.pow(1 + taxaMensalParaOp * SEMANAS_POR_MES, prazoMesesParaOp);
-  // (usa juros simples por ciclo: 1 mês rende 20%, então cada ciclo multiplica por 1.20)
-  const taxaCiclo = taxaUnidade==='semanal' ? taxaPeriodo * SEMANAS_POR_MES : taxaPeriodo;
-  const bolaDeNeveReal = valor * Math.pow(1 + taxaCiclo, prazoMesesParaOp);
-  const custOp = bolaDeNeveReal - valorTotal;
-  const custOpPct = (custOp / valorTotal * 100);
+  const ciclos = prazoNorm; // número de períodos (semanas ou meses)
+  const labelCiclo = isSemanal ? 'Semana' : 'Mês';
 
-  // Tabela bola de neve
+  // Bola de neve: cada ciclo reinveste capital + juros simples do período
   let capitalBola = valor;
   const tabelaBola = [];
-  for(let m = 1; m <= prazoMesesParaOp; m++){
-    const jBola = capitalBola * taxaCiclo;
+  for(let m = 1; m <= ciclos; m++){
+    const jBola = capitalBola * taxaPeriodo;
     const capitalAntes = capitalBola;
-    capitalBola = capitalBola + jBola;
-    tabelaBola.push({mes: m, capital: capitalAntes, juros: jBola, total: capitalBola});
+    capitalBola = capitalAntes + jBola;
+    tabelaBola.push({ciclo: m, capital: capitalAntes, juros: jBola, total: capitalBola});
   }
+  const bolaDeNeveReal = capitalBola;
+  const custOp = bolaDeNeveReal - valorTotal;
+  const custOpPct = (custOp / valorTotal * 100);
 
   const opEl = document.getElementById('sim-oportunidade');
   if(opEl) opEl.style.display='';
@@ -2526,13 +2542,13 @@ function simCalc(){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
       <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px">
         <div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">📋 Cenário A — Parcelado</div>
-        <div style="font-size:0.6rem;color:var(--muted);margin-bottom:8px">Você parcela em ${prazoMesesParaOp} meses, recebe aos poucos</div>
+        <div style="font-size:0.6rem;color:var(--muted);margin-bottom:8px">Você parcela em ${ciclos} ${isSemanal?'semanas':'meses'}, recebe aos poucos</div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold)">${fmt(valorTotal)}</div>
         <div style="font-size:0.55rem;color:var(--muted);margin-top:4px">Juros: ${fmt(jurosTotal)} · ROI: ${roi.toFixed(1)}%</div>
       </div>
       <div style="background:var(--s1);border:1px solid rgba(6,214,160,0.3);border-radius:10px;padding:14px">
         <div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">🔄 Cenário B — Reinvestimento</div>
-        <div style="font-size:0.6rem;color:var(--muted);margin-bottom:8px">Você recebe tudo a cada mês e reinveste ${prazoMesesParaOp}x</div>
+        <div style="font-size:0.6rem;color:var(--muted);margin-bottom:8px">Você recebe tudo a cada ${labelCiclo.toLowerCase()} e reinveste ${ciclos}x</div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--green)">${fmt(bolaDeNeveReal)}</div>
         <div style="font-size:0.55rem;color:var(--muted);margin-top:4px">Juros: ${fmt(bolaDeNeveReal-valor)} · ROI: ${((bolaDeNeveReal-valor)/valor*100).toFixed(1)}%</div>
       </div>
@@ -2542,10 +2558,10 @@ function simCalc(){
       <div>
         <div style="font-size:0.58rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">Custo de Oportunidade do Parcelamento</div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--red)">− ${fmt(custOp)} <span style="font-size:0.7rem;color:var(--muted)">(−${custOpPct.toFixed(1)}% a menos que reinvestindo)</span></div>
-        <div style="font-size:0.58rem;color:var(--muted);margin-top:4px">Parcelando em ${prazoMesesParaOp} meses você deixa de ganhar <strong style="color:var(--red)">${fmt(custOp)}</strong> em relação a reinvestir o capital mês a mês.</div>
+        <div style="font-size:0.58rem;color:var(--muted);margin-top:4px">Parcelando em ${ciclos} ${isSemanal?'semanas':'meses'} você deixa de ganhar <strong style="color:var(--red)">${fmt(custOp)}</strong> em relação a reinvestir a cada ${labelCiclo.toLowerCase()}.</div>
       </div>
     </div>
-    <div style="font-size:0.55rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px">📈 Evolução da Bola de Neve (reinvestimento)</div>
+    <div style="font-size:0.55rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px">📈 Evolução da Bola de Neve (reinvestimento a cada ${labelCiclo.toLowerCase()})</div>
     <div style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:0.6rem">
         <thead><tr style="background:var(--s2)">
@@ -2556,7 +2572,7 @@ function simCalc(){
         </tr></thead>
         <tbody>${tabelaBola.map(r=>`
           <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:8px;color:var(--muted)">Mês ${r.mes}</td>
+            <td style="padding:8px;color:var(--muted)">${labelCiclo} ${r.ciclo}</td>
             <td style="padding:8px;text-align:right;font-family:'DM Mono',monospace">${fmt(r.capital)}</td>
             <td style="padding:8px;text-align:right;font-family:'DM Mono',monospace;color:var(--green)">${fmt(r.juros)}</td>
             <td style="padding:8px;text-align:right;font-family:'DM Mono',monospace;color:var(--gold);font-weight:600">${fmt(r.total)}</td>
@@ -2577,7 +2593,128 @@ function simCalc(){
   });
 }
 
-function simPDF(){
+// ── CALCULADORA DE DESÁGIO MENSAL x SEMANAL ──────────────
+function calcDesagio(){
+  const taxaMensal = parseFloat(document.getElementById('dag-taxa-mensal')?.value) || 20;
+  const capital    = parseFloat(document.getElementById('dag-capital')?.value)     || 1000;
+  const el = document.getElementById('dag-resultado');
+  if(!el) return;
+
+  // ── Base: contrato mensal ─────────────────────────────
+  // 1 contrato de 1 mês a taxaMensal% → retorna capital + juros em 4 semanas
+  const retornoMensal  = capital * taxaMensal / 100;       // juros ganhos
+  const totalMensal    = capital + retornoMensal;          // total recebido
+  const roiMensal      = taxaMensal;                       // % sobre capital
+
+  // ── Cenário semanal: recebe em 1 semana, reinveste 4x ──
+  // Para ser equivalente ao mensal, o retorno total em 4 semanas deve ser igual.
+  // Capital × (1 + taxaSem)^4 = totalMensal
+  // taxaSemEquivComposta = (totalMensal/capital)^(1/4) - 1
+  const taxaSemEquivComposta = (Math.pow(totalMensal / capital, 1/4) - 1) * 100;
+
+  // Taxa proporcional simples: taxaMensal / 4
+  const taxaSemProporcional = taxaMensal / 4;
+
+  // ── Cenários de deságio sugeridos ─────────────────────
+  // Deságio = quanto % a menos que o mensal você cobra por semana
+  // Faz sentido cobrar menos por semana porque o dinheiro volta mais rápido
+  // mas não tão menos a ponto de perder dinheiro no acumulado
+  const cenarios = [
+    { label: 'Sem deságio',         taxa: taxaMensal,              desc: 'Cobra o mesmo % — desvantagem para o cliente pagar semanalmente' },
+    { label: 'Deságio Leve (−10%)', taxa: taxaMensal * 0.90,       desc: 'Pequeno incentivo para pagamento semanal. Ainda muito lucrativo.' },
+    { label: 'Deságio Moderado (−20%)', taxa: taxaMensal * 0.80,   desc: '⭐ Recomendado — equilibra atratividade e retorno acelerado do capital' },
+    { label: 'Deságio Proporcional', taxa: taxaSemProporcional,    desc: 'Taxa exatamente proporcional ao mês (taxaMensal ÷ 4). Matematicamente neutro em juros simples.' },
+    { label: 'Equivalência Composta', taxa: taxaSemEquivComposta,  desc: 'Taxa que dá o mesmo retorno acumulado em 4 semanas via juros compostos.' },
+  ];
+
+  // Calcula retorno acumulado de cada cenário (4 semanas reinvestindo)
+  const rows = cenarios.map(c => {
+    const taxaS = c.taxa / 100;
+    // Reinvestindo 4x (bola de neve simples por semana):
+    let cap = capital;
+    let jurosAcum = 0;
+    for(let i = 0; i < 4; i++){
+      const j = cap * taxaS;
+      jurosAcum += j;
+      cap += j;
+    }
+    const totalAcum = cap;
+    const roiAcum = (totalAcum - capital) / capital * 100;
+    const diffVsMensal = totalAcum - totalMensal;
+    return { ...c, taxaS: c.taxa, totalAcum, roiAcum, diffVsMensal, jurosAcum };
+  });
+
+  el.innerHTML = `
+    <!-- Referência mensal -->
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:16px">
+      <div style="font-size:1.6rem">📅</div>
+      <div style="flex:1">
+        <div style="font-size:0.55rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">Referência — Contrato Mensal (1 mês)</div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap">
+          <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--gold)">${taxaMensal}% a.m.</div><div style="font-size:0.52rem;color:var(--muted)">taxa mensal</div></div>
+          <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--green)">${fmt(retornoMensal)}</div><div style="font-size:0.52rem;color:var(--muted)">juros em 4 semanas</div></div>
+          <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--text)">${fmt(totalMensal)}</div><div style="font-size:0.52rem;color:var(--muted)">total recebido</div></div>
+          <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--purple)">${roiMensal.toFixed(1)}%</div><div style="font-size:0.52rem;color:var(--muted)">ROI 4 semanas</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela de cenários -->
+    <div style="font-size:0.55rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">
+      Cenários de taxa semanal — reinvestindo 4x em 4 semanas
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${rows.map((r,i) => {
+        const isRec = i === 2; // deságio moderado = recomendado
+        const cor = r.diffVsMensal >= 0 ? 'var(--green)' : r.diffVsMensal >= -50 ? 'var(--gold)' : 'var(--red)';
+        const sinal = r.diffVsMensal >= 0 ? '+' : '';
+        return `
+        <div style="background:${isRec?'rgba(6,214,160,0.06)':'var(--s2)'};border:1px solid ${isRec?'rgba(6,214,160,0.3)':'var(--border)'};border-radius:10px;padding:14px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+                ${isRec?'<span style="font-size:0.6rem;background:rgba(6,214,160,0.15);border:1px solid rgba(6,214,160,0.3);color:var(--green);border-radius:4px;padding:1px 7px">⭐ RECOMENDADO</span>':''}
+                <span style="font-size:0.65rem;color:var(--text);font-weight:600">${r.label}</span>
+              </div>
+              <div style="font-size:0.58rem;color:var(--muted);line-height:1.5">${r.desc}</div>
+            </div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;text-align:right">
+              <div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--gold)">${r.taxaS.toFixed(2)}% a.s.</div>
+                <div style="font-size:0.5rem;color:var(--muted)">taxa semanal</div>
+              </div>
+              <div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--green)">${fmt(r.totalAcum)}</div>
+                <div style="font-size:0.5rem;color:var(--muted)">acum. 4 semanas</div>
+              </div>
+              <div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${cor}">${sinal}${fmt(r.diffVsMensal)}</div>
+                <div style="font-size:0.5rem;color:var(--muted)">vs mensal</div>
+              </div>
+              <div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--purple)">${r.roiAcum.toFixed(1)}%</div>
+                <div style="font-size:0.5rem;color:var(--muted)">ROI 4 sem.</div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- Conclusão -->
+    <div style="margin-top:14px;padding:14px;background:rgba(201,146,42,0.05);border:1px solid rgba(201,146,42,0.2);border-radius:10px;font-size:0.62rem;line-height:1.7;color:var(--muted)">
+      💡 <strong style="color:var(--gold2)">Como usar:</strong>
+      Se você cobra <strong style="color:var(--text)">${taxaMensal}% ao mês</strong>, o deságio moderado sugere
+      <strong style="color:var(--green)">${(taxaMensal*0.8).toFixed(2)}% por semana</strong>.
+      Em 4 semanas reinvestindo, você acumula <strong style="color:var(--text)">${fmt(rows[2].totalAcum)}</strong>
+      — apenas <strong style="color:var(--red)">${fmt(Math.abs(rows[2].diffVsMensal))} a menos</strong> que o mensal,
+      mas com capital retornando 4x mais rápido, reduzindo seu risco de inadimplência.
+    </div>
+  `;
+}
+
+// Inicializa a calculadora ao carregar
+setTimeout(calcDesagio, 500);
   const valor=parseFloat(document.getElementById('sim-valor')?.value)||0;
   const taxa=parseFloat(document.getElementById('sim-taxa')?.value)||0;
   const prazo=parseInt(document.getElementById('sim-prazo')?.value)||0;
