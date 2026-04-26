@@ -2617,15 +2617,18 @@ function calcDesagio(){
   const taxaSemProporcional = taxaMensal / 4;
 
   // ── Cenários de deságio sugeridos ─────────────────────
-  // Deságio = quanto % a menos que o mensal você cobra por semana
-  // Faz sentido cobrar menos por semana porque o dinheiro volta mais rápido
-  // mas não tão menos a ponto de perder dinheiro no acumulado
+  // Taxa proporcional semanal = taxaMensal / 4 (matematicamente neutra)
+  // Deságio = você cobra MENOS que o proporcional porque o capital volta mais rápido
+  // Isso beneficia o cliente e ainda é bom para você (capital gira mais)
+  const taxaSemProporcional = taxaMensal / 4; // 20%/4 = 5% — ponto neutro
+  const taxaSemEquivComposta = (Math.pow(totalMensal / capital, 1/4) - 1) * 100; // equiv. composta
+
   const cenarios = [
-    { label: 'Sem deságio',         taxa: taxaMensal,              desc: 'Cobra o mesmo % — desvantagem para o cliente pagar semanalmente' },
-    { label: 'Deságio Leve (−10%)', taxa: taxaMensal * 0.90,       desc: 'Pequeno incentivo para pagamento semanal. Ainda muito lucrativo.' },
-    { label: 'Deságio Moderado (−20%)', taxa: taxaMensal * 0.80,   desc: '⭐ Recomendado — equilibra atratividade e retorno acelerado do capital' },
-    { label: 'Deságio Proporcional', taxa: taxaSemProporcional,    desc: 'Taxa exatamente proporcional ao mês (taxaMensal ÷ 4). Matematicamente neutro em juros simples.' },
-    { label: 'Equivalência Composta', taxa: taxaSemEquivComposta,  desc: 'Taxa que dá o mesmo retorno acumulado em 4 semanas via juros compostos.' },
+    { label: 'Proporcional (sem deságio)', taxa: taxaSemProporcional,          desc: 'Mesmo retorno que o mensal — nenhum benefício para o cliente pagar semanalmente.' },
+    { label: 'Deságio Leve (−10%)',        taxa: taxaSemProporcional * 0.90,   desc: 'Pequeno desconto. Cliente paga um pouco menos por semana. Pouco atrativo.' },
+    { label: '⭐ Deságio Moderado (−20%)', taxa: taxaSemProporcional * 0.80,   desc: 'Recomendado — cliente paga menos por semana, você recebe capital mais rápido e reinveste.' },
+    { label: 'Deságio Agressivo (−30%)',   taxa: taxaSemProporcional * 0.70,   desc: 'Muito atrativo para o cliente. Só vale se você tiver fila de clientes esperando o capital.' },
+    { label: 'Equivalência Composta',      taxa: taxaSemEquivComposta,          desc: 'Taxa que dá exatamente o mesmo montante final via juros compostos em 4 semanas.' },
   ];
 
   // Calcula retorno acumulado de cada cenário (4 semanas reinvestindo)
@@ -2705,11 +2708,16 @@ function calcDesagio(){
     <!-- Conclusão -->
     <div style="margin-top:14px;padding:14px;background:rgba(201,146,42,0.05);border:1px solid rgba(201,146,42,0.2);border-radius:10px;font-size:0.62rem;line-height:1.7;color:var(--muted)">
       💡 <strong style="color:var(--gold2)">Como usar:</strong>
-      Se você cobra <strong style="color:var(--text)">${taxaMensal}% ao mês</strong>, o deságio moderado sugere
-      <strong style="color:var(--green)">${(taxaMensal*0.8).toFixed(2)}% por semana</strong>.
-      Em 4 semanas reinvestindo, você acumula <strong style="color:var(--text)">${fmt(rows[2].totalAcum)}</strong>
-      — apenas <strong style="color:var(--red)">${fmt(Math.abs(rows[2].diffVsMensal))} a menos</strong> que o mensal,
-      mas com capital retornando 4x mais rápido, reduzindo seu risco de inadimplência.
+      Se você cobra <strong style="color:var(--text)">${taxaMensal}% ao mês</strong>, a taxa proporcional semanal seria
+      <strong style="color:var(--text)">${taxaSemProporcional.toFixed(2)}% a.s.</strong>
+      Com o deságio moderado, você cobra
+      <strong style="color:var(--green)">${(taxaSemProporcional*0.8).toFixed(2)}% por semana</strong> —
+      o cliente paga menos por ciclo, mas você recebe o capital de volta toda semana e pode reinvestir,
+      compensando a taxa menor com a velocidade de giro.
+      Em 4 semanas reinvestindo acumula <strong style="color:var(--text)">${fmt(rows[2].totalAcum)}</strong>
+      vs <strong style="color:var(--text)">${fmt(totalMensal)}</strong> no mensal
+      (<strong style="color:${rows[2].diffVsMensal>=0?'var(--green)':'var(--red)'}">
+      ${rows[2].diffVsMensal>=0?'+':''}${fmt(rows[2].diffVsMensal)}</strong>).
     </div>
   `;
 }
