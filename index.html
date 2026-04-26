@@ -1112,11 +1112,11 @@ async function dossieSyncSalvar(pasta) {
 async function dossieSyncExcluir(id) {
   const url = localStorage.getItem('dossie_script_url');
   if (!url) return;
-  try {
-    await syncPost('delete', { id });
-  } catch(e) {
-    console.warn('Sync excluir falhou:', e.message);
-  }
+  // Usa JSONP GET (igual ao list) para ter confirmação real do servidor
+  // POST com no-cors é fire-and-forget e não garante que o servidor processou
+  const data = await jsonpRequest(url + '?action=delete&id=' + encodeURIComponent(id));
+  if (!data || !data.ok) throw new Error(data?.erro || 'Servidor não confirmou o delete');
+  return data;
 }
 
 async function dossieSyncCarregar() {
