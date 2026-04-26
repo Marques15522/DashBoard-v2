@@ -570,6 +570,15 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       <input class="pasta-search-input" id="pasta-search" type="text" placeholder="🔍 Buscar pasta por nome, CPF ou telefone..." oninput="pastaSearchChange()">
       <button class="pasta-new-btn" onclick="pastaModalOpen(null)">＋ Nova Pasta</button>
     </div>
+    <!-- BARRA DE SYNC -->
+    <div id="sync-bar" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:0.58rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">🔗 Sincronização com a Planilha</div>
+        <div id="sync-status-txt" style="font-size:0.62rem;color:var(--muted)">Não configurada — dados salvos só neste dispositivo</div>
+      </div>
+      <button onclick="dossieConfigurarURL()" style="background:rgba(201,146,42,0.1);border:1px solid rgba(201,146,42,0.3);color:var(--gold2);border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.58rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">⚙️ Configurar URL</button>
+      <button onclick="dossieSyncManual()" id="sync-btn" style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.25);color:var(--green);border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.58rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">🔄 Sincronizar</button>
+    </div>
     <div class="pasta-stats-strip" id="pasta-stats-strip">
       <div class="pasta-stat-box"><div class="pasta-stat-val" id="ps-total" style="color:var(--gold)">0</div><div class="pasta-stat-lbl">Pastas Abertas</div></div>
       <div class="pasta-stat-box"><div class="pasta-stat-val" id="ps-docs" style="color:var(--blue)">0</div><div class="pasta-stat-lbl">Documentos</div></div>
@@ -1095,19 +1104,44 @@ async function dossieSyncCarregar() {
   return false;
 }
 
+function syncStatusUpdate(msg, cor) {
+  const el = document.getElementById('sync-status-txt');
+  if (el) { el.textContent = msg; el.style.color = cor || 'var(--muted)'; }
+}
+
+async function dossieSyncManual() {
+  const url = localStorage.getItem('dossie_script_url');
+  if (!url) { dossieConfigurarURL(); return; }
+  const btn = document.getElementById('sync-btn');
+  if (btn) { btn.textContent = '⏳ Sincronizando...'; btn.disabled = true; }
+  syncStatusUpdate('Sincronizando...', 'var(--gold2)');
+  try {
+    // Envia pastas locais para a planilha
+    const pastas = Object.values(_pastas);
+    for (const pasta of pastas) {
+      await dossieSyncSalvar(pasta);
+    }
+    // Baixa da planilha
+    const ok = await dossieSyncCarregar();
+    pastaRender();
+    const agora = new Date().toLocaleTimeString('pt-BR');
+    syncStatusUpdate(`✅ Sincronizado às ${agora} · ${Object.keys(_pastas).length} pasta(s)`, 'var(--green)');
+  } catch(e) {
+    syncStatusUpdate('❌ Erro ao sincronizar: ' + e.message, 'var(--red)');
+  } finally {
+    if (btn) { btn.textContent = '🔄 Sincronizar'; btn.disabled = false; }
+  }
+}
+
 function dossieConfigurarURL() {
   const atual = localStorage.getItem('dossie_script_url') || '';
-  const url = prompt('Cole a URL do Apps Script implantado:', atual);
+  const url = prompt('Cole a URL do Apps Script:\n(Apps Script → Implantar → Gerenciar implantações → URL)', atual);
   if (url && url.startsWith('https://script.google.com')) {
-    localStorage.setItem('dossie_script_url', url);
-    alert('✅ URL salva! Sincronizando...');
-    dossieSyncCarregar().then(ok => {
-      pastaRender();
-      if (ok) alert('✅ Pastas sincronizadas!');
-      else alert('⚠️ Conectado mas sem pastas ainda.');
-    });
+    localStorage.setItem('dossie_script_url', url.trim());
+    syncStatusUpdate('URL configurada. Clique em Sincronizar.', 'var(--gold2)');
+    dossieSyncManual();
   } else if (url !== null) {
-    alert('URL inválida.');
+    alert('URL inválida. Deve começar com https://script.google.com');
   }
 }
 const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18};
@@ -1126,6 +1160,17 @@ document.querySelectorAll('.nav-tab').forEach(tab=>{
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
+    // Ao abrir a aba Clientes, sincroniza automaticamente em background
+    if(tab.dataset.tab === 'clientes' && localStorage.getItem('dossie_script_url')) {
+      syncStatusUpdate('⏳ Buscando atualizações...', 'var(--gold2)');
+      dossieSyncCarregar().then(ok => {
+        pastaRender();
+        if(ok) {
+          const agora = new Date().toLocaleTimeString('pt-BR');
+          syncStatusUpdate('✅ Atualizado às ' + agora + ' · ' + Object.keys(_pastas).length + ' pasta(s)', 'var(--green)');
+        }
+      }).catch(()=> syncStatusUpdate('⚠️ Sem conexão — exibindo dados locais', 'var(--muted)'));
+    }
   });
 });
 
@@ -2486,7 +2531,11 @@ function pastaSalvarLocal(){
   }
 }
 pastaCarregar();
-// pastaRender() é chamado dentro de loadData após o DOM estar visível
+// Atualiza status do sync na barra
+setTimeout(() => {
+  const url = localStorage.getItem('dossie_script_url');
+  if (url) syncStatusUpdate('URL configurada · clique em Sincronizar para atualizar', 'var(--gold2)');
+}, 500);
 
 function pastaTipoRendaChange(){
   const v=document.getElementById('pf-tipo-renda').value;
@@ -2661,7 +2710,14 @@ function pastaSalvar(){
     updatedAt:Date.now()
   };
   pastaSalvarLocal();
-  dossieSyncSalvar(_pastas[id]); // sincroniza com a planilha
+  // Sync automático — sem precisar clicar em nada
+  syncStatusUpdate('⏳ Salvando na planilha...', 'var(--gold2)');
+  dossieSyncSalvar(_pastas[id]).then(()=>{
+    const agora = new Date().toLocaleTimeString('pt-BR');
+    syncStatusUpdate('✅ Salvo e sincronizado às ' + agora, 'var(--green)');
+  }).catch(()=>{
+    syncStatusUpdate('⚠️ Salvo localmente (sync falhou — tente sincronizar manualmente)', 'var(--red)');
+  });
   pastaModalClose();
   pastaRender();
 }
@@ -2732,8 +2788,13 @@ function pastaExcluir(id){
   // Remove também a chave de docs separada
   try{localStorage.removeItem('pastas_docs_'+id);}catch(e){}
   delete _pastas[id];
-  dossieSyncExcluir(id); // sincroniza exclusão com a planilha
   pastaSalvarLocal();
+  syncStatusUpdate('⏳ Removendo da planilha...', 'var(--gold2)');
+  dossieSyncExcluir(id).then(()=>{
+    syncStatusUpdate('✅ Removido e sincronizado', 'var(--green)');
+  }).catch(()=>{
+    syncStatusUpdate('⚠️ Removido localmente (sync falhou)', 'var(--red)');
+  });
   pastaRender();
 }
 
