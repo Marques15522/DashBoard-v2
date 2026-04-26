@@ -2400,8 +2400,8 @@ function simCalc(){
   } else if(taxaUnidade === 'mensal' && prazoUnidade === 'semanas'){
     // Converte taxa mensal para semanal
     taxaPeriodo = tipo === 'composto'
-      ? Math.pow(1 + taxa/100, 1/SEMANAS_POR_MES) - 1   // equivalência exponencial
-      : (taxa/100) / SEMANAS_POR_MES;                     // proporcional
+      ? Math.pow(1 + taxa/100, 1/SEMANAS_POR_MES) - 1   // equivalência exponencial (composto)
+      : (taxa/100) / SEMANAS_POR_MES;                     // proporcional simples: 20% ÷ 4 = 5%
     periodoLabel = 'Semana';
     isSemanal = true;
   } else if(taxaUnidade === 'semanal' && prazoUnidade === 'semanas'){
@@ -2452,8 +2452,8 @@ function simCalc(){
     : taxa;
   const taxaSemanalEq = taxaUnidade === 'mensal'
     ? tipo === 'composto'
-      ? (Math.pow(1+taxa/100, 1/SEMANAS_POR_MES)-1)*100
-      : taxa / SEMANAS_POR_MES
+      ? (Math.pow(1+taxa/100, 1/SEMANAS_POR_MES)-1)*100   // equiv. composta
+      : taxa / SEMANAS_POR_MES                              // proporcional simples: 20÷4=5%
     : taxa;
   const taxaEqInfo = isSemanal
     ? `<div class="sim-res-item"><div class="sim-res-lbl">Taxa Equiv. Mensal</div><div class="sim-res-val" style="color:var(--muted)">${taxaMensalEq.toFixed(2)}% a.m.</div></div>`
