@@ -2607,20 +2607,12 @@ function calcDesagio(){
   const totalMensal    = capital + retornoMensal;          // total recebido
   const roiMensal      = taxaMensal;                       // % sobre capital
 
-  // ── Cenário semanal: recebe em 1 semana, reinveste 4x ──
-  // Para ser equivalente ao mensal, o retorno total em 4 semanas deve ser igual.
-  // Capital × (1 + taxaSem)^4 = totalMensal
-  // taxaSemEquivComposta = (totalMensal/capital)^(1/4) - 1
-  const taxaSemEquivComposta = (Math.pow(totalMensal / capital, 1/4) - 1) * 100;
-
-  // Taxa proporcional simples: taxaMensal / 4
-  const taxaSemProporcional = taxaMensal / 4;
-
   // ── Cenários de deságio sugeridos ─────────────────────
   // Taxa proporcional semanal = taxaMensal / 4 (matematicamente neutra)
   // Deságio = você cobra MENOS que o proporcional porque o capital volta mais rápido
   // Isso beneficia o cliente e ainda é bom para você (capital gira mais)
   const taxaSemProporcional = taxaMensal / 4; // 20%/4 = 5% — ponto neutro
+  // taxaSemEquivComposta = (totalMensal/capital)^(1/4) - 1
   const taxaSemEquivComposta = (Math.pow(totalMensal / capital, 1/4) - 1) * 100; // equiv. composta
 
   const cenarios = [
