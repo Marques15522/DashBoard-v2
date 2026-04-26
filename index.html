@@ -1127,8 +1127,9 @@ async function dossieSyncCarregar() {
     if (data && data.pastas) {
       let novos = 0;
 
-      // 1. Adiciona/atualiza pastas que vieram do servidor
+      // 1. Adiciona/atualiza — mas NUNCA restaura um ID que foi deletado localmente
       Object.entries(data.pastas).forEach(([id, pSheet]) => {
+        if (_deletedIds.has(id)) return; // ignorar — foi apagado localmente
         const pLocal = _pastas[id];
         if (!pLocal || (pSheet.updatedAt >= (pLocal.updatedAt || 0))) {
           _pastas[id] = pSheet;
@@ -1136,11 +1137,11 @@ async function dossieSyncCarregar() {
         }
       });
 
-      // 2. Remove localmente qualquer pasta que NÃO existe mais no servidor
-      // (foi excluída em outro dispositivo)
+      // 2. Remove localmente qualquer ID que sumiu do servidor
+      // (exceto os que já estão na lista negra — já foram tratados)
       const idsServidor = new Set(Object.keys(data.pastas));
       Object.keys(_pastas).forEach(id => {
-        if (!idsServidor.has(id)) {
+        if (!idsServidor.has(id) && !_deletedIds.has(id)) {
           delete _pastas[id];
           try { localStorage.removeItem('pastas_docs_' + id); } catch(e) {}
         }
@@ -1210,14 +1211,13 @@ function destroyChart(k){if(charts[k]){charts[k].destroy();delete charts[k];}}
 
 // Tab switching + auto-sync polling
 let _syncInterval = null;
+let _deletedIds = new Set(); // IDs excluídos localmente — nunca restaurar do servidor
 
 function iniciarSyncPolling() {
-  if (_syncInterval) return; // já rodando
+  if (_syncInterval) return;
   const url = localStorage.getItem('dossie_script_url');
   if (!url) return;
-  // Sincroniza imediatamente ao entrar na aba
   _executarSyncSilencioso();
-  // Depois a cada 30 segundos
   _syncInterval = setInterval(_executarSyncSilencioso, 30000);
 }
 
