@@ -1030,71 +1030,84 @@ const SHEET_ID='1g9336ZjN2jnVoxA5CFQmlaDxTkda7tlz48_EAlKUjr4';
 // Ex: 'https://script.google.com/macros/s/SEU_ID_AQUI/exec'
 const DOSSIE_SCRIPT_URL = localStorage.getItem('dossie_script_url') || '';
 
-// ── SYNC COM GOOGLE SHEETS ───────────────────────────────
-let _syncPendente = false;
+// ── JSONP helper — contorna CORS do Apps Script ──────────
+function jsonpRequest(url) {
+  return new Promise((resolve, reject) => {
+    const cbName = '_jsonp_' + Date.now() + '_' + Math.floor(Math.random()*9999);
+    const script = document.createElement('script');
+    const timeout = setTimeout(() => {
+      delete window[cbName];
+      document.body.removeChild(script);
+      reject(new Error('Timeout JSONP'));
+    }, 10000);
+    window[cbName] = (data) => {
+      clearTimeout(timeout);
+      delete window[cbName];
+      document.body.removeChild(script);
+      resolve(data);
+    };
+    script.src = url + (url.includes('?')?'&':'?') + 'callback=' + cbName + '&t=' + Date.now();
+    script.onerror = () => { clearTimeout(timeout); reject(new Error('Erro ao carregar script JSONP')); };
+    document.body.appendChild(script);
+  });
+}
 
 async function dossieSyncSalvar(pasta) {
-  const url = DOSSIE_SCRIPT_URL || localStorage.getItem('dossie_script_url');
-  if (!url) return; // sem URL configurada, usa só localStorage
+  const url = localStorage.getItem('dossie_script_url');
+  if (!url) return;
   try {
-    await fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'save', pasta }),
-    });
+    // Salva via GET+JSONP (POST tem CORS, GET com JSONP funciona)
+    const pastaEnc = encodeURIComponent(JSON.stringify(pasta));
+    await jsonpRequest(url + '?action=save&pasta=' + pastaEnc);
   } catch(e) {
-    console.warn('Sync dossiê falhou (offline?):', e.message);
+    console.warn('Sync salvar falhou:', e.message);
   }
 }
 
 async function dossieSyncExcluir(id) {
-  const url = DOSSIE_SCRIPT_URL || localStorage.getItem('dossie_script_url');
+  const url = localStorage.getItem('dossie_script_url');
   if (!url) return;
   try {
-    await fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'delete', id }),
-    });
+    await jsonpRequest(url + '?action=delete&id=' + encodeURIComponent(id));
   } catch(e) {
-    console.warn('Sync exclusão falhou:', e.message);
+    console.warn('Sync excluir falhou:', e.message);
   }
 }
 
 async function dossieSyncCarregar() {
-  const url = DOSSIE_SCRIPT_URL || localStorage.getItem('dossie_script_url');
+  const url = localStorage.getItem('dossie_script_url');
   if (!url) return false;
   try {
-    const res = await fetch(url + '?action=list&t=' + Date.now());
-    const data = await res.json();
-    if (data.pastas && Object.keys(data.pastas).length >= 0) {
-      // Merge: sheet tem prioridade se updatedAt for maior
+    const data = await jsonpRequest(url + '?action=list');
+    if (data && data.pastas) {
       Object.entries(data.pastas).forEach(([id, pSheet]) => {
         const pLocal = _pastas[id];
         if (!pLocal || (pSheet.updatedAt > (pLocal.updatedAt || 0))) {
           _pastas[id] = pSheet;
         }
       });
-      pastaSalvarLocal(); // espelha no localStorage
+      pastaSalvarLocal();
       return true;
     }
   } catch(e) {
-    console.warn('Falha ao carregar dossiê da planilha:', e.message);
+    console.warn('Sync carregar falhou:', e.message);
   }
   return false;
 }
 
-// ── Configura URL do script ───────────────────────────────
 function dossieConfigurarURL() {
   const atual = localStorage.getItem('dossie_script_url') || '';
-  const url = prompt('Cole a URL do Apps Script implantado:\n(Extensões → Apps Script → Implantar → Gerenciar implantações → URL)', atual);
+  const url = prompt('Cole a URL do Apps Script implantado:', atual);
   if (url && url.startsWith('https://script.google.com')) {
     localStorage.setItem('dossie_script_url', url);
-    alert('✅ URL salva! Sincronizando pastas...');
+    alert('✅ URL salva! Sincronizando...');
     dossieSyncCarregar().then(ok => {
       pastaRender();
-      if (ok) alert('✅ Pastas sincronizadas com sucesso!');
+      if (ok) alert('✅ Pastas sincronizadas!');
+      else alert('⚠️ Conectado mas sem pastas ainda.');
     });
   } else if (url !== null) {
-    alert('URL inválida. Deve começar com https://script.google.com');
+    alert('URL inválida.');
   }
 }
 const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18};
