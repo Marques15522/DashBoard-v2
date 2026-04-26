@@ -2380,73 +2380,93 @@ function simCalc(){
   const prazoUnidade=document.getElementById('sim-prazo-unidade')?.value||'meses';
   if(!valor||!taxa||!prazo) return;
 
-  const isSemanal = prazoUnidade==='semanas';
-  const periodoLabel = isSemanal ? 'Semana' : 'Mês';
+  // ── Normaliza tudo para a MESMA unidade de tempo ──────
+  // Regra: trabalhamos na unidade da TAXA, convertendo o prazo
+  // Se taxa é semanal e prazo é mensal → converte prazo para semanas EXATAS
+  // 1 mês = 4 semanas exatas (contrato de 1 mês = 4 pagamentos semanais)
+  // Isso evita a inconsistência do 4.33333
+  const SEMANAS_POR_MES = 4; // convenção contratual, não média do calendário
 
-  // Converte taxa para a unidade do prazo
-  // Juros SIMPLES → conversão proporcional (regra de três)
-  // Juros COMPOSTOS → conversão exponencial (equivalência)
-  let taxaPeriodo;
-  if(taxaUnidade==='mensal' && isSemanal){
-    taxaPeriodo = tipo==='composto'
-      ? Math.pow(1+taxa/100, 1/4.33333)-1   // composto: equiv. semanal
-      : (taxa/100)/4.33333;                  // simples: proporcional semanal
-  } else if(taxaUnidade==='semanal' && !isSemanal){
-    taxaPeriodo = tipo==='composto'
-      ? Math.pow(1+taxa/100, 4.33333)-1      // composto: equiv. mensal
-      : (taxa/100)*4.33333;                  // simples: proporcional mensal
+  let taxaPeriodo = taxa / 100; // taxa já na unidade correta
+  let prazoNorm = prazo;        // prazo na unidade correta
+  let periodoLabel, isSemanal;
+
+  if(taxaUnidade === 'semanal' && prazoUnidade === 'meses'){
+    // Converte prazo de meses para semanas (convenção: 1 mês = 4 semanas)
+    prazoNorm = prazo * SEMANAS_POR_MES;
+    periodoLabel = 'Semana';
+    isSemanal = true;
+    // Taxa permanece semanal — sem conversão
+  } else if(taxaUnidade === 'mensal' && prazoUnidade === 'semanas'){
+    // Converte taxa mensal para semanal
+    taxaPeriodo = tipo === 'composto'
+      ? Math.pow(1 + taxa/100, 1/SEMANAS_POR_MES) - 1   // equivalência exponencial
+      : (taxa/100) / SEMANAS_POR_MES;                     // proporcional
+    periodoLabel = 'Semana';
+    isSemanal = true;
+  } else if(taxaUnidade === 'semanal' && prazoUnidade === 'semanas'){
+    periodoLabel = 'Semana';
+    isSemanal = true;
   } else {
-    taxaPeriodo = taxa/100; // mesma unidade — sem conversão
+    // mensal + meses — sem conversão
+    periodoLabel = 'Mês';
+    isSemanal = false;
   }
 
-  let jurosTotal,valorTotal,parcela;
-  const tabela=[];
+  // ── Cálculo ───────────────────────────────────────────
+  let jurosTotal, valorTotal, parcela;
+  const tabela = [];
 
-  if(tipo==='simples'){
-    jurosTotal=valor*taxaPeriodo*prazo;
-    valorTotal=valor+jurosTotal;
-    parcela=valorTotal/prazo;
-    let saldo=valorTotal;
-    for(let p=1;p<=prazo;p++){
-      const j=valor*taxaPeriodo;
-      const amort=valor/prazo;
-      saldo-=parcela;
-      tabela.push({periodo:p,saldoInicial:saldo+parcela,juros:j,amort,parcela,saldoFinal:Math.max(0,saldo)});
+  if(tipo === 'simples'){
+    jurosTotal = valor * taxaPeriodo * prazoNorm;
+    valorTotal = valor + jurosTotal;
+    parcela = valorTotal / prazoNorm;
+    let saldo = valorTotal;
+    for(let p = 1; p <= prazoNorm; p++){
+      const j = valor * taxaPeriodo;
+      const amort = valor / prazoNorm;
+      saldo -= parcela;
+      tabela.push({periodo:p, saldoInicial:saldo+parcela, juros:j, amort, parcela, saldoFinal:Math.max(0,saldo)});
     }
   } else {
-    valorTotal=valor*Math.pow(1+taxaPeriodo,prazo);
-    jurosTotal=valorTotal-valor;
-    parcela=valor*(taxaPeriodo*Math.pow(1+taxaPeriodo,prazo))/(Math.pow(1+taxaPeriodo,prazo)-1);
-    let saldo=valor;
-    for(let p=1;p<=prazo;p++){
-      const j=saldo*taxaPeriodo;
-      const amort=parcela-j;
-      const saldoI=saldo;
-      saldo=Math.max(0,saldo-amort);
-      tabela.push({periodo:p,saldoInicial:saldoI,juros:j,amort,parcela,saldoFinal:saldo});
+    valorTotal = valor * Math.pow(1 + taxaPeriodo, prazoNorm);
+    jurosTotal = valorTotal - valor;
+    parcela = valor * (taxaPeriodo * Math.pow(1+taxaPeriodo, prazoNorm)) / (Math.pow(1+taxaPeriodo, prazoNorm) - 1);
+    let saldo = valor;
+    for(let p = 1; p <= prazoNorm; p++){
+      const j = saldo * taxaPeriodo;
+      const amort = parcela - j;
+      const saldoI = saldo;
+      saldo = Math.max(0, saldo - amort);
+      tabela.push({periodo:p, saldoInicial:saldoI, juros:j, amort, parcela, saldoFinal:saldo});
     }
   }
 
-  const roi=jurosTotal/valor*100;
-  // Taxa equivalente para exibição — proporcional p/ simples, exponencial p/ composto
-  const taxaMensalEq = taxaUnidade==='semanal'
-    ? tipo==='composto'
-      ? (Math.pow(1+taxa/100, 4.33333)-1)*100
-      : (taxa/100)*4.33333*100
+  const roi = jurosTotal / valor * 100;
+
+  // Taxa equivalente para exibição
+  const taxaMensalEq = taxaUnidade === 'semanal'
+    ? tipo === 'composto'
+      ? (Math.pow(1+taxa/100, SEMANAS_POR_MES)-1)*100
+      : taxa * SEMANAS_POR_MES
     : taxa;
-  const taxaSemanalEq = taxaUnidade==='mensal'
-    ? tipo==='composto'
-      ? (Math.pow(1+taxa/100, 1/4.33333)-1)*100
-      : (taxa/100)/4.33333*100
+  const taxaSemanalEq = taxaUnidade === 'mensal'
+    ? tipo === 'composto'
+      ? (Math.pow(1+taxa/100, 1/SEMANAS_POR_MES)-1)*100
+      : taxa / SEMANAS_POR_MES
     : taxa;
   const taxaEqInfo = isSemanal
     ? `<div class="sim-res-item"><div class="sim-res-lbl">Taxa Equiv. Mensal</div><div class="sim-res-val" style="color:var(--muted)">${taxaMensalEq.toFixed(2)}% a.m.</div></div>`
     : `<div class="sim-res-item"><div class="sim-res-lbl">Taxa Equiv. Semanal</div><div class="sim-res-val" style="color:var(--muted)">${taxaSemanalEq.toFixed(2)}% a.s.</div></div>`;
 
+  // ── Exibição ──────────────────────────────────────────
   document.getElementById('sim-resultado').style.display='';
   document.getElementById('sim-tabela-card').style.display='';
   const thPeriodo = document.getElementById('sim-th-periodo');
   if(thPeriodo) thPeriodo.textContent = periodoLabel;
+
+  // Label do prazo para exibição (mostra original do usuário)
+  const prazoLabel = prazoUnidade === 'semanas' ? `${prazo} semanas` : `${prazo} mês/meses (${prazoNorm} semanas)`;
 
   document.getElementById('sim-results-content').innerHTML=`
     <div class="sim-res-item"><div class="sim-res-lbl">Juros Total</div><div class="sim-res-val" style="color:var(--green)">${fmt(jurosTotal)}</div></div>
@@ -2454,7 +2474,7 @@ function simCalc(){
     <div class="sim-res-item"><div class="sim-res-lbl">Parcela por ${periodoLabel}</div><div class="sim-res-val" style="color:var(--blue)">${fmt(parcela)}</div></div>
     <div class="sim-res-item"><div class="sim-res-lbl">ROI</div><div class="sim-res-val" style="color:var(--purple)">${roi.toFixed(1)}%</div></div>
     <div class="sim-res-item"><div class="sim-res-lbl">Capital</div><div class="sim-res-val">${fmt(valor)}</div></div>
-    <div class="sim-res-item"><div class="sim-res-lbl">Prazo</div><div class="sim-res-val">${prazo} ${isSemanal?'semanas':'meses'}</div></div>
+    <div class="sim-res-item"><div class="sim-res-lbl">Prazo</div><div class="sim-res-val">${prazoLabel}</div></div>
     ${taxaEqInfo}
   `;
   document.getElementById('sim-tbody').innerHTML=tabela.map(t=>`
