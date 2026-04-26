@@ -1089,13 +1089,15 @@ async function dossieSyncCarregar() {
   try {
     const data = await jsonpRequest(url + '?action=list');
     if (data && data.pastas) {
+      // Merge: sheet tem prioridade sempre (fonte da verdade)
       Object.entries(data.pastas).forEach(([id, pSheet]) => {
         const pLocal = _pastas[id];
-        if (!pLocal || (pSheet.updatedAt > (pLocal.updatedAt || 0))) {
+        if (!pLocal || (pSheet.updatedAt >= (pLocal.updatedAt || 0))) {
           _pastas[id] = pSheet;
         }
       });
       pastaSalvarLocal();
+      pastaRender(); // força re-render imediato
       return true;
     }
   } catch(e) {
@@ -1116,18 +1118,16 @@ async function dossieSyncManual() {
   if (btn) { btn.textContent = '⏳ Sincronizando...'; btn.disabled = true; }
   syncStatusUpdate('Sincronizando...', 'var(--gold2)');
   try {
-    // Envia pastas locais para a planilha
-    const pastas = Object.values(_pastas);
-    for (const pasta of pastas) {
+    // 1. Envia pastas locais para a planilha
+    for (const pasta of Object.values(_pastas)) {
       await dossieSyncSalvar(pasta);
     }
-    // Baixa da planilha
-    const ok = await dossieSyncCarregar();
-    pastaRender();
+    // 2. Baixa da planilha (já chama pastaRender internamente)
+    await dossieSyncCarregar();
     const agora = new Date().toLocaleTimeString('pt-BR');
     syncStatusUpdate(`✅ Sincronizado às ${agora} · ${Object.keys(_pastas).length} pasta(s)`, 'var(--green)');
   } catch(e) {
-    syncStatusUpdate('❌ Erro ao sincronizar: ' + e.message, 'var(--red)');
+    syncStatusUpdate('❌ Erro: ' + e.message, 'var(--red)');
   } finally {
     if (btn) { btn.textContent = '🔄 Sincronizar'; btn.disabled = false; }
   }
