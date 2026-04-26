@@ -1126,6 +1126,8 @@ async function dossieSyncCarregar() {
     const data = await jsonpRequest(url + '?action=list');
     if (data && data.pastas) {
       let novos = 0;
+
+      // 1. Adiciona/atualiza pastas que vieram do servidor
       Object.entries(data.pastas).forEach(([id, pSheet]) => {
         const pLocal = _pastas[id];
         if (!pLocal || (pSheet.updatedAt >= (pLocal.updatedAt || 0))) {
@@ -1133,6 +1135,17 @@ async function dossieSyncCarregar() {
           novos++;
         }
       });
+
+      // 2. Remove localmente qualquer pasta que NÃO existe mais no servidor
+      // (foi excluída em outro dispositivo)
+      const idsServidor = new Set(Object.keys(data.pastas));
+      Object.keys(_pastas).forEach(id => {
+        if (!idsServidor.has(id)) {
+          delete _pastas[id];
+          try { localStorage.removeItem('pastas_docs_' + id); } catch(e) {}
+        }
+      });
+
       pastaSalvarLocal();
       pastaRender();
       return novos;
