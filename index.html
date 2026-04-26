@@ -2384,15 +2384,19 @@ function simCalc(){
   const periodoLabel = isSemanal ? 'Semana' : 'Mês';
 
   // Converte taxa para a unidade do prazo
-  // Se taxa é mensal e prazo em semanas: taxa semanal = (1 + taxaMensal)^(1/4.333) - 1
-  // Se taxa é semanal e prazo em meses: taxa mensal = (1 + taxaSemanal)^4.333 - 1
+  // Juros SIMPLES → conversão proporcional (regra de três)
+  // Juros COMPOSTOS → conversão exponencial (equivalência)
   let taxaPeriodo;
   if(taxaUnidade==='mensal' && isSemanal){
-    taxaPeriodo = Math.pow(1 + taxa/100, 1/4.33333) - 1; // mensal → semanal
+    taxaPeriodo = tipo==='composto'
+      ? Math.pow(1+taxa/100, 1/4.33333)-1   // composto: equiv. semanal
+      : (taxa/100)/4.33333;                  // simples: proporcional semanal
   } else if(taxaUnidade==='semanal' && !isSemanal){
-    taxaPeriodo = Math.pow(1 + taxa/100, 4.33333) - 1; // semanal → mensal
+    taxaPeriodo = tipo==='composto'
+      ? Math.pow(1+taxa/100, 4.33333)-1      // composto: equiv. mensal
+      : (taxa/100)*4.33333;                  // simples: proporcional mensal
   } else {
-    taxaPeriodo = taxa/100; // mesma unidade
+    taxaPeriodo = taxa/100; // mesma unidade — sem conversão
   }
 
   let jurosTotal,valorTotal,parcela;
@@ -2424,9 +2428,17 @@ function simCalc(){
   }
 
   const roi=jurosTotal/valor*100;
-  // Taxa equivalente para exibição
-  const taxaMensalEq = taxaUnidade==='semanal' ? (Math.pow(1+taxa/100,4.33333)-1)*100 : taxa;
-  const taxaSemanalEq = taxaUnidade==='mensal' ? (Math.pow(1+taxa/100,1/4.33333)-1)*100 : taxa;
+  // Taxa equivalente para exibição — proporcional p/ simples, exponencial p/ composto
+  const taxaMensalEq = taxaUnidade==='semanal'
+    ? tipo==='composto'
+      ? (Math.pow(1+taxa/100, 4.33333)-1)*100
+      : (taxa/100)*4.33333*100
+    : taxa;
+  const taxaSemanalEq = taxaUnidade==='mensal'
+    ? tipo==='composto'
+      ? (Math.pow(1+taxa/100, 1/4.33333)-1)*100
+      : (taxa/100)/4.33333*100
+    : taxa;
   const taxaEqInfo = isSemanal
     ? `<div class="sim-res-item"><div class="sim-res-lbl">Taxa Equiv. Mensal</div><div class="sim-res-val" style="color:var(--muted)">${taxaMensalEq.toFixed(2)}% a.m.</div></div>`
     : `<div class="sim-res-item"><div class="sim-res-lbl">Taxa Equiv. Semanal</div><div class="sim-res-val" style="color:var(--muted)">${taxaSemanalEq.toFixed(2)}% a.s.</div></div>`;
@@ -2487,20 +2499,31 @@ function simPDF(){
 
   // Converte taxa para a unidade do prazo
   let taxaPeriodo;
-  if(taxaUnidade==='mensal' && isSemanal) taxaPeriodo = Math.pow(1+taxa/100, 1/4.33333)-1;
-  else if(taxaUnidade==='semanal' && !isSemanal) taxaPeriodo = Math.pow(1+taxa/100, 4.33333)-1;
-  else taxaPeriodo = taxa/100;
+  if(taxaUnidade==='mensal' && isSemanal){
+    taxaPeriodo = tipo==='composto' ? Math.pow(1+taxa/100,1/4.33333)-1 : (taxa/100)/4.33333;
+  } else if(taxaUnidade==='semanal' && !isSemanal){
+    taxaPeriodo = tipo==='composto' ? Math.pow(1+taxa/100,4.33333)-1 : (taxa/100)*4.33333;
+  } else {
+    taxaPeriodo = taxa/100;
+  }
 
-  const jurosTotal=tipo==='simples'?valor*taxaPeriodo*prazo:valor*(Math.pow(1+taxaPeriodo,prazo)-1);
-  const valorTotal=valor+jurosTotal;
-  const parcela=tipo==='simples'?valorTotal/prazo:valor*(taxaPeriodo*Math.pow(1+taxaPeriodo,prazo))/(Math.pow(1+taxaPeriodo,prazo)-1);
+  // Taxa para exibição no PDF
+  const taxaMensalEqPdf = taxaUnidade==='semanal'
+    ? tipo==='composto' ? (Math.pow(1+taxa/100,4.33333)-1)*100 : (taxa/100)*4.33333*100
+    : taxa;
+  const taxaSemanalEqPdf = taxaUnidade==='mensal'
+    ? tipo==='composto' ? (Math.pow(1+taxa/100,1/4.33333)-1)*100 : (taxa/100)/4.33333*100
+    : taxa;
+  const taxaExibicao = taxaUnidade==='mensal'
+    ? `${taxa}% a.m.${isSemanal?' (≈ '+taxaSemanalEqPdf.toFixed(2)+'% a.s.)':''}`
+    : `${taxa}% a.s. · equiv. ${taxaMensalEqPdf.toFixed(2)}% a.m.`;
+
+  // Cálculos financeiros
+  const jurosTotal = tipo==='simples' ? valor*taxaPeriodo*prazo : valor*(Math.pow(1+taxaPeriodo,prazo)-1);
+  const valorTotal = valor+jurosTotal;
+  const parcela = tipo==='simples' ? valorTotal/prazo : valor*(taxaPeriodo*Math.pow(1+taxaPeriodo,prazo))/(Math.pow(1+taxaPeriodo,prazo)-1);
   const roi=(jurosTotal/valor*100).toFixed(1);
   const agora=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
-
-  // Taxa equivalente para exibição no PDF
-  const taxaExibicao = taxaUnidade==='mensal'
-    ? `${taxa}% a.m.${isSemanal?' (≈ '+(taxaPeriodo*100).toFixed(2)+'% a.s.)':''}`
-    : `${taxa}% a.s.${!isSemanal?' (≈ '+(taxaPeriodo*100).toFixed(2)+'% a.m.)':''}`;
 
   // Calcular datas de vencimento
   const dataInicio=inicioRaw?new Date(inicioRaw+'T12:00:00'):new Date();
