@@ -70,9 +70,11 @@ header{position:sticky;top:0;z-index:50;background:rgba(7,9,14,0.93);backdrop-fi
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(6,214,160,0.4);}50%{opacity:0.7;box-shadow:0 0 0 4px rgba(6,214,160,0);}}
 .refresh-btn{padding:6px 16px;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;font-family:'DM Mono',monospace;font-size:0.68rem;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s;}
 .refresh-btn:hover{border-color:var(--gold);color:var(--gold);}
-.nav-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto;}
-.nav-tab{padding:12px 20px;font-size:0.72rem;letter-spacing:0.1em;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s;text-transform:uppercase;user-select:none;}
+.nav-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.nav-tab{padding:12px 16px;font-size:0.68rem;letter-spacing:0.08em;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s;text-transform:uppercase;user-select:none;flex-shrink:0;}
 .nav-tab:hover{color:var(--text);}
+.nav-tab.active{color:var(--gold2);border-bottom-color:var(--gold2);}
 .nav-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
@@ -111,24 +113,6 @@ header{position:sticky;top:0;z-index:50;background:rgba(7,9,14,0.93);backdrop-fi
 .risk-score-val{font-family:'Bebas Neue',sans-serif;font-size:1rem;line-height:1;}
 .risk-bar-bg{height:5px;border-radius:3px;background:var(--border2);overflow:hidden;}
 .risk-bar-fill{height:100%;border-radius:3px;transition:width 1s ease;}
-.month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
-.month-day-name{text-align:center;font-size:0.52rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;padding:4px 0 6px;}
-.month-day-cell{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:5px 4px;min-height:64px;display:flex;flex-direction:column;gap:2px;cursor:default;}
-.month-day-cell.other-month{opacity:0.25;}
-.month-day-cell.today{border-color:var(--gold);background:rgba(201,146,42,0.04);}
-.month-day-cell.has-payment{border-color:var(--green);background:rgba(6,214,160,0.04);}
-.month-day-cell.atraso-day{border-color:var(--red);background:rgba(239,71,111,0.04);}
-.month-day-num{font-family:'Bebas Neue',sans-serif;font-size:0.88rem;color:var(--muted);line-height:1;}
-.month-day-cell.today .month-day-num{color:var(--gold);}
-.month-day-cell.has-payment .month-day-num{color:var(--green);}
-.month-day-cell.atraso-day .month-day-num{color:var(--red);}
-.month-day-total{font-size:0.46rem;color:var(--green);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.month-day-total.atraso{color:var(--red);}
-.month-day-chips{display:flex;flex-direction:column;gap:1px;margin-top:1px;}
-.month-chip{background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:2px;padding:1px 3px;font-size:0.45rem;color:var(--green);line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.month-chip.atraso{background:rgba(239,71,111,0.08);border-color:rgba(239,71,111,0.25);color:var(--red);}
-.month-more{font-size:0.42rem;color:var(--muted);margin-top:1px;}
-/* legado — mantido para não quebrar nada */
 .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
 .day-col{text-align:center;}
 .day-name{font-size:0.52rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px;}
@@ -1015,10 +999,10 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
 <!-- AGENDA -->
 <div id="tab-agenda" class="tab-panel">
-  <div class="section-label">VENCIMENTOS DO MÊS</div>
+  <div class="section-label">VENCIMENTOS DESTA SEMANA</div>
   <div class="card">
-    <div class="card-header"><div><div class="card-title">📅 Calendário Mensal</div><div class="card-desc">Quem paga e quanto entra cada dia</div></div><div id="monthCalendarNav" style="display:flex;align-items:center;gap:8px"><button onclick="monthCalendarPrev()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.75rem;font-family:'DM Mono',monospace">‹</button><span id="monthCalendarTitle" style="font-family:'Bebas Neue',sans-serif;font-size:0.88rem;letter-spacing:0.1em;color:var(--text);white-space:nowrap"></span><button onclick="monthCalendarNext()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.75rem;font-family:'DM Mono',monospace">›</button></div></div>
-    <div id="weekCalendar"></div>
+    <div class="card-header"><div><div class="card-title">📅 Calendário Semanal</div><div class="card-desc">Quem paga e quanto entra cada dia</div></div><div class="card-badge">SEMANAL</div></div>
+    <div class="week-grid" id="weekCalendar"></div>
     <div style="margin-top:20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:0.7rem;letter-spacing:0.2em;color:var(--muted);margin-bottom:8px">📋 LISTA DE COBRANÇA</div><div id="cobrancaList"></div></div>
   </div>
   <div class="section-label">CONTRATOS VENCENDO EM 30 DIAS</div>
@@ -1692,7 +1676,14 @@ function doGet(e) {
     </div>`;
   document.body.appendChild(modal);
 }
-const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18};
+const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,valorTotal:12,totalPago:13,saldo:14,jProx:15,parcelas:16,status:17,proxVenc:18,obs:19};
+// unidade (semanal/mensal) é derivada do campo Tipo Juros ou da coluna de observações
+function getUnidade(row){
+  const tj = String(row[CE.tipoJuros]||'').toLowerCase();
+  const obs = String(row[CE.obs]||'').toLowerCase();
+  if(tj.includes('semanal')||obs.includes('semanal')) return 'semanal';
+  return 'mensal';
+}
 const CP={id:0,tipo:2,valor:3,data:4,juros:5};
 const GID_EMP=147333899, GID_PAG=647642652;
 const fmt=v=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
@@ -1810,7 +1801,7 @@ function render(empRows,pagRows){
 
   const emps=empRows
     .filter(r=>r[CE.id]&&String(r[CE.id]).trim().toUpperCase().startsWith('EMP'))
-    .map(r=>({id:String(r[CE.id]).trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital:parseNum(r[CE.cap]),data:parseDate(r[CE.data]),taxa:parseTaxa(r[CE.taxa]),prazo:parseNum(r[CE.prazo]),tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal:parseNum(r[CE.jTotal]),saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status:parseStatus(r[CE.status]),proxVenc:parseDate(r[CE.proxVenc]),vencContrato:parseDate(r[CE.vencContrato])}))
+    .map(r=>({id:String(r[CE.id]).trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital:parseNum(r[CE.cap]),data:parseDate(r[CE.data]),taxa:parseTaxa(r[CE.taxa]),prazo:parseNum(r[CE.prazo]),tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal:parseNum(r[CE.jTotal]),saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status:parseStatus(r[CE.status]),proxVenc:parseDate(r[CE.proxVenc]),vencContrato:parseDate(r[CE.vencContrato]),unidade:getUnidade(r)}))
     .filter(e=>e.status!==null&&e.capital>0);
 
   const pags=pagRows
@@ -1835,8 +1826,10 @@ function render(empRows,pagRows){
   const ticket=abertos.length?totalCap/abertos.length:0;
   const inadimPct=abertos.length?atrasado.length/abertos.length:0;
   const lucroReal=pags.reduce((s,p)=>s+p.juros,0);
-  const prazoMedio=abertos.length?abertos.reduce((s,e)=>s+e.prazo,0)/abertos.length:0;
-  const taxaMediaGlobal=abertos.length?abertos.reduce((s,e)=>s+e.taxa,0)/abertos.length:0.1;
+  // prazoMeses: normaliza semanais para meses (4 semanas = 1 mês) para comparar igual
+  const prazoMedio=abertos.length?abertos.reduce((s,e)=>s+(e.unidade==='semanal'?e.prazo/4:e.prazo),0)/abertos.length:0;
+  // taxaMediaGlobal: converte taxa semanal → mensal proporcional para projeções mensais
+  const taxaMediaGlobal=abertos.length?abertos.reduce((s,e)=>s+(e.unidade==='semanal'?e.taxa*4:e.taxa),0)/abertos.length:0.1;
   const em7=new Date(hoje);em7.setDate(hoje.getDate()+7);
   const proxSemana=abertos.filter(e=>e.proxVenc&&e.proxVenc>=hoje&&e.proxVenc<=em7).reduce((s,e)=>s+e.jProx,0);
 
@@ -1894,7 +1887,10 @@ function render(empRows,pagRows){
   document.getElementById('kpi-cli-ativos').textContent=cliAtivos.length;
   document.getElementById('kpi-cli-sub').textContent=cliInativos.length+' inativos';
   document.getElementById('kpi-realizado').textContent=fmt(lucroReal);
+  const temSemanais=abertos.some(e=>e.unidade==='semanal');
   document.getElementById('kpi-prazo').textContent=prazoMedio.toFixed(1);
+  const prazoSub=document.querySelector('#kpi-prazo')?.closest('.kpi')?.querySelector('.kpi-sub');
+  if(prazoSub) prazoSub.textContent=temSemanais?'meses (normalizado)':'meses';
   document.getElementById('cli-ativos-n').textContent=cliAtivos.length;
   document.getElementById('cli-inativos-n').textContent=cliInativos.length;
   document.getElementById('cli-recorrencia').textContent=pct(recorrPct);
@@ -2045,7 +2041,7 @@ function render(empRows,pagRows){
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div class="atraso-info">
           <span class="atraso-nome">${e.nome||e.id}</span>
-          <span class="atraso-sub">${e.id} · Capital: ${fmt(e.capital)} · Saldo: ${fmt(e.saldo||e.capital)} · vencia ${e.proxVenc?e.proxVenc.toLocaleDateString('pt-BR'):'—'}</span>
+          <span class="atraso-sub">${e.id} · ${fmt(e.capital)} · ${e.prazo} ${e.unidade==='semanal'?'sem.':'m.'} · ${e.unidade==='semanal'?'<span style=\'background:rgba(155,93,229,0.15);color:#9b5de5;border-radius:3px;padding:1px 5px;font-size:0.5rem\'>⚡ SEMANAL</span> · ':''} vencia ${e.proxVenc?e.proxVenc.toLocaleDateString('pt-BR'):'—'}</span>
         </div>
         <div class="atraso-dias" style="color:${cor};flex-shrink:0;margin-left:12px">${e.dias>0?e.dias:'?'}<span>${e.dias>0?'dias':'sem data'}</span></div>
       </div>
@@ -2139,7 +2135,8 @@ function render(empRows,pagRows){
   document.getElementById('profileGrid').innerHTML=clientes.map(c=>{const cl=cluster(c);const ini=c.nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();const sc=calcScore(c);const corSc=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';return`<div class="profile-card"><div class="profile-top"><div class="p-avatar">${ini}</div><div class="p-name">${c.nome}</div><div class="p-cluster ${cl.cls}">${cl.lbl}</div></div><div class="p-stats"><div class="pstat"><div class="pstat-lbl">Capital Total</div><div class="pstat-val" style="color:var(--gold)">${fmt(c.totalCap)}</div></div><div class="pstat"><div class="pstat-lbl">Lucro Previsto</div><div class="pstat-val" style="color:var(--green)">${fmt(c.totalJuros)}</div></div><div class="pstat"><div class="pstat-lbl">Contratos</div><div class="pstat-val">${c.qtdContratos}</div></div><div class="pstat"><div class="pstat-lbl">Score Risco</div><div class="pstat-val" style="color:${corSc}">${sc}</div></div><div class="pstat"><div class="pstat-lbl">Relacionamento</div><div class="pstat-val" style="color:var(--blue)">${c.mesesRelac}m</div></div><div class="pstat"><div class="pstat-lbl">Status</div><div class="pstat-val" style="color:${c.ativo?'var(--green)':'var(--muted)'}">${c.ativo?'ATIVO':'INATIVO'}</div></div></div></div>`;}).join('');
 
   // HISTÓRICO PAGAMENTOS
-  document.getElementById('histList').innerHTML=[...clientes].sort((a,b)=>b.totalPago-a.totalPago).map(c=>{const isAt=c.temAtraso,isQ=c.soQuitados;const st=isQ?`<span class="badge ok">✅ QUITADO</span>`:isAt?`<span class="badge bad">⚠️ ATRASO</span>`:`<span class="badge ok">✓ EM DIA</span>`;const rec=c.recorrente?`<span class="badge blue">↩ RECORRENTE</span>`:'';return`<div class="hist-row"><span class="hist-nome">${c.nome}</span><div class="hist-badges"><span class="badge muted">${c.qtdContratos} contrato(s)</span><span class="badge muted">${fmt(c.totalPago)}</span>${rec}${st}</div></div>`;}).join('');
+  document.getElementById('histList').innerHTML=[...clientes].sort((a,b)=>b.totalPago-a.totalPago).map(c=>{const isAt=c.temAtraso,isQ=c.soQuitados;const st=isQ?`<span class="badge ok">✅ QUITADO</span>`:isAt?`<span class="badge bad">⚠️ ATRASO</span>`:`<span class="badge ok">✓ EM DIA</span>`;const rec=c.recorrente?`<span class="badge blue">↩ RECORRENTE</span>`:'';const temSem=c.contratos.some(e=>e.unidade==='semanal');const semBadge=temSem?`<span class="badge" style="background:rgba(155,93,229,0.15);color:#9b5de5;border:1px solid rgba(155,93,229,0.3)">⚡ semanal</span>`:'';
+return`<div class="hist-row"><span class="hist-nome">${c.nome}</span><div class="hist-badges"><span class="badge muted">${c.qtdContratos} contrato(s)</span><span class="badge muted">${fmt(c.totalPago)}</span>${semBadge}${rec}${st}</div></div>`;}).join('');
 
   // COMPARATIVO MENSAL
   const mesAt=hoje.getMonth(),anoAt=hoje.getFullYear();
@@ -2188,16 +2185,13 @@ function render(empRows,pagRows){
     <div style="font-size:0.52rem;color:var(--muted2);margin-top:8px">* Projeção assume reinvestimento total dos juros mensalmente (juros compostos)</div>
   ` : `<div style="color:var(--muted);font-size:0.68rem;padding:20px 0;text-align:center">Dados insuficientes para projeção.</div>`;
 
-  // CALENDÁRIO MENSAL
+  // CALENDÁRIO SEMANAL
   const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  window._calAbertos=abertos; window._calHoje=hoje; window._calFmt=fmt;
-  if(window._calMes===undefined){window._calMes=hoje.getMonth();window._calAno=hoje.getFullYear();}
-  renderMonthCalendar();
-
-  // LISTA DE COBRANÇA — mostra todos do mês atual
   const iniSem=new Date(hoje);iniSem.setDate(hoje.getDate()-hoje.getDay());
   const semana=Array.from({length:7},(_,i)=>{const d=new Date(iniSem);d.setDate(iniSem.getDate()+i);d.setHours(0,0,0,0);const fim=new Date(d);fim.setHours(23,59,59,999);const venc=abertos.filter(e=>e.proxVenc&&e.proxVenc>=d&&e.proxVenc<=fim);return{dia:d.getDate(),nome:DIAS[i],isToday:d.getTime()===hoje.getTime(),total:venc.reduce((s,e)=>s+e.jProx,0),vencimentos:venc};});
+  document.getElementById('weekCalendar').innerHTML=semana.map(d=>`<div class="day-col"><div class="day-name">${d.nome}</div><div class="day-box ${d.isToday?'today':''} ${d.total>0?'has-payment':''}"><div class="day-num">${d.dia}</div>${d.total>0?`<div style="font-size:0.5rem;color:var(--green)">${fmt(d.total)}</div><div class="day-clients">${d.vencimentos.map(e=>`<div class="day-chip ${e.status==='atraso'?'atraso':''}">${e.nome||e.id}<span class="chip-val">${fmt(e.jProx)}${e.status==='atraso'?' ⚠️':''}</span></div>`).join('')}</div>`:`<div class="day-empty">—</div>`}</div></div>`).join('');
+
+  // LISTA DE COBRANÇA
   const todosV=semana.flatMap(d=>d.vencimentos.map(e=>({...e,diaVenc:d})));
   document.getElementById('cobrancaList').innerHTML=todosV.length===0?`<div style="color:var(--muted);font-size:0.68rem;padding:12px 0">Nenhum vencimento esta semana.</div>`:[...todosV].sort((a,b)=>(a.status==='atraso'?-1:1)-(b.status==='atraso'?-1:1)||a.diaVenc.dia-b.diaVenc.dia).map(e=>{const isAt=e.status==='atraso';return`<div class="cobr-row"><div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:0.72rem;color:var(--text)">${e.nome||e.id}</span><span style="font-size:0.57rem;color:var(--muted)">${e.id} · vence ${e.diaVenc.nome} ${e.diaVenc.dia}</span></div><div style="display:flex;align-items:center;gap:10px"><span class="badge ${isAt?'bad':'ok'}">${isAt?'⚠️ ATRASO':'✓ EM DIA'}</span><span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${isAt?'var(--red)':'var(--green)'}">${fmt(e.jProx)}</span></div></div>`;}).join('');
 
@@ -3318,7 +3312,7 @@ function renderFluxo90(abertos, hoje){
     const cor=diasRestantes<=7?'var(--red)':diasRestantes<=30?'var(--gold2)':'var(--green)';
     return`<div class="f90-venc-item">
       <div><div style="font-size:0.65rem;color:var(--text);font-weight:500">${e.nome}</div>
-      <div style="font-size:0.52rem;color:var(--muted);margin-top:2px">${e.proxVenc.toLocaleDateString('pt-BR')} · ${e.id}</div></div>
+      <div style="font-size:0.52rem;color:var(--muted);margin-top:2px">${e.proxVenc.toLocaleDateString('pt-BR')} · ${e.id}${e.unidade==='semanal'?' · <span style="color:#9b5de5;font-size:0.48rem">⚡ semanal</span>':''}</div></div>
       <div style="text-align:right"><div style="font-size:0.68rem;color:${cor};font-family:'Bebas Neue',sans-serif">${fmt(e.jProx)}</div>
       <div style="font-size:0.5rem;color:var(--muted)">${diasRestantes}d</div></div>
     </div>`;
@@ -4550,79 +4544,6 @@ function loginSair() {
     setTimeout(() => document.getElementById('login-senha').focus(), 200);
   }
 })();
-
-// ── CALENDÁRIO MENSAL ─────────────────────────────────────
-window._calMes = undefined;
-window._calAno = undefined;
-
-function renderMonthCalendar(){
-  const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const mes=window._calMes, ano=window._calAno;
-  const hoje=window._calHoje||new Date();
-  const abertos=window._calAbertos||[];
-  const fmt=window._calFmt||(v=>v);
-  const titulo=document.getElementById('monthCalendarTitle');
-  if(titulo) titulo.textContent=MESES[mes]+' '+ano;
-
-  const primDia=new Date(ano,mes,1).getDay();
-  const diasMes=new Date(ano,mes+1,0).getDate();
-  const diasMesAnt=new Date(ano,mes,0).getDate();
-
-  // Mapeia vencimentos por dia do mês
-  const mapVenc={};
-  abertos.forEach(e=>{
-    if(!e.proxVenc) return;
-    const d=e.proxVenc;
-    if(d.getFullYear()===ano&&d.getMonth()===mes){
-      const k=d.getDate();
-      if(!mapVenc[k]) mapVenc[k]=[];
-      mapVenc[k].push(e);
-    }
-  });
-
-  const hojeStr=hoje.getFullYear()+'-'+hoje.getMonth()+'-'+hoje.getDate();
-
-  let cells=[];
-  // Dias do mês anterior
-  for(let i=primDia-1;i>=0;i--) cells.push({day:diasMesAnt-i,cur:false,venc:[]});
-  // Dias do mês atual
-  for(let d=1;d<=diasMes;d++){
-    const isToday=(ano===hoje.getFullYear()&&mes===hoje.getMonth()&&d===hoje.getDate());
-    cells.push({day:d,cur:true,isToday,venc:mapVenc[d]||[]});
-  }
-  // Completar grade até múltiplo de 7
-  let nextDay=1;
-  while(cells.length%7!==0) cells.push({day:nextDay++,cur:false,venc:[]});
-
-  const header=DIAS.map(n=>`<div class="month-day-name">${n}</div>`).join('');
-  const body=cells.map(c=>{
-    const hasAt=c.venc.some(e=>e.status==='atraso');
-    const hasPay=c.venc.length>0;
-    let cls='month-day-cell';
-    if(!c.cur) cls+=' other-month';
-    if(c.isToday) cls+=' today';
-    else if(hasAt) cls+=' atraso-day';
-    else if(hasPay) cls+=' has-payment';
-    const total=c.venc.reduce((s,e)=>s+e.jProx,0);
-    const chips=c.venc.slice(0,3).map(e=>`<div class="month-chip ${e.status==='atraso'?'atraso':''}">${(e.nome||e.id||'').split(' ')[0]}</div>`).join('');
-    const mais=c.venc.length>3?`<div class="month-more">+${c.venc.length-3} mais</div>`:'';
-    const totalHtml=hasPay?`<div class="month-day-total${hasAt?' atraso':''}">${fmt(total)}</div>`:'';
-    return `<div class="${cls}"><div class="month-day-num">${c.day}</div>${totalHtml}<div class="month-day-chips">${chips}${mais}</div></div>`;
-  }).join('');
-
-  const el=document.getElementById('weekCalendar');
-  if(el) el.innerHTML=`<div class="month-grid">${header}${body}</div>`;
-}
-
-function monthCalendarPrev(){
-  if(window._calMes===0){window._calMes=11;window._calAno--;}else{window._calMes--;}
-  renderMonthCalendar();
-}
-function monthCalendarNext(){
-  if(window._calMes===11){window._calMes=0;window._calAno++;}else{window._calMes++;}
-  renderMonthCalendar();
-}
 
 setInterval(()=>loadData(false), 15*60*1000);
 </script>
