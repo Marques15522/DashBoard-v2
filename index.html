@@ -111,6 +111,24 @@ header{position:sticky;top:0;z-index:50;background:rgba(7,9,14,0.93);backdrop-fi
 .risk-score-val{font-family:'Bebas Neue',sans-serif;font-size:1rem;line-height:1;}
 .risk-bar-bg{height:5px;border-radius:3px;background:var(--border2);overflow:hidden;}
 .risk-bar-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+.month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.month-day-name{text-align:center;font-size:0.52rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;padding:4px 0 6px;}
+.month-day-cell{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:5px 4px;min-height:64px;display:flex;flex-direction:column;gap:2px;cursor:default;}
+.month-day-cell.other-month{opacity:0.25;}
+.month-day-cell.today{border-color:var(--gold);background:rgba(201,146,42,0.04);}
+.month-day-cell.has-payment{border-color:var(--green);background:rgba(6,214,160,0.04);}
+.month-day-cell.atraso-day{border-color:var(--red);background:rgba(239,71,111,0.04);}
+.month-day-num{font-family:'Bebas Neue',sans-serif;font-size:0.88rem;color:var(--muted);line-height:1;}
+.month-day-cell.today .month-day-num{color:var(--gold);}
+.month-day-cell.has-payment .month-day-num{color:var(--green);}
+.month-day-cell.atraso-day .month-day-num{color:var(--red);}
+.month-day-total{font-size:0.46rem;color:var(--green);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.month-day-total.atraso{color:var(--red);}
+.month-day-chips{display:flex;flex-direction:column;gap:1px;margin-top:1px;}
+.month-chip{background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:2px;padding:1px 3px;font-size:0.45rem;color:var(--green);line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.month-chip.atraso{background:rgba(239,71,111,0.08);border-color:rgba(239,71,111,0.25);color:var(--red);}
+.month-more{font-size:0.42rem;color:var(--muted);margin-top:1px;}
+/* legado — mantido para não quebrar nada */
 .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
 .day-col{text-align:center;}
 .day-name{font-size:0.52rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px;}
@@ -997,10 +1015,10 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
 <!-- AGENDA -->
 <div id="tab-agenda" class="tab-panel">
-  <div class="section-label">VENCIMENTOS DESTA SEMANA</div>
+  <div class="section-label">VENCIMENTOS DO MÊS</div>
   <div class="card">
-    <div class="card-header"><div><div class="card-title">📅 Calendário Semanal</div><div class="card-desc">Quem paga e quanto entra cada dia</div></div><div class="card-badge">SEMANAL</div></div>
-    <div class="week-grid" id="weekCalendar"></div>
+    <div class="card-header"><div><div class="card-title">📅 Calendário Mensal</div><div class="card-desc">Quem paga e quanto entra cada dia</div></div><div id="monthCalendarNav" style="display:flex;align-items:center;gap:8px"><button onclick="monthCalendarPrev()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.75rem;font-family:'DM Mono',monospace">‹</button><span id="monthCalendarTitle" style="font-family:'Bebas Neue',sans-serif;font-size:0.88rem;letter-spacing:0.1em;color:var(--text);white-space:nowrap"></span><button onclick="monthCalendarNext()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.75rem;font-family:'DM Mono',monospace">›</button></div></div>
+    <div id="weekCalendar"></div>
     <div style="margin-top:20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:0.7rem;letter-spacing:0.2em;color:var(--muted);margin-bottom:8px">📋 LISTA DE COBRANÇA</div><div id="cobrancaList"></div></div>
   </div>
   <div class="section-label">CONTRATOS VENCENDO EM 30 DIAS</div>
@@ -2170,13 +2188,16 @@ function render(empRows,pagRows){
     <div style="font-size:0.52rem;color:var(--muted2);margin-top:8px">* Projeção assume reinvestimento total dos juros mensalmente (juros compostos)</div>
   ` : `<div style="color:var(--muted);font-size:0.68rem;padding:20px 0;text-align:center">Dados insuficientes para projeção.</div>`;
 
-  // CALENDÁRIO SEMANAL
+  // CALENDÁRIO MENSAL
   const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  window._calAbertos=abertos; window._calHoje=hoje; window._calFmt=fmt;
+  if(window._calMes===undefined){window._calMes=hoje.getMonth();window._calAno=hoje.getFullYear();}
+  renderMonthCalendar();
+
+  // LISTA DE COBRANÇA — mostra todos do mês atual
   const iniSem=new Date(hoje);iniSem.setDate(hoje.getDate()-hoje.getDay());
   const semana=Array.from({length:7},(_,i)=>{const d=new Date(iniSem);d.setDate(iniSem.getDate()+i);d.setHours(0,0,0,0);const fim=new Date(d);fim.setHours(23,59,59,999);const venc=abertos.filter(e=>e.proxVenc&&e.proxVenc>=d&&e.proxVenc<=fim);return{dia:d.getDate(),nome:DIAS[i],isToday:d.getTime()===hoje.getTime(),total:venc.reduce((s,e)=>s+e.jProx,0),vencimentos:venc};});
-  document.getElementById('weekCalendar').innerHTML=semana.map(d=>`<div class="day-col"><div class="day-name">${d.nome}</div><div class="day-box ${d.isToday?'today':''} ${d.total>0?'has-payment':''}"><div class="day-num">${d.dia}</div>${d.total>0?`<div style="font-size:0.5rem;color:var(--green)">${fmt(d.total)}</div><div class="day-clients">${d.vencimentos.map(e=>`<div class="day-chip ${e.status==='atraso'?'atraso':''}">${e.nome||e.id}<span class="chip-val">${fmt(e.jProx)}${e.status==='atraso'?' ⚠️':''}</span></div>`).join('')}</div>`:`<div class="day-empty">—</div>`}</div></div>`).join('');
-
-  // LISTA DE COBRANÇA
   const todosV=semana.flatMap(d=>d.vencimentos.map(e=>({...e,diaVenc:d})));
   document.getElementById('cobrancaList').innerHTML=todosV.length===0?`<div style="color:var(--muted);font-size:0.68rem;padding:12px 0">Nenhum vencimento esta semana.</div>`:[...todosV].sort((a,b)=>(a.status==='atraso'?-1:1)-(b.status==='atraso'?-1:1)||a.diaVenc.dia-b.diaVenc.dia).map(e=>{const isAt=e.status==='atraso';return`<div class="cobr-row"><div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:0.72rem;color:var(--text)">${e.nome||e.id}</span><span style="font-size:0.57rem;color:var(--muted)">${e.id} · vence ${e.diaVenc.nome} ${e.diaVenc.dia}</span></div><div style="display:flex;align-items:center;gap:10px"><span class="badge ${isAt?'bad':'ok'}">${isAt?'⚠️ ATRASO':'✓ EM DIA'}</span><span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${isAt?'var(--red)':'var(--green)'}">${fmt(e.jProx)}</span></div></div>`;}).join('');
 
@@ -4529,6 +4550,79 @@ function loginSair() {
     setTimeout(() => document.getElementById('login-senha').focus(), 200);
   }
 })();
+
+// ── CALENDÁRIO MENSAL ─────────────────────────────────────
+window._calMes = undefined;
+window._calAno = undefined;
+
+function renderMonthCalendar(){
+  const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const mes=window._calMes, ano=window._calAno;
+  const hoje=window._calHoje||new Date();
+  const abertos=window._calAbertos||[];
+  const fmt=window._calFmt||(v=>v);
+  const titulo=document.getElementById('monthCalendarTitle');
+  if(titulo) titulo.textContent=MESES[mes]+' '+ano;
+
+  const primDia=new Date(ano,mes,1).getDay();
+  const diasMes=new Date(ano,mes+1,0).getDate();
+  const diasMesAnt=new Date(ano,mes,0).getDate();
+
+  // Mapeia vencimentos por dia do mês
+  const mapVenc={};
+  abertos.forEach(e=>{
+    if(!e.proxVenc) return;
+    const d=e.proxVenc;
+    if(d.getFullYear()===ano&&d.getMonth()===mes){
+      const k=d.getDate();
+      if(!mapVenc[k]) mapVenc[k]=[];
+      mapVenc[k].push(e);
+    }
+  });
+
+  const hojeStr=hoje.getFullYear()+'-'+hoje.getMonth()+'-'+hoje.getDate();
+
+  let cells=[];
+  // Dias do mês anterior
+  for(let i=primDia-1;i>=0;i--) cells.push({day:diasMesAnt-i,cur:false,venc:[]});
+  // Dias do mês atual
+  for(let d=1;d<=diasMes;d++){
+    const isToday=(ano===hoje.getFullYear()&&mes===hoje.getMonth()&&d===hoje.getDate());
+    cells.push({day:d,cur:true,isToday,venc:mapVenc[d]||[]});
+  }
+  // Completar grade até múltiplo de 7
+  let nextDay=1;
+  while(cells.length%7!==0) cells.push({day:nextDay++,cur:false,venc:[]});
+
+  const header=DIAS.map(n=>`<div class="month-day-name">${n}</div>`).join('');
+  const body=cells.map(c=>{
+    const hasAt=c.venc.some(e=>e.status==='atraso');
+    const hasPay=c.venc.length>0;
+    let cls='month-day-cell';
+    if(!c.cur) cls+=' other-month';
+    if(c.isToday) cls+=' today';
+    else if(hasAt) cls+=' atraso-day';
+    else if(hasPay) cls+=' has-payment';
+    const total=c.venc.reduce((s,e)=>s+e.jProx,0);
+    const chips=c.venc.slice(0,3).map(e=>`<div class="month-chip ${e.status==='atraso'?'atraso':''}">${(e.nome||e.id||'').split(' ')[0]}</div>`).join('');
+    const mais=c.venc.length>3?`<div class="month-more">+${c.venc.length-3} mais</div>`:'';
+    const totalHtml=hasPay?`<div class="month-day-total${hasAt?' atraso':''}">${fmt(total)}</div>`:'';
+    return `<div class="${cls}"><div class="month-day-num">${c.day}</div>${totalHtml}<div class="month-day-chips">${chips}${mais}</div></div>`;
+  }).join('');
+
+  const el=document.getElementById('weekCalendar');
+  if(el) el.innerHTML=`<div class="month-grid">${header}${body}</div>`;
+}
+
+function monthCalendarPrev(){
+  if(window._calMes===0){window._calMes=11;window._calAno--;}else{window._calMes--;}
+  renderMonthCalendar();
+}
+function monthCalendarNext(){
+  if(window._calMes===11){window._calMes=0;window._calAno++;}else{window._calMes++;}
+  renderMonthCalendar();
+}
 
 setInterval(()=>loadData(false), 15*60*1000);
 </script>
