@@ -1676,13 +1676,10 @@ function doGet(e) {
     </div>`;
   document.body.appendChild(modal);
 }
-const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,valorTotal:12,totalPago:13,saldo:14,jProx:15,parcelas:16,status:17,proxVenc:18,obs:19};
-// unidade (semanal/mensal) é derivada do campo Tipo Juros ou da coluna de observações
+const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,valorTotal:12,totalPago:13,saldo:14,jProx:15,parcelas:16,status:17,proxVenc:18,unidade:19,obs:20};
 function getUnidade(row){
-  const tj = String(row[CE.tipoJuros]||'').toLowerCase();
-  const obs = String(row[CE.obs]||'').toLowerCase();
-  if(tj.includes('semanal')||obs.includes('semanal')) return 'semanal';
-  return 'mensal';
+  const u = String(row[CE.unidade]||'').trim().toLowerCase();
+  return u === 'semanal' ? 'semanal' : 'mensal';
 }
 const CP={id:0,tipo:2,valor:3,data:4,juros:5};
 const GID_EMP=147333899, GID_PAG=647642652;
