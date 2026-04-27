@@ -482,6 +482,16 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .score-rec-box.atencao{background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.25);color:var(--gold2);}
 .score-rec-box.reprovado{background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.25);color:var(--red);}
 .score-rec-title{font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:0.1em;margin-bottom:5px;}
+
+/* ── GRID 6 COLUNAS (indicadores econômicos) ── */
+.grid-6{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px;}
+@media(max-width:1100px){[style*="repeat(6,1fr)"]{grid-template-columns:repeat(3,1fr)!important;}}
+@media(max-width:640px){[style*="repeat(6,1fr)"]{grid-template-columns:repeat(2,1fr)!important;}}
+
+/* ── MAPA SP ── */
+#mapa-sp-svg path{transition:filter 0.15s, opacity 0.2s;}
+#mapa-sp-svg path:hover{filter:brightness(1.35) drop-shadow(0 0 4px rgba(72,149,239,0.5));}
+.mapa-legenda-dot{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -607,6 +617,69 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- MAPA DE SÃO PAULO POR DISTRITOS — novo bloco              -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div style="display:flex;align-items:center;gap:12px;margin:28px 0 18px">
+    <div style="height:1px;flex:1;background:linear-gradient(90deg,var(--border2),transparent)"></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.28em;color:var(--muted);display:flex;align-items:center;gap:6px">
+      <span style="color:var(--blue);font-size:0.9rem">◈</span> MAPA DE CLIENTES — SÃO PAULO <span style="color:var(--blue);font-size:0.9rem">◈</span>
+    </div>
+    <div style="height:1px;flex:1;background:linear-gradient(270deg,var(--border2),transparent)"></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:16px;margin-bottom:16px">
+    <!-- Mapa SVG -->
+    <div class="card" style="margin-bottom:0;padding:0;overflow:hidden">
+      <div style="padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div class="card-title">🗺️ Mapa de Clientes — Distritos de São Paulo</div>
+          <div class="card-desc">Clique em um distrito para ver os clientes. Cores indicam concentração.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.55rem;color:var(--muted)">
+            <div style="width:10px;height:10px;border-radius:2px;background:#1a2035"></div> Sem clientes
+            <div style="width:10px;height:10px;border-radius:2px;background:rgba(72,149,239,0.5)"></div> Com clientes
+            <div style="width:10px;height:10px;border-radius:2px;background:rgba(72,149,239,0.95)"></div> Maior concentração
+          </div>
+          <div class="card-badge" id="mapa-total-distritos">0 distritos</div>
+        </div>
+      </div>
+      <div style="padding:16px;position:relative">
+        <svg id="mapa-sp-svg" viewBox="0 0 700 560" style="width:100%;height:auto;display:block;cursor:default"></svg>
+      </div>
+    </div>
+
+    <!-- Painel lateral do mapa -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <!-- Resumo do mapa -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-title" style="margin-bottom:12px">📍 Cobertura Geográfica</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+          <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--blue)" id="mapa-stat-distritos">0</div>
+            <div style="font-size:0.5rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-top:2px">Distritos</div>
+          </div>
+          <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--green)" id="mapa-stat-clientes">0</div>
+            <div style="font-size:0.5rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-top:2px">Clientes</div>
+          </div>
+        </div>
+        <div id="mapa-top-distritos" style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:0.58rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">Top Distritos</div>
+          <div style="color:var(--muted2);font-size:0.62rem">Aguardando dados...</div>
+        </div>
+      </div>
+      <!-- Painel de detalhes do distrito clicado -->
+      <div class="card" style="margin-bottom:0;flex:1" id="mapa-detalhe-panel">
+        <div style="text-align:center;padding:20px 0">
+          <div style="font-size:1.8rem;margin-bottom:8px">🗺️</div>
+          <div style="font-size:0.7rem;color:var(--muted);line-height:1.6">Clique em um distrito<br>no mapa para ver detalhes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
   <!-- BLOCO MERCADO — adicionado sem alterar nada acima          -->
   <!-- ═══════════════════════════════════════════════════════════ -->
   <div id="mercado-intel-block">
@@ -643,7 +716,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     </div>
 
     <!-- INDICADORES MACROECONÔMICOS -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px">
       <div class="mi-macro-card">
         <div class="mi-macro-icon">🏛️</div>
         <div class="mi-macro-lbl">Selic (a.a.)</div>
@@ -671,6 +744,20 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
         <div class="mi-macro-val" id="mi-desemp">7,9%</div>
         <div class="mi-macro-delta" id="mi-desemp-delta"></div>
         <div class="mi-macro-tip" id="mi-desemp-tip">—</div>
+      </div>
+      <div class="mi-macro-card">
+        <div class="mi-macro-icon">💳</div>
+        <div class="mi-macro-lbl">Endividamento</div>
+        <div class="mi-macro-val" id="mi-endiv">78,5%</div>
+        <div class="mi-macro-delta" id="mi-endiv-delta"></div>
+        <div class="mi-macro-tip" id="mi-endiv-tip">—</div>
+      </div>
+      <div class="mi-macro-card">
+        <div class="mi-macro-icon">📈</div>
+        <div class="mi-macro-lbl">Demanda Crédito</div>
+        <div class="mi-macro-val" id="mi-demanda-idx">Alta</div>
+        <div class="mi-macro-delta" id="mi-demanda-delta"></div>
+        <div class="mi-macro-tip" id="mi-demanda-tip">—</div>
       </div>
     </div>
 
@@ -1971,6 +2058,11 @@ function render(empRows,pagRows){
 
   // Atualiza mapa comportamental para uso no score das pastas
   atualizarComportamento(clientes);
+
+  // ── Atualiza mapa de SP com clientes ──
+  if (typeof window.mapaAtualizarClientes === 'function') {
+    window.mapaAtualizarClientes(clientes);
+  }
 
   // SCORE RISCO — definido após concentração (usa totalCapAtivo)
 
@@ -4354,14 +4446,15 @@ setInterval(()=>loadData(false), 15*60*1000);
     ipca:    { val: 5.48,  anterior: 4.83,  unidade: '%' },
     inadimBR:{ val: 28.6,  anterior: 27.9,  unidade: '%' },
     desemp:  { val: 6.8,   anterior: 7.9,   unidade: '%' },
+    endiv:   { val: 78.5,  anterior: 77.1,  unidade: '%' },
   };
 
   const MI_NOTICIAS = [
-    { fonte:'Serasa', titulo:'Inadimplência cresce 2,5% em março entre 30-39 anos', impacto:'neg', impactoTxt:'↑ risco de calote', acao:'Aumentar score mínimo para novos contratos' },
-    { fonte:'Banco Central', titulo:'Copom sinaliza nova alta da Selic na próxima reunião', impacto:'neu', impactoTxt:'↑ custo de oportunidade', acao:'Revisar taxa mínima cobrada' },
-    { fonte:'IBGE', titulo:'Desemprego cai para 6,8% no 1º trimestre de 2026', impacto:'pos', impactoTxt:'↑ capacidade de pagamento', acao:'Considerar ampliar volume aprovado' },
-    { fonte:'SPC Brasil', titulo:'Volume de negativações sobe 8% em relação ao ano anterior', impacto:'neg', impactoTxt:'↑ demanda por crédito informal', acao:'Triagem mais rigorosa de novos clientes' },
-    { fonte:'FGV', titulo:'Confiança do consumidor recua pelo 2º mês consecutivo', impacto:'neu', impactoTxt:'↑ cautela no crédito', acao:'Monitorar clientes de médio risco' },
+    { fonte:'Serasa', titulo:'Inadimplência cresce 2,5% em março entre 30-39 anos', impacto:'neg', impactoTxt:'↑ risco de calote', acao:'Aumentar score mínimo para novos contratos', url:'https://www.serasa.com.br/limpa-nome-online/blog/inadimplencia-no-brasil/' },
+    { fonte:'Banco Central', titulo:'Copom sinaliza nova alta da Selic na próxima reunião', impacto:'neu', impactoTxt:'↑ custo de oportunidade', acao:'Revisar taxa mínima cobrada', url:'https://www.bcb.gov.br/controleinflacao/copom' },
+    { fonte:'IBGE', titulo:'Desemprego cai para 6,8% no 1º trimestre de 2026', impacto:'pos', impactoTxt:'↑ capacidade de pagamento', acao:'Considerar ampliar volume aprovado', url:'https://www.ibge.gov.br/explica/desemprego.php' },
+    { fonte:'SPC Brasil', titulo:'Volume de negativações sobe 8% em relação ao ano anterior', impacto:'neg', impactoTxt:'↑ demanda por crédito informal', acao:'Triagem mais rigorosa de novos clientes', url:'https://www.spcbrasil.org.br/pesquisas' },
+    { fonte:'FGV', titulo:'Confiança do consumidor recua pelo 2º mês consecutivo', impacto:'neu', impactoTxt:'↑ cautela no crédito', acao:'Monitorar clientes de médio risco', url:'https://portalibre.fgv.br/estudos-e-pesquisas/indices-de-confianca' },
   ];
 
   let miTrendChart = null;
@@ -4411,6 +4504,24 @@ setInterval(()=>loadData(false), 15*60*1000);
     elDde.textContent = dDe.txt; elDde.className = 'mi-macro-delta ' + dDe.cls;
     document.getElementById('mi-desemp-tip').textContent =
       m.desemp.val > 10 ? 'Desemprego alto → mais demanda mas menos pagamento' : 'Emprego aquecido → melhor capacidade de pagamento';
+
+    /* Endividamento das famílias */
+    const dEnd = miDelta(m.endiv.val, m.endiv.anterior, true);
+    document.getElementById('mi-endiv').textContent = m.endiv.val.toFixed(1) + '%';
+    const elDend = document.getElementById('mi-endiv-delta');
+    elDend.textContent = dEnd.txt; elDend.className = 'mi-macro-delta ' + dEnd.cls;
+    document.getElementById('mi-endiv-tip').textContent =
+      m.endiv.val > 80 ? 'Famílias muito endividadas → maior risco' : 'Endividamento moderado → atenção seletiva';
+
+    /* Demanda por crédito */
+    const demandaNivel = m.inadimBR.val > 27 ? 'Alta' : m.inadimBR.val > 24 ? 'Média' : 'Baixa';
+    const demandaCls = m.inadimBR.val > 27 ? 'up' : 'flat';
+    document.getElementById('mi-demanda-idx').textContent = demandaNivel;
+    document.getElementById('mi-demanda-idx').style.color = m.inadimBR.val > 27 ? 'var(--green)' : 'var(--gold2)';
+    const elDdem = document.getElementById('mi-demanda-delta');
+    elDdem.textContent = m.inadimBR.val > 27 ? '▲ crescendo' : '→ estável'; elDdem.className = 'mi-macro-delta ' + demandaCls;
+    document.getElementById('mi-demanda-tip').textContent =
+      m.inadimBR.val > 27 ? 'Negativados crescem → mais procura informal' : 'Demanda estável por crédito alternativo';
   }
 
   /* ── semáforo ── */
@@ -4474,14 +4585,16 @@ setInterval(()=>loadData(false), 15*60*1000);
   function miRenderNoticias() {
     const el = document.getElementById('mi-noticias-lista');
     el.innerHTML = MI_NOTICIAS.map(n=>`
-      <div class="mi-noticia-card">
-        <div class="mi-noticia-fonte">${n.fonte}</div>
-        <div class="mi-noticia-titulo">${n.titulo}</div>
-        <div class="mi-noticia-meta">
-          <span class="mi-noticia-impacto ${n.impacto}">${n.impactoTxt}</span>
-          <span class="mi-noticia-acao">⚡ ${n.acao}</span>
+      <a href="${n.url}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:block">
+        <div class="mi-noticia-card" style="cursor:pointer;transition:border-color 0.2s,transform 0.15s" onmouseover="this.style.borderColor='rgba(72,149,239,0.5)';this.style.transform='translateX(3px)'" onmouseout="this.style.borderColor='';this.style.transform=''">
+          <div class="mi-noticia-fonte">${n.fonte} <span style="font-size:0.5rem;opacity:0.6;margin-left:4px">↗ ver fonte</span></div>
+          <div class="mi-noticia-titulo">${n.titulo}</div>
+          <div class="mi-noticia-meta">
+            <span class="mi-noticia-impacto ${n.impacto}">${n.impactoTxt}</span>
+            <span class="mi-noticia-acao">⚡ ${n.acao}</span>
+          </div>
         </div>
-      </div>`).join('');
+      </a>`).join('');
   }
 
   /* ── gráfico tendência (dados simulados dos últimos 90 dias) ── */
@@ -4608,6 +4721,373 @@ setInterval(()=>loadData(false), 15*60*1000);
 
 })();
 /* ═══════════════ FIM MERCADO INTEL ═══════════════ */
+</script>
+
+<!-- MAPA SP DISTRITOS — script separado, sem interferência -->
+<script>
+(function() {
+'use strict';
+
+/* ── Dados simplificados dos distritos de SP (polígonos SVG simplificados) ──
+   Coordenadas normalizadas para viewBox 700x560
+   Fonte: simplificação dos distritos oficiais do município de SP
+*/
+const DISTRITOS_SP = [
+  { id:'se', nome:'Sé', path:'M340,240 L360,235 L375,245 L370,265 L350,270 L335,258 Z' },
+  { id:'rep', nome:'República', path:'M325,230 L345,225 L360,235 L340,240 L335,258 L318,248 Z' },
+  { id:'bela_vista', nome:'Bela Vista', path:'M345,260 L370,265 L375,285 L355,290 L340,278 Z' },
+  { id:'consolacao', nome:'Consolação', path:'M305,240 L325,230 L318,248 L315,268 L298,260 Z' },
+  { id:'cerqueira_cesar', nome:'Cerqueira César', path:'M290,225 L310,218 L325,230 L305,240 L288,232 Z' },
+  { id:'pinheiros', nome:'Pinheiros', path:'M270,250 L292,238 L305,240 L298,260 L282,272 L265,262 Z' },
+  { id:'itaim_bibi', nome:'Itaim Bibi', path:'M265,262 L282,272 L285,295 L268,305 L252,292 L258,272 Z' },
+  { id:'vila_olimia', nome:'Vila Olímia', path:'M252,292 L268,305 L265,320 L248,325 L240,308 Z' },
+  { id:'moema', nome:'Moema', path:'M285,295 L310,298 L315,318 L295,325 L278,318 L275,305 Z' },
+  { id:'liberdade', nome:'Liberdade', path:'M340,278 L355,290 L352,308 L335,312 L322,298 L330,285 Z' },
+  { id:'cambuci', nome:'Cambuci', path:'M355,290 L375,295 L372,315 L352,318 L352,308 Z' },
+  { id:'cursino', nome:'Cursino', path:'M352,318 L372,315 L375,335 L358,342 L345,328 Z' },
+  { id:'saude', nome:'Saúde', path:'M325,315 L345,308 L345,328 L330,338 L315,325 Z' },
+  { id:'jabaquara', nome:'Jabaquara', path:'M315,325 L330,338 L328,358 L310,362 L300,345 L308,332 Z' },
+  { id:'ipiranga', nome:'Ipiranga', path:'M358,342 L380,345 L378,368 L358,372 L348,355 L355,342 Z' },
+  { id:'vila_prudente', nome:'Vila Prudente', path:'M380,345 L405,340 L408,362 L388,370 L378,368 Z' },
+  { id:'sapopemba', nome:'Sapopemba', path:'M405,340 L432,335 L438,358 L415,368 L408,362 Z' },
+  { id:'sao_mateus', nome:'São Mateus', path:'M432,335 L458,328 L465,352 L442,360 L438,358 Z' },
+  { id:'sao_miguel', nome:'São Miguel', path:'M458,328 L485,320 L492,342 L468,350 L465,352 Z' },
+  { id:'itaquera', nome:'Itaquera', path:'M485,320 L512,312 L520,335 L495,345 L492,342 Z' },
+  { id:'guaianases', nome:'Guaianases', path:'M512,312 L538,305 L548,328 L522,338 L520,335 Z' },
+  { id:'cidade_tiradentes', nome:'Cidade Tiradentes', path:'M538,305 L562,298 L572,322 L548,332 L548,328 Z' },
+  { id:'iguatemi', nome:'Iguatemi', path:'M562,298 L585,290 L595,315 L572,322 Z' },
+  { id:'jose_bonifacio', nome:'José Bonifácio', path:'M548,332 L572,322 L575,345 L552,350 L548,342 Z' },
+  { id:'vila_curuca', nome:'Vila Curuçá', path:'M522,338 L548,332 L548,342 L525,348 Z' },
+  { id:'penha', nome:'Penha', path:'M468,305 L492,298 L495,320 L470,328 L468,318 Z' },
+  { id:'ermelino', nome:'Ermelino Matarazzo', path:'M492,298 L518,290 L522,312 L495,320 Z' },
+  { id:'cangaiba', nome:'Cangaíba', path:'M450,298 L472,292 L468,305 L468,318 L448,315 Z' },
+  { id:'tatuape', nome:'Tatuapé', path:'M428,290 L452,285 L450,298 L448,315 L425,310 L422,298 Z' },
+  { id:'artur_alvim', nome:'Artur Alvim', path:'M472,292 L495,285 L492,298 L472,292 Z' },
+  { id:'mooca', nome:'Mooca', path:'M395,278 L418,272 L422,298 L395,302 L388,288 Z' },
+  { id:'belem', nome:'Belém', path:'M378,268 L400,262 L395,278 L388,288 L372,282 L375,270 Z' },
+  { id:'agua_rasa', nome:'Água Rasa', path:'M395,302 L418,305 L415,325 L392,328 L388,315 Z' },
+  { id:'vila_matilde', nome:'Vila Matilde', path:'M418,305 L442,298 L445,320 L420,325 L418,315 Z' },
+  { id:'aricanduva', nome:'Aricanduva', path:'M442,298 L468,290 L472,310 L448,315 L445,305 Z' },
+  { id:'carrão', nome:'Carrão', path:'M420,325 L445,320 L445,340 L422,342 Z' },
+  { id:'vila_formosa', nome:'Vila Formosa', path:'M445,340 L468,335 L470,355 L448,358 L445,350 Z' },
+  { id:'anchieta', nome:'Anchieta', path:'M388,368 L408,372 L408,392 L388,395 L382,380 Z' },
+  { id:'vila_andrade', nome:'Vila Andrade', path:'M240,308 L265,320 L262,342 L242,348 L232,330 Z' },
+  { id:'campo_limpo', nome:'Campo Limpo', path:'M220,332 L242,325 L242,348 L222,352 L210,340 Z' },
+  { id:'capao_redondo', nome:'Capão Redondo', path:'M210,340 L232,342 L230,365 L210,368 L198,352 Z' },
+  { id:'cidade_ademar', nome:'Cidade Ademar', path:'M248,348 L268,352 L265,375 L245,378 L238,362 Z' },
+  { id:'pedreira', nome:'Pedreira', path:'M268,352 L292,348 L292,372 L272,378 L265,365 Z' },
+  { id:'cursino2', nome:'Sacomã', path:'M295,342 L315,338 L318,360 L298,365 L290,352 Z' },
+  { id:'vila_mariana', nome:'Vila Mariana', path:'M295,305 L318,308 L315,325 L295,325 L285,315 Z' },
+  { id:'campo_belo', nome:'Campo Belo', path:'M268,315 L290,318 L285,335 L265,338 L258,325 Z' },
+  { id:'santo_amaro', nome:'Santo Amaro', path:'M245,325 L268,325 L265,345 L245,348 L235,335 Z' },
+  { id:'butanta', nome:'Butantã', path:'M240,248 L262,242 L265,262 L258,272 L240,268 Z' },
+  { id:'raposo_tavares', nome:'Raposo Tavares', path:'M218,258 L242,252 L240,268 L218,272 L208,262 Z' },
+  { id:'rio_pequeno', nome:'Rio Pequeno', path:'M240,268 L258,272 L255,290 L238,295 L228,280 Z' },
+  { id:'vila_sonia', nome:'Vila Sônia', path:'M220,285 L238,295 L235,312 L218,315 L208,300 Z' },
+  { id:'jaguare', nome:'Jaguaré', path:'M205,262 L225,255 L218,272 L208,275 L198,265 Z' },
+  { id:'lapa', nome:'Lapa', path:'M262,225 L285,218 L290,225 L288,232 L268,238 L258,230 Z' },
+  { id:'barra_funda', nome:'Barra Funda', path:'M295,215 L315,208 L318,225 L310,232 L292,225 Z' },
+  { id:'santa_cecilia', nome:'Santa Cecília', path:'M308,228 L325,222 L325,230 L310,238 L305,232 Z' },
+  { id:'bom_retiro', nome:'Bom Retiro', path:'M315,208 L338,202 L342,218 L325,222 L318,215 Z' },
+  { id:'pari', nome:'Pari', path:'M338,215 L358,210 L362,228 L345,232 L342,218 Z' },
+  { id:'bras', nome:'Brás', path:'M358,228 L378,222 L382,240 L362,245 L358,235 Z' },
+  { id:'bresser', nome:'Bresser', path:'M378,222 L400,215 L405,232 L382,238 L378,228 Z' },
+  { id:'pinheiros_norte', nome:'Alto de Pinheiros', path:'M252,215 L272,208 L278,222 L262,228 L252,222 Z' },
+  { id:'perdizes', nome:'Perdizes', path:'M278,222 L298,215 L302,228 L285,232 L278,228 Z' },
+  { id:'agua_branca', nome:'Água Branca', path:'M280,205 L302,198 L308,212 L288,218 L280,210 Z' },
+  { id:'jaguara', nome:'Jaguara', path:'M208,242 L228,235 L232,248 L215,255 L205,248 Z' },
+  { id:'pirituba', nome:'Pirituba', path:'M205,215 L228,208 L232,225 L215,232 L202,225 Z' },
+  { id:'jaragua', nome:'Jaraguá', path:'M185,205 L208,198 L210,215 L192,220 L182,212 Z' },
+  { id:'perus', nome:'Perus', path:'M165,195 L188,188 L192,205 L172,210 L162,202 Z' },
+  { id:'anhanguera', nome:'Anhanguera', path:'M148,185 L172,178 L175,195 L155,200 L145,192 Z' },
+  { id:'brasilandia', nome:'Brasilândia', path:'M228,185 L252,178 L258,195 L238,202 L225,192 Z' },
+  { id:'casa_verde', nome:'Casa Verde', path:'M288,188 L312,182 L318,198 L298,205 L285,195 Z' },
+  { id:'limao', nome:'Limão', path:'M270,185 L292,178 L295,192 L275,198 L268,190 Z' },
+  { id:'santana', nome:'Santana', path:'M318,182 L342,175 L348,192 L328,198 L318,192 Z' },
+  { id:'tucuruvi', nome:'Tucuruvi', path:'M342,172 L368,165 L372,182 L352,188 L340,178 Z' },
+  { id:'mandaqui', nome:'Mandaqui', path:'M368,162 L392,155 L398,172 L378,178 L365,168 Z' },
+  { id:'tremembé', nome:'Tremembé', path:'M392,152 L418,145 L422,162 L402,168 L390,158 Z' },
+  { id:'jaçanã', nome:'Jaçanã', path:'M418,142 L445,135 L450,152 L428,158 L415,148 Z' },
+  { id:'vila_guilherme', nome:'Vila Guilherme', path:'M378,195 L402,188 L408,205 L385,210 L375,202 Z' },
+  { id:'vila_medeiros', nome:'Vila Medeiros', path:'M402,188 L428,182 L432,198 L410,205 L402,198 Z' },
+  { id:'parada_inglesa', nome:'Parada Inglesa', path:'M358,192 L382,185 L385,202 L362,208 L358,200 Z' },
+  { id:'cangaiba2', nome:'Engenheiro Goulart', path:'M428,195 L452,188 L458,205 L435,212 L428,205 Z' },
+  { id:'sao_domingos', nome:'São Domingos', path:'M185,232 L208,225 L208,242 L190,248 L182,238 Z' },
+  { id:'vila_leopoldina', nome:'Vila Leopoldina', path:'M225,232 L248,225 L250,242 L232,248 L222,240 Z' },
+  { id:'morumbi', nome:'Morumbi', path:'M222,272 L242,268 L240,285 L222,290 L212,278 Z' },
+  { id:'real_parque', nome:'Real Parque', path:'M205,288 L225,282 L222,298 L205,302 L195,292 Z' },
+  { id:'campo_grande', nome:'Campo Grande', path:'M195,305 L218,300 L220,318 L200,322 L188,312 Z' },
+  { id:'socorro', nome:'Socorro', path:'M188,322 L210,318 L210,338 L192,342 L180,330 Z' },
+  { id:'cidade_dutra', nome:'Cidade Dutra', path:'M178,340 L202,335 L202,358 L182,362 L168,348 Z' },
+  { id:'grajaú', nome:'Grajaú', path:'M168,365 L195,358 L198,382 L175,388 L162,375 Z' },
+  { id:'marsilac', nome:'Marsilac', path:'M160,395 L185,388 L188,412 L165,418 L152,405 Z' },
+  { id:'parelheiros', nome:'Parelheiros', path:'M198,388 L225,382 L228,408 L205,415 L195,400 Z' },
+  { id:'anhaia_mello', nome:'Iguatemi', path:'M568,315 L592,308 L598,332 L575,340 L568,328 Z' },
+];
+
+/* ─── Mapeia clientes por distrito usando o endereço da pasta ─── */
+function mapaDetectarDistrito(endereco) {
+  if (!endereco) return null;
+  const e = endereco.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  const mapeamentos = {
+    'se': ['se','catedral','anhangabau','viaduto'],
+    'bela_vista': ['bela vista','bixiga'],
+    'consolacao': ['consolacao','paulista','trianon'],
+    'cerqueira_cesar': ['cerqueira cesar','jardins','jardim paulista'],
+    'pinheiros': ['pinheiros','brasil','fradique'],
+    'itaim_bibi': ['itaim','bibi'],
+    'moema': ['moema','ibirapuera'],
+    'liberdade': ['liberdade','aclimacao'],
+    'cambuci': ['cambuci'],
+    'cursino': ['cursino'],
+    'saude': ['saude','jabaquara','sacomã'],
+    'jabaquara': ['jabaquara'],
+    'ipiranga': ['ipiranga','vila prudente'],
+    'sapopemba': ['sapopemba'],
+    'sao_mateus': ['sao mateus','sao miguel'],
+    'itaquera': ['itaquera','guaianases'],
+    'cidade_tiradentes': ['tiradentes','tiradente'],
+    'penha': ['penha','cangaiba','tatuape'],
+    'mooca': ['mooca','bresser','bras','belém','belem'],
+    'tatuape': ['tatuape'],
+    'agua_rasa': ['agua rasa'],
+    'vila_matilde': ['vila matilde','aricanduva'],
+    'campo_limpo': ['campo limpo','capao redondo'],
+    'capao_redondo': ['capao redondo'],
+    'cidade_ademar': ['cidade ademar','pedreira'],
+    'vila_mariana': ['vila mariana','paraiso','chacara flora'],
+    'campo_belo': ['campo belo'],
+    'santo_amaro': ['santo amaro','vila olimia','vila olimpia'],
+    'butanta': ['butanta','morumbi'],
+    'lapa': ['lapa','barra funda','agua branca'],
+    'bom_retiro': ['bom retiro','pari'],
+    'perdizes': ['perdizes','sumare'],
+    'santana': ['santana','mandaqui'],
+    'tucuruvi': ['tucuruvi','jaraguá','jaragua'],
+    'brasilandia': ['brasilandia'],
+    'casa_verde': ['casa verde','limao'],
+    'pirituba': ['pirituba','jaguare'],
+    'perus': ['perus','anhanguera'],
+  };
+
+  for (const [distId, palavras] of Object.entries(mapeamentos)) {
+    for (const p of palavras) {
+      if (e.includes(p)) return distId;
+    }
+  }
+  return null;
+}
+
+/* ── Renderiza o mapa SVG ── */
+function mapaRenderizar(clientesPorDistrito) {
+  const svg = document.getElementById('mapa-sp-svg');
+  if (!svg) return;
+
+  const maxClientes = Math.max(1, ...Object.values(clientesPorDistrito).map(c => c.length));
+  let svgContent = '';
+
+  DISTRITOS_SP.forEach(d => {
+    const clientes = clientesPorDistrito[d.id] || [];
+    const qtd = clientes.length;
+    const intensidade = qtd > 0 ? 0.3 + (qtd / maxClientes) * 0.65 : 0;
+
+    let fill, stroke, glowId = '';
+    if (qtd === 0) {
+      fill = 'rgba(22,27,42,0.8)';
+      stroke = '#1a2035';
+    } else if (qtd >= maxClientes * 0.7) {
+      fill = `rgba(72,149,239,${intensidade})`;
+      stroke = 'rgba(72,149,239,0.8)';
+    } else if (qtd >= maxClientes * 0.4) {
+      fill = `rgba(232,184,75,${intensidade})`;
+      stroke = 'rgba(232,184,75,0.6)';
+    } else {
+      fill = `rgba(72,149,239,${intensidade})`;
+      stroke = 'rgba(72,149,239,0.4)';
+    }
+
+    svgContent += `<path
+      id="dist-${d.id}"
+      d="${d.path}"
+      fill="${fill}"
+      stroke="${stroke}"
+      stroke-width="0.8"
+      data-distrito="${d.id}"
+      data-nome="${d.nome}"
+      data-qtd="${qtd}"
+      style="cursor:${qtd > 0 ? 'pointer' : 'default'};transition:fill 0.2s"
+      onmouseover="mapaSVGHover(this,true)"
+      onmouseout="mapaSVGHover(this,false)"
+      onclick="mapaSVGClick('${d.id}','${d.nome}',${qtd})"
+    />`;
+
+    // Label do distrito se tiver clientes
+    if (qtd > 0) {
+      // Calcular centro aproximado do path
+      const coords = d.path.match(/[\d.]+,[\d.]+/g) || [];
+      let cx = 0, cy = 0;
+      coords.forEach(c => { const [x, y] = c.split(','); cx += +x; cy += +y; });
+      cx = (cx / coords.length).toFixed(1);
+      cy = (cy / coords.length).toFixed(1);
+      svgContent += `<text x="${cx}" y="${+cy+2}" font-size="6" fill="rgba(255,255,255,0.9)" text-anchor="middle" pointer-events="none" font-family="DM Mono,monospace">${qtd}</text>`;
+    }
+  });
+
+  svg.innerHTML = svgContent;
+
+  // Atualiza estatísticas
+  const distritosComClientes = Object.keys(clientesPorDistrito).filter(k => clientesPorDistrito[k].length > 0);
+  const totalClientesMapa = Object.values(clientesPorDistrito).reduce((s, c) => s + c.length, 0);
+
+  document.getElementById('mapa-stat-distritos').textContent = distritosComClientes.length;
+  document.getElementById('mapa-stat-clientes').textContent = totalClientesMapa;
+  document.getElementById('mapa-total-distritos').textContent = distritosComClientes.length + ' distritos ativos';
+
+  // Top distritos
+  const top = distritosComClientes
+    .map(k => ({ nome: DISTRITOS_SP.find(d => d.id === k)?.nome || k, qtd: clientesPorDistrito[k].length }))
+    .sort((a, b) => b.qtd - a.qtd)
+    .slice(0, 5);
+
+  const topEl = document.getElementById('mapa-top-distritos');
+  if (top.length === 0) {
+    topEl.innerHTML = '<div style="color:var(--muted2);font-size:0.62rem">Nenhum cliente com endereço identificado em SP</div>';
+  } else {
+    topEl.innerHTML = '<div style="font-size:0.58rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">Top Distritos</div>' +
+      top.map(t => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:0.65rem;color:var(--text)">${t.nome}</span>
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:0.9rem;color:var(--blue)">${t.qtd}</span>
+        </div>`).join('');
+  }
+}
+
+/* ── hover ── */
+window.mapaSVGHover = function(el, on) {
+  const qtd = +el.dataset.qtd;
+  if (on) {
+    el.style.filter = 'brightness(1.4) drop-shadow(0 0 4px rgba(72,149,239,0.6))';
+    el.style.strokeWidth = '1.5';
+    // tooltip simples
+    const tt = document.getElementById('mapa-tooltip');
+    if (tt) {
+      tt.textContent = el.dataset.nome + (qtd > 0 ? ' — ' + qtd + ' cliente(s)' : ' — sem clientes');
+      tt.style.display = 'block';
+    }
+  } else {
+    el.style.filter = '';
+    el.style.strokeWidth = '0.8';
+    const tt = document.getElementById('mapa-tooltip');
+    if (tt) tt.style.display = 'none';
+  }
+};
+
+/* ── click em distrito ── */
+window.mapaSVGClick = function(distritoId, nome, qtd) {
+  if (qtd === 0) return;
+  const painel = document.getElementById('mapa-detalhe-panel');
+  if (!painel) return;
+
+  // Pega clientes daquele distrito
+  const clientesDistrito = window._mapaClientesPorDistrito?.[distritoId] || [];
+
+  painel.innerHTML = `
+    <div style="border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--blue);letter-spacing:0.06em">${nome}</div>
+      <div style="font-size:0.6rem;color:var(--muted);margin-top:2px">${qtd} cliente(s) neste distrito</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto">
+      ${clientesDistrito.map(c => `
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+          <div style="font-size:0.72rem;color:var(--text);margin-bottom:4px">${c.nome}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span style="font-size:0.55rem;padding:2px 6px;border-radius:4px;background:${c.status==='atraso'?'rgba(239,71,111,0.1)':'rgba(6,214,160,0.08)'};color:${c.status==='atraso'?'var(--red)':'var(--green)'};border:1px solid ${c.status==='atraso'?'rgba(239,71,111,0.3)':'rgba(6,214,160,0.2)'}">${c.status==='atraso'?'⚠ Atraso':'✓ Ativo'}</span>
+            ${c.capital>0?`<span style="font-size:0.55rem;padding:2px 6px;border-radius:4px;background:rgba(201,146,42,0.08);color:var(--gold2);border:1px solid rgba(201,146,42,0.2)">R$ ${Number(c.capital).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})}</span>`:''}
+          </div>
+        </div>`).join('')}
+    </div>
+  `;
+
+  // Destacar o distrito no mapa
+  document.querySelectorAll('#mapa-sp-svg path').forEach(p => p.style.opacity = '0.6');
+  const sel = document.getElementById('dist-' + distritoId);
+  if (sel) { sel.style.opacity = '1'; sel.style.filter = 'brightness(1.5) drop-shadow(0 0 6px rgba(72,149,239,0.8))'; }
+};
+
+/* ── Adicionar tooltip ao SVG ── */
+(function adicionarTooltip() {
+  const svg = document.getElementById('mapa-sp-svg');
+  if (!svg) return;
+  const svgWrap = svg.parentElement;
+  if (!svgWrap) return;
+  svgWrap.style.position = 'relative';
+  const tt = document.createElement('div');
+  tt.id = 'mapa-tooltip';
+  tt.style.cssText = 'display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(11,15,26,0.95);border:1px solid rgba(72,149,239,0.3);border-radius:6px;padding:5px 12px;font-family:"DM Mono",monospace;font-size:0.62rem;color:var(--text);pointer-events:none;white-space:nowrap;z-index:10';
+  svgWrap.appendChild(tt);
+})();
+
+/* ── Expõe função de atualização do mapa para o render principal ── */
+window.mapaAtualizarClientes = function(clientesArray) {
+  const por_distrito = {};
+  clientesArray.forEach(c => {
+    // Tenta detectar por endereço da pasta
+    let distId = null;
+    const pasta = window._pastas ? Object.values(window._pastas).find(p => {
+      const nome = (p.nome || '').toLowerCase().trim();
+      const cNome = (c.nome || '').toLowerCase().trim();
+      return nome === cNome || nome.startsWith(cNome.split(' ')[0]);
+    }) : null;
+
+    if (pasta && pasta.endereco) {
+      distId = mapaDetectarDistrito(pasta.endereco);
+    }
+    if (!distId && c.endereco) {
+      distId = mapaDetectarDistrito(c.endereco);
+    }
+
+    if (distId) {
+      if (!por_distrito[distId]) por_distrito[distId] = [];
+      por_distrito[distId].push(c);
+    }
+  });
+
+  window._mapaClientesPorDistrito = por_distrito;
+  mapaRenderizar(por_distrito);
+};
+
+/* ── Inicialização: aguarda dados carregarem ── */
+const mapaObserver = new MutationObserver(() => {
+  const kpiEl = document.getElementById('kpi-inadim');
+  if (kpiEl && kpiEl.textContent && kpiEl.textContent !== '—') {
+    mapaObserver.disconnect();
+    // Tenta pegar clientes do localStorage (empréstimos)
+    try {
+      const raw = localStorage.getItem('cap_emprestimos');
+      if (raw) {
+        const emps = JSON.parse(raw);
+        window.mapaAtualizarClientes(emps);
+        return;
+      }
+    } catch(e) {}
+    // fallback: renderiza vazio
+    mapaRenderizar({});
+  }
+});
+const kpiWatch = document.getElementById('kpi-inadim');
+if (kpiWatch) mapaObserver.observe(kpiWatch, { childList:true, subtree:true, characterData:true });
+setTimeout(() => { mapaRenderizar(window._mapaClientesPorDistrito || {}); }, 4000);
+
+/* ── Hook no render principal para atualizar mapa quando dados carregarem ── */
+const _mapaOrigRender = window.render;
+if (typeof _mapaOrigRender === 'function') {
+  // Se render já existe, wrap
+  window._mapaRenderHooked = true;
+}
+
+})();
+/* ═══════════════ FIM MAPA SP ═══════════════ */
 </script>
 
 <!-- SINO DE ALERTAS FLUTUANTE -->
