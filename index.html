@@ -53,8 +53,9 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .error-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--red);margin-bottom:10px;}
 .error-msg{font-size:0.72rem;color:var(--muted);line-height:1.7;}
 .error-btn{margin-top:18px;padding:10px 28px;background:transparent;border:1px solid var(--gold);color:var(--gold);border-radius:6px;font-family:'DM Mono',monospace;font-size:0.7rem;cursor:pointer;letter-spacing:0.1em;}
-#main{opacity:0;transition:opacity 0.5s ease;position:relative;z-index:1;}
+#main{opacity:1;transition:opacity 0.5s ease;position:relative;z-index:1;}
 #main.visible{opacity:1;}
+#main.loading{opacity:0;}
 .wrap{max-width:1380px;margin:0 auto;padding:0 20px 40px;}
 header{position:sticky;top:0;z-index:50;background:rgba(7,9,14,0.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 24px;}
 .header-inner{max-width:1380px;margin:0 auto;height:58px;display:flex;align-items:center;justify-content:space-between;}
@@ -4387,18 +4388,11 @@ let _primeiraVez = true;
 async function loadData(mostrarLoading){
   const loading=document.getElementById('loading-screen'),error=document.getElementById('error-screen'),main=document.getElementById('main');
   if(mostrarLoading || _primeiraVez){
-    const barWrap=loading.querySelector('.load-bar-wrap');
-    if(barWrap){
-      const novaBar=document.createElement('div');
-      novaBar.className='load-bar';
-      barWrap.innerHTML='';
-      barWrap.appendChild(novaBar);
-    }
     loading.classList.remove('hidden');
     loading.style.opacity='1';
     loading.style.pointerEvents='auto';
     error.classList.remove('show');
-    main.classList.remove('visible');
+    main.classList.add('loading');
   }
   try{
     const[empT,pagT]=await Promise.all([fetchSheet(GID_EMP),fetchSheetPag()]);
@@ -4407,18 +4401,21 @@ async function loadData(mostrarLoading){
     render(empRows,pagRows);
     error.classList.remove('show');
   }catch(err){
-    console.error(err);
+    console.error('loadData erro:',err);
     if(_primeiraVez || mostrarLoading){
       error.classList.add('show');
-      document.getElementById('error-msg').textContent='Erro: '+err.message+'. Verifique se a planilha está compartilhada publicamente.';
+      const el=document.getElementById('error-msg');
+      if(el) el.textContent='Erro: '+err.message;
     }
-  } finally {
-    // SEMPRE esconde o loading e mostra o main — independente de erro
-    loading.classList.add('hidden');
-    main.classList.add('visible');
-    _primeiraVez = false;
-    pastaRender();
   }
+  // SEMPRE mostra o main — independente de qualquer erro
+  try{ loading.classList.add('hidden'); }catch(e){}
+  try{ loading.style.opacity='0'; loading.style.pointerEvents='none'; }catch(e){}
+  try{ main.classList.remove('loading'); main.classList.add('visible'); }catch(e){}
+  try{ main.style.opacity='1'; }catch(e){}
+  _primeiraVez=false;
+  try{ pastaRender(); }catch(e){ console.warn('pastaRender erro:',e); }
+  try{ waHistRender(); }catch(e){}
 }
 // ════════════════════════════════════════════════════════
 // AUTENTICAÇÃO — senha local com hash simples
