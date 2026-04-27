@@ -450,6 +450,65 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .score-rec-box.atencao{background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.25);color:var(--gold2);}
 .score-rec-box.reprovado{background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.25);color:var(--red);}
 .score-rec-title{font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:0.1em;margin-bottom:5px;}
+
+/* ── PARCELA IDEAL ── */
+.pi-panel{background:var(--s1);border:1px solid var(--border2);border-radius:14px;padding:20px;margin-top:14px;}
+.pi-title{font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.2em;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.pi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.pi-box{border-radius:10px;padding:14px 16px;text-align:center;position:relative;}
+.pi-box.parcela{background:rgba(6,214,160,0.07);border:1px solid rgba(6,214,160,0.25);}
+.pi-box.capital{background:rgba(201,146,42,0.07);border:1px solid rgba(201,146,42,0.25);}
+.pi-box.taxa{background:rgba(72,149,239,0.07);border:1px solid rgba(72,149,239,0.25);}
+.pi-box.reprovado{background:rgba(239,71,111,0.07);border:1px solid rgba(239,71,111,0.25);}
+.pi-lbl{font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;}
+.pi-val{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;line-height:1;}
+.pi-sub{font-size:0.5rem;opacity:0.7;margin-top:4px;}
+.pi-comprometimento{margin-top:10px;}
+.pi-comp-bar-bg{height:7px;background:var(--border2);border-radius:4px;overflow:hidden;margin:6px 0 3px;}
+.pi-comp-bar-fill{height:100%;border-radius:4px;transition:width 0.8s ease;}
+.pi-comp-labels{display:flex;justify-content:space-between;font-size:0.5rem;color:var(--muted);}
+.pi-nota{background:var(--s2);border-radius:8px;padding:10px 14px;font-size:0.6rem;color:var(--muted);line-height:1.7;margin-top:10px;}
+/* No simulador */
+.sim-pi-banner{background:linear-gradient(135deg,rgba(6,214,160,0.06) 0%,rgba(72,149,239,0.04) 100%);border:1px solid rgba(6,214,160,0.2);border-radius:12px;padding:16px 18px;margin-top:14px;}
+.sim-pi-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.sim-pi-icon{font-size:1.4rem;}
+.sim-pi-title{font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:0.12em;color:var(--green);}
+.sim-pi-sub{font-size:0.55rem;color:var(--muted);}
+.sim-pi-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.sim-pi-row:last-child{border-bottom:none;}
+.sim-pi-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sim-pi-label{font-size:0.6rem;color:var(--muted);flex:1;}
+.sim-pi-val{font-family:'Bebas Neue',sans-serif;font-size:0.95rem;}
+.sim-pi-status{font-size:0.5rem;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+.sim-pi-status.ok{background:rgba(6,214,160,0.12);color:var(--green);border:1px solid rgba(6,214,160,0.25);}
+.sim-pi-status.warn{background:rgba(240,180,41,0.12);color:var(--gold2);border:1px solid rgba(240,180,41,0.3);}
+.sim-pi-status.bad{background:rgba(239,71,111,0.1);color:var(--red);border:1px solid rgba(239,71,111,0.25);}
+.sim-pi-status.nd{background:var(--s2);color:var(--muted);border:1px solid var(--border2);}
+/* ── CARD SEMANAL ── */
+.sem-config-bar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;padding:10px 14px;background:rgba(201,146,42,0.06);border:1px solid rgba(201,146,42,0.2);border-radius:10px;}
+.sem-config-bar label{font-size:0.56rem;color:var(--muted);letter-spacing:0.07em;white-space:nowrap;}
+.sem-config-input{background:var(--s2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:7px 10px;outline:none;width:160px;}
+.sem-config-input:focus{border-color:var(--gold);}
+.sem-config-btn{padding:7px 14px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:6px;font-family:'DM Mono',monospace;font-size:0.58rem;font-weight:700;cursor:pointer;white-space:nowrap;}
+.sem-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.sem-stat{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;}
+.sem-stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;line-height:1;}
+.sem-stat-lbl{font-size:0.48rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:3px;}
+.sem-table-wrap{overflow-x:auto;}
+.sem-table{width:100%;border-collapse:collapse;font-size:0.62rem;}
+.sem-table th{background:var(--s3);color:var(--muted);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.sem-table td{padding:9px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
+.sem-table tr:hover td{background:rgba(255,255,255,0.02);}
+.sem-badge-pago{background:rgba(6,214,160,0.1);color:var(--green);border:1px solid rgba(6,214,160,0.25);padding:2px 8px;border-radius:6px;font-size:0.5rem;font-weight:700;}
+.sem-badge-atrasado{background:rgba(239,71,111,0.1);color:var(--red);border:1px solid rgba(239,71,111,0.25);padding:2px 8px;border-radius:6px;font-size:0.5rem;font-weight:700;}
+.sem-badge-pendente{background:rgba(240,180,41,0.1);color:var(--gold2);border:1px solid rgba(240,180,41,0.25);padding:2px 8px;border-radius:6px;font-size:0.5rem;font-weight:700;}
+.sem-multa{color:var(--red);font-weight:700;}
+.sem-empty{text-align:center;padding:40px;color:var(--muted);font-size:0.68rem;}
+.sem-alerta-strip{background:rgba(239,71,111,0.07);border:1px solid rgba(239,71,111,0.2);border-radius:10px;padding:12px 16px;margin-bottom:14px;display:none;}
+.sem-alerta-strip.visible{display:block;}
+.sem-alerta-title{font-family:'Bebas Neue',sans-serif;font-size:0.72rem;color:var(--red);letter-spacing:0.12em;margin-bottom:6px;}
+.sem-alerta-item{font-size:0.62rem;color:var(--text);padding:3px 0;border-bottom:1px solid rgba(239,71,111,0.1);}
+.sem-alerta-item:last-child{border-bottom:none;}
 </style>
 </head>
 <body>
@@ -519,6 +578,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="nav-tab" data-tab="financeiro">💰 Financeiro</div>
   <div class="nav-tab" data-tab="risco">⚠️ Risco & Alertas</div>
   <div class="nav-tab" data-tab="clientes">👤 Clientes</div>
+  <div class="nav-tab" data-tab="semanal">📅 Semanal</div>
   <div class="nav-tab" data-tab="comparativo">📈 Comparativos</div>
   <div class="nav-tab" data-tab="agenda">📅 Agenda</div>
   <div class="nav-tab" data-tab="simulador">🧮 Simulador</div>
@@ -844,6 +904,14 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
         <div class="score-rec-title" id="score-rec-title"></div>
         <div id="score-rec-body"></div>
       </div>
+
+      <!-- PARCELA IDEAL -->
+      <div class="pi-panel" id="pi-panel" style="display:none">
+        <div class="pi-title">💳 CAPACIDADE DE PAGAMENTO — PARCELA IDEAL</div>
+        <div class="pi-grid" id="pi-grid"></div>
+        <div class="pi-comprometimento" id="pi-comprometimento"></div>
+        <div class="pi-nota" id="pi-nota"></div>
+      </div>
     </div>
 
     <div class="pasta-form-section">DOCUMENTOS & FOTOS</div>
@@ -941,6 +1009,80 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 </div>
 
 <!-- COMPARATIVOS -->
+<div id="tab-semanal" class="tab-panel">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">📅 Controle de Empréstimos Semanais</div>
+        <div class="card-desc">Lê em tempo real da aba "Controle Semanal" do seu Google Sheets</div>
+      </div>
+      <div class="card-badge">AO VIVO</div>
+    </div>
+
+    <!-- Config do GID -->
+    <div class="sem-config-bar" id="sem-config-bar">
+      <label>🔗 GID da aba "Controle Semanal" no Google Sheets:</label>
+      <input class="sem-config-input" id="sem-gid-input" type="text" placeholder="Ex: 1234567890"
+        value="" oninput="">
+      <button class="sem-config-btn" onclick="semSalvarGid()">✓ Salvar e Carregar</button>
+      <span style="font-size:0.52rem;color:var(--muted)">Abra a aba no Sheets → URL → <strong style="color:var(--gold2)">#gid=XXXXXXX</strong></span>
+    </div>
+
+    <!-- Alertas de atraso -->
+    <div class="sem-alerta-strip" id="sem-alerta-strip">
+      <div class="sem-alerta-title">🔴 PARCELAS SEMANAIS ATRASADAS</div>
+      <div id="sem-alerta-body"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="sem-stats">
+      <div class="sem-stat">
+        <div class="sem-stat-val" id="sem-total-contratos" style="color:var(--gold)">—</div>
+        <div class="sem-stat-lbl">Contratos Ativos</div>
+      </div>
+      <div class="sem-stat">
+        <div class="sem-stat-val" id="sem-total-atrasado" style="color:var(--red)">—</div>
+        <div class="sem-stat-lbl">Parcelas Atrasadas</div>
+      </div>
+      <div class="sem-stat">
+        <div class="sem-stat-val" id="sem-total-multas" style="color:var(--red)">—</div>
+        <div class="sem-stat-lbl">Total Multas em Aberto</div>
+      </div>
+      <div class="sem-stat">
+        <div class="sem-stat-val" id="sem-total-recebido" style="color:var(--green)">—</div>
+        <div class="sem-stat-lbl">Recebido esta semana</div>
+      </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="sem-table-wrap">
+      <table class="sem-table">
+        <thead><tr>
+          <th>Contrato</th>
+          <th>Cliente</th>
+          <th>Semana</th>
+          <th>Vencimento</th>
+          <th>Parcela</th>
+          <th>Status</th>
+          <th>Dt. Pagamento</th>
+          <th>Valor Pago</th>
+          <th>Dias Atraso</th>
+          <th>Multa (R$30/dia)</th>
+          <th>Saldo Devedor</th>
+        </tr></thead>
+        <tbody id="sem-tbody">
+          <tr><td colspan="11" class="sem-empty">Configure o GID acima para carregar os dados da sua planilha.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:10px;font-size:0.55rem;color:var(--muted);text-align:right">
+      Multa calculada: R$ 30 fixos por dia de atraso · Teto: R$ 300 por parcela · 
+      <button onclick="semCarregar()" style="background:none;border:none;color:var(--gold2);cursor:pointer;font-family:'DM Mono',monospace;font-size:0.55rem">⟳ Atualizar agora</button>
+    </div>
+  </div>
+</div>
+
 <div id="tab-comparativo" class="tab-panel">
   <div class="section-label">MÊS ATUAL vs MÊS ANTERIOR</div>
   <div class="grid-2">
@@ -997,7 +1139,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
             <option value="composto">Composto</option>
           </select>
         </div>
-        <div class="sim-field"><label class="sim-label">👤 Nome do Cliente <span style="color:var(--red)">*</span></label><input class="sim-input" id="sim-cliente" type="text" placeholder="Nome completo do cliente"></div>
+        <div class="sim-field"><label class="sim-label">👤 Nome do Cliente <span style="color:var(--red)">*</span></label><input class="sim-input" id="sim-cliente" type="text" placeholder="Nome completo do cliente" oninput="simParcelaIdealRender()"></div>
         <div class="sim-field"><label class="sim-label">🪪 CPF do Cliente <span style="color:var(--muted);font-size:0.5rem">(opcional)</span></label><input class="sim-input" id="sim-cpf" type="text" placeholder="000.000.000-00" maxlength="14"></div>
         <div class="sim-field"><label class="sim-label">📞 Telefone do Cliente <span style="color:var(--muted);font-size:0.5rem">(opcional)</span></label><input class="sim-input" id="sim-tel" type="text" placeholder="(00) 00000-0000" required></div>
         <div class="sim-field"><label class="sim-label">📅 Data de Início do Contrato</label><input class="sim-input" id="sim-inicio" type="date"></div>
@@ -1008,6 +1150,14 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       <div class="card-header"><div><div class="card-title">📊 Resultado da Simulação</div><div class="card-desc">Projeção detalhada do contrato</div></div><div class="card-badge">RESULTADO</div></div>
       <div class="sim-results" id="sim-results-content"></div>
       <div class="chart-wrap" style="margin-top:16px"><canvas id="chartSim"></canvas></div>
+      <!-- PARCELA IDEAL NO SIMULADOR -->
+      <div class="sim-pi-banner" id="sim-pi-banner" style="display:none">
+        <div class="sim-pi-head">
+          <div class="sim-pi-icon">💳</div>
+          <div><div class="sim-pi-title">ANÁLISE DE CAPACIDADE — PARCELA IDEAL</div><div class="sim-pi-sub">Baseado no score e renda do cliente buscado na pasta</div></div>
+        </div>
+        <div id="sim-pi-rows"></div>
+      </div>
     </div>
   </div>
   <div class="card" id="sim-tabela-card" style="display:none">
@@ -1627,6 +1777,9 @@ function doGet(e) {
 const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18};
 const CP={id:0,tipo:2,valor:3,data:4,juros:5};
 const GID_EMP=147333899, GID_PAG=647642652;
+// ⬇️ Cole aqui o GID da aba "Controle Semanal" do seu Google Sheets
+// Para achar: abra a aba no Sheets → olhe a URL: ...#gid=XXXXXXX
+const GID_SEM = localStorage.getItem('gid_semanal') || null;
 const fmt=v=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
 const pct=v=>(Number(v)*100).toFixed(1)+'%';
 let charts={};
@@ -2573,6 +2726,8 @@ function simCalc(){
   document.getElementById('sim-tabela-card').style.display='';
   const thPeriodo = document.getElementById('sim-th-periodo');
   if(thPeriodo) thPeriodo.textContent = periodoLabel;
+  // Parcela ideal
+  simParcelaIdealRender();
 
   // Label do prazo para exibição (mostra original do usuário)
   const prazoLabel = prazoUnidade === 'semanas' ? `${prazo} semanas` : `${prazo} mês/meses (${prazoNorm} semanas)`;
@@ -3139,33 +3294,6 @@ function simPDF(){
         <td>${fmtR(t.parcela)}</td>
         <td class="${t.saldoFinal<1?'td-saldo-zero':''}">${t.saldoFinal<1?'✓ Quitado':fmtR(t.saldoFinal)}</td>
       </tr>`).join('')}
-    </tbody>
-  </table>
-
-  <!-- TABELA DE AMORTIZAÇÃO ANTECIPADA -->
-  <div class="section-title" style="margin-top:24px">Simulação de Amortização Antecipada</div>
-  <p style="font-size:0.72rem;color:#888;margin-bottom:12px">Caso o cliente opte por amortizar o saldo devedor antecipadamente, os valores abaixo representam o desconto no saldo a cada pagamento extra realizado sobre o principal.</p>
-  <table>
-    <thead><tr>
-      <th>Após a Parcela</th>
-      <th>Saldo Devedor</th>
-      <th>Amortização Extra de 10%</th>
-      <th>Novo Saldo</th>
-      <th>Parcelas Restantes</th>
-    </tr></thead>
-    <tbody>
-      ${tabela.filter(t=>t.saldoFinal>=1).map(t=>{
-        const amortExtra=t.saldoFinal*0.10;
-        const novoSaldo=Math.max(0,t.saldoFinal-amortExtra);
-        const parcelasRest=prazo-t.mes;
-        return `<tr>
-          <td>${t.mes}ª parcela</td>
-          <td>${fmtR(t.saldoFinal)}</td>
-          <td class="td-juros">${fmtR(amortExtra)}</td>
-          <td>${fmtR(novoSaldo)}</td>
-          <td>${parcelasRest} restante${parcelasRest!==1?'s':''}</td>
-        </tr>`;
-      }).join('')}
     </tbody>
   </table>
 
@@ -4024,9 +4152,250 @@ function pastaScoreAuto(){
   box.style.display='';
   g('score-rec-title').textContent=titulo;
   g('score-rec-body').innerHTML=corpo.replace(/\n/g,'<br>');
+
+  // PARCELA IDEAL
+  const renda2 = renda; // já calculada acima
+  renderParcelaIdeal(
+    total, renda2,
+    g('pi-grid'), g('pi-comprometimento'), g('pi-nota'), g('pi-panel')
+  );
 }
 
-// ── MAPA COMPORTAMENTAL GLOBAL (atualizado pela planilha) ──
+// ════════════════════════════════════════════════════════
+// PARCELA IDEAL — baseada em score + renda
+// ════════════════════════════════════════════════════════
+
+// Tabela: score → % máximo da renda comprometível com parcela
+// Regra: score alto = pode comprometer mais renda
+function piPctPorScore(score) {
+  if (score >= 800) return 0.50;  // até 50% da renda
+  if (score >= 700) return 0.40;  // até 40%
+  if (score >= 600) return 0.30;  // até 30%
+  if (score >= 450) return 0.20;  // até 20%
+  if (score >= 250) return 0.10;  // até 10%
+  return 0;                       // não emprestar
+}
+
+// Taxa mínima sugerida por faixa de score
+function piTaxaSug(score) {
+  if (score >= 800) return { min: 10, max: 18, label: '10% a 18% a.m.' };
+  if (score >= 700) return { min: 15, max: 22, label: '15% a 22% a.m.' };
+  if (score >= 600) return { min: 20, max: 28, label: '20% a 28% a.m.' };
+  if (score >= 450) return { min: 25, max: 35, label: '25% a 35% a.m.' };
+  if (score >= 250) return { min: 35, max: 50, label: '35%+ a.m. (alto risco)' };
+  return { min: 0, max: 0, label: '— não recomendado' };
+}
+
+// Prazo máximo sugerido por score
+function piPrazoMax(score) {
+  if (score >= 800) return 6;
+  if (score >= 700) return 5;
+  if (score >= 600) return 4;
+  if (score >= 450) return 2;
+  if (score >= 250) return 1;
+  return 0;
+}
+
+// Capital máximo: parcela_max / taxa_min  (juros simples, prazo padrão)
+function piCapitalMax(parcelaMax, taxaMinPct, prazo) {
+  if (!taxaMinPct || !prazo) return 0;
+  const t = taxaMinPct / 100;
+  // Parcela simples = capital * (1 + t * prazo) / prazo  →  capital = parcela * prazo / (1 + t*prazo)
+  return parcelaMax * prazo / (1 + t * prazo);
+}
+
+// Render no painel da pasta do cliente
+function renderParcelaIdeal(score, renda, container, comprContainer, notaContainer, panelEl) {
+  const fmt2 = v => v > 0 ? 'R$ ' + Math.round(v).toLocaleString('pt-BR') : '—';
+  const pct   = piPctPorScore(score);
+  const taxa  = piTaxaSug(score);
+  const prazo = piPrazoMax(score);
+
+  if (!panelEl) return;
+
+  if (score < 50 && renda <= 0) {
+    panelEl.style.display = 'none';
+    return;
+  }
+  panelEl.style.display = '';
+
+  const parcelaMax = renda > 0 ? renda * pct : 0;
+  const capMax     = renda > 0 ? piCapitalMax(parcelaMax, taxa.min, Math.max(prazo, 1)) : 0;
+  const corScore   = score >= 700 ? 'var(--green)' : score >= 450 ? 'var(--gold2)' : 'var(--red)';
+
+  if (container) {
+    if (pct === 0) {
+      container.innerHTML = `
+        <div class="pi-box reprovado" style="grid-column:1/-1;text-align:center">
+          <div class="pi-lbl" style="color:var(--red)">⛔ Score insuficiente</div>
+          <div class="pi-val" style="color:var(--red);font-size:1rem">Não emprestar</div>
+          <div class="pi-sub">Score ${score}/1000 — risco muito alto</div>
+        </div>`;
+    } else {
+      container.innerHTML = `
+        <div class="pi-box parcela">
+          <div class="pi-lbl" style="color:var(--green)">💳 Parcela Máx.</div>
+          <div class="pi-val" style="color:var(--green)">${renda > 0 ? fmt2(parcelaMax) : '—'}</div>
+          <div class="pi-sub">${(pct*100).toFixed(0)}% da renda ${renda>0?'(R$ '+Math.round(renda).toLocaleString('pt-BR')+')':''}</div>
+        </div>
+        <div class="pi-box capital">
+          <div class="pi-lbl" style="color:var(--gold2)">🏦 Capital Máx.</div>
+          <div class="pi-val" style="color:var(--gold2)">${renda > 0 ? fmt2(capMax) : '—'}</div>
+          <div class="pi-sub">em ${prazo} mês${prazo!==1?'es':''} · taxa ${taxa.min}%</div>
+        </div>
+        <div class="pi-box taxa">
+          <div class="pi-lbl" style="color:var(--blue)">📈 Taxa Sugerida</div>
+          <div class="pi-val" style="color:var(--blue);font-size:1rem">${taxa.label.split(' ')[0]}</div>
+          <div class="pi-sub">${taxa.label} · até ${prazo} mês${prazo!==1?'es':''}</div>
+        </div>`;
+    }
+  }
+
+  // Barra de comprometimento
+  if (comprContainer && renda > 0 && pct > 0) {
+    comprContainer.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+        <span style="font-size:0.55rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase">Comprometimento Máximo Recomendado</span>
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:0.9rem;color:${corScore}">${(pct*100).toFixed(0)}%</span>
+      </div>
+      <div class="pi-comp-bar-bg">
+        <div class="pi-comp-bar-fill" style="width:${pct*100}%;background:${corScore}"></div>
+      </div>
+      <div class="pi-comp-labels">
+        <span>0%</span>
+        <span style="color:var(--red)">30% (padrão mercado)</span>
+        <span>50%</span>
+      </div>`;
+  }
+
+  // Nota explicativa
+  if (notaContainer) {
+    const notas = {
+      ok:   `✅ Score <strong style="color:var(--green)">${score}/1000</strong> — cliente confiável. Pode comprometer até <strong>${(pct*100).toFixed(0)}%</strong> da renda (${fmt2(parcelaMax)}/mês). Capital máx. sugerido: <strong>${fmt2(capMax)}</strong>.`,
+      med:  `⚠️ Score <strong style="color:var(--gold2)">${score}/1000</strong> — risco moderado. Limite de ${(pct*100).toFixed(0)}% da renda (${fmt2(parcelaMax)}/mês). Exija comprovante atualizado e use taxa mínima de ${taxa.min}%.`,
+      bad:  `🔴 Score <strong style="color:var(--red)">${score}/1000</strong> — alto risco. Limite máximo: ${(pct*100).toFixed(0)}% da renda (${fmt2(parcelaMax)}/mês). Prazo não deve passar de ${prazo} mês. Exija garantias.`,
+      zero: `🚫 Score <strong style="color:var(--red)">${score}/1000</strong> — não recomendado. Probabilidade alta de inadimplência.`
+    };
+    const chave = score >= 700 ? 'ok' : score >= 450 ? 'med' : score >= 250 ? 'bad' : 'zero';
+    notaContainer.innerHTML = notas[chave] + (renda <= 0 ? '<br><em style="opacity:0.6">ℹ️ Informe a renda para ver os valores calculados.</em>' : '');
+  }
+}
+
+// Análise no simulador: busca cliente por nome na pasta e compara com o empréstimo simulado
+function simParcelaIdealRender() {
+  const banner  = document.getElementById('sim-pi-banner');
+  const rowsEl  = document.getElementById('sim-pi-rows');
+  if (!banner || !rowsEl) return;
+
+  const nomeDigitado = (document.getElementById('sim-cliente')?.value || '').toLowerCase().trim();
+  if (!nomeDigitado) { banner.style.display = 'none'; return; }
+
+  // Busca pasta pelo nome (match parcial)
+  const pasta = Object.values(_pastas).find(p =>
+    (p.nome || '').toLowerCase().includes(nomeDigitado) ||
+    nomeDigitado.includes((p.nome || '').toLowerCase().split(' ')[0])
+  );
+
+  const valor  = parseFloat(document.getElementById('sim-valor')?.value) || 0;
+  const taxa   = parseFloat(document.getElementById('sim-taxa')?.value) || 0;
+  const prazo  = parseInt(document.getElementById('sim-prazo')?.value) || 1;
+  const tipo   = document.getElementById('sim-tipo')?.value || 'simples';
+
+  // Calcular parcela real do contrato
+  const taxaP = taxa / 100;
+  let parcelaReal;
+  if (tipo === 'simples') {
+    parcelaReal = (valor + valor * taxaP * prazo) / prazo;
+  } else {
+    parcelaReal = valor * (taxaP * Math.pow(1+taxaP, prazo)) / (Math.pow(1+taxaP, prazo) - 1);
+  }
+
+  const fmt2 = v => v > 0 ? 'R$ ' + Math.round(v).toLocaleString('pt-BR') : '—';
+
+  // Sem pasta: sem renda nem score
+  if (!pasta) {
+    banner.style.display = '';
+    rowsEl.innerHTML = `
+      <div class="sim-pi-row">
+        <div class="sim-pi-dot" style="background:var(--muted)"></div>
+        <div class="sim-pi-label">Cliente não encontrado nas pastas — sem dados de renda/score</div>
+        <span class="sim-pi-status nd">SEM DADOS</span>
+      </div>
+      <div class="sim-pi-row">
+        <div class="sim-pi-dot" style="background:var(--gold)"></div>
+        <div class="sim-pi-label">Parcela calculada para este contrato</div>
+        <div class="sim-pi-val" style="color:var(--gold)">${fmt2(parcelaReal)}/mês</div>
+        <span class="sim-pi-status nd">CALCULE NA PASTA</span>
+      </div>`;
+    return;
+  }
+
+  // Tem pasta — calcula score e renda
+  const renda = pasta.tipoRenda === 'empresario'
+    ? (pasta.prolabore || pasta.faturamento * 0.3 || 0)
+    : (pasta.salario || 0);
+  const score = pasta.scoreCredito || 0;
+  const pct   = piPctPorScore(score);
+  const taxa2 = piTaxaSug(score);
+  const prazoMax = piPrazoMax(score);
+  const parcelaMax = renda > 0 ? renda * pct : 0;
+  const capMax = renda > 0 ? piCapitalMax(parcelaMax, taxa2.min, Math.max(prazoMax, 1)) : 0;
+
+  // Avalia o contrato atual vs capacidade
+  const okParcela = parcelaMax > 0 && parcelaReal <= parcelaMax;
+  const okCapital = capMax > 0 && valor <= capMax;
+  const okTaxa    = taxa >= taxa2.min;
+  const okPrazo   = prazo <= prazoMax;
+  const semRenda  = renda <= 0;
+  const semScore  = score < 50;
+
+  const statusPill = (ok, nd, txtOk, txtWarn, txtBad) => {
+    if (nd) return `<span class="sim-pi-status nd">SEM DADOS</span>`;
+    if (ok) return `<span class="sim-pi-status ok">✓ ${txtOk}</span>`;
+    return `<span class="sim-pi-status ${ok===null?'warn':'bad'}">${ok===null?'⚠️ '+txtWarn:'✗ '+txtBad}</span>`;
+  };
+
+  banner.style.display = '';
+  rowsEl.innerHTML = `
+    <div class="sim-pi-row">
+      <div class="sim-pi-dot" style="background:${score>=700?'var(--green)':score>=450?'var(--gold)':'var(--red)'}"></div>
+      <div class="sim-pi-label">Score de crédito — <strong>${pasta.nome}</strong></div>
+      <div class="sim-pi-val" style="color:${score>=700?'var(--green)':score>=450?'var(--gold2)':'var(--red)'}">${semScore?'—':score+'/1000'}</div>
+      ${semScore?`<span class="sim-pi-status nd">SEM SCORE</span>`:score>=700?`<span class="sim-pi-status ok">✓ BOM</span>`:score>=450?`<span class="sim-pi-status warn">⚠️ MÉDIO</span>`:`<span class="sim-pi-status bad">✗ ALTO RISCO</span>`}
+    </div>
+    <div class="sim-pi-row">
+      <div class="sim-pi-dot" style="background:var(--text)"></div>
+      <div class="sim-pi-label">Renda mensal declarada</div>
+      <div class="sim-pi-val">${semRenda?'—':fmt2(renda)}</div>
+      ${semRenda?`<span class="sim-pi-status nd">SEM RENDA</span>`:renda>=parcelaReal*3?`<span class="sim-pi-status ok">✓ ADEQUADA</span>`:`<span class="sim-pi-status warn">⚠️ APERTADA</span>`}
+    </div>
+    <div class="sim-pi-row">
+      <div class="sim-pi-dot" style="background:${okParcela||semRenda?'var(--green)':'var(--red)'}"></div>
+      <div class="sim-pi-label">Parcela deste contrato vs máximo recomendado <span style="color:var(--muted)">(${fmt2(parcelaMax)}/mês)</span></div>
+      <div class="sim-pi-val" style="color:${okParcela||semRenda?'var(--gold2)':'var(--red)'}">${fmt2(parcelaReal)}</div>
+      ${semRenda?`<span class="sim-pi-status nd">SEM RENDA</span>`:okParcela?`<span class="sim-pi-status ok">✓ DENTRO DO LIMITE</span>`:`<span class="sim-pi-status bad">✗ ACIMA DO LIMITE</span>`}
+    </div>
+    <div class="sim-pi-row">
+      <div class="sim-pi-dot" style="background:${okCapital||semRenda?'var(--green)':'var(--red)'}"></div>
+      <div class="sim-pi-label">Capital solicitado vs máximo sugerido <span style="color:var(--muted)">(${fmt2(capMax)})</span></div>
+      <div class="sim-pi-val" style="color:${okCapital||semRenda?'var(--gold2)':'var(--red)'}">${fmt2(valor)}</div>
+      ${semRenda?`<span class="sim-pi-status nd">SEM RENDA</span>`:okCapital?`<span class="sim-pi-status ok">✓ APROVADO</span>`:`<span class="sim-pi-status bad">✗ ACIMA DO LIMITE</span>`}
+    </div>
+    <div class="sim-pi-row">
+      <div class="sim-pi-dot" style="background:${okTaxa?'var(--green)':'var(--red)'}"></div>
+      <div class="sim-pi-label">Taxa cobrada vs mínima recomendada pelo score <span style="color:var(--muted)">(${taxa2.label})</span></div>
+      <div class="sim-pi-val" style="color:${okTaxa?'var(--green)':'var(--red)'}">${taxa}%</div>
+      ${okTaxa?`<span class="sim-pi-status ok">✓ ADEQUADA</span>`:`<span class="sim-pi-status warn">⚠️ ABAIXO DO RECOMENDADO</span>`}
+    </div>
+    <div class="sim-pi-row">
+      <div class="sim-pi-dot" style="background:${okPrazo?'var(--green)':'var(--red)'}"></div>
+      <div class="sim-pi-label">Prazo vs máximo recomendado pelo score <span style="color:var(--muted)">(${prazoMax} meses)</span></div>
+      <div class="sim-pi-val" style="color:${okPrazo?'var(--green)':'var(--red)'}">${prazo} meses</div>
+      ${okPrazo?`<span class="sim-pi-status ok">✓ OK</span>`:`<span class="sim-pi-status bad">✗ PRAZO LONGO</span>`}
+    </div>`;
+}
+
+
 // nome → { qtdContratos, qtdAtraso, qtdQuitados, mesesRelac, recorrente }
 let _comportamento = {};
 
@@ -4100,6 +4469,119 @@ function scoreBadgeHtml(total, temHistorico) {
   return `<span class="score-badge ${cls}" title="Score: ${total}/1000${temHistorico?' (ficha + histórico real)':' (só ficha — sem contratos ainda)'}">${emoji} ${label}</span>
     <div class="score-mini-bar"><div class="score-mini-fill" style="width:${total/10}%;background:${barColor}"></div></div>`;
 }
+
+// ════════════════════════════════════════════════════════
+// CONTROLE SEMANAL — lê aba do Google Sheets via CSV
+// ════════════════════════════════════════════════════════
+const MULTA_DIA = 30;
+const MULTA_TETO = 300;
+
+function semSalvarGid(){
+  const v = document.getElementById('sem-gid-input')?.value.trim();
+  if(!v || isNaN(v)){ alert('GID inválido. Use só os números do #gid=XXXXXXX na URL.'); return; }
+  localStorage.setItem('gid_semanal', v);
+  semCarregar();
+}
+
+function semParseBRL(str){
+  if(!str) return 0;
+  return parseFloat(String(str).replace(/[R$\s.]/g,'').replace(',','.')) || 0;
+}
+
+function semParseData(str){
+  if(!str||str.trim()==='') return null;
+  const p=str.trim().split('/');
+  if(p.length===3) return new Date(+p[2],+p[1]-1,+p[0]);
+  const d=new Date(str); return isNaN(d)?null:d;
+}
+
+function semDiasAtraso(venc,status,dtPago){
+  if(!venc) return 0;
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  if(status==='Pago'){ if(!dtPago) return 0; return Math.max(0,Math.floor((dtPago-venc)/86400000)); }
+  if(status==='Atrasado') return Math.max(0,Math.floor((hoje-venc)/86400000));
+  return 0;
+}
+
+function semFmt(v){ return 'R$\u00a0'+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function semFmtDt(d){ if(!d) return '—'; return d.toLocaleDateString('pt-BR'); }
+
+async function semCarregar(){
+  const gid=localStorage.getItem('gid_semanal');
+  const inp=document.getElementById('sem-gid-input');
+  if(inp&&gid) inp.value=gid;
+  const tbody=document.getElementById('sem-tbody');
+  if(!tbody) return;
+  if(!gid){ tbody.innerHTML='<tr><td colspan="11" class="sem-empty">Configure o GID acima para carregar os dados.</td></tr>'; return; }
+  tbody.innerHTML='<tr><td colspan="11" class="sem-empty" style="color:var(--gold)">⟳ Carregando...</td></tr>';
+  let rows;
+  try{ rows=await fetchSheet(parseInt(gid)); }
+  catch(e){ tbody.innerHTML=`<tr><td colspan="11" class="sem-empty" style="color:var(--red)">❌ Erro: ${e.message}<br><small>Verifique se a planilha está pública e o GID está correto.</small></td></tr>`; return; }
+
+  let startIdx=0;
+  for(let i=0;i<rows.length;i++){
+    const f=(rows[i][0]||'').toLowerCase();
+    if(f.includes('id')||f.includes('contrato')){ startIdx=f.includes('id')||f.includes('contrato')?i+1:i; break; }
+    if(f.startsWith('c-')||f.startsWith('emp')){ startIdx=i; break; }
+  }
+  const data=rows.slice(startIdx).filter(r=>r[0]&&r[0].trim()!=='');
+  if(!data.length){ tbody.innerHTML='<tr><td colspan="11" class="sem-empty">Nenhum dado encontrado.</td></tr>'; return; }
+
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const iniSem=new Date(hoje); iniSem.setDate(hoje.getDate()-hoje.getDay());
+  let totalAtrasado=0,totalMultas=0,totalRecSem=0;
+  const contratos=new Set(), alertas=[];
+
+  const htmlRows=data.map(r=>{
+    const id=(r[0]||'').trim(), cliente=(r[1]||'').trim(), semana=(r[2]||'').trim();
+    const vencStr=(r[3]||'').trim(), parcela=semParseBRL(r[4]), status=(r[5]||'Pendente').trim();
+    const dtPagoStr=(r[6]||'').trim(), vlrPago=semParseBRL(r[7]);
+    const venc=semParseData(vencStr), dtPago=semParseData(dtPagoStr);
+    const saldo=semParseBRL(r[10]);
+    const dias=semDiasAtraso(venc,status,dtPago);
+    const multa=Math.min(dias*MULTA_DIA,MULTA_TETO);
+    if(id) contratos.add(id);
+    if(status==='Atrasado'){ totalAtrasado++; totalMultas+=multa; alertas.push({cliente,id,semana,venc,dias,multa}); }
+    if(status==='Pago'&&dtPago&&dtPago>=iniSem) totalRecSem+=vlrPago;
+    const bc=status==='Pago'?'sem-badge-pago':status==='Atrasado'?'sem-badge-atrasado':'sem-badge-pendente';
+    return `<tr>
+      <td style="color:var(--gold2);font-weight:700">${id}</td>
+      <td>${cliente}</td>
+      <td style="color:var(--muted)">${semana}</td>
+      <td>${venc?semFmtDt(venc):vencStr||'—'}</td>
+      <td style="color:var(--gold)">${semFmt(parcela)}</td>
+      <td><span class="${bc}">${status.toUpperCase()}</span></td>
+      <td style="color:var(--muted)">${dtPago?semFmtDt(dtPago):'—'}</td>
+      <td style="color:${vlrPago>0?'var(--green)':'var(--muted)'}">${vlrPago>0?semFmt(vlrPago):'—'}</td>
+      <td style="color:${dias>0?'var(--red)':'var(--muted)'}">${dias>0?dias+' dias':'—'}</td>
+      <td style="color:${multa>0?'var(--red)':'var(--muted)'};font-weight:${multa>0?700:400}">${multa>0?semFmt(multa):'—'}</td>
+      <td style="color:${saldo<=0?'var(--green)':'var(--text)'}">${saldo<=0?'✅ Quitado':semFmt(saldo)}</td>
+    </tr>`;
+  }).join('');
+  tbody.innerHTML=htmlRows||'<tr><td colspan="11" class="sem-empty">Nenhum dado.</td></tr>';
+
+  const sv=id=>document.getElementById(id);
+  if(sv('sem-total-contratos')) sv('sem-total-contratos').textContent=contratos.size;
+  if(sv('sem-total-atrasado'))  sv('sem-total-atrasado').textContent=totalAtrasado;
+  if(sv('sem-total-multas'))    sv('sem-total-multas').textContent=semFmt(totalMultas);
+  if(sv('sem-total-recebido'))  sv('sem-total-recebido').textContent=semFmt(totalRecSem);
+
+  const strip=document.getElementById('sem-alerta-strip'), body=document.getElementById('sem-alerta-body');
+  if(alertas.length>0&&strip&&body){
+    strip.classList.add('visible');
+    body.innerHTML=alertas.map(a=>`<div class="sem-alerta-item">🔴 <strong>${a.cliente}</strong> — Contrato ${a.id} · Semana ${a.semana} · Venceu ${a.venc?semFmtDt(a.venc):'?'} · <strong style="color:var(--red)">${a.dias} dias · Multa: ${semFmt(a.multa)}</strong></div>`).join('');
+  } else if(strip) strip.classList.remove('visible');
+}
+
+// Carregar semanal quando a aba for clicada
+document.addEventListener('DOMContentLoaded',()=>{
+  const gid=localStorage.getItem('gid_semanal');
+  const inp=document.getElementById('sem-gid-input');
+  if(inp&&gid){ inp.value=gid; }
+  document.querySelectorAll('[data-tab]').forEach(btn=>{
+    btn.addEventListener('click',()=>{ if(btn.dataset.tab==='semanal') semCarregar(); });
+  });
+});
 
 let _primeiraVez = true;
 
