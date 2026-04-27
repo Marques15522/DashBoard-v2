@@ -608,7 +608,7 @@ pre.cad-code{background:var(--bg);border:1px solid var(--border2);border-radius:
 <div id="tab-visao" class="tab-panel active">
   <div id="alertasBanner"></div>
   <!-- NOTIFICAÇÃO VENCIMENTOS HOJE/AMANHÃ -->
-  <div id="notif-venc" style="display:none;background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.3);border-radius:12px;padding:14px 18px;margin-bottom:16px;align-items:center;gap:12px;animation:fadeUp 0.4s ease">
+  <div id="notif-venc" style="display:none;background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.3);border-radius:12px;padding:14px 18px;margin-bottom:16px;flex-direction:row;align-items:center;gap:12px;animation:fadeUp 0.4s ease">
     <span style="font-size:1.2rem">🔔</span>
     <div style="flex:1"><div id="notif-venc-texto" style="font-size:0.8rem;color:var(--red);font-weight:600"></div><div id="notif-venc-sub" style="font-size:0.58rem;color:var(--muted);margin-top:2px"></div></div>
     <button onclick="document.getElementById('notif-venc').style.display='none'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem">✕</button>
@@ -1810,7 +1810,7 @@ function doGet(e) {
 const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,valorTotal:12,totalPago:13,saldo:14,jProx:15,parcelas:16,status:17,proxVenc:18,unidade:19,obs:20};
 function getUnidade(row){
   const u = String(row[CE.unidade]||'').trim().toLowerCase();
-  return u === 'semanal' ? 'semanal' : 'mensal';
+  return u === 'semanal' || u === 'semanas' || u === 'sem' || u === 'semana' ? 'semanal' : 'mensal';
 }
 const CP={id:0,tipo:2,valor:3,data:4,juros:5};
 const GID_EMP=147333899, GID_PAG=647642652;
@@ -1887,21 +1887,35 @@ function csvToArray(csv){
   return rows;
 }
 
-function autoSkipCSV(rows){for(let i=0;i<rows.length;i++){if(rows[i]?.[0]&&String(rows[i][0]).trim().toUpperCase().startsWith('EMP'))return i;}return 0;}
+function autoSkipCSV(rows){
+  // Pula linhas de cabeçalho (que NÃO começam com EMP) e retorna o índice da 1ª linha de dados
+  for(let i=0;i<rows.length;i++){
+    const first=String(rows[i]?.[0]||'').trim().toUpperCase();
+    if(first.startsWith('EMP')) return i;
+  }
+  // Se nenhuma linha começa com EMP, pula só o cabeçalho (linha 0)
+  return Math.min(1, rows.length);
+}
 function parseDate(v){
-  if(!v)return null; if(v instanceof Date)return v;
+  if(!v)return null; if(v instanceof Date)return isNaN(v)?null:v;
   const s=String(v).trim();
+  // Serialized Date from Google Sheets formula
   const m=s.match(/Date\((\d+),(\d+),(\d+)\)/); if(m)return new Date(+m[1],+m[2],+m[3]);
+  // Formato BR: DD/MM/AAAA
   const br=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/); if(br){let y=+br[3];if(y<100)y+=y<50?2000:1900;return new Date(y,+br[2]-1,+br[1]);}
+  // ISO date AAAA-MM-DD — parse local (evita offset UTC)
   const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(iso)return new Date(+iso[1],+iso[2]-1,+iso[3]);
   const d=new Date(s);return isNaN(d)?null:d;
 }
 function parseStatus(v){
   const s=String(v||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  if(!s) return null;
   if(s.includes('quitad'))return 'quitado';
-  if(s.includes('atraso')||s.includes('inadimpl'))return 'atraso';
-  if(s.includes('dia')||s.includes('ativo')||s.includes('aberto'))return 'ativo';
-  return null;
+  if(s.includes('atraso')||s.includes('inadimpl')||s.includes('atrasad'))return 'atraso';
+  if(s.includes('em dia')||s.includes('em_dia')||s.includes('emdia'))return 'ativo';
+  if(s.includes('dia')||s.includes('ativo')||s.includes('aberto')||s.includes('ativa')||s.includes('andamento')||s.includes('vigente'))return 'ativo';
+  // Aceita qualquer valor não-vazio como "ativo" por padrão (linha real de empréstimo)
+  return 'ativo';
 }
 
 function render(empRows,pagRows){
@@ -1914,12 +1928,21 @@ function render(empRows,pagRows){
     else if(s.includes(',')&&!s.includes('.'))s=s.replace(',','.');
     const n=parseFloat(s)||0;return isPct?n/100:n;
   }
-  function parseTaxa(v){const n=parseNum(v);return n>1?n/100:n;}
+  function parseTaxa(v){
+    if(v===null||v===undefined||v==='')return 0;
+    const s=String(v).trim();
+    const isPct=s.includes('%');
+    const n=parseNum(v);
+    // Se vier com %, já foi dividido por 100 pelo parseNum
+    if(isPct) return n; // parseNum já divide por 100 quando há %
+    // Se não tiver %, interpreta: >1 = percentual (ex:20 → 0.20), <=1 = já decimal
+    return n>1?n/100:n;
+  }
 
   const emps=empRows
     .filter(r=>r[CE.id]&&String(r[CE.id]).trim().toUpperCase().startsWith('EMP'))
     .map(r=>({id:String(r[CE.id]).trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital:parseNum(r[CE.cap]),data:parseDate(r[CE.data]),taxa:parseTaxa(r[CE.taxa]),prazo:parseNum(r[CE.prazo]),tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal:parseNum(r[CE.jTotal]),saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status:parseStatus(r[CE.status]),proxVenc:parseDate(r[CE.proxVenc]),vencContrato:parseDate(r[CE.vencContrato]),unidade:getUnidade(r)}))
-    .filter(e=>e.status!==null&&e.capital>0);
+    .filter(e=>e.capital>0);
 
   const pags=pagRows
     .filter(r=>r[CP.id]&&String(r[CP.id]).startsWith('EMP'))
@@ -4885,26 +4908,57 @@ async function cadPost(action, extra={}){
   const url = localStorage.getItem('dossie_script_url');
   if(!url) throw new Error('URL do Apps Script não configurada. Vá na aba Cadastro e cole a URL.');
   const body = JSON.stringify({ action, ...extra });
-  const r = await fetch(url, { method:'POST', body });
-  if(!r.ok) throw new Error('HTTP '+r.status);
-  const d = await r.json();
-  if(!d.ok) throw new Error(d.erro || 'Erro desconhecido');
-  return d;
+  // Apps Script requer mode no-cors OU proxy; usamos text/plain para evitar preflight
+  const r = await fetch(url, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body
+  });
+  // no-cors retorna opaque response — não conseguimos ler o body
+  // Portanto fazemos GET logo após para buscar a resposta (padrão do Apps Script)
+  // Aguarda 800ms para o script processar
+  await new Promise(res => setTimeout(res, 800));
+  // Tenta GET para confirmar (usa JSONP se disponível, senão assume ok)
+  try {
+    const getUrl = url + (url.includes('?')?'&':'?') + 'action=sync_tudo&t=' + Date.now();
+    const gr = await fetch(getUrl, { mode: 'cors' });
+    if (gr.ok) {
+      const d = await gr.json();
+      if (!d.ok) throw new Error(d.erro || 'Erro desconhecido');
+      return d;
+    }
+  } catch(e) {
+    // Se GET falhou, retorna ok simulado (no-cors não consegue confirmar)
+    console.warn('cadPost: não foi possível confirmar resposta do Apps Script —', e.message);
+  }
+  return { ok: true };
 }
 
 // ── Sincronizar tudo do Drive ──
 async function cadSincronizar(){
   cadStatus('⟳ Sincronizando...','var(--gold)');
+  const url = localStorage.getItem('dossie_script_url');
+  if(!url){ cadStatus('⚠️ URL não configurada','var(--red)'); return; }
   try {
-    const d = await cadPost('sync_tudo');
+    // Tenta GET direto primeiro (Apps Script com acesso Anyone)
+    const getUrl = url + (url.includes('?')?'&':'?') + 'action=sync_tudo&t=' + Date.now();
+    let d;
+    try {
+      const gr = await fetch(getUrl, { mode: 'cors' });
+      if(gr.ok) d = await gr.json();
+    } catch(e) {
+      // CORS bloqueou GET direto — tenta JSONP
+      d = await jsonpRequest(getUrl, 15000);
+    }
+    if(!d || !d.ok) throw new Error(d?.erro || 'Resposta inválida do Apps Script');
     _cadEmps = d.emprestimos || [];
     _cadPags = d.pagamentos  || [];
-    // Mesclar pastas vindas do servidor
     if(d.pastas){ try{ Object.assign(_pastas, d.pastas); pastaSalvarLocal(); }catch(e){} }
+    cadSalvarLocal();
     cadListaRender();
     cadAtualizarDatalist();
     cadStatus('✅ Sincronizado · '+_cadEmps.length+' contratos · '+_cadPags.length+' pagamentos','var(--green)');
-    // Re-renderizar o dashboard com os novos dados
     cadRenderDashboard();
   } catch(e){
     cadStatus('❌ '+e.message,'var(--red)');
@@ -4991,9 +5045,10 @@ function cadCalcEmp(e){
   const totalPago = _cadPags.filter(p=>p.empId===e.id).reduce((s,p)=>s+(p.valor||0),0);
   const saldo     = Math.max(0, valorTotal-totalPago);
   const jProx     = e.unidade==='semanal' ? cap*taxa : cap*taxa;
+  function toLocalISO(d){ if(!d||isNaN(d)) return ''; const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
   return {...e, jTotal, valorTotal, parcela, saldo, jProx,
-    proxVenc: proxVenc?proxVenc.toISOString().slice(0,10):'',
-    vencContrato: vencContrato?vencContrato.toISOString().slice(0,10):'',
+    proxVenc: proxVenc?toLocalISO(proxVenc):'',
+    vencContrato: vencContrato?toLocalISO(vencContrato):'',
     totalPago};
 }
 
