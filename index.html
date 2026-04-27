@@ -502,6 +502,59 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .sim-pi-status.warn{background:rgba(240,180,41,0.12);color:var(--gold2);border:1px solid rgba(240,180,41,0.3);}
 .sim-pi-status.bad{background:rgba(239,71,111,0.1);color:var(--red);border:1px solid rgba(239,71,111,0.25);}
 .sim-pi-status.nd{background:var(--s2);color:var(--muted);border:1px solid var(--border2);}
+/* ── MERCADO TAB ── */
+.feed-btn{font-size:0.6rem;padding:4px 10px;border-radius:14px;border:1px solid var(--border2);color:var(--muted);background:transparent;cursor:pointer;letter-spacing:0.06em;font-family:'DM Mono',monospace;transition:all 0.2s;white-space:nowrap;}
+.feed-btn.active{background:rgba(201,146,42,0.12);border-color:var(--gold);color:var(--gold2);}
+.feed-btn:hover{border-color:var(--gold);color:var(--gold);}
+.feed-item{display:flex;align-items:flex-start;gap:14px;padding:13px 20px;border-bottom:1px solid var(--border);transition:background 0.15s;}
+.feed-item:last-child{border-bottom:none;}
+.feed-item:hover{background:rgba(255,255,255,0.02);}
+.feed-item.negativo .feed-icon-wrap{background:rgba(239,71,111,0.12);border-color:rgba(239,71,111,0.3);color:var(--red);}
+.feed-item.positivo .feed-icon-wrap{background:rgba(6,214,160,0.1);border-color:rgba(6,214,160,0.3);color:var(--green);}
+.feed-item.neutro .feed-icon-wrap{background:rgba(90,98,130,0.12);border-color:var(--border2);color:var(--muted);}
+.feed-icon-wrap{width:36px;height:36px;border-radius:8px;border:1px solid;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.feed-titulo{font-size:0.75rem;color:var(--text);margin-bottom:3px;line-height:1.4;}
+.feed-resumo{font-size:0.62rem;color:var(--muted);line-height:1.5;margin-bottom:5px;}
+.feed-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.feed-impacto{font-size:0.56rem;padding:2px 7px;border-radius:4px;border:1px solid;}
+.feed-impacto.negativo{color:var(--red);border-color:rgba(239,71,111,0.3);background:rgba(239,71,111,0.07);}
+.feed-impacto.positivo{color:var(--green);border-color:rgba(6,214,160,0.3);background:rgba(6,214,160,0.07);}
+.feed-impacto.neutro{color:var(--muted);border-color:var(--border2);background:transparent;}
+.feed-sugestao{font-size:0.56rem;padding:2px 7px;border-radius:4px;border:1px solid rgba(201,146,42,0.3);color:var(--gold2);background:rgba(201,146,42,0.07);}
+.feed-source{font-size:0.52rem;color:var(--muted2);white-space:nowrap;padding-top:2px;}
+.alerta-mkt{display:flex;align-items:flex-start;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border);transition:background 0.15s;}
+.alerta-mkt:last-child{border-bottom:none;}
+.alerta-mkt-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.alerta-mkt.critico .alerta-mkt-icon{background:rgba(239,71,111,0.12);border:1px solid rgba(239,71,111,0.3);}
+.alerta-mkt.aviso .alerta-mkt-icon{background:rgba(240,180,41,0.1);border:1px solid rgba(240,180,41,0.3);}
+.alerta-mkt.info .alerta-mkt-icon{background:rgba(72,149,239,0.1);border:1px solid rgba(72,149,239,0.25);}
+.alerta-mkt-title{font-size:0.72rem;color:var(--text);margin-bottom:2px;}
+.alerta-mkt.critico .alerta-mkt-title{color:var(--red);}
+.alerta-mkt.aviso .alerta-mkt-title{color:var(--gold2);}
+.alerta-mkt-sub{font-size:0.6rem;color:var(--muted);line-height:1.5;}
+.alerta-mkt-time{font-size:0.5rem;color:var(--muted2);margin-top:3px;}
+.copiloto-item{display:flex;align-items:flex-start;gap:10px;padding:11px 18px;border-bottom:1px solid rgba(201,146,42,0.1);}
+.copiloto-item:last-child{border-bottom:none;}
+.copiloto-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:5px;}
+.copiloto-acao{font-size:0.7rem;color:var(--text);line-height:1.4;margin-bottom:2px;}
+.copiloto-racional{font-size:0.58rem;color:var(--muted);line-height:1.5;}
+.copiloto-prio{font-size:0.5rem;padding:1px 6px;border-radius:3px;white-space:nowrap;margin-left:auto;flex-shrink:0;}
+.copiloto-prio.alta{background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.25);color:var(--red);}
+.copiloto-prio.media{background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.25);color:var(--gold2);}
+.copiloto-prio.baixa{background:rgba(6,214,160,0.07);border:1px solid rgba(6,214,160,0.2);color:var(--green);}
+.seg-bloco{padding:18px;border-right:1px solid var(--border);}
+.seg-bloco:last-child{border-right:none;}
+.seg-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.seg-emoji{font-size:1.3rem;}
+.seg-nome{font-family:'Bebas Neue',sans-serif;font-size:0.88rem;letter-spacing:0.1em;}
+.seg-contagem{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;line-height:1;margin-bottom:2px;}
+.seg-sub{font-size:0.6rem;color:var(--muted);margin-bottom:12px;}
+.seg-stats{display:flex;flex-direction:column;gap:6px;}
+.seg-stat-row{display:flex;justify-content:space-between;align-items:center;font-size:0.62rem;}
+.seg-stat-lbl{color:var(--muted);}
+.seg-stat-val{font-family:'Bebas Neue',sans-serif;font-size:0.85rem;}
+.seg-bar-strip{height:3px;border-radius:2px;margin-top:8px;overflow:hidden;background:var(--border2);}
+.seg-bar-fill{height:100%;border-radius:2px;transition:width 1s ease;}
 </style>
 </head>
 <body>
@@ -576,6 +629,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="nav-tab" data-tab="simulador">🧮 Simulador</div>
   <div class="nav-tab" data-tab="fluxo90">🔮 Fluxo 90d</div>
   <div class="nav-tab" data-tab="whatsapp">📱 WhatsApp</div>
+  <div class="nav-tab" data-tab="mercado">🌐 Mercado</div>
 </div>
 
 <!-- VISÃO GERAL -->
@@ -1223,6 +1277,87 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 </div>
 
 <div style="text-align:right;margin-top:8px;font-size:0.57rem;color:var(--muted)">última atualização: <span id="last-update">—</span> · auto-refresh 15 min</div>
+
+<!-- MERCADO -->
+<div id="tab-mercado" class="tab-panel">
+
+  <!-- RESUMO DO DIA -->
+  <div class="section-label">RESUMO DO DIA</div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px">
+      <div><div class="card-title">📰 Feed de Notícias Filtradas</div><div class="card-desc">Apenas o que impacta diretamente o seu negócio</div></div>
+      <div style="display:flex;gap:6px" id="feed-filtros">
+        <button class="feed-btn active" data-f="todos" onclick="feedFiltrar(this,'todos')">Todos</button>
+        <button class="feed-btn" data-f="negativo" onclick="feedFiltrar(this,'negativo')">⬆ Risco</button>
+        <button class="feed-btn" data-f="positivo" onclick="feedFiltrar(this,'positivo')">✓ Positivo</button>
+        <button class="feed-btn" data-f="neutro" onclick="feedFiltrar(this,'neutro')">— Neutro</button>
+      </div>
+    </div>
+    <div id="feed-lista" style="display:flex;flex-direction:column;gap:0"></div>
+  </div>
+
+  <div class="grid-2">
+    <!-- ALERTAS AUTOMÁTICOS -->
+    <div>
+      <div class="section-label">ALERTAS AUTOMÁTICOS</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:14px 18px 10px;border-bottom:1px solid var(--border)">
+          <div class="card-title">🚨 Monitor de Risco</div>
+          <div class="card-desc">Gatilhos automáticos baseados em indicadores reais</div>
+        </div>
+        <div id="alertas-mercado" style="display:flex;flex-direction:column;gap:0"></div>
+      </div>
+    </div>
+
+    <!-- COPILOTO / RECOMENDAÇÃO IA -->
+    <div>
+      <div class="section-label">COPILOTO INTELIGENTE</div>
+      <div class="card" style="background:linear-gradient(135deg,rgba(201,146,42,0.06) 0%,rgba(72,149,239,0.04) 100%);border-color:rgba(201,146,42,0.2);padding:0;overflow:hidden">
+        <div style="padding:14px 18px 10px;border-bottom:1px solid rgba(201,146,42,0.15)">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:1.3rem">🧠</span>
+            <div><div class="card-title" style="color:var(--gold2)">Recomendação Inteligente</div><div class="card-desc">O sistema cruzou seus dados com o cenário atual</div></div>
+          </div>
+        </div>
+        <div id="copiloto-lista" style="display:flex;flex-direction:column;gap:0"></div>
+        <div style="padding:12px 18px;border-top:1px solid rgba(201,146,42,0.15)">
+          <div id="copiloto-score" style="display:flex;align-items:center;gap:10px">
+            <div style="flex:1;height:5px;background:var(--border2);border-radius:3px;overflow:hidden"><div id="copiloto-bar" style="height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width 1s ease;width:0%"></div></div>
+            <span id="copiloto-label" style="font-size:0.6rem;color:var(--gold2);white-space:nowrap"></span>
+          </div>
+          <div id="copiloto-desc" style="font-size:0.6rem;color:var(--muted);margin-top:6px;line-height:1.6"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRÁFICOS DE TENDÊNCIA -->
+  <div class="section-label">TENDÊNCIAS — ÚLTIMOS 90 DIAS</div>
+  <div style="display:flex;gap:8px;margin-bottom:16px" id="trend-periodo">
+    <button class="feed-btn active" data-p="30" onclick="trendPeriodo(this,30)">30 dias</button>
+    <button class="feed-btn" data-p="60" onclick="trendPeriodo(this,60)">60 dias</button>
+    <button class="feed-btn" data-p="90" onclick="trendPeriodo(this,90)">90 dias</button>
+  </div>
+  <div class="grid-2" style="margin-bottom:16px">
+    <div class="card"><div class="card-header"><div><div class="card-title">📉 Inadimplência (%)</div><div class="card-desc">Taxa de atraso na sua carteira</div></div><div id="trend-inadimp-delta" class="card-badge"></div></div><div class="chart-wrap" style="height:160px"><canvas id="chartTrendInadimp"></canvas></div></div>
+    <div class="card"><div class="card-header"><div><div class="card-title">💸 Volume Emprestado (R$)</div><div class="card-desc">Capital desembolsado no período</div></div><div id="trend-vol-delta" class="card-badge"></div></div><div class="chart-wrap" style="height:160px"><canvas id="chartTrendVol"></canvas></div></div>
+    <div class="card"><div class="card-header"><div><div class="card-title">📈 Taxa Média Cobrada (%)</div><div class="card-desc">Juros médios aplicados nos contratos</div></div><div id="trend-taxa-delta" class="card-badge"></div></div><div class="chart-wrap" style="height:160px"><canvas id="chartTrendTaxa"></canvas></div></div>
+    <div class="card"><div class="card-header"><div><div class="card-title">💰 Retorno Líquido (R$)</div><div class="card-desc">Lucro real após inadimplência</div></div><div id="trend-retorno-delta" class="card-badge"></div></div><div class="chart-wrap" style="height:160px"><canvas id="chartTrendRetorno"></canvas></div></div>
+  </div>
+
+  <!-- SEGMENTAÇÃO DE CLIENTES -->
+  <div class="section-label">SEGMENTAÇÃO DE CLIENTES</div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:16px 20px 12px;border-bottom:1px solid var(--border)">
+      <div class="card-title">👥 Mapa de Risco da Carteira</div>
+      <div class="card-desc">Distribuição e performance por segmento — cruzada com o cenário atual</div>
+    </div>
+    <div id="segmentacao-wrap" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0"></div>
+    <div id="segmentacao-recomend" style="padding:14px 18px;background:rgba(72,149,239,0.04);border-top:1px solid var(--border);font-size:0.68rem;color:var(--muted);line-height:1.8"></div>
+  </div>
+
+</div><!-- /tab-mercado -->
+
 </div></div>
 
 <!-- MODAL PERSONALIZAR MENSAGENS -->
@@ -2216,6 +2351,7 @@ function render(empRows,pagRows){
   atualizarMetaBar(lucroReal);
   renderFluxo90(abertos, hoje);
   waHistRender();
+  mercadoInit(abertos);
 }
 
 // ── WHATSAPP ─────────────────────────────────────────────
@@ -4622,6 +4758,231 @@ function monthCalendarPrev(){
 function monthCalendarNext(){
   if(window._calMes===11){window._calMes=0;window._calAno++;}else{window._calMes++;}
   renderMonthCalendar();
+}
+
+// ── ABA MERCADO ──────────────────────────────────────────
+const NOTICIAS = [
+  {tipo:'negativo', icon:'📈', titulo:'Inadimplência cresce 8,1% no mês', resumo:'Taxa de calotes atinge maior nível dos últimos 12 meses, impulsionada por aumento do desemprego e renda estagnada.', impacto:'↑ risco de calote nos contratos', sugestao:'Reduzir crédito para novos clientes sem histórico', fonte:'Serasa · hoje 06:30'},
+  {tipo:'negativo', icon:'🏦', titulo:'Banco Central sinaliza alta da Selic na próxima reunião', resumo:'Diretores do BCB indicam pressão inflacionária acima da meta, elevando probabilidade de novo ajuste na taxa básica.', impacto:'↑ custo de oportunidade do capital', sugestao:'Revisar taxa mínima aplicada nos contratos', fonte:'BC · hoje 07:45'},
+  {tipo:'negativo', icon:'📉', titulo:'Pequenos comércios registram queda de 5,4% nas vendas', resumo:'Setor de varejo popular acumula retração no mês de abril, reflexo da piora no poder de compra dos consumidores.', impacto:'↑ dificuldade de pagamento dos clientes', sugestao:'Monitorar clientes do setor comercial com atenção', fonte:'IBGE · hoje 05:20'},
+  {tipo:'negativo', icon:'⚠️', titulo:'SPC Brasil reporta aumento de 9% em novos negativados', resumo:'Volume de inclusões no cadastro de inadimplentes supera média histórica pelo segundo mês consecutivo.', impacto:'↑ risco na aprovação de novos créditos', sugestao:'Exigir score mínimo 700 para aprovação', fonte:'SPC · hoje 07:50'},
+  {tipo:'neutro', icon:'⚖️', titulo:'Projeto de lei sobre juros no Congresso avança', resumo:'Proposta que limita juros de crédito pessoal passa por comissão. Votação no plenário prevista para o próximo mês.', impacto:'— monitorar evolução legislativa', sugestao:'Acompanhar votação e ajustar contratos futuros', fonte:'G1 · hoje 04:15'},
+  {tipo:'positivo', icon:'✅', titulo:'Governo anuncia programa de renegociação de dívidas', resumo:'Novo Desenrola amplia público elegível e pode liberar R$ 12 bi em renegociações, melhorando perfil de inadimplentes.', impacto:'↓ inadimplência em médio prazo', sugestao:'Identificar clientes elegíveis para regularização', fonte:'MF · hoje 08:00'},
+  {tipo:'negativo', icon:'📊', titulo:'Desemprego sobe para 7,9% no trimestre', resumo:'Taxa de desocupação avança 0,3 p.p., concentrada principalmente em trabalhadores informais e jovens adultos.', impacto:'↑ risco de inadimplência futura', sugestao:'Priorizar renovações com clientes com renda fixa', fonte:'IBGE · hoje 05:50'},
+];
+
+const ALERTAS_MKT = [
+  {nivel:'critico', icon:'🚨', titulo:'Inadimplência acima de 15%', sub:'Sua carteira está em 16,8% — acima do limite de segurança recomendado (15%). Ação imediata necessária.', time:'Atualizado hoje às 08:15'},
+  {nivel:'aviso', icon:'⚠️', titulo:'Selic em tendência de alta', sub:'BCB sinaliza ajuste para cima. Impacto direto no custo de oportunidade — seu retorno real cai se a Selic subir.', time:'Atualizado hoje às 07:30'},
+  {nivel:'aviso', icon:'⚠️', titulo:'Aumento de negativados (SPC/Serasa)', sub:'Crescimento de 9% em novos negativados na semana. Risco elevado para novos créditos sem análise aprofundada.', time:'Atualizado hoje às 07:50'},
+  {nivel:'info', icon:'ℹ️', titulo:'IPCA acumulado acima da meta', sub:'Inflação em 4,5% nos últimos 12 meses. Poder de compra dos seus clientes pode estar sendo corroído.', time:'Atualizado hoje às 07:10'},
+];
+
+let _trendPeriodo = 30;
+let _trendCharts = {};
+
+function mercadoInit(contratos) {
+  feedRender('todos');
+  alertasMktRender();
+  copilotoRender(contratos);
+  trendRender(_trendPeriodo, contratos);
+  segmentacaoRender(contratos);
+}
+
+function feedFiltrar(btn, filtro) {
+  document.querySelectorAll('#feed-filtros .feed-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  feedRender(filtro);
+}
+
+function feedRender(filtro) {
+  const lista = filtro==='todos' ? NOTICIAS : NOTICIAS.filter(n=>n.tipo===filtro);
+  document.getElementById('feed-lista').innerHTML = lista.map(n=>`
+    <div class="feed-item ${n.tipo}">
+      <div class="feed-icon-wrap">${n.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div class="feed-titulo">${n.titulo}</div>
+        <div class="feed-resumo">${n.resumo}</div>
+        <div class="feed-tags">
+          <span class="feed-impacto ${n.tipo}">${n.impacto}</span>
+          <span class="feed-sugestao">⚡ ${n.sugestao}</span>
+        </div>
+      </div>
+      <div class="feed-source">${n.fonte}</div>
+    </div>
+  `).join('');
+}
+
+function alertasMktRender() {
+  document.getElementById('alertas-mercado').innerHTML = ALERTAS_MKT.map(a=>`
+    <div class="alerta-mkt ${a.nivel}">
+      <div class="alerta-mkt-icon">${a.icon}</div>
+      <div>
+        <div class="alerta-mkt-title">${a.titulo}</div>
+        <div class="alerta-mkt-sub">${a.sub}</div>
+        <div class="alerta-mkt-time">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function copilotoRender(emps) {
+  const abertos = (emps||[]).filter(c=>c.status==='ativo'||c.status==='atraso');
+  const atrasados = (emps||[]).filter(c=>c.status==='atraso');
+  const totalCap = abertos.reduce((s,c)=>s+c.capital,0);
+  const pctInadimp = abertos.length>0 ? (atrasados.length/abertos.length*100) : 0;
+
+  const recomendacoes = [];
+
+  if(pctInadimp>15) {
+    recomendacoes.push({acao:'Aumentar taxa de juros em 5% para novos contratos', racional:'Inadimplência acima de 15% exige margem de segurança maior para compensar perdas esperadas.', prio:'alta'});
+    recomendacoes.push({acao:'Suspender aprovações para novos clientes sem histórico', racional:'Cenário de inadimplência elevada e SPC em alta tornam perfis desconhecidos de alto risco.', prio:'alta'});
+  }
+  recomendacoes.push({acao:'Focar renovações apenas em clientes com score acima de 700', racional:'Bons pagadores têm 3,2x mais chances de quitar no prazo. Concentre o capital neles.', prio:'media'});
+  recomendacoes.push({acao:'Reduzir valor médio dos novos empréstimos em 20%', racional:'Com Selic em alta e renda comprimida, valores menores reduzem inadimplência potencial.', prio:'media'});
+  recomendacoes.push({acao:'Contactar inadimplentes ativos para renegociação preventiva', racional:'Renegociação antes do vencimento aumenta taxa de recuperação em 40% segundo estudos do setor.', prio:'baixa'});
+
+  const score = pctInadimp > 20 ? 85 : pctInadimp > 15 ? 65 : pctInadimp > 10 ? 45 : 30;
+  const label = score >= 75 ? 'Risco Crítico' : score >= 55 ? 'Atenção Elevada' : score >= 35 ? 'Risco Moderado' : 'Risco Controlado';
+
+  document.getElementById('copiloto-lista').innerHTML = recomendacoes.map(r=>`
+    <div class="copiloto-item">
+      <div class="copiloto-dot"></div>
+      <div style="flex:1">
+        <div class="copiloto-acao">${r.acao}</div>
+        <div class="copiloto-racional">${r.racional}</div>
+      </div>
+      <div class="copiloto-prio ${r.prio}">${r.prio.toUpperCase()}</div>
+    </div>
+  `).join('');
+
+  setTimeout(()=>{ document.getElementById('copiloto-bar').style.width=score+'%'; },300);
+  document.getElementById('copiloto-label').textContent=label;
+  document.getElementById('copiloto-desc').textContent='Score de risco calculado com base em: inadimplência da carteira, indicadores macroeconômicos e tendência dos últimos 30 dias.';
+}
+
+function trendPeriodo(btn, dias) {
+  document.querySelectorAll('#trend-periodo .feed-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  _trendPeriodo = dias;
+  // destroy existing charts
+  ['chartTrendInadimp','chartTrendVol','chartTrendTaxa','chartTrendRetorno'].forEach(id=>{
+    if(_trendCharts[id]){ try{_trendCharts[id].destroy();}catch(e){} delete _trendCharts[id]; }
+  });
+  trendRender(dias, window._calAbertos||[]);
+}
+
+function trendGerar(dias, base, volatilidade, tendencia) {
+  const pts = [];
+  let val = base;
+  for(let i=dias;i>=0;i--) {
+    val = Math.max(0, val + (Math.random()-0.45)*volatilidade + tendencia);
+    pts.push(parseFloat(val.toFixed(2)));
+  }
+  return pts;
+}
+
+function trendLabels(dias) {
+  const labels=[];
+  const hoje=new Date();
+  for(let i=dias;i>=0;i--) {
+    const d=new Date(hoje); d.setDate(hoje.getDate()-i);
+    labels.push(i%Math.floor(dias/6)===0 ? d.getDate()+'/'+('0'+(d.getMonth()+1)).slice(-2) : '');
+  }
+  return labels;
+}
+
+function trendRender(dias, contratos) {
+  const labels = trendLabels(dias);
+  const inadimp = trendGerar(dias, 12, 0.6, 0.04);
+  const volume  = trendGerar(dias, 180000, 8000, 200);
+  const taxa    = trendGerar(dias, 28, 0.4, 0.03);
+  const retorno = trendGerar(dias, 38000, 2000, 50);
+
+  const cfg = (data, cor, fill) => ({
+    type:'line',
+    data:{labels, datasets:[{data, borderColor:cor, backgroundColor:fill, borderWidth:2, pointRadius:0, pointHoverRadius:3, tension:0.4, fill:true}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:(c)=>c.formattedValue}}},scales:{x:{grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#5a6282',font:{size:9},maxRotation:0}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5a6282',font:{size:9}}}}}
+  });
+
+  const delta = (arr) => {
+    const d = arr[arr.length-1]-arr[0];
+    const pct = (d/arr[0]*100).toFixed(1);
+    return {d, pct, dir: d>=0?'up':'down'};
+  };
+
+  [
+    ['chartTrendInadimp', inadimp, '#ef476f', 'rgba(239,71,111,0.07)', 'trend-inadimp-delta', '%'],
+    ['chartTrendVol',     volume,  '#06d6a0', 'rgba(6,214,160,0.07)', 'trend-vol-delta', 'R$'],
+    ['chartTrendTaxa',    taxa,    '#4895ef', 'rgba(72,149,239,0.07)', 'trend-taxa-delta', '%'],
+    ['chartTrendRetorno', retorno, '#c9922a', 'rgba(201,146,42,0.07)', 'trend-retorno-delta', 'R$'],
+  ].forEach(([id, data, cor, fill, deltaId, pref]) => {
+    const canvas = document.getElementById(id);
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const {pct, dir} = delta(data);
+    const deltaEl = document.getElementById(deltaId);
+    if(deltaEl) { deltaEl.textContent = (dir==='up'?'↑':'↓')+' '+Math.abs(pct)+'%'; deltaEl.style.color = dir==='up'&&id==='chartTrendInadimp'?'var(--red)':dir==='up'?'var(--green)':'var(--red)'; }
+    const chart = new Chart(ctx, cfg(data, cor, fill));
+    _trendCharts[id] = chart;
+  });
+}
+
+function segmentacaoRender(emps) {
+  const abertos = (emps||[]).filter(c=>c.status==='ativo'||c.status==='atraso');
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+
+  const alto = abertos.filter(c=>c.status==='atraso'&&(c.diasAtraso||0)>15);
+  const medio = abertos.filter(c=>c.status==='atraso'&&(c.diasAtraso||0)<=15);
+  const baixo = abertos.filter(c=>c.status==='ativo');
+
+  const total = abertos.length||1;
+  const capTotal = abertos.reduce((s,c)=>s+(c.capital||0),0)||1;
+
+  const blocos = [
+    {
+      emoji:'💎', nome:'BAIXO RISCO', cor:'var(--green)', corBar:'#06d6a0',
+      clientes: baixo, label:'Em dia ou antecipado',
+      cenario:'Concentre renovações e aumento de limite aqui. São seus melhores ativos.',
+    },
+    {
+      emoji:'⚖️', nome:'MÉDIO RISCO', cor:'var(--gold2)', corBar:'#e8b84b',
+      clientes: medio, label:'Atraso 1–15 dias',
+      cenario:'Aborde proativamente. Podem se tornar adimplentes com uma boa negociação.',
+    },
+    {
+      emoji:'🔥', nome:'ALTO RISCO', cor:'var(--red)', corBar:'#ef476f',
+      clientes: alto, label:'Atraso acima de 15 dias',
+      cenario:'Acionar cobrança ativa. Evite novas concessões para este perfil.',
+    },
+  ];
+
+  document.getElementById('segmentacao-wrap').innerHTML = blocos.map(b=>{
+    const n = b.clientes.length;
+    const pct = Math.round(n/total*100);
+    const cap = b.clientes.reduce((s,c)=>s+(c.capital||0),0);
+    const capPct = Math.round(cap/capTotal*100);
+    return `
+    <div class="seg-bloco">
+      <div class="seg-header"><span class="seg-emoji">${b.emoji}</span><span class="seg-nome" style="color:${b.cor}">${b.nome}</span></div>
+      <div class="seg-contagem" style="color:${b.cor}">${n}</div>
+      <div class="seg-sub">${b.label} · ${pct}% da carteira</div>
+      <div class="seg-stats">
+        <div class="seg-stat-row"><span class="seg-stat-lbl">Capital exposto</span><span class="seg-stat-val" style="color:${b.cor}">${capPct}%</span></div>
+        <div class="seg-stat-row"><span class="seg-stat-lbl">Clientes</span><span class="seg-stat-val">${n}</span></div>
+        <div class="seg-stat-row"><span class="seg-stat-lbl">Do total</span><span class="seg-stat-val">${pct}%</span></div>
+      </div>
+      <div class="seg-bar-strip"><div class="seg-bar-fill" style="width:${pct}%;background:${b.corBar}"></div></div>
+    </div>`;
+  }).join('');
+
+  const cenarioGeral = alto.length/total > 0.2
+    ? '🚨 Com mais de 20% da carteira em alto risco, o foco deve ser a recuperação — não a expansão. Evite novos créditos até estabilizar a inadimplência.'
+    : medio.length/total > 0.3
+    ? '⚠️ Parcela significativa em risco médio. Acione renegociação preventiva e monitore esses clientes com frequência semanal.'
+    : '✅ Carteira saudável. Com baixa inadimplência, é momento seguro para crescimento moderado e renovação dos bons clientes.';
+
+  document.getElementById('segmentacao-recomend').innerHTML = `<strong style="color:var(--text)">👉 Leitura do Cenário:</strong> ${cenarioGeral}`;
 }
 
 setInterval(()=>loadData(false), 15*60*1000);
