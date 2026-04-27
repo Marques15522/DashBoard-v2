@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Capital Investimentos — Dashboard Estratégico</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#07090e;--s1:#0c0f18;--s2:#111521;--s3:#161b2a;--border:#1a2035;--border2:#212840;--gold:#c9922a;--gold2:#e8b84b;--gold3:#f5d080;--green:#06d6a0;--red:#ef476f;--blue:#4895ef;--purple:#9b5de5;--text:#dde1f0;--muted:#5a6282;--muted2:#3d4466;}
@@ -484,6 +486,98 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .score-rec-title{font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:0.1em;margin-bottom:5px;}
 
 /* ══════════════════════════════════════════════════════
+   MAPA SÃO PAULO — CSS novo, incremental
+   ══════════════════════════════════════════════════════ */
+#sp-map-container {
+  position: relative;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  height: 560px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+}
+#sp-map { width: 100%; height: 100%; background: #07090e; }
+/* Leaflet dark override */
+.leaflet-container { background: #07090e !important; font-family: 'DM Mono', monospace; }
+.leaflet-control-zoom a {
+  background: var(--s2) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+  font-size: 16px !important;
+}
+.leaflet-control-zoom a:hover { background: var(--s3) !important; color: var(--gold) !important; }
+.leaflet-control-attribution { display: none !important; }
+/* Tooltip do mapa */
+.sp-map-tooltip {
+  background: rgba(7,9,14,0.95) !important;
+  border: 1px solid var(--border2) !important;
+  border-radius: 10px !important;
+  color: var(--text) !important;
+  font-family: 'DM Mono', monospace !important;
+  font-size: 0.72rem !important;
+  padding: 10px 14px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
+  pointer-events: none !important;
+}
+.sp-map-tooltip::before { display: none !important; }
+.sp-tt-bairro { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.1em; margin-bottom: 4px; color: var(--gold2); }
+.sp-tt-row { display: flex; justify-content: space-between; gap: 16px; font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
+.sp-tt-val { color: var(--text); font-weight: 600; }
+/* Legenda do mapa */
+#sp-map-legend {
+  position: absolute;
+  bottom: 20px;
+  right: 16px;
+  z-index: 999;
+  background: rgba(7,9,14,0.92);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.62rem;
+  color: var(--muted);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 140px;
+}
+.sp-leg-title { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.15em; color: var(--text); font-size: 0.7rem; margin-bottom: 2px; }
+.sp-leg-row { display: flex; align-items: center; gap: 8px; }
+.sp-leg-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+/* Painel lateral do mapa */
+#sp-map-panel {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+  animation: fadeUp 0.4s ease both;
+}
+.sp-panel-stat { display: flex; flex-direction: column; gap: 3px; }
+.sp-panel-lbl { font-size: 0.58rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
+.sp-panel-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; line-height: 1; }
+/* Tabela de bairros */
+#sp-bairros-table-wrap {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  animation: fadeUp 0.4s ease both;
+}
+.sp-bairro-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 10px; }
+.sp-bairro-row:last-child { border-bottom: none; }
+.sp-bairro-nome { font-size: 0.73rem; color: var(--text); flex: 1; }
+.sp-bairro-bar-bg { flex: 2; height: 5px; background: var(--border2); border-radius: 3px; overflow: hidden; }
+.sp-bairro-bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+.sp-bairro-cnt { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; min-width: 28px; text-align: right; }
+.sp-bairro-cap { font-size: 0.6rem; color: var(--muted); min-width: 80px; text-align: right; }
+
+/* ══════════════════════════════════════════════════════
    UPGRADE DE LAYOUT — adicionado incrementalmente
    Nenhuma regra abaixo sobrescreve lógica JS existente
    ══════════════════════════════════════════════════════ */
@@ -836,6 +930,7 @@ header {
   <div class="nav-tab" data-tab="simulador">🧮 Simulador</div>
   <div class="nav-tab" data-tab="fluxo90">🔮 Fluxo 90d</div>
   <div class="nav-tab" data-tab="whatsapp">📱 WhatsApp</div>
+  <div class="nav-tab" data-tab="mapa">🗺️ Mapa SP</div>
 </div>
 
 <!-- VISÃO GERAL -->
@@ -1119,6 +1214,58 @@ header {
     </div>
   </div>
 </div>
+
+<!-- MAPA SÃO PAULO — novo tab-panel, não altera nada existente -->
+<div id="tab-mapa" class="tab-panel">
+
+  <!-- painel de stats -->
+  <div id="sp-map-panel">
+    <div class="sp-panel-stat">
+      <div class="sp-panel-lbl">Bairros com Clientes</div>
+      <div class="sp-panel-val" id="sp-stat-bairros" style="color:var(--gold2)">—</div>
+    </div>
+    <div class="sp-panel-stat">
+      <div class="sp-panel-lbl">Clientes Mapeados</div>
+      <div class="sp-panel-val" id="sp-stat-cli" style="color:var(--green)">—</div>
+    </div>
+    <div class="sp-panel-stat">
+      <div class="sp-panel-lbl">Capital Distribuído</div>
+      <div class="sp-panel-val" id="sp-stat-cap" style="color:var(--blue)">—</div>
+    </div>
+    <div class="sp-panel-stat">
+      <div class="sp-panel-lbl">Bairro Principal</div>
+      <div class="sp-panel-val" id="sp-stat-top" style="color:var(--purple);font-size:1rem">—</div>
+    </div>
+  </div>
+
+  <!-- mapa Leaflet -->
+  <div id="sp-map-container">
+    <div id="sp-map"></div>
+    <div id="sp-map-legend">
+      <div class="sp-leg-title">Clientes / Bairro</div>
+      <div class="sp-leg-row"><div class="sp-leg-dot" style="background:rgba(72,149,239,0.25);border:1px solid rgba(72,149,239,0.4)"></div><span>Sem clientes</span></div>
+      <div class="sp-leg-row"><div class="sp-leg-dot" style="background:rgba(201,146,42,0.45)"></div><span>1 – 5 clientes</span></div>
+      <div class="sp-leg-row"><div class="sp-leg-dot" style="background:rgba(201,146,42,0.72)"></div><span>6 – 15 clientes</span></div>
+      <div class="sp-leg-row"><div class="sp-leg-dot" style="background:rgba(239,71,111,0.8)"></div><span>16+ clientes</span></div>
+    </div>
+  </div>
+
+  <!-- tabela de bairros -->
+  <div id="sp-bairros-table-wrap">
+    <div class="card-header" style="margin-bottom:14px">
+      <div>
+        <div class="card-title">📍 Concentração por Bairro</div>
+        <div class="card-desc">Bairros detectados nos endereços cadastrados nas pastas de clientes</div>
+      </div>
+      <div class="card-badge" id="sp-table-badge">0 bairros</div>
+    </div>
+    <div id="sp-bairros-lista">
+      <div style="color:var(--muted);font-size:0.7rem;padding:16px 0">Carregando dados das pastas…</div>
+    </div>
+  </div>
+
+</div>
+<!-- /MAPA SÃO PAULO -->
 
 <!-- MODAL CRIAR/EDITAR PASTA -->
 <div class="pasta-modal-overlay" id="pasta-modal-overlay" onclick="if(event.target===this)pastaModalClose()">
