@@ -70,11 +70,9 @@ header{position:sticky;top:0;z-index:50;background:rgba(7,9,14,0.93);backdrop-fi
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(6,214,160,0.4);}50%{opacity:0.7;box-shadow:0 0 0 4px rgba(6,214,160,0);}}
 .refresh-btn{padding:6px 16px;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;font-family:'DM Mono',monospace;font-size:0.68rem;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s;}
 .refresh-btn:hover{border-color:var(--gold);color:var(--gold);}
-.nav-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}
-.nav-tabs::-webkit-scrollbar{display:none;}
-.nav-tab{padding:12px 16px;font-size:0.68rem;letter-spacing:0.08em;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s;text-transform:uppercase;user-select:none;flex-shrink:0;}
+.nav-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto;}
+.nav-tab{padding:12px 20px;font-size:0.72rem;letter-spacing:0.1em;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s;text-transform:uppercase;user-select:none;}
 .nav-tab:hover{color:var(--text);}
-.nav-tab.active{color:var(--gold2);border-bottom-color:var(--gold2);}
 .nav-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
@@ -1676,14 +1674,7 @@ function doGet(e) {
     </div>`;
   document.body.appendChild(modal);
 }
-const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,valorTotal:12,totalPago:13,saldo:14,jProx:15,parcelas:16,status:17,proxVenc:18,obs:19};
-// unidade (semanal/mensal) é derivada do campo Tipo Juros ou da coluna de observações
-function getUnidade(row){
-  const tj = String(row[CE.tipoJuros]||'').toLowerCase();
-  const obs = String(row[CE.obs]||'').toLowerCase();
-  if(tj.includes('semanal')||obs.includes('semanal')) return 'semanal';
-  return 'mensal';
-}
+const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18};
 const CP={id:0,tipo:2,valor:3,data:4,juros:5};
 const GID_EMP=147333899, GID_PAG=647642652;
 const fmt=v=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
@@ -1801,7 +1792,7 @@ function render(empRows,pagRows){
 
   const emps=empRows
     .filter(r=>r[CE.id]&&String(r[CE.id]).trim().toUpperCase().startsWith('EMP'))
-    .map(r=>({id:String(r[CE.id]).trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital:parseNum(r[CE.cap]),data:parseDate(r[CE.data]),taxa:parseTaxa(r[CE.taxa]),prazo:parseNum(r[CE.prazo]),tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal:parseNum(r[CE.jTotal]),saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status:parseStatus(r[CE.status]),proxVenc:parseDate(r[CE.proxVenc]),vencContrato:parseDate(r[CE.vencContrato]),unidade:getUnidade(r)}))
+    .map(r=>({id:String(r[CE.id]).trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital:parseNum(r[CE.cap]),data:parseDate(r[CE.data]),taxa:parseTaxa(r[CE.taxa]),prazo:parseNum(r[CE.prazo]),tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal:parseNum(r[CE.jTotal]),saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status:parseStatus(r[CE.status]),proxVenc:parseDate(r[CE.proxVenc]),vencContrato:parseDate(r[CE.vencContrato])}))
     .filter(e=>e.status!==null&&e.capital>0);
 
   const pags=pagRows
@@ -1826,10 +1817,8 @@ function render(empRows,pagRows){
   const ticket=abertos.length?totalCap/abertos.length:0;
   const inadimPct=abertos.length?atrasado.length/abertos.length:0;
   const lucroReal=pags.reduce((s,p)=>s+p.juros,0);
-  // prazoMeses: normaliza semanais para meses (4 semanas = 1 mês) para comparar igual
-  const prazoMedio=abertos.length?abertos.reduce((s,e)=>s+(e.unidade==='semanal'?e.prazo/4:e.prazo),0)/abertos.length:0;
-  // taxaMediaGlobal: converte taxa semanal → mensal proporcional para projeções mensais
-  const taxaMediaGlobal=abertos.length?abertos.reduce((s,e)=>s+(e.unidade==='semanal'?e.taxa*4:e.taxa),0)/abertos.length:0.1;
+  const prazoMedio=abertos.length?abertos.reduce((s,e)=>s+e.prazo,0)/abertos.length:0;
+  const taxaMediaGlobal=abertos.length?abertos.reduce((s,e)=>s+e.taxa,0)/abertos.length:0.1;
   const em7=new Date(hoje);em7.setDate(hoje.getDate()+7);
   const proxSemana=abertos.filter(e=>e.proxVenc&&e.proxVenc>=hoje&&e.proxVenc<=em7).reduce((s,e)=>s+e.jProx,0);
 
@@ -1887,10 +1876,7 @@ function render(empRows,pagRows){
   document.getElementById('kpi-cli-ativos').textContent=cliAtivos.length;
   document.getElementById('kpi-cli-sub').textContent=cliInativos.length+' inativos';
   document.getElementById('kpi-realizado').textContent=fmt(lucroReal);
-  const temSemanais=abertos.some(e=>e.unidade==='semanal');
   document.getElementById('kpi-prazo').textContent=prazoMedio.toFixed(1);
-  const prazoSub=document.querySelector('#kpi-prazo')?.closest('.kpi')?.querySelector('.kpi-sub');
-  if(prazoSub) prazoSub.textContent=temSemanais?'meses (normalizado)':'meses';
   document.getElementById('cli-ativos-n').textContent=cliAtivos.length;
   document.getElementById('cli-inativos-n').textContent=cliInativos.length;
   document.getElementById('cli-recorrencia').textContent=pct(recorrPct);
@@ -2041,7 +2027,7 @@ function render(empRows,pagRows){
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div class="atraso-info">
           <span class="atraso-nome">${e.nome||e.id}</span>
-          <span class="atraso-sub">${e.id} · ${fmt(e.capital)} · ${e.prazo} ${e.unidade==='semanal'?'sem.':'m.'} · ${e.unidade==='semanal'?'<span style=\'background:rgba(155,93,229,0.15);color:#9b5de5;border-radius:3px;padding:1px 5px;font-size:0.5rem\'>⚡ SEMANAL</span> · ':''} vencia ${e.proxVenc?e.proxVenc.toLocaleDateString('pt-BR'):'—'}</span>
+          <span class="atraso-sub">${e.id} · Capital: ${fmt(e.capital)} · Saldo: ${fmt(e.saldo||e.capital)} · vencia ${e.proxVenc?e.proxVenc.toLocaleDateString('pt-BR'):'—'}</span>
         </div>
         <div class="atraso-dias" style="color:${cor};flex-shrink:0;margin-left:12px">${e.dias>0?e.dias:'?'}<span>${e.dias>0?'dias':'sem data'}</span></div>
       </div>
@@ -2135,8 +2121,7 @@ function render(empRows,pagRows){
   document.getElementById('profileGrid').innerHTML=clientes.map(c=>{const cl=cluster(c);const ini=c.nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();const sc=calcScore(c);const corSc=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';return`<div class="profile-card"><div class="profile-top"><div class="p-avatar">${ini}</div><div class="p-name">${c.nome}</div><div class="p-cluster ${cl.cls}">${cl.lbl}</div></div><div class="p-stats"><div class="pstat"><div class="pstat-lbl">Capital Total</div><div class="pstat-val" style="color:var(--gold)">${fmt(c.totalCap)}</div></div><div class="pstat"><div class="pstat-lbl">Lucro Previsto</div><div class="pstat-val" style="color:var(--green)">${fmt(c.totalJuros)}</div></div><div class="pstat"><div class="pstat-lbl">Contratos</div><div class="pstat-val">${c.qtdContratos}</div></div><div class="pstat"><div class="pstat-lbl">Score Risco</div><div class="pstat-val" style="color:${corSc}">${sc}</div></div><div class="pstat"><div class="pstat-lbl">Relacionamento</div><div class="pstat-val" style="color:var(--blue)">${c.mesesRelac}m</div></div><div class="pstat"><div class="pstat-lbl">Status</div><div class="pstat-val" style="color:${c.ativo?'var(--green)':'var(--muted)'}">${c.ativo?'ATIVO':'INATIVO'}</div></div></div></div>`;}).join('');
 
   // HISTÓRICO PAGAMENTOS
-  document.getElementById('histList').innerHTML=[...clientes].sort((a,b)=>b.totalPago-a.totalPago).map(c=>{const isAt=c.temAtraso,isQ=c.soQuitados;const st=isQ?`<span class="badge ok">✅ QUITADO</span>`:isAt?`<span class="badge bad">⚠️ ATRASO</span>`:`<span class="badge ok">✓ EM DIA</span>`;const rec=c.recorrente?`<span class="badge blue">↩ RECORRENTE</span>`:'';const temSem=c.contratos.some(e=>e.unidade==='semanal');const semBadge=temSem?`<span class="badge" style="background:rgba(155,93,229,0.15);color:#9b5de5;border:1px solid rgba(155,93,229,0.3)">⚡ semanal</span>`:'';
-return`<div class="hist-row"><span class="hist-nome">${c.nome}</span><div class="hist-badges"><span class="badge muted">${c.qtdContratos} contrato(s)</span><span class="badge muted">${fmt(c.totalPago)}</span>${semBadge}${rec}${st}</div></div>`;}).join('');
+  document.getElementById('histList').innerHTML=[...clientes].sort((a,b)=>b.totalPago-a.totalPago).map(c=>{const isAt=c.temAtraso,isQ=c.soQuitados;const st=isQ?`<span class="badge ok">✅ QUITADO</span>`:isAt?`<span class="badge bad">⚠️ ATRASO</span>`:`<span class="badge ok">✓ EM DIA</span>`;const rec=c.recorrente?`<span class="badge blue">↩ RECORRENTE</span>`:'';return`<div class="hist-row"><span class="hist-nome">${c.nome}</span><div class="hist-badges"><span class="badge muted">${c.qtdContratos} contrato(s)</span><span class="badge muted">${fmt(c.totalPago)}</span>${rec}${st}</div></div>`;}).join('');
 
   // COMPARATIVO MENSAL
   const mesAt=hoje.getMonth(),anoAt=hoje.getFullYear();
@@ -3312,7 +3297,7 @@ function renderFluxo90(abertos, hoje){
     const cor=diasRestantes<=7?'var(--red)':diasRestantes<=30?'var(--gold2)':'var(--green)';
     return`<div class="f90-venc-item">
       <div><div style="font-size:0.65rem;color:var(--text);font-weight:500">${e.nome}</div>
-      <div style="font-size:0.52rem;color:var(--muted);margin-top:2px">${e.proxVenc.toLocaleDateString('pt-BR')} · ${e.id}${e.unidade==='semanal'?' · <span style="color:#9b5de5;font-size:0.48rem">⚡ semanal</span>':''}</div></div>
+      <div style="font-size:0.52rem;color:var(--muted);margin-top:2px">${e.proxVenc.toLocaleDateString('pt-BR')} · ${e.id}</div></div>
       <div style="text-align:right"><div style="font-size:0.68rem;color:${cor};font-family:'Bebas Neue',sans-serif">${fmt(e.jProx)}</div>
       <div style="font-size:0.5rem;color:var(--muted)">${diasRestantes}d</div></div>
     </div>`;
