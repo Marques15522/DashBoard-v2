@@ -1893,12 +1893,32 @@ document.querySelectorAll('.nav-tab').forEach(tab=>{
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     tab.classList.add('active');
     tab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-    document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
+    const panel = document.getElementById('tab-'+tab.dataset.tab);
+    if(panel) panel.classList.add('active');
     if(tab.dataset.tab === 'simulador'){ calcDesagio(); calcOportunidade(); }
     if(tab.dataset.tab === 'clientes') {
       iniciarSyncPolling();
     } else {
       pararSyncPolling();
+    }
+    // Garantir que abas sem dados do Sheets mostrem estado vazio adequado
+    if(tab.dataset.tab === 'fluxo90'){
+      const el=document.getElementById('fluxo90-kpis');
+      if(el&&!el.innerHTML.trim()) el.innerHTML='<div style="color:var(--muted);font-size:0.68rem;padding:20px 0;grid-column:1/-1">Aguardando dados — clique em <strong style="color:var(--gold)">Atualizar</strong> para carregar.</div>';
+    }
+    if(tab.dataset.tab === 'whatsapp'){
+      const el=document.getElementById('wa-cards');
+      if(el&&el.querySelector('.wa-empty')) {
+        try{ waRenderCards(); }catch(e){}
+      }
+    }
+    if(tab.dataset.tab === 'cadastro'){
+      cadListaRender();
+      cadAtualizarDatalist();
+      // Preencher URL salva
+      const url=localStorage.getItem('dossie_script_url');
+      const inp=document.getElementById('cad-script-url');
+      if(inp&&url&&!inp.value) inp.value=url;
     }
   });
 });
@@ -5014,8 +5034,10 @@ async function loadData(mostrarLoading){
   _primeiraVez=false;
   try{ pastaRender(); }catch(e){ console.warn('pastaRender:',e); }
   try{ waHistRender(); }catch(e){}
-  // Garante que WhatsApp e Fluxo90 sempre renderizam
-  try{ if(!_waCli.length) waRenderCards(); }catch(e){}
+  // Garante que WhatsApp sempre renderiza (mesmo sem dados)
+  try{ waRenderCards(); }catch(e){}
+  // Cadastro: atualizar listas com dados locais
+  try{ cadListaRender(); cadAtualizarDatalist(); }catch(e){}
 }
 // ════════════════════════════════════════════════════════
 // AUTENTICAÇÃO — senha local com hash simples
