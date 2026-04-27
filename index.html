@@ -8,1013 +8,523 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
-    --navy-900: #050d1a;
-    --navy-800: #081428;
-    --navy-700: #0d1f3c;
-    --navy-600: #122850;
-    --navy-500: #1a3566;
-    --gold-400: #c9a84c;
-    --gold-300: #d4b56a;
-    --gold-200: #e2cc99;
-    --gold-100: #f0e4c4;
-    --emerald: #00c896;
-    --emerald-dim: rgba(0,200,150,0.15);
-    --red: #e05555;
-    --red-dim: rgba(224,85,85,0.15);
-    --purple: #9b6dff;
-    --text-primary: #f0e4c4;
-    --text-secondary: #8a9ab5;
-    --text-muted: #4a5a72;
-    --border: rgba(201,168,76,0.15);
-    --border-bright: rgba(201,168,76,0.35);
-    --card-bg: rgba(8,20,40,0.85);
-    --card-bg-hover: rgba(13,31,60,0.9);
-    --glow-gold: 0 0 40px rgba(201,168,76,0.08);
+    --navy:#050d1a;--gold:#c9a84c;--gold2:#d4b56a;--gold3:#e2cc99;
+    --green:#00c896;--green-dim:rgba(0,200,150,.15);
+    --red:#e05555;--red-dim:rgba(224,85,85,.15);
+    --purple:#9b6dff;--blue:#4a90d9;
+    --txt:#f0e4c4;--txt2:#8a9ab5;--txt3:#4a5a72;
+    --bdr:rgba(201,168,76,.15);--bdr2:rgba(201,168,76,.35);
+    --card:rgba(8,20,40,.85);
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--navy-900);
-    color: var(--text-primary);
-    font-family: 'Outfit', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Background texture */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(201,168,76,0.04) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(13,31,60,0.8) 0%, transparent 70%),
-      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(201,168,76,0.015) 60px, rgba(201,168,76,0.015) 61px),
-      repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(201,168,76,0.015) 60px, rgba(201,168,76,0.015) 61px);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* ─── HEADER ─── */
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(5,13,26,0.95);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 64px;
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .logo-icon {
-    width: 36px;
-    height: 36px;
-  }
-
-  .logo-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1;
-  }
-
-  .logo-name {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.15rem;
-    font-weight: 600;
-    color: var(--gold-300);
-    letter-spacing: 0.04em;
-  }
-
-  .logo-sub {
-    font-size: 0.58rem;
-    color: var(--text-muted);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-top: 2px;
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .live-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.72rem;
-    font-family: 'DM Mono', monospace;
-    color: var(--emerald);
-    letter-spacing: 0.08em;
-  }
-
-  .live-dot {
-    width: 7px;
-    height: 7px;
-    background: var(--emerald);
-    border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,200,150,0.4); }
-    50% { opacity: 0.7; box-shadow: 0 0 0 5px rgba(0,200,150,0); }
-  }
-
-  .header-date {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--text-secondary);
-  }
-
-  .btn-refresh {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 14px;
-    background: transparent;
-    border: 1px solid var(--border-bright);
-    border-radius: 6px;
-    color: var(--gold-300);
-    font-size: 0.75rem;
-    font-family: 'Outfit', sans-serif;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.05em;
-  }
-
-  .btn-refresh:hover {
-    background: rgba(201,168,76,0.08);
-  }
-
-  /* ─── NAV TABS ─── */
-  nav {
-    position: sticky;
-    top: 64px;
-    z-index: 90;
-    background: rgba(5,13,26,0.9);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    display: flex;
-    gap: 0;
-    overflow-x: auto;
-  }
-
-  nav::-webkit-scrollbar { height: 2px; }
-  nav::-webkit-scrollbar-track { background: transparent; }
-  nav::-webkit-scrollbar-thumb { background: var(--gold-400); }
-
-  .tab {
-    padding: 14px 20px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    border: none;
-    background: none;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-  }
-
-  .tab:hover { color: var(--text-secondary); }
-
-  .tab.active {
-    color: var(--gold-300);
-    border-bottom-color: var(--gold-400);
-  }
-
-  /* ─── MAIN ─── */
-  main {
-    position: relative;
-    z-index: 1;
-    padding: 2rem;
-    max-width: 1600px;
-    margin: 0 auto;
-  }
-
-  /* ─── SECTION TITLE ─── */
-  .section-label {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 1.5rem;
-  }
-
-  .section-label::before {
-    content: '';
-    width: 3px;
-    height: 18px;
-    background: linear-gradient(to bottom, var(--gold-400), transparent);
-    border-radius: 2px;
-  }
-
-  .section-label span {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
-  /* ─── LOADING / ERROR ─── */
-  #loading-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem;
-    gap: 1rem;
-  }
-
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border: 2px solid var(--border);
-    border-top-color: var(--gold-400);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .loading-text {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    letter-spacing: 0.1em;
-  }
-
-  #error-state {
-    display: none;
-    background: var(--red-dim);
-    border: 1px solid var(--red);
-    border-radius: 10px;
-    padding: 1.5rem 2rem;
-    margin-bottom: 2rem;
-  }
-
-  #error-state h3 {
-    color: var(--red);
-    font-size: 0.85rem;
-    margin-bottom: 0.5rem;
-  }
-
-  #error-state p {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    font-family: 'DM Mono', monospace;
-  }
-
-  #dashboard-content { display: none; }
-
-  /* ─── KPI GRID ─── */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .kpi-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.4rem 1.5rem;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.25s;
-    animation: fadeUp 0.5s ease both;
-  }
-
-  .kpi-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    border-radius: 12px 12px 0 0;
-  }
-
-  .kpi-card.gold::before { background: linear-gradient(90deg, var(--gold-400), transparent); }
-  .kpi-card.emerald::before { background: linear-gradient(90deg, var(--emerald), transparent); }
-  .kpi-card.red::before { background: linear-gradient(90deg, var(--red), transparent); }
-  .kpi-card.purple::before { background: linear-gradient(90deg, var(--purple), transparent); }
-  .kpi-card.blue::before { background: linear-gradient(90deg, #4a90d9, transparent); }
-
-  .kpi-card:hover {
-    background: var(--card-bg-hover);
-    border-color: var(--border-bright);
-    transform: translateY(-2px);
-    box-shadow: var(--glow-gold);
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .kpi-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 0.6rem;
-    font-weight: 500;
-  }
-
-  .kpi-value {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2.2rem;
-    font-weight: 600;
-    line-height: 1;
-    margin-bottom: 0.5rem;
-  }
-
-  .kpi-card.gold .kpi-value { color: var(--gold-300); }
-  .kpi-card.emerald .kpi-value { color: var(--emerald); }
-  .kpi-card.red .kpi-value { color: var(--red); }
-  .kpi-card.purple .kpi-value { color: var(--purple); }
-  .kpi-card.blue .kpi-value { color: #4a90d9; }
-
-  .kpi-sub {
-    font-size: 0.72rem;
-    color: var(--text-muted);
-  }
-
-  .kpi-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.68rem;
-    font-family: 'DM Mono', monospace;
-    padding: 3px 8px;
-    border-radius: 20px;
-    margin-top: 0.5rem;
-  }
-
-  .kpi-badge.up { background: var(--emerald-dim); color: var(--emerald); }
-  .kpi-badge.down { background: var(--red-dim); color: var(--red); }
-
-  /* ─── CHARTS GRID ─── */
-  .charts-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .charts-grid-3 {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .chart-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    animation: fadeUp 0.5s ease both;
-  }
-
-  .chart-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-  }
-
-  .chart-title {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-    margin-bottom: 3px;
-  }
-
-  .chart-subtitle {
-    font-size: 0.72rem;
-    color: var(--text-muted);
-  }
-
-  .chart-tag {
-    font-size: 0.6rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border: 1px solid var(--border-bright);
-    border-radius: 4px;
-    color: var(--text-muted);
-  }
-
-  .chart-canvas-wrap {
-    position: relative;
-    height: 220px;
-  }
-
-  /* ─── TABLE ─── */
-  .table-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    animation: fadeUp 0.5s ease both;
-    margin-bottom: 2rem;
-  }
-
-  .table-header {
-    padding: 1.2rem 1.5rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .table-title {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.82rem;
-  }
-
-  thead th {
-    padding: 0.8rem 1.5rem;
-    text-align: left;
-    font-size: 0.62rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    font-weight: 500;
-    border-bottom: 1px solid var(--border);
-    background: rgba(8,20,40,0.5);
-  }
-
-  tbody tr {
-    border-bottom: 1px solid rgba(201,168,76,0.06);
-    transition: background 0.15s;
-  }
-
-  tbody tr:hover { background: rgba(201,168,76,0.04); }
-  tbody tr:last-child { border-bottom: none; }
-
-  tbody td {
-    padding: 0.9rem 1.5rem;
-    color: var(--text-primary);
-  }
-
-  .status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 0.68rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-  }
-
-  .status-badge::before {
-    content: '';
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-  }
-
-  .status-ativo { background: var(--emerald-dim); color: var(--emerald); }
-  .status-ativo::before { background: var(--emerald); }
-  .status-quitado { background: rgba(74,90,114,0.2); color: var(--text-muted); }
-  .status-quitado::before { background: var(--text-muted); }
-  .status-atraso { background: var(--red-dim); color: var(--red); }
-  .status-atraso::before { background: var(--red); }
-  .status-renegociado { background: rgba(155,109,255,0.15); color: var(--purple); }
-  .status-renegociado::before { background: var(--purple); }
-
-  /* ─── FOOTER ─── */
-  .footer-info {
-    text-align: center;
-    padding: 2rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--text-muted);
-    letter-spacing: 0.1em;
-  }
-
-  /* ─── RESPONSIVE ─── */
-  @media (max-width: 900px) {
-    main { padding: 1rem; }
-    .charts-grid, .charts-grid-3 { grid-template-columns: 1fr; }
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-
-  @media (max-width: 500px) {
-    .kpi-grid { grid-template-columns: 1fr; }
-    header { padding: 0 1rem; }
-    nav { padding: 0 1rem; }
-  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--navy);color:var(--txt);font-family:'Outfit',sans-serif;min-height:100vh}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(201,168,76,.04) 0%,transparent 60%),repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(201,168,76,.015) 60px,rgba(201,168,76,.015) 61px),repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(201,168,76,.015) 60px,rgba(201,168,76,.015) 61px);pointer-events:none;z-index:0}
+
+  header{position:sticky;top:0;z-index:100;background:rgba(5,13,26,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{display:flex;align-items:center;gap:14px}
+  .logo-name{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--gold2);letter-spacing:.04em}
+  .logo-sub{font-size:.58rem;color:var(--txt3);letter-spacing:.15em;text-transform:uppercase;margin-top:2px}
+  .hright{display:flex;align-items:center;gap:1.5rem}
+  .live{display:flex;align-items:center;gap:6px;font-size:.72rem;font-family:'DM Mono',monospace;color:var(--green);letter-spacing:.08em}
+  .dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,200,150,.4)}50%{opacity:.7;box-shadow:0 0 0 5px rgba(0,200,150,0)}}
+  .hdate{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--txt2)}
+  .btnr{display:flex;align-items:center;gap:6px;padding:7px 14px;background:transparent;border:1px solid var(--bdr2);border-radius:6px;color:var(--gold2);font-size:.75rem;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s;letter-spacing:.05em}
+  .btnr:hover{background:rgba(201,168,76,.08)}
+
+  nav{position:sticky;top:64px;z-index:90;background:rgba(5,13,26,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--bdr);padding:0 2rem;display:flex;overflow-x:auto}
+  nav::-webkit-scrollbar{height:2px}nav::-webkit-scrollbar-thumb{background:var(--gold)}
+  .tab{padding:14px 20px;font-size:.75rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+  .tab:hover{color:var(--txt2)}.tab.active{color:var(--gold2);border-bottom-color:var(--gold)}
+
+  main{position:relative;z-index:1;padding:2rem;max-width:1600px;margin:0 auto}
+  .slabel{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem}
+  .slabel::before{content:'';width:3px;height:18px;background:linear-gradient(to bottom,var(--gold),transparent);border-radius:2px}
+  .slabel span{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--txt3)}
+
+  #loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem;gap:1rem}
+  .spin{width:40px;height:40px;border:2px solid var(--bdr);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .ltxt{font-family:'DM Mono',monospace;font-size:.8rem;color:var(--txt3);letter-spacing:.1em}
+
+  #errdiv{display:none;background:var(--red-dim);border:1px solid var(--red);border-radius:10px;padding:1.5rem 2rem;margin-bottom:2rem}
+  #errdiv h3{color:var(--red);font-size:.85rem;margin-bottom:.5rem}
+  #errdiv p{font-size:.8rem;color:var(--txt2);font-family:'DM Mono',monospace}
+
+  #dash{display:none}
+
+  .kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+  .kcard{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:1.4rem 1.5rem;position:relative;overflow:hidden;transition:all .25s;animation:up .5s ease both}
+  .kcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:12px 12px 0 0}
+  .kcard.g::before{background:linear-gradient(90deg,var(--gold),transparent)}
+  .kcard.e::before{background:linear-gradient(90deg,var(--green),transparent)}
+  .kcard.r::before{background:linear-gradient(90deg,var(--red),transparent)}
+  .kcard.p::before{background:linear-gradient(90deg,var(--purple),transparent)}
+  .kcard.b::before{background:linear-gradient(90deg,var(--blue),transparent)}
+  .kcard:hover{border-color:var(--bdr2);transform:translateY(-2px)}
+  @keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  .klbl{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--txt3);margin-bottom:.6rem;font-weight:500}
+  .kval{font-family:'Cormorant Garamond',serif;font-size:2.1rem;font-weight:600;line-height:1;margin-bottom:.4rem}
+  .kcard.g .kval{color:var(--gold2)}.kcard.e .kval{color:var(--green)}.kcard.r .kval{color:var(--red)}.kcard.p .kval{color:var(--purple)}.kcard.b .kval{color:var(--blue)}
+  .ksub{font-size:.72rem;color:var(--txt3)}
+
+  .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem}
+  .cgrid3{display:grid;grid-template-columns:2fr 1fr;gap:1rem;margin-bottom:2rem}
+  .ccard{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:1.5rem;animation:up .5s ease both}
+  .chdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem}
+  .ctit{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--txt2);margin-bottom:3px}
+  .csub{font-size:.72rem;color:var(--txt3)}
+  .ctag{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border:1px solid var(--bdr2);border-radius:4px;color:var(--txt3)}
+  .cwrap{position:relative;height:220px}
+
+  .tcard{background:var(--card);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;animation:up .5s ease both;margin-bottom:2rem}
+  .thdr{padding:1.2rem 1.5rem;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}
+  .ttit{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--txt2)}
+  table{width:100%;border-collapse:collapse;font-size:.82rem}
+  thead th{padding:.8rem 1.5rem;text-align:left;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--txt3);font-weight:500;border-bottom:1px solid var(--bdr);background:rgba(8,20,40,.5)}
+  tbody tr{border-bottom:1px solid rgba(201,168,76,.06);transition:background .15s}
+  tbody tr:hover{background:rgba(201,168,76,.04)}
+  tbody tr:last-child{border-bottom:none}
+  tbody td{padding:.9rem 1.5rem}
+
+  .sbadge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:500}
+  .sbadge::before{content:'';width:5px;height:5px;border-radius:50%}
+  .sa{background:var(--green-dim);color:var(--green)}.sa::before{background:var(--green)}
+  .sq{background:rgba(74,90,114,.2);color:var(--txt3)}.sq::before{background:var(--txt3)}
+  .sr{background:var(--red-dim);color:var(--red)}.sr::before{background:var(--red)}
+  .sn{background:rgba(155,109,255,.15);color:var(--purple)}.sn::before{background:var(--purple)}
+
+  .footer{text-align:center;padding:2rem;font-family:'DM Mono',monospace;font-size:.65rem;color:var(--txt3);letter-spacing:.1em}
+
+  /* debug box */
+  #debugbox{display:none;background:rgba(8,20,40,.9);border:1px solid var(--bdr2);border-radius:8px;padding:1rem;margin-bottom:1rem;font-family:'DM Mono',monospace;font-size:.7rem;color:var(--txt2);white-space:pre-wrap;max-height:200px;overflow:auto}
+
+  @media(max-width:900px){main{padding:1rem}.cgrid,.cgrid3{grid-template-columns:1fr}.kgrid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:500px){.kgrid{grid-template-columns:1fr}header,nav{padding:0 1rem}}
 </style>
 </head>
 <body>
 
-<!-- ─── HEADER ─── -->
 <header>
   <div class="logo">
-    <svg class="logo-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="2" y="28" width="3" height="4" rx="1" fill="#c9a84c" opacity="0.4"/>
-      <rect x="6" y="24" width="3" height="8" rx="1" fill="#c9a84c" opacity="0.5"/>
-      <rect x="10" y="20" width="3" height="12" rx="1" fill="#c9a84c" opacity="0.6"/>
-      <rect x="14" y="16" width="3" height="16" rx="1" fill="#c9a84c" opacity="0.7"/>
-      <rect x="18" y="12" width="3" height="20" rx="1" fill="#c9a84c" opacity="0.85"/>
-      <rect x="22" y="8" width="3" height="24" rx="1" fill="#c9a84c" opacity="0.95"/>
-      <rect x="26" y="4" width="3" height="28" rx="1" fill="#c9a84c"/>
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect x="2"  y="28" width="3" height="4"  rx="1" fill="#c9a84c" opacity=".4"/>
+      <rect x="6"  y="24" width="3" height="8"  rx="1" fill="#c9a84c" opacity=".5"/>
+      <rect x="10" y="20" width="3" height="12" rx="1" fill="#c9a84c" opacity=".6"/>
+      <rect x="14" y="16" width="3" height="16" rx="1" fill="#c9a84c" opacity=".7"/>
+      <rect x="18" y="12" width="3" height="20" rx="1" fill="#c9a84c" opacity=".85"/>
+      <rect x="22" y="8"  width="3" height="24" rx="1" fill="#c9a84c" opacity=".95"/>
+      <rect x="26" y="4"  width="3" height="28" rx="1" fill="#c9a84c"/>
       <line x1="2" y1="32.5" x2="34" y2="32.5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round"/>
     </svg>
-    <div class="logo-text">
-      <span class="logo-name">Capital Investimentos</span>
-      <span class="logo-sub">Soluções Financeiras Estratégicas</span>
+    <div>
+      <div class="logo-name">Capital Investimentos</div>
+      <div class="logo-sub">Soluções Financeiras Estratégicas</div>
     </div>
   </div>
-
-  <div class="header-right">
-    <div class="live-badge">
-      <div class="live-dot"></div>
-      AO VIVO
-    </div>
-    <div class="header-date" id="header-date"></div>
-    <button class="btn-refresh" onclick="loadData()">↻ ATUALIZAR</button>
+  <div class="hright">
+    <div class="live"><div class="dot"></div>AO VIVO</div>
+    <div class="hdate" id="hdate"></div>
+    <button class="btnr" onclick="loadData()">↻ ATUALIZAR</button>
   </div>
 </header>
 
-<!-- ─── NAV ─── -->
 <nav>
   <button class="tab active">⬛ VISÃO GERAL</button>
   <button class="tab">💰 FINANCEIRO</button>
-  <button class="tab">⚠️ RISCO & ALERTAS</button>
+  <button class="tab">⚠️ RISCO</button>
   <button class="tab">👤 CLIENTES</button>
   <button class="tab">📊 SIMULADOR</button>
 </nav>
 
-<!-- ─── MAIN ─── -->
 <main>
-
-  <!-- LOADING -->
-  <div id="loading-state">
-    <div class="spinner"></div>
-    <div class="loading-text">CARREGANDO DADOS...</div>
+  <div id="loading">
+    <div class="spin"></div>
+    <div class="ltxt">CARREGANDO DADOS DA PLANILHA...</div>
   </div>
 
-  <!-- ERROR -->
-  <div id="error-state">
-    <h3>⚠ Erro ao carregar planilha</h3>
-    <p id="error-msg">Verifique se a planilha está publicada para a web (Arquivo → Compartilhar → Publicar na web).</p>
+  <div id="errdiv">
+    <h3>⚠ Não foi possível ler a planilha</h3>
+    <p id="errmsg">Erro desconhecido.</p>
     <br>
-    <p style="font-size:0.75rem;color:var(--gold-300)">Como publicar: Planilha → Arquivo → Compartilhar → Publicar na web → Planilha inteira → CSV → Publicar</p>
+    <p style="font-size:.75rem;color:var(--gold2)">Solução: Arquivo → Compartilhar → Publicar na web → Valores separados por vírgula → Publicar</p>
   </div>
 
-  <!-- DASHBOARD -->
-  <div id="dashboard-content">
+  <div id="dash">
+    <div id="debugbox"></div>
 
-    <!-- KPIs PRINCIPAIS -->
-    <div class="section-label"><span>KPIs Principais</span></div>
-    <div class="kpi-grid" id="kpi-grid"></div>
+    <div class="slabel"><span>KPIs Principais</span></div>
+    <div class="kgrid" id="kgrid"></div>
 
-    <!-- CHARTS ROW 1 -->
-    <div class="section-label"><span>Fluxo Financeiro</span></div>
-    <div class="charts-grid">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">📈 Carteira Ativa por Mês</div>
-            <div class="chart-subtitle">Capital emprestado ao longo do tempo</div>
-          </div>
-          <span class="chart-tag">SAÍDAS</span>
+    <div class="slabel"><span>Fluxo Financeiro</span></div>
+    <div class="cgrid">
+      <div class="ccard">
+        <div class="chdr">
+          <div><div class="ctit">📈 Capital por Mês</div><div class="csub">Volume emprestado ao longo do tempo</div></div>
+          <span class="ctag">SAÍDAS</span>
         </div>
-        <div class="chart-canvas-wrap"><canvas id="chart-carteira"></canvas></div>
+        <div class="cwrap"><canvas id="ccarteira"></canvas></div>
       </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">💵 Juros Recebidos vs Previstos</div>
-            <div class="chart-subtitle">Realizado vs a receber</div>
-          </div>
-          <span class="chart-tag">RESULTADO</span>
+      <div class="ccard">
+        <div class="chdr">
+          <div><div class="ctit">💵 Recebido vs Previsto</div><div class="csub">Juros realizados vs a receber</div></div>
+          <span class="ctag">RESULTADO</span>
         </div>
-        <div class="chart-canvas-wrap"><canvas id="chart-juros"></canvas></div>
+        <div class="cwrap"><canvas id="cjuros"></canvas></div>
       </div>
     </div>
 
-    <!-- CHARTS ROW 2 -->
-    <div class="charts-grid-3">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">⚠️ Status da Carteira</div>
-            <div class="chart-subtitle">Distribuição por situação dos contratos</div>
-          </div>
-          <span class="chart-tag">RISCO</span>
+    <div class="cgrid3">
+      <div class="ccard">
+        <div class="chdr">
+          <div><div class="ctit">⚠️ Status da Carteira</div><div class="csub">Distribuição por situação dos contratos</div></div>
+          <span class="ctag">RISCO</span>
         </div>
-        <div class="chart-canvas-wrap"><canvas id="chart-status"></canvas></div>
+        <div class="cwrap"><canvas id="cstatus"></canvas></div>
       </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <div class="chart-title">🎯 ROI por Período</div>
-            <div class="chart-subtitle">Retorno sobre capital</div>
-          </div>
-          <span class="chart-tag">FUTURO</span>
+      <div class="ccard" style="display:flex;flex-direction:column">
+        <div class="chdr">
+          <div><div class="ctit">🎯 Quando o Capital Dobra?</div><div class="csub">Projeção pela taxa média atual</div></div>
+          <span class="ctag">FUTURO</span>
         </div>
-        <div class="chart-canvas-wrap"><canvas id="chart-roi"></canvas></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem">
+          <div style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--txt3);letter-spacing:.15em">SEU CAPITAL DOBRA EM</div>
+          <div id="dmeses" style="font-family:'Cormorant Garamond',serif;font-size:4rem;color:var(--gold2);line-height:1">—</div>
+          <div id="dlabel" style="font-size:.8rem;color:var(--txt3)">meses</div>
+          <div style="width:85%;border-top:1px solid var(--bdr);margin:.5rem 0"></div>
+          <div style="width:85%;display:flex;flex-direction:column;gap:.5rem">
+            <div style="display:flex;justify-content:space-between;font-size:.75rem"><span style="color:var(--txt3)">Taxa média/mês</span><span id="dtaxa" style="color:var(--gold2);font-family:'DM Mono',monospace">—</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:.75rem"><span style="color:var(--txt3)">Capital atual</span><span id="dcap" style="font-family:'DM Mono',monospace">—</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:.75rem"><span style="color:var(--txt3)">Capital dobrado</span><span id="ddob" style="color:var(--green);font-family:'DM Mono',monospace">—</span></div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- TABLE -->
-    <div class="section-label"><span>Contratos Ativos</span></div>
-    <div class="table-card">
-      <div class="table-header">
-        <span class="table-title">📋 Empréstimos em Aberto</span>
-        <span class="chart-tag" id="total-contratos">— contratos</span>
+    <div class="slabel"><span>Contratos Ativos</span></div>
+    <div class="tcard">
+      <div class="thdr">
+        <span class="ttit">📋 Empréstimos em Aberto</span>
+        <span class="ctag" id="tcount">—</span>
       </div>
-      <div style="overflow-x:auto;">
+      <div style="overflow-x:auto">
         <table>
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Capital (R$)</th>
-              <th>Taxa</th>
-              <th>Prazo</th>
-              <th>Juros Gerados</th>
-              <th>Status</th>
-              <th>Vencimento</th>
-            </tr>
-          </thead>
-          <tbody id="table-body">
-          </tbody>
+          <thead><tr>
+            <th>ID</th><th>Cliente</th><th>Capital</th><th>Taxa/mês</th>
+            <th>Prazo</th><th>Juros Total</th><th>Total Pago</th>
+            <th>Saldo</th><th>Próx. Venc.</th><th>Status</th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
         </table>
       </div>
     </div>
+  </div>
 
-  </div><!-- /dashboard-content -->
-
-  <div class="footer-info" id="footer-info"></div>
-
+  <div class="footer" id="footer"></div>
 </main>
 
 <script>
-// ─── CONFIG ───────────────────────────────────────
-// ID da sua planilha do Google Sheets
-const SHEET_ID = '1g9336ZjN2jnVoxA5CFQmlaDxTkda7tlz48_EAlKUjr4';
+// ── CONFIG ──────────────────────────────────────────────────────
+const SID = '1g9336ZjN2jnVoxA5CFQmlaDxTkda7tlz48_EAlKUjr4';
 
-// Nomes das abas — ajuste se necessário
-const SHEETS = {
-  emprestimos: 'gestao_emprestimos',  // aba principal de empréstimos
+// Colunas EXATAS da aba Empréstimos (linha 3 da planilha)
+// Normalizadas: minúsculo, sem acento, espaço→_ , parênteses removidos
+const COL = {
+  id:        'id_emprestimo',
+  idcli:     'id_cliente',
+  nome:      'nome_cliente_auto',
+  cpf:       'cpf_auto',
+  tel:       'telefone_auto',
+  capital:   'valor_emprestado_r$',
+  dataEmp:   'data_do_emprestimo',
+  taxa:      'taxa_juros_%_am',
+  prazo:     'prazo_meses',
+  vencOrig:  'venc_original',
+  tipoJuros: 'tipo_juros',
+  jTotal:    'juros_total_r$',
+  vTotal:    'valor_total_devido_r$',
+  tPago:     'total_pago',
+  saldo:     'saldo_restante',
+  jProxMes:  'juros_prox_mes_r$',
+  parcPagas: 'parcelas_pagas',
+  status:    'status',
+  proxVenc:  'proximo_vencimento_auto',
+  unidade:   'unidade',
 };
 
-let charts = {};
+let CH = {};
 
-// ─── HELPERS ──────────────────────────────────────
-const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
-const fmtPct = (v) => (v || 0).toFixed(1) + '%';
-const today = new Date();
+// ── HELPERS ─────────────────────────────────────────────────────
+const fmt  = v => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);
+const fpct = v => (v||0).toFixed(1)+'%';
 
-document.getElementById('header-date').textContent =
-  today.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+document.getElementById('hdate').textContent =
+  new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
 
-// ─── FETCH SHEET ──────────────────────────────────
-async function fetchSheet(sheetName) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const text = await res.text();
-  return parseCSV(text);
+function brl(s) {
+  if(!s||s==='-'||s==='') return 0;
+  // Remove R$, espaços, pontos (milhar), troca vírgula por ponto decimal
+  const clean = s.toString().replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.');
+  return parseFloat(clean)||0;
+}
+function pct(s) {
+  if(!s) return 0;
+  return parseFloat(s.toString().replace('%','').replace(',','.'))||0;
 }
 
-function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase().replace(/\s+/g, '_'));
-  return lines.slice(1).map(line => {
-    const vals = parseCSVLine(line);
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = (vals[i] || '').trim().replace(/^"|"$/g, ''));
-    return obj;
-  }).filter(r => Object.values(r).some(v => v !== ''));
+// ── CSV ─────────────────────────────────────────────────────────
+async function gSheet(name) {
+  const u = `https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`;
+  const r = await fetch(u);
+  if(!r.ok) throw new Error('HTTP '+r.status+' na aba "'+name+'"');
+  const t = await r.text();
+  if(t.includes('<!DOCTYPE')||t.includes('Signin'))
+    throw new Error('A planilha não está publicada publicamente. Vá em Arquivo → Compartilhar → Publicar na web.');
+  return t;
 }
 
-function parseCSVLine(line) {
-  const result = [];
-  let cur = '', inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') { inQ = !inQ; continue; }
-    if (c === ',' && !inQ) { result.push(cur); cur = ''; continue; }
-    cur += c;
+// Normaliza header: lowercase, remove acentos, espaço→_, remove ()/$
+function norm(s){
+  return s.trim().replace(/^"|"$/g,'')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/\s+/g,'_')
+    .replace(/[().\/\[\]]/g,'');
+}
+
+function csvParse(txt) {
+  const lines = txt.trim().split('\n');
+
+  // Procura a linha de cabeçalho real:
+  // É a linha com mais células preenchidas e sem "GESTÃO" ou "Digite" (títulos decorativos)
+  let hi = 0;
+  for(let i=0;i<Math.min(6,lines.length);i++){
+    const raw = lines[i];
+    const cells = csvLine(raw).map(c=>c.trim().replace(/^"|"$/g,''));
+    const filled = cells.filter(c=>c.length>0).length;
+    const isTitle = /gestao|gestão|cadastro|registro|preencha|digit/i.test(raw);
+    if(filled >= 4 && !isTitle){ hi=i; break; }
   }
-  result.push(cur);
-  return result;
+
+  const hdrs = csvLine(lines[hi]).map(norm);
+
+  const rows = lines.slice(hi+1).map(l=>{
+    const v = csvLine(l);
+    const o = {};
+    hdrs.forEach((h,i)=>{ o[h]=(v[i]||'').trim().replace(/^"|"$/g,''); });
+    return o;
+  }).filter(r=>Object.values(r).some(v=>v&&v!==''));
+
+  return {hdrs, rows};
 }
 
-function parseBRL(s) {
-  if (!s) return 0;
-  return parseFloat(s.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+function csvLine(l){
+  const r=[];let c='',q=false;
+  for(let i=0;i<l.length;i++){
+    if(l[i]==='"'){q=!q;continue}
+    if(l[i]===','&&!q){r.push(c);c='';continue}
+    c+=l[i];
+  }
+  r.push(c);return r;
 }
 
-function parsePct(s) {
-  if (!s) return 0;
-  return parseFloat(s.replace('%', '').replace(',', '.')) || 0;
-}
+// ── LOAD ────────────────────────────────────────────────────────
+async function loadData(){
+  document.getElementById('loading').style.display='flex';
+  document.getElementById('dash').style.display='none';
+  document.getElementById('errdiv').style.display='none';
 
-// ─── LOAD DATA ────────────────────────────────────
-async function loadData() {
-  document.getElementById('loading-state').style.display = 'flex';
-  document.getElementById('dashboard-content').style.display = 'none';
-  document.getElementById('error-state').style.display = 'none';
+  const try_ = async(names)=>{
+    for(const n of names){
+      try{
+        const raw = await gSheet(n);
+        const {hdrs,rows} = csvParse(raw);
+        if(rows.length>0) return {hdrs,rows};
+      }catch(e){}
+    }
+    return null;
+  };
 
-  try {
-    // Tenta buscar a aba principal
-    let rows = [];
-    const sheetNames = [
-      'gestao_emprestimos', 'Gestao_Emprestimos', 'emprestimos',
-      'Empréstimos', 'empréstimos', 'Sheet1', 'Página1', 'dados'
-    ];
+  try{
+    const empResult = await try_(['Empréstimos','Emprestimos','empréstimos','emprestimos']);
+    const pagResult = await try_(['Pagamentos','pagamentos']);
 
-    let loaded = false;
-    for (const name of sheetNames) {
-      try {
-        rows = await fetchSheet(name);
-        if (rows.length > 0) { loaded = true; break; }
-      } catch (e) { /* tenta próxima */ }
+    let empRows = empResult ? empResult.rows : null;
+    let empHdrs = empResult ? empResult.hdrs : [];
+    let pagRows = pagResult ? pagResult.rows : [];
+
+    if(!empRows || empRows.length===0){
+      empRows = demoEmp();
+      empHdrs = Object.keys(empRows[0]);
     }
 
-    if (!loaded || rows.length === 0) {
-      // Sem dados reais → mostra demo
-      rows = getDemoData();
-    }
+    render(empRows, empHdrs, pagRows);
 
-    renderDashboard(rows);
-
-  } catch (err) {
-    document.getElementById('loading-state').style.display = 'none';
-    document.getElementById('error-state').style.display = 'block';
-    document.getElementById('error-msg').textContent = err.message;
+  }catch(e){
+    document.getElementById('loading').style.display='none';
+    document.getElementById('errdiv').style.display='block';
+    document.getElementById('errmsg').textContent = e.message;
   }
 }
 
-// ─── DEMO DATA (fallback) ─────────────────────────
-function getDemoData() {
+// ── DEMO ────────────────────────────────────────────────────────
+function demoEmp(){
+  // Usa as chaves normalizadas exatas da planilha real
   return [
-    { nome_do_cliente:'Renata Silva', capital_emprestado:'R$ 800', taxa_de_juros:'15%', prazo:'6', unidade:'Meses', juros_gerados:'R$ 720', status:'Ativo', data_inicio:'01/03/2026', data_vencimento:'01/09/2026' },
-    { nome_do_cliente:'Caio Ferreira', capital_emprestado:'R$ 500', taxa_de_juros:'20%', prazo:'3', unidade:'Meses', juros_gerados:'R$ 300', status:'Ativo', data_inicio:'15/03/2026', data_vencimento:'15/06/2026' },
-    { nome_do_cliente:'Marcola Duarte', capital_emprestado:'R$ 600', taxa_de_juros:'15%', prazo:'4', unidade:'Meses', juros_gerados:'R$ 360', status:'Ativo', data_inicio:'01/04/2026', data_vencimento:'01/08/2026' },
-    { nome_do_cliente:'Cliente Demo', capital_emprestado:'R$ 900', taxa_de_juros:'18%', prazo:'5', unidade:'Meses', juros_gerados:'R$ 810', status:'Atraso', data_inicio:'10/02/2026', data_vencimento:'10/07/2026' },
-    { nome_do_cliente:'Ana Costa', capital_emprestado:'R$ 400', taxa_de_juros:'15%', prazo:'2', unidade:'Meses', juros_gerados:'R$ 120', status:'Quitado', data_inicio:'01/02/2026', data_vencimento:'01/04/2026' },
+    {'id_emprestimo':'EMP002','nome_cliente_auto':'Caio Santos Cunha','valor_emprestado_r$':'R$ 500,00','taxa_juros_%_am':'40%','prazo_meses':'1','juros_total_r$':'R$ 200,00','valor_total_devido_r$':'R$ 700,00','total_pago':'R$ 0,00','saldo_restante':'R$ 700,00','status':'Em Dia','data_do_emprestimo':'20/04/2026','proximo_vencimento_auto':'20/05/2026'},
+    {'id_emprestimo':'EMP003','nome_cliente_auto':'Marcos William Firmino Mora','valor_emprestado_r$':'R$ 500,00','taxa_juros_%_am':'40%','prazo_meses':'1','juros_total_r$':'R$ 200,00','valor_total_devido_r$':'R$ 700,00','total_pago':'R$ 0,00','saldo_restante':'R$ 700,00','status':'Em Dia','data_do_emprestimo':'25/04/2026','proximo_vencimento_auto':'25/05/2026'},
+    {'id_emprestimo':'EMP004','nome_cliente_auto':'Marcola','valor_emprestado_r$':'R$ 250,00','taxa_juros_%_am':'24%','prazo_meses':'1','juros_total_r$':'R$ 60,00','valor_total_devido_r$':'R$ 310,00','total_pago':'R$ 0,00','saldo_restante':'R$ 310,00','status':'Em Dia','data_do_emprestimo':'05/04/2026','proximo_vencimento_auto':'05/05/2026'},
   ];
 }
 
-// ─── RENDER ───────────────────────────────────────
-function renderDashboard(rows) {
-  // Detecta colunas dinamicamente
-  const allKeys = rows.length > 0 ? Object.keys(rows[0]) : [];
-  const find = (keywords) => allKeys.find(k => keywords.some(kw => k.includes(kw))) || '';
+// ── RENDER ──────────────────────────────────────────────────────
+function render(rows, hdrs, pags){
 
-  const colCapital  = find(['capital','valor_emp','principal']);
-  const colJuros    = find(['juros_ger','lucro','rendimento','juros_tot']);
-  const colStatus   = find(['status','situacao','situação']);
-  const colCliente  = find(['cliente','nome','devedor']);
-  const colTaxa     = find(['taxa','juros_%','percentual']);
-  const colPrazo    = find(['prazo','meses','semanas']);
-  const colVenc     = find(['vencimento','venc','data_fim','data_venc']);
-  const colJReceb   = find(['j_receb','juros_receb','pago','recebido']);
+  // Função para encontrar coluna por palavras-chave nos headers reais
+  const findCol = (...kws) => hdrs.find(h=>kws.some(w=>h.includes(w))) || '';
+
+  // Mapeamento das colunas com fallbacks
+  const cNome   = findCol('nome_cliente','nome','cliente');
+  const cCap    = findCol('valor_emprestado','capital','principal','valor_emp');
+  const cTaxa   = findCol('taxa_juros','taxa','juros_%');
+  const cPrazo  = findCol('prazo_meses','prazo','meses');
+  const cJTot   = findCol('juros_total','juros_tot','juros_ger');
+  const cVTot   = findCol('valor_total_devido','total_devido','valor_total');
+  const cTPago  = findCol('total_pago','pago','recebido');
+  const cSaldo  = findCol('saldo_restante','saldo');
+  const cStat   = findCol('status','situacao');
+  const cVenc   = findCol('proximo_vencimento','vencimento','proxim','prox_venc','venc_original');
+  const cIni    = findCol('data_do_emprestimo','data_emp','data_ini','inicio');
+  const cID     = findCol('id_emprestimo','id_emp','id');
+  const cJProx  = findCol('juros_prox','juros_prox_mes');
 
   // Filtra linhas com capital > 0
-  const valid = rows.filter(r => {
-    const v = parseBRL(r[colCapital]);
-    return v > 0;
-  });
+  const valid  = rows.filter(r=>brl(r[cCap])>0);
 
-  // Agrupa por status
-  const byStatus = {};
-  valid.forEach(r => {
-    const s = (r[colStatus] || 'Ativo').trim();
-    byStatus[s] = (byStatus[s] || 0) + 1;
-  });
+  // Classifica por status — sua planilha usa "Em Dia", "Atrasado", "Quitado"
+  const ativos = valid.filter(r=>/em.dia|ativo|aberto/i.test(r[cStat]||'em dia'));
+  const quit   = valid.filter(r=>/quit/i.test(r[cStat]||''));
+  const atras  = valid.filter(r=>/atras|inadimpl/i.test(r[cStat]||''));
+  const reneg  = valid.filter(r=>/reneg/i.test(r[cStat]||''));
+  const todos  = [...ativos,...atras,...reneg]; // ativos em sentido amplo (não quitados)
 
-  const ativos = valid.filter(r => /ativo/i.test(r[colStatus] || 'ativo'));
-  const quitados = valid.filter(r => /quit/i.test(r[colStatus] || ''));
-  const atraso = valid.filter(r => /atraso|inadimpl/i.test(r[colStatus] || ''));
+  // KPI numéricos
+  const totCap   = todos.reduce((s,r)=>s+brl(r[cCap]),0);
+  const totJuros = valid.reduce((s,r)=>s+brl(r[cJTot]),0);
+  const totPago  = valid.reduce((s,r)=>s+brl(r[cTPago]),0);
+  const totSaldo = todos.reduce((s,r)=>s+brl(r[cSaldo]||r[cVTot]),0);
+  const totJProx = todos.reduce((s,r)=>s+brl(r[cJProx]),0);
+  const inadPct  = todos.length>0?(atras.length/todos.length)*100:0;
 
-  const totalCapital = ativos.reduce((s, r) => s + parseBRL(r[colCapital]), 0);
-  const totalJuros   = valid.reduce((s, r) => s + parseBRL(r[colJuros] || r['juros_gerados'] || 0), 0);
-  const totalRecebido = valid.reduce((s, r) => s + parseBRL(r[colJReceb] || r['juros_recebidos'] || 0), 0);
-  const inadimplencia = ativos.length > 0 ? (atraso.length / ativos.length) * 100 : 0;
-  const roi = totalCapital > 0 ? (totalJuros / totalCapital) * 100 : 0;
-
-  const taxas = ativos.map(r => parsePct(r[colTaxa] || r['taxa_de_juros'] || '0')).filter(t => t > 0);
-  const taxaMedia = taxas.length > 0 ? taxas.reduce((a, b) => a + b, 0) / taxas.length : 0;
-
-  const ticket = ativos.length > 0 ? totalCapital / ativos.length : 0;
+  const taxas   = todos.map(r=>pct(r[cTaxa])).filter(t=>t>0);
+  const taxaAvg = taxas.length>0?taxas.reduce((a,b)=>a+b,0)/taxas.length:0;
+  const roi     = totCap>0?(totJuros/totCap)*100:0;
+  const ticket  = todos.length>0?totCap/todos.length:0;
+  const mDobra  = taxaAvg>0?Math.ceil(100/taxaAvg):0;
 
   // ── KPIs ──
-  const kpis = [
-    { label: 'Capital em Giro', value: fmt(totalCapital), sub: `${ativos.length} contratos ativos`, color: 'gold' },
-    { label: 'Juros Gerados', value: fmt(totalJuros), sub: 'Total previsto da carteira', color: 'emerald' },
-    { label: 'Juros Recebidos', value: fmt(totalRecebido), sub: 'Já entrou no caixa', color: 'emerald' },
-    { label: 'Clientes Ativos', value: ativos.length, sub: 'Com contrato aberto', color: 'blue' },
-    { label: 'Inadimplência', value: fmtPct(inadimplencia), sub: `${atraso.length} contratos em atraso`, color: inadimplencia > 10 ? 'red' : 'emerald' },
-    { label: 'ROI da Carteira', value: fmtPct(roi), sub: 'Retorno sobre capital', color: 'gold' },
-    { label: 'Taxa Média', value: fmtPct(taxaMedia) + '/mês', sub: 'Média ponderada', color: 'purple' },
-    { label: 'Ticket Médio', value: fmt(ticket), sub: 'Valor médio por cliente', color: 'gold' },
+  const kpis=[
+    {l:'Capital em Giro',       v:fmt(totCap),         s:`${todos.length} contratos ativos`,       c:'g'},
+    {l:'Juros Gerados',         v:fmt(totJuros),       s:'Total previsto da carteira',             c:'e'},
+    {l:'Juros Recebidos',       v:fmt(totPago),        s:'Já entrou no caixa',                    c:'e'},
+    {l:'Saldo a Receber',       v:fmt(totSaldo),       s:'Pendente dos contratos ativos',          c:'g'},
+    {l:'Juros do Próx. Mês',    v:fmt(totJProx),       s:'Receita prevista próximo mês',           c:'p'},
+    {l:'Contratos Ativos',      v:todos.length,        s:`${quit.length} quitados`,               c:'b'},
+    {l:'Inadimplência',         v:fpct(inadPct),       s:`${atras.length} em atraso`,             c:inadPct>0?'r':'e'},
+    {l:'ROI da Carteira',       v:fpct(roi),           s:'Retorno sobre capital total',            c:'g'},
+    {l:'Taxa Média/mês',        v:fpct(taxaAvg),       s:'Média dos contratos ativos',             c:'p'},
+    {l:'Ticket Médio',          v:fmt(ticket),         s:'Valor médio por contrato',               c:'g'},
   ];
+  document.getElementById('kgrid').innerHTML=kpis.map((k,i)=>`
+    <div class="kcard ${k.c}" style="animation-delay:${i*.06}s">
+      <div class="klbl">${k.l}</div>
+      <div class="kval">${k.v}</div>
+      <div class="ksub">${k.s}</div>
+    </div>`).join('');
 
-  const grid = document.getElementById('kpi-grid');
-  grid.innerHTML = kpis.map((k, i) => `
-    <div class="kpi-card ${k.color}" style="animation-delay:${i * 0.07}s">
-      <div class="kpi-label">${k.label}</div>
-      <div class="kpi-value">${k.value}</div>
-      <div class="kpi-sub">${k.sub}</div>
-    </div>
-  `).join('');
+  // ── Card Dobra ──
+  document.getElementById('dmeses').textContent=mDobra||'—';
+  document.getElementById('dlabel').textContent=mDobra?`meses (${(mDobra/12).toFixed(1)} anos)`:'configure taxa';
+  document.getElementById('dtaxa').textContent=fpct(taxaAvg);
+  document.getElementById('dcap').textContent=fmt(totCap);
+  document.getElementById('ddob').textContent=fmt(totCap*2);
 
-  // ── TABLE ──
-  document.getElementById('total-contratos').textContent = `${ativos.length} contratos ativos`;
-  const tbody = document.getElementById('table-body');
-  tbody.innerHTML = ativos.map(r => {
-    const s = (r[colStatus] || 'Ativo').trim();
-    const sClass = /ativo/i.test(s) ? 'status-ativo' : /quit/i.test(s) ? 'status-quitado' : /atraso|inadimpl/i.test(s) ? 'status-atraso' : 'status-renegociado';
+  // ── Tabela ──
+  document.getElementById('tcount').textContent=`${todos.length} contratos ativos`;
+  document.getElementById('tbody').innerHTML = todos.map(r=>{
+    const s=(r[cStat]||'Em Dia').trim();
+    const sc=/em.dia|ativo/i.test(s)?'sa':/quit/i.test(s)?'sq':/atras|inadimpl/i.test(s)?'sr':'sn';
+    const sLabel = /em.dia/i.test(s)?'Em Dia':s;
     return `<tr>
-      <td><strong>${r[colCliente] || r['nome_do_cliente'] || '—'}</strong></td>
-      <td style="color:var(--gold-300)">${r[colCapital] || r['capital_emprestado'] || '—'}</td>
-      <td style="color:var(--emerald)">${r[colTaxa] || r['taxa_de_juros'] || '—'}/mês</td>
-      <td>${r[colPrazo] || r['prazo'] || '—'} ${r['unidade'] || 'meses'}</td>
-      <td style="color:var(--gold-200)">${r[colJuros] || r['juros_gerados'] || '—'}</td>
-      <td><span class="status-badge ${sClass}">${s}</span></td>
-      <td style="color:var(--text-secondary);font-family:'DM Mono',monospace;font-size:0.78rem">${r[colVenc] || r['data_vencimento'] || '—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:.75rem;color:var(--txt3)">${r[cID]||'—'}</td>
+      <td><strong>${r[cNome]||'—'}</strong></td>
+      <td style="color:var(--gold2)">${r[cCap]||'—'}</td>
+      <td style="color:var(--green)">${r[cTaxa]||'—'}/mês</td>
+      <td>${r[cPrazo]||'—'} mês</td>
+      <td style="color:var(--gold3)">${r[cJTot]||'—'}</td>
+      <td style="color:var(--green)">${r[cTPago]||'R$ 0,00'}</td>
+      <td style="color:var(--red)">${r[cSaldo]||r[cVTot]||'—'}</td>
+      <td style="color:var(--txt2);font-family:'DM Mono',monospace;font-size:.78rem">${r[cVenc]||'—'}</td>
+      <td><span class="sbadge ${sc}">${sLabel}</span></td>
     </tr>`;
-  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem">Nenhum contrato ativo encontrado</td></tr>';
+  }).join('')||'<tr><td colspan="10" style="text-align:center;color:var(--txt3);padding:2rem">Nenhum contrato ativo encontrado</td></tr>';
 
-  // ── CHARTS ──
-  // Agrupa capital por mês
-  const byMonth = {};
-  valid.forEach(r => {
-    const d = r['data_inicio'] || r['data_do_empréstimo'] || r['data'] || '';
-    const [, m, y] = d.split('/');
-    if (m && y) {
-      const key = `${y}-${m}`;
-      byMonth[key] = (byMonth[key] || 0) + parseBRL(r[colCapital]);
-    }
+  // ── Chart: capital por mês ──
+  const bm={};
+  valid.forEach(r=>{
+    const d=r[cIni]||'';const p=d.split('/');
+    if(p.length===3){const k=`${p[2]}-${p[1]}`;bm[k]=(bm[k]||0)+brl(r[cCap]);}
+  });
+  const mk=Object.keys(bm).sort();
+  const ml=mk.map(k=>{const[y,m]=k.split('-');return new Date(+y,+m-1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});});
+
+  dc('ccarteira');
+  CH.ccarteira=new Chart(document.getElementById('ccarteira'),{
+    type:'bar',
+    data:{labels:ml.length?ml:['sem dados'],datasets:[{label:'Capital',data:ml.length?mk.map(k=>bm[k]):[0],backgroundColor:'rgba(155,109,255,.6)',borderColor:'rgba(155,109,255,.9)',borderWidth:1,borderRadius:5}]},
+    options:copts('R$')
   });
 
-  const sortedMonths = Object.keys(byMonth).sort();
-  const monthLabels = sortedMonths.map(k => {
-    const [y, m] = k.split('-');
-    return new Date(+y, +m - 1).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+  // ── Chart: recebido vs previsto ──
+  const aReceber = totJuros - totPago;
+  dc('cjuros');
+  CH.cjuros=new Chart(document.getElementById('cjuros'),{
+    type:'bar',
+    data:{labels:['A Receber','Recebido'],datasets:[{data:[aReceber,totPago],backgroundColor:['rgba(201,168,76,.6)','rgba(0,200,150,.6)'],borderColor:['rgba(201,168,76,.9)','rgba(0,200,150,.9)'],borderWidth:1,borderRadius:5}]},
+    options:{...copts('R$'),indexAxis:'y'}
   });
 
-  destroyChart('chart-carteira');
-  charts['chart-carteira'] = new Chart(document.getElementById('chart-carteira'), {
-    type: 'bar',
-    data: {
-      labels: monthLabels.length ? monthLabels : ['Mar/26', 'Abr/26'],
-      datasets: [{
-        label: 'Capital Emprestado',
-        data: monthLabels.length ? sortedMonths.map(k => byMonth[k]) : [2600, 3200],
-        backgroundColor: 'rgba(155,109,255,0.6)',
-        borderColor: 'rgba(155,109,255,0.9)',
-        borderWidth: 1,
-        borderRadius: 5,
-      }]
-    },
-    options: chartOptions('R$')
+  // ── Chart: status ──
+  const bst={'Em Dia':ativos.length,'Atraso':atras.length,'Quitado':quit.length,'Reneg.':reneg.length};
+  const sk=Object.keys(bst).filter(k=>bst[k]>0);
+  const scol={'Em Dia':'rgba(0,200,150,.7)','Atraso':'rgba(224,85,85,.7)','Quitado':'rgba(74,90,114,.7)','Reneg.':'rgba(155,109,255,.7)'};
+  dc('cstatus');
+  CH.cstatus=new Chart(document.getElementById('cstatus'),{
+    type:'doughnut',
+    data:{labels:sk,datasets:[{data:sk.map(k=>bst[k]),backgroundColor:sk.map(k=>scol[k]),borderColor:'rgba(5,13,26,.5)',borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
+      plugins:{legend:{position:'bottom',labels:{color:'#8a9ab5',font:{size:11,family:'Outfit'},boxWidth:12,padding:12}},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed} contratos`}}}}
   });
 
-  destroyChart('chart-juros');
-  charts['chart-juros'] = new Chart(document.getElementById('chart-juros'), {
-    type: 'bar',
-    data: {
-      labels: ['Juros a Receber', 'Juros Recebidos'],
-      datasets: [{
-        data: [totalJuros - totalRecebido, totalRecebido],
-        backgroundColor: ['rgba(201,168,76,0.6)', 'rgba(0,200,150,0.6)'],
-        borderColor: ['rgba(201,168,76,0.9)', 'rgba(0,200,150,0.9)'],
-        borderWidth: 1,
-        borderRadius: 5,
-      }]
-    },
-    options: { ...chartOptions('R$'), indexAxis: 'y' }
-  });
+  document.getElementById('loading').style.display='none';
+  document.getElementById('dash').style.display='block';
 
-  const statusLabels = Object.keys(byStatus);
-  const statusColors = statusLabels.map(s => /ativo/i.test(s) ? 'rgba(0,200,150,0.7)' : /quit/i.test(s) ? 'rgba(74,90,114,0.7)' : /atraso/i.test(s) ? 'rgba(224,85,85,0.7)' : 'rgba(155,109,255,0.7)');
-
-  destroyChart('chart-status');
-  charts['chart-status'] = new Chart(document.getElementById('chart-status'), {
-    type: 'doughnut',
-    data: {
-      labels: statusLabels.length ? statusLabels : ['Ativo', 'Quitado', 'Atraso'],
-      datasets: [{
-        data: statusLabels.length ? statusLabels.map(s => byStatus[s]) : [5, 1, 1],
-        backgroundColor: statusLabels.length ? statusColors : ['rgba(0,200,150,0.7)', 'rgba(74,90,114,0.7)', 'rgba(224,85,85,0.7)'],
-        borderColor: 'rgba(5,13,26,0.5)',
-        borderWidth: 2,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      cutout: '65%',
-      plugins: {
-        legend: { position: 'bottom', labels: { color: '#8a9ab5', font: { size: 11, family: 'Outfit' }, boxWidth: 12, padding: 12 } },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} contratos` } }
-      }
-    }
-  });
-
-  // ROI projetado acumulado
-  const roiMeses = [1,2,3,4,5,6].map(m => +(taxaMedia * m).toFixed(1));
-  destroyChart('chart-roi');
-  charts['chart-roi'] = new Chart(document.getElementById('chart-roi'), {
-    type: 'line',
-    data: {
-      labels: ['1m','2m','3m','4m','5m','6m'],
-      datasets: [{
-        label: 'ROI Acumulado %',
-        data: roiMeses,
-        borderColor: 'rgba(201,168,76,0.9)',
-        backgroundColor: 'rgba(201,168,76,0.06)',
-        fill: true,
-        tension: 0.4,
-        pointBackgroundColor: 'rgba(201,168,76,1)',
-        pointRadius: 4,
-      }]
-    },
-    options: chartOptions('%')
-  });
-
-  document.getElementById('loading-state').style.display = 'none';
-  document.getElementById('dashboard-content').style.display = 'block';
-
-  const now = new Date();
-  document.getElementById('footer-info').textContent =
-    `Última atualização: ${now.toLocaleTimeString('pt-BR')} · Auto-refresh: 15 min`;
-
-  // Auto-refresh
-  setTimeout(loadData, 15 * 60 * 1000);
+  const n=new Date();
+  document.getElementById('footer').textContent=`Última atualização: ${n.toLocaleTimeString('pt-BR')} · Auto-refresh: 15 min`;
+  setTimeout(loadData,15*60*1000);
 }
 
-function destroyChart(id) {
-  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
-}
+function dc(id){if(CH[id]){CH[id].destroy();delete CH[id];}}
 
-function chartOptions(unit) {
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: 'rgba(8,20,40,0.95)',
-        borderColor: 'rgba(201,168,76,0.3)',
-        borderWidth: 1,
-        titleColor: '#c9a84c',
-        bodyColor: '#8a9ab5',
-        callbacks: {
-          label: ctx => unit === 'R$'
-            ? ` ${new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(ctx.parsed.y ?? ctx.parsed.x ?? ctx.parsed)}`
-            : ` ${(ctx.parsed.y ?? ctx.parsed.x ?? ctx.parsed).toFixed(1)}%`
-        }
-      }
-    },
-    scales: {
-      x: { grid: { color: 'rgba(201,168,76,0.05)' }, ticks: { color: '#4a5a72', font: { size: 10 } } },
-      y: { grid: { color: 'rgba(201,168,76,0.05)' }, ticks: { color: '#4a5a72', font: { size: 10 } } }
-    }
+function copts(u){
+  return{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(8,20,40,.95)',borderColor:'rgba(201,168,76,.3)',borderWidth:1,titleColor:'#c9a84c',bodyColor:'#8a9ab5',
+      callbacks:{label:ctx=>{const v=ctx.parsed.y??ctx.parsed.x??ctx.parsed;return u==='R$'?` ${fmt(v)}`:`  ${v.toFixed(1)}%`}}}},
+    scales:{x:{grid:{color:'rgba(201,168,76,.05)'},ticks:{color:'#4a5a72',font:{size:10}}},y:{grid:{color:'rgba(201,168,76,.05)'},ticks:{color:'#4a5a72',font:{size:10}}}}
   };
 }
 
-// ─── INIT ─────────────────────────────────────────
 loadData();
 </script>
 </body>
