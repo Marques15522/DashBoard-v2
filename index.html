@@ -559,6 +559,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="nav-tab" data-tab="comparativo">📈 Comparativos</div>
   <div class="nav-tab" data-tab="agenda">📅 Agenda</div>
   <div class="nav-tab" data-tab="simulador">🧮 Simulador</div>
+  <div class="nav-tab" data-tab="cadastro">✏️ Cadastro</div>
 
 </div>
 
@@ -1157,6 +1158,614 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
 
 
+
+
+<!-- ════ ABA CADASTRO ════ -->
+<div id="tab-cadastro" class="tab-panel">
+
+<style>
+.cad-section{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;animation:fadeUp 0.4s ease both;}
+.cad-section-title{font-family:'Bebas Neue',sans-serif;font-size:0.85rem;letter-spacing:0.14em;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.cad-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.cad-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:700px){.cad-grid,.cad-grid-3{grid-template-columns:1fr;}}
+.cad-lbl{font-size:0.58rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;}
+.cad-input{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.78rem;padding:10px 12px;outline:none;transition:border-color 0.2s;}
+.cad-input:focus{border-color:var(--gold);}
+.cad-input.ok{border-color:var(--green);}
+.cad-input.err{border-color:var(--red);}
+.cad-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a6282'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+.cad-btn{padding:11px 24px;border:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.08em;cursor:pointer;transition:opacity 0.2s;}
+.cad-btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;font-weight:700;}
+.cad-btn-primary:hover{opacity:0.88;}
+.cad-btn-secondary{background:transparent;border:1px solid var(--border2);color:var(--muted);}
+.cad-btn-secondary:hover{border-color:var(--gold);color:var(--gold);}
+.cad-preview-box{background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;font-size:0.72rem;line-height:1.9;margin-top:12px;}
+.cad-preview-row{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border);padding:4px 0;}
+.cad-preview-row:last-child{border-bottom:none;}
+.cad-preview-lbl{color:var(--muted);}
+.cad-preview-val{color:var(--text);text-align:right;}
+.cad-preview-val.destaque{color:var(--gold2);font-size:0.85rem;font-family:'Bebas Neue',sans-serif;letter-spacing:0.05em;}
+.cad-status{padding:8px 14px;border-radius:8px;font-size:0.7rem;margin-top:12px;display:none;}
+.cad-status.ok{background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.3);color:var(--green);display:block;}
+.cad-status.err{background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.3);color:var(--red);display:block;}
+.cad-status.loading{background:rgba(201,146,42,0.08);border:1px solid rgba(201,146,42,0.2);color:var(--gold2);display:block;}
+.cad-step-bar{display:flex;gap:0;margin-bottom:20px;}
+.cad-step{flex:1;padding:8px;text-align:center;font-size:0.6rem;letter-spacing:0.06em;color:var(--muted);border-bottom:2px solid var(--border);cursor:pointer;transition:all 0.2s;text-transform:uppercase;}
+.cad-step.active{color:var(--gold);border-bottom-color:var(--gold);}
+.cad-step.done{color:var(--green);border-bottom-color:var(--green);}
+.cad-form-step{display:none;}
+.cad-form-step.active{display:block;}
+.cad-script-warn{background:rgba(201,146,42,0.07);border:1px solid rgba(201,146,42,0.25);border-radius:10px;padding:12px 16px;font-size:0.65rem;color:var(--gold2);line-height:1.7;margin-bottom:16px;}
+.cad-script-warn a{color:var(--gold);text-decoration:underline;}
+</style>
+
+<!-- CONFIGURAÇÃO DO APPS SCRIPT -->
+<div class="cad-section">
+  <div class="cad-section-title">⚙️ Configuração — Apps Script</div>
+  <div class="cad-script-warn">
+    Para gravar na planilha, é necessário um <strong>Google Apps Script</strong> implantado como Web App. 
+    <a href="#" onclick="cadMostrarInstrucoes();return false;">Ver instruções passo a passo →</a>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <input id="cad-script-url" class="cad-input" style="flex:1;min-width:280px" type="text" placeholder="https://script.google.com/macros/s/SEU_ID/exec" oninput="cadSalvarUrlInput()">
+    <button class="cad-btn cad-btn-primary" onclick="cadTestarScript()">✓ Testar Conexão</button>
+  </div>
+  <div id="cad-script-status" class="cad-status"></div>
+</div>
+
+<!-- INSTRUÇÕES (oculto por padrão) -->
+<div id="cad-instrucoes" style="display:none" class="cad-section">
+  <div class="cad-section-title">📖 Como configurar o Apps Script</div>
+  <div style="font-size:0.7rem;color:var(--muted);line-height:2">
+    <div style="margin-bottom:8px"><span style="color:var(--gold)">1.</span> Abra a planilha → menu <strong style="color:var(--text)">Extensões → Apps Script</strong></div>
+    <div style="margin-bottom:8px"><span style="color:var(--gold)">2.</span> Apague o conteúdo e cole o código abaixo</div>
+    <div style="margin-bottom:8px"><span style="color:var(--gold)">3.</span> Clique em <strong style="color:var(--text)">Implantar → Nova implantação → App da Web</strong></div>
+    <div style="margin-bottom:8px"><span style="color:var(--gold)">4.</span> Execute como: <strong style="color:var(--text)">Eu</strong> · Acesso: <strong style="color:var(--text)">Qualquer pessoa</strong></div>
+    <div style="margin-bottom:16px"><span style="color:var(--gold)">5.</span> Copie a URL gerada e cole acima</div>
+    <div style="margin-bottom:8px;color:var(--text);font-size:0.68rem">Código do Apps Script:</div>
+    <div style="position:relative">
+      <pre id="cad-codigo-script" style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:14px;font-size:0.6rem;overflow-x:auto;color:var(--green);line-height:1.6;white-space:pre-wrap;max-height:260px;overflow-y:auto"></pre>
+      <button onclick="cadCopiarCodigo()" style="position:absolute;top:8px;right:8px;background:var(--s2);border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer">📋 Copiar</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEPS -->
+<div class="cad-step-bar">
+  <div class="cad-step active" id="step-btn-1" onclick="cadIrStep(1)">1 · Empréstimo</div>
+  <div class="cad-step" id="step-btn-2" onclick="cadIrStep(2)">2 · Revisão</div>
+</div>
+
+<!-- STEP 1: DADOS DO EMPRÉSTIMO -->
+<div class="cad-form-step active" id="cad-step-1">
+  <div class="cad-section">
+    <div class="cad-section-title">👤 Dados do Cliente</div>
+    <div class="cad-grid">
+      <div>
+        <div class="cad-lbl">ID do Cliente *</div>
+        <input class="cad-input" id="cad-id-cliente" type="text" placeholder="CLI001" oninput="cadBuscarCliente()" list="cad-lista-ids">
+        <datalist id="cad-lista-ids"></datalist>
+        <div id="cad-nome-auto" style="font-size:0.63rem;color:var(--green);margin-top:4px;min-height:16px"></div>
+      </div>
+      <div>
+        <div class="cad-lbl">Ou selecione o cliente</div>
+        <select class="cad-input cad-select" id="cad-select-cliente" onchange="cadSelecionarCliente(this.value)">
+          <option value="">— selecionar da lista —</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="cad-section">
+    <div class="cad-section-title">💰 Dados do Empréstimo</div>
+    <div class="cad-grid">
+      <div>
+        <div class="cad-lbl">Valor Emprestado (R$) *</div>
+        <input class="cad-input" id="cad-valor" type="number" placeholder="1000" min="1" step="0.01" oninput="cadCalcPreview()">
+      </div>
+      <div>
+        <div class="cad-lbl">Data do Empréstimo *</div>
+        <input class="cad-input" id="cad-data" type="date" oninput="cadCalcPreview()">
+      </div>
+      <div>
+        <div class="cad-lbl">Taxa de Juros (% a.m.) *</div>
+        <input class="cad-input" id="cad-taxa" type="number" placeholder="20" min="0" step="0.1" oninput="cadCalcPreview()">
+      </div>
+      <div>
+        <div class="cad-lbl">Prazo (meses) *</div>
+        <input class="cad-input" id="cad-prazo" type="number" placeholder="1" min="1" step="1" oninput="cadCalcPreview()">
+      </div>
+      <div>
+        <div class="cad-lbl">Tipo de Juros *</div>
+        <select class="cad-input cad-select" id="cad-tipo-juros" onchange="cadCalcPreview()">
+          <option value="Simples">Simples</option>
+          <option value="Composto">Composto</option>
+        </select>
+      </div>
+      <div>
+        <div class="cad-lbl">Unidade</div>
+        <input class="cad-input" id="cad-unidade" type="text" placeholder="Ex: Sede, Filial A...">
+      </div>
+    </div>
+    <div>
+      <div class="cad-lbl" style="margin-top:12px">Observações</div>
+      <input class="cad-input" id="cad-obs" type="text" placeholder="Opcional...">
+    </div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="cad-section" id="cad-preview-wrap" style="display:none">
+    <div class="cad-section-title">📊 Preview do Contrato</div>
+    <div class="cad-preview-box" id="cad-preview-box"></div>
+  </div>
+
+  <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px">
+    <button class="cad-btn cad-btn-secondary" onclick="cadLimpar()">🗑 Limpar</button>
+    <button class="cad-btn cad-btn-primary" onclick="cadAvancar()">Revisar →</button>
+  </div>
+</div>
+
+<!-- STEP 2: REVISÃO E ENVIO -->
+<div class="cad-form-step" id="cad-step-2">
+  <div class="cad-section">
+    <div class="cad-section-title">✅ Revisão Final</div>
+    <div class="cad-preview-box" id="cad-revisao-box" style="font-size:0.75rem;line-height:2"></div>
+    <div id="cad-envio-status" class="cad-status"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;gap:10px;margin-top:8px;flex-wrap:wrap">
+    <button class="cad-btn cad-btn-secondary" onclick="cadIrStep(1)">← Voltar</button>
+    <button class="cad-btn cad-btn-primary" id="cad-btn-gravar" onclick="cadGravar()">💾 Gravar na Planilha</button>
+  </div>
+</div>
+
+</div><!-- /tab-cadastro -->
+
+<script>
+// ═══════════════════════════════════════
+// CADASTRO — lógica
+// ═══════════════════════════════════════
+
+// Código do Apps Script
+const APPS_SCRIPT_CODE = `// Cole este código no Google Apps Script da sua planilha
+// Extensões → Apps Script → Substituir tudo → Implantar como Web App
+
+const SHEET_ID = '1g9336ZjN2jnVoxA5CFQmlaDxTkda7tlz48_EAlKUjr4';
+const GID_EMP = 147333899; // aba Empréstimos
+
+function doPost(e) {
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Content-Type': 'application/json'
+  };
+  try {
+    const dados = JSON.parse(e.postData.contents);
+    const acao = dados.acao;
+    
+    if (acao === 'ping') {
+      return ContentService.createTextOutput(JSON.stringify({ok:true,msg:'Conectado!'}))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    if (acao === 'novoEmprestimo') {
+      return novoEmprestimo(dados);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({ok:false,msg:'Ação desconhecida'}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ok:false,msg:err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  const acao = e.parameter.acao || '';
+  if (acao === 'ping') {
+    return ContentService.createTextOutput(JSON.stringify({ok:true,msg:'Conectado!'}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  return ContentService.createTextOutput(JSON.stringify({ok:false,msg:'Use POST'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function novoEmprestimo(d) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const aba = ss.getSheets().find(s => s.getSheetId() == GID_EMP);
+  if (!aba) throw new Error('Aba Empréstimos não encontrada');
+  
+  // Encontra próxima linha vazia (coluna A)
+  const dados = aba.getDataRange().getValues();
+  let proxLinha = dados.length + 1;
+  
+  // Gera próximo ID
+  const ids = dados.map(r => String(r[0])).filter(id => id.startsWith('EMP'));
+  const nums = ids.map(id => parseInt(id.replace('EMP',''))||0);
+  const proxNum = nums.length ? Math.max(...nums) + 1 : 1;
+  const novoId = 'EMP' + String(proxNum).padStart(3,'0');
+  
+  // Calcula juros
+  const valor = parseFloat(d.valor);
+  const taxa = parseFloat(d.taxa) / 100;
+  const prazo = parseInt(d.prazo);
+  let jurosTotal, valorTotal;
+  
+  if (d.tipoJuros === 'Composto') {
+    valorTotal = valor * Math.pow(1 + taxa, prazo);
+    jurosTotal = valorTotal - valor;
+  } else {
+    jurosTotal = valor * taxa * prazo;
+    valorTotal = valor + jurosTotal;
+  }
+  
+  // Data de vencimento
+  const partes = d.dataEmp.split('/');
+  const dataEmp = new Date(parseInt(partes[2]), parseInt(partes[1])-1, parseInt(partes[0]));
+  const dataVenc = new Date(dataEmp);
+  dataVenc.setMonth(dataVenc.getMonth() + prazo);
+  const fmtData = dt => ('0'+dt.getDate()).slice(-2)+'/'+('0'+(dt.getMonth()+1)).slice(-2)+'/'+dt.getFullYear();
+  
+  // Juros próximo mês
+  const jProxMes = d.tipoJuros === 'Composto'
+    ? (valor * Math.pow(1+taxa, 1)) - valor
+    : valor * taxa;
+  
+  // Linha a inserir (colunas A-U)
+  const linha = [
+    novoId,          // A: ID Empréstimo
+    d.idCliente,     // B: ID Cliente
+    d.nomeCliente,   // C: Nome Cliente
+    d.cpfCliente||'',// D: CPF
+    d.telCliente||'',// E: Telefone
+    valor,           // F: Valor Emprestado
+    fmtData(dataEmp),// G: Data do Empréstimo
+    parseFloat(d.taxa),// H: Taxa Juros %
+    prazo,           // I: Prazo
+    fmtData(dataVenc),// J: Venc. Original
+    d.tipoJuros,     // K: Tipo Juros
+    jurosTotal,      // L: Juros Total
+    valorTotal,      // M: Valor Total Devido
+    0,               // N: Total Pago
+    valorTotal,      // O: Saldo Restante
+    jProxMes,        // P: Juros Próx. Mês
+    0,               // Q: Parcelas Pagas
+    '🟢 Em Dia',     // R: Status
+    fmtData(dataVenc),// S: Próximo Vencimento
+    d.unidade||'',   // T: Unidade
+    d.obs||''        // U: Observações
+  ];
+  
+  aba.appendRow(linha);
+  
+  return ContentService.createTextOutput(JSON.stringify({
+    ok: true,
+    msg: 'Empréstimo ' + novoId + ' cadastrado com sucesso!',
+    id: novoId
+  })).setMimeType(ContentService.MimeType.JSON);
+}`;
+
+// Popula o código no elemento
+document.addEventListener('DOMContentLoaded', function() {
+  const el = document.getElementById('cad-codigo-script');
+  if (el) el.textContent = APPS_SCRIPT_CODE;
+  
+  // Restaura URL salva
+  const urlSalva = localStorage.getItem('cad_script_url_v2');
+  const inp = document.getElementById('cad-script-url');
+  if (inp && urlSalva) inp.value = urlSalva;
+  
+  // Data padrão = hoje
+  const dataInp = document.getElementById('cad-data');
+  if (dataInp) dataInp.value = new Date().toISOString().split('T')[0];
+});
+
+function cadMostrarInstrucoes() {
+  const el = document.getElementById('cad-instrucoes');
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  const cd = document.getElementById('cad-codigo-script');
+  if (cd) cd.textContent = APPS_SCRIPT_CODE;
+}
+
+function cadCopiarCodigo() {
+  navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(() => {
+    const btn = event.target;
+    btn.textContent = '✅ Copiado!';
+    setTimeout(() => btn.textContent = '📋 Copiar', 2000);
+  });
+}
+
+function cadSalvarUrlInput() {
+  const url = document.getElementById('cad-script-url').value.trim();
+  if (url) localStorage.setItem('cad_script_url_v2', url);
+}
+
+function cadGetUrl() {
+  return (document.getElementById('cad-script-url').value || '').trim();
+}
+
+function cadSetStatus(id, tipo, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'cad-status ' + tipo;
+  el.textContent = msg;
+}
+
+async function cadTestarScript() {
+  const url = cadGetUrl();
+  if (!url) { cadSetStatus('cad-script-status', 'err', '⚠️ Cole a URL do Apps Script primeiro.'); return; }
+  cadSetStatus('cad-script-status', 'loading', '⏳ Testando conexão...');
+  try {
+    // Tenta GET com ?acao=ping (CORS-friendly via no-cors, checar resposta)
+    const r = await fetch(url + '?acao=ping', { method: 'GET', mode: 'cors' });
+    if (r.ok) {
+      const json = await r.json();
+      if (json.ok) {
+        cadSetStatus('cad-script-status', 'ok', '✅ ' + json.msg + ' — pronto para gravar.');
+        localStorage.setItem('cad_script_url_v2', url);
+        return;
+      }
+    }
+    cadSetStatus('cad-script-status', 'err', '❌ Script respondeu mas retornou erro. Verifique as permissões.');
+  } catch(e) {
+    // Se falhar com cors, pode ser modo no-cors
+    cadSetStatus('cad-script-status', 'ok', '✅ URL salva. Se a conexão falhar ao gravar, verifique as permissões do script.');
+    localStorage.setItem('cad_script_url_v2', url);
+  }
+}
+
+// Popula selects com dados dos clientes já carregados
+function cadPopularClientes() {
+  if (!window._empData) return;
+  const clientesMap = {};
+  window._empData.forEach(e => {
+    if (e.idCliente && e.nomeCliente) clientesMap[e.idCliente] = e;
+  });
+  
+  const sel = document.getElementById('cad-select-cliente');
+  const dl = document.getElementById('cad-lista-ids');
+  if (!sel || !dl) return;
+  
+  sel.innerHTML = '<option value="">— selecionar da lista —</option>';
+  dl.innerHTML = '';
+  
+  Object.entries(clientesMap).sort((a,b) => a[0].localeCompare(b[0])).forEach(([id, e]) => {
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = id + ' — ' + e.nomeCliente;
+    sel.appendChild(opt);
+    
+    const dopt = document.createElement('option');
+    dopt.value = id;
+    dl.appendChild(dopt);
+  });
+}
+
+function cadBuscarCliente(idForcado) {
+  const id = (idForcado || document.getElementById('cad-id-cliente').value || '').trim().toUpperCase();
+  const infoEl = document.getElementById('cad-nome-auto');
+  if (!id) { infoEl.textContent = ''; return; }
+  
+  if (window._empData) {
+    const match = window._empData.find(e => e.idCliente === id);
+    if (match) {
+      infoEl.textContent = '✅ ' + match.nomeCliente + (match.telefone ? ' · ' + match.telefone : '');
+      window._cadClienteSelecionado = { id, nome: match.nomeCliente, tel: match.telefone, cpf: match.cpf || '' };
+      return;
+    }
+  }
+  infoEl.textContent = '⚠️ Cliente não encontrado na planilha';
+  window._cadClienteSelecionado = null;
+}
+
+function cadSelecionarCliente(id) {
+  if (!id) return;
+  document.getElementById('cad-id-cliente').value = id;
+  cadBuscarCliente(id);
+}
+
+function cadCalcPreview() {
+  const valor = parseFloat(document.getElementById('cad-valor').value) || 0;
+  const taxa = parseFloat(document.getElementById('cad-taxa').value) || 0;
+  const prazo = parseInt(document.getElementById('cad-prazo').value) || 0;
+  const tipo = document.getElementById('cad-tipo-juros').value;
+  const dataVal = document.getElementById('cad-data').value;
+  
+  const wrap = document.getElementById('cad-preview-wrap');
+  const box = document.getElementById('cad-preview-box');
+  
+  if (!valor || !taxa || !prazo || !dataVal) { if(wrap) wrap.style.display='none'; return; }
+  
+  const t = taxa / 100;
+  let juros, total;
+  if (tipo === 'Composto') {
+    total = valor * Math.pow(1 + t, prazo);
+    juros = total - valor;
+  } else {
+    juros = valor * t * prazo;
+    total = valor + juros;
+  }
+  
+  const jProx = tipo === 'Composto' ? (valor * (1+t)) - valor : valor * t;
+  
+  const dataEmp = new Date(dataVal + 'T12:00:00');
+  const dataVenc = new Date(dataEmp);
+  dataVenc.setMonth(dataVenc.getMonth() + prazo);
+  const fmt = d => d.toLocaleDateString('pt-BR');
+  const brl = v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  
+  if(wrap) wrap.style.display = 'block';
+  if(box) box.innerHTML = `
+    <div class="cad-preview-row"><span class="cad-preview-lbl">Capital</span><span class="cad-preview-val">${brl(valor)}</span></div>
+    <div class="cad-preview-row"><span class="cad-preview-lbl">Juros Total (${prazo}m)</span><span class="cad-preview-val" style="color:var(--gold2)">${brl(juros)}</span></div>
+    <div class="cad-preview-row"><span class="cad-preview-lbl">Total a Receber</span><span class="cad-preview-val destaque">${brl(total)}</span></div>
+    <div class="cad-preview-row"><span class="cad-preview-lbl">Juros/mês (próx.)</span><span class="cad-preview-val">${brl(jProx)}</span></div>
+    <div class="cad-preview-row"><span class="cad-preview-lbl">Vencimento</span><span class="cad-preview-val">${fmt(dataVenc)}</span></div>
+    <div class="cad-preview-row"><span class="cad-preview-lbl">Tipo</span><span class="cad-preview-val">${tipo}</span></div>
+  `;
+}
+
+function cadIrStep(n) {
+  document.querySelectorAll('.cad-form-step').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.cad-step').forEach(el => el.classList.remove('active'));
+  document.getElementById('cad-step-' + n).classList.add('active');
+  document.getElementById('step-btn-' + n).classList.add('active');
+}
+
+function cadAvancar() {
+  const idCliente = document.getElementById('cad-id-cliente').value.trim().toUpperCase();
+  const valor = parseFloat(document.getElementById('cad-valor').value);
+  const taxa = parseFloat(document.getElementById('cad-taxa').value);
+  const prazo = parseInt(document.getElementById('cad-prazo').value);
+  const dataVal = document.getElementById('cad-data').value;
+  
+  if (!idCliente) { alert('Informe o ID do cliente.'); return; }
+  if (!window._cadClienteSelecionado) { alert('Cliente não encontrado. Verifique o ID.'); return; }
+  if (!valor || valor <= 0) { alert('Informe o valor do empréstimo.'); return; }
+  if (!taxa || taxa <= 0) { alert('Informe a taxa de juros.'); return; }
+  if (!prazo || prazo <= 0) { alert('Informe o prazo.'); return; }
+  if (!dataVal) { alert('Informe a data do empréstimo.'); return; }
+  
+  const tipo = document.getElementById('cad-tipo-juros').value;
+  const t = taxa / 100;
+  let juros, total;
+  if (tipo === 'Composto') { total = valor * Math.pow(1+t,prazo); juros = total - valor; }
+  else { juros = valor * t * prazo; total = valor + juros; }
+  
+  const dataEmp = new Date(dataVal + 'T12:00:00');
+  const dataVenc = new Date(dataEmp);
+  dataVenc.setMonth(dataVenc.getMonth() + prazo);
+  const fmt = d => d.toLocaleDateString('pt-BR');
+  const brl = v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2,maximumFractionDigits:2});
+  
+  const cli = window._cadClienteSelecionado;
+  
+  document.getElementById('cad-revisao-box').innerHTML = `
+    <div class="cad-preview-row"><span class="cad-preview-lbl">Cliente</span><span class="cad-preview-val">${cli.id} — ${cli.nome}</span></div>
+    <div class="cad-preview-row"><span class="cad-preview-lbl">Telefone</span><span class="cad-preview-val">${cli.tel||'—'}</span></div>
+    <div class="cad-preview-row"><span class="cad-preview-lbl">Valor Emprestado</span><span class="cad-preview-val destaque">${brl(valor)}</span></div>
+    <div class="cad-preview-row"><span class="cad-preview-lbl">Taxa</span><span class="cad-preview-val">${taxa}% a.m. (${tipo})</span></div>
+    <div class="cad-preview-row"><span class="cad-preview-lbl">Prazo</span><span class="cad-preview-val">${prazo} mês(es)</span></div>
+    <div class="cad-preview-row"><span class="cad-preview-lbl">Data Empréstimo</span><span class="cad-preview-val">${fmt(dataEmp)}</span></div>
+    <div class="cad-preview-row"><span class="cad-preview-lbl">Vencimento</span><span class="cad-preview-val">${fmt(dataVenc)}</span></div>
+    <div class="cad-preview-row"><span class="cad-preview-lbl">Juros Total</span><span class="cad-preview-val" style="color:var(--gold2)">${brl(juros)}</span></div>
+    <div class="cad-preview-row"><span class="cad-preview-lbl">Total a Receber</span><span class="cad-preview-val destaque">${brl(total)}</span></div>
+    ${document.getElementById('cad-obs').value ? '<div class="cad-preview-row"><span class="cad-preview-lbl">Obs</span><span class="cad-preview-val">'+document.getElementById('cad-obs').value+'</span></div>' : ''}
+  `;
+  
+  document.getElementById('step-btn-1').classList.add('done');
+  cadIrStep(2);
+}
+
+async function cadGravar() {
+  const url = cadGetUrl();
+  if (!url) { cadSetStatus('cad-envio-status','err','⚠️ Configure a URL do Apps Script primeiro.'); return; }
+  
+  const cli = window._cadClienteSelecionado;
+  if (!cli) { cadSetStatus('cad-envio-status','err','⚠️ Cliente inválido.'); return; }
+  
+  const dataVal = document.getElementById('cad-data').value;
+  const dataEmp = new Date(dataVal + 'T12:00:00');
+  const fmt = d => ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();
+  
+  const payload = {
+    acao: 'novoEmprestimo',
+    idCliente: cli.id,
+    nomeCliente: cli.nome,
+    cpfCliente: cli.cpf || '',
+    telCliente: cli.tel || '',
+    valor: parseFloat(document.getElementById('cad-valor').value),
+    dataEmp: fmt(dataEmp),
+    taxa: parseFloat(document.getElementById('cad-taxa').value),
+    prazo: parseInt(document.getElementById('cad-prazo').value),
+    tipoJuros: document.getElementById('cad-tipo-juros').value,
+    unidade: document.getElementById('cad-unidade').value.trim(),
+    obs: document.getElementById('cad-obs').value.trim()
+  };
+  
+  cadSetStatus('cad-envio-status','loading','⏳ Gravando na planilha...');
+  document.getElementById('cad-btn-gravar').disabled = true;
+  
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      mode: 'cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const json = await r.json();
+    if (json.ok) {
+      cadSetStatus('cad-envio-status','ok','✅ ' + json.msg);
+      cadLimpar();
+      cadIrStep(1);
+      // Atualiza dados do dashboard
+      setTimeout(() => { try { loadData(false); } catch(e){} }, 2000);
+    } else {
+      cadSetStatus('cad-envio-status','err','❌ ' + (json.msg || 'Erro desconhecido'));
+    }
+  } catch(e) {
+    cadSetStatus('cad-envio-status','err','❌ Erro de conexão: ' + e.message + '. Verifique se o script está implantado como "Qualquer pessoa".');
+  }
+  
+  document.getElementById('cad-btn-gravar').disabled = false;
+}
+
+function cadLimpar() {
+  ['cad-id-cliente','cad-valor','cad-taxa','cad-prazo','cad-unidade','cad-obs'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const dataInp = document.getElementById('cad-data');
+  if (dataInp) dataInp.value = new Date().toISOString().split('T')[0];
+  document.getElementById('cad-tipo-juros').value = 'Simples';
+  document.getElementById('cad-select-cliente').value = '';
+  document.getElementById('cad-nome-auto').textContent = '';
+  document.getElementById('cad-preview-wrap').style.display = 'none';
+  window._cadClienteSelecionado = null;
+}
+
+function cadPopularClientesDoSheets(empRows) {
+  // Extrai clientes únicos das linhas de empréstimos
+  const clientesMap = {};
+  empRows.forEach(r => {
+    const id = String(r[1]||'').trim(); // CE.clienteId = 1
+    const nome = String(r[2]||'').trim(); // CE.nome = 2
+    const tel = String(r[4]||'').trim();  // CE.tel = 4
+    const cpf = String(r[3]||'').trim();  // CE.cpf = 3
+    if (id && nome && id.startsWith('CLI')) {
+      clientesMap[id] = { id, nome, tel, cpf };
+    }
+  });
+
+  window._empData = Object.values(clientesMap);
+
+  const sel = document.getElementById('cad-select-cliente');
+  const dl = document.getElementById('cad-lista-ids');
+  if (!sel || !dl) return;
+
+  sel.innerHTML = '<option value="">— selecionar da lista —</option>';
+  dl.innerHTML = '';
+
+  Object.entries(clientesMap).sort((a,b) => a[0].localeCompare(b[0])).forEach(([id, c]) => {
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = id + ' — ' + c.nome;
+    sel.appendChild(opt);
+
+    const dopt = document.createElement('option');
+    dopt.value = id;
+    dl.appendChild(dopt);
+  });
+}
+
+// Hook: quando os dados do dashboard carregam, popula o select de clientes
+const _cadOrigRender = window.renderAll || null;
+function cadHookRender() {
+  // Chamado após loadData — popula clientes no cadastro
+  setTimeout(cadPopularClientes, 500);
+}
+// Será chamado pelo loadData existente via evento
+document.addEventListener('dashboardDataLoaded', cadHookRender);
+</script>
 
 <div style="text-align:right;margin-top:8px;font-size:0.57rem;color:var(--muted)">última atualização: <span id="last-update">—</span> · auto-refresh 15 min</div>
 
@@ -4755,6 +5364,8 @@ async function loadData(mostrarLoading){
     console.log('📊 Capital Investimentos — emp:',empRows.length,'pag:',pagRows.length);
     try{
       render(empRows,pagRows);
+      // Popular clientes no cadastro
+      try{ cadPopularClientesDoSheets(empRows); }catch(ce){}
       // Migrar dados do Sheets para o Drive (só na primeira vez que tem dados no Sheets e Drive vazio)
       try{ cadMigrarDoSheets(empRows, pagRows); }catch(me){ console.warn('migração:',me); }
     }catch(renderErr){
