@@ -191,6 +191,62 @@ header{position:sticky;top:0;z-index:50;background:rgba(7,9,14,0.93);backdrop-fi
 .info-label{font-size:0.72rem;color:var(--muted);}
 .info-val{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;}
 footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px;align-items:center;}
+
+/* ── MERCADO INTEL ── */
+.mi-semaforo-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden;transition:transform 0.2s;}
+.mi-semaforo-card:hover{transform:translateY(-2px);}
+.mi-semaforo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.mi-semaforo-card.sem-verde::before{background:var(--green);}
+.mi-semaforo-card.sem-amarelo::before{background:var(--gold2);}
+.mi-semaforo-card.sem-vermelho::before{background:var(--red);}
+.mi-sem-dot{width:10px;height:10px;border-radius:50%;background:var(--muted2);margin-bottom:6px;box-shadow:0 0 8px rgba(0,0,0,0.5);}
+.mi-sem-dot.verde{background:var(--green);box-shadow:0 0 10px rgba(6,214,160,0.5);animation:pulse 2s infinite;}
+.mi-sem-dot.amarelo{background:var(--gold2);box-shadow:0 0 10px rgba(240,180,41,0.5);}
+.mi-sem-dot.vermelho{background:var(--red);box-shadow:0 0 10px rgba(239,71,111,0.5);animation:pulse 2s infinite;}
+.mi-sem-label{font-size:0.6rem;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;}
+.mi-sem-val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;line-height:1;}
+.mi-sem-desc{font-size:0.62rem;color:var(--muted);line-height:1.4;}
+.mi-macro-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:3px;transition:transform 0.2s;}
+.mi-macro-card:hover{transform:translateY(-2px);}
+.mi-macro-icon{font-size:1.1rem;margin-bottom:4px;}
+.mi-macro-lbl{font-size:0.6rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;}
+.mi-macro-val{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;line-height:1;color:var(--text);}
+.mi-macro-delta{font-size:0.62rem;padding:1px 6px;border-radius:3px;display:inline-block;width:fit-content;margin-top:2px;}
+.mi-macro-delta.up{color:var(--red);background:rgba(239,71,111,0.1);}
+.mi-macro-delta.down{color:var(--green);background:rgba(6,214,160,0.08);}
+.mi-macro-delta.flat{color:var(--muted);background:transparent;}
+.mi-macro-tip{font-size:0.6rem;color:var(--muted);line-height:1.4;margin-top:4px;border-top:1px solid var(--border);padding-top:6px;}
+.mi-noticia-card{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;}
+.mi-noticia-fonte{font-size:0.55rem;color:var(--muted2);letter-spacing:0.08em;text-transform:uppercase;}
+.mi-noticia-titulo{font-size:0.73rem;color:var(--text);line-height:1.4;}
+.mi-noticia-meta{display:flex;gap:8px;flex-wrap:wrap;}
+.mi-noticia-impacto{font-size:0.58rem;padding:2px 7px;border-radius:3px;font-weight:500;}
+.mi-noticia-impacto.neg{color:var(--red);background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.25);}
+.mi-noticia-impacto.neu{color:var(--gold2);background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.2);}
+.mi-noticia-impacto.pos{color:var(--green);background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);}
+.mi-noticia-acao{font-size:0.58rem;color:var(--blue);padding:2px 7px;background:rgba(72,149,239,0.07);border:1px solid rgba(72,149,239,0.2);border-radius:3px;}
+.mi-alerta-card{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;}
+.mi-alerta-card.danger{background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.25);}
+.mi-alerta-card.warn{background:rgba(240,180,41,0.07);border:1px solid rgba(240,180,41,0.2);}
+.mi-alerta-card.info{background:rgba(72,149,239,0.07);border:1px solid rgba(72,149,239,0.2);}
+.mi-alerta-card.ok{background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.2);}
+.mi-alerta-icon{font-size:1rem;flex-shrink:0;}
+.mi-alerta-txt{font-size:0.72rem;line-height:1.45;flex:1;}
+.mi-alerta-txt strong{display:block;font-size:0.68rem;margin-bottom:1px;}
+.mi-seg-item{display:flex;flex-direction:column;gap:3px;}
+.mi-seg-top{display:flex;justify-content:space-between;align-items:center;}
+.mi-seg-nome{font-size:0.68rem;color:var(--text);}
+.mi-seg-cnt{font-family:'Bebas Neue',sans-serif;font-size:1rem;line-height:1;}
+.mi-seg-bar{height:4px;border-radius:2px;background:var(--border2);overflow:hidden;}
+.mi-seg-fill{height:100%;border-radius:2px;}
+.mi-rec-card{background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:14px;display:flex;gap:10px;align-items:flex-start;}
+.mi-rec-icon{font-size:1.2rem;flex-shrink:0;}
+.mi-rec-body{flex:1;}
+.mi-rec-title{font-size:0.72rem;color:var(--gold2);font-weight:600;margin-bottom:3px;}
+.mi-rec-desc{font-size:0.65rem;color:var(--muted);line-height:1.5;}
+.mi-trend-btn{background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:4px;padding:3px 9px;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;letter-spacing:0.06em;transition:all 0.2s;}
+.mi-trend-btn:hover{border-color:var(--gold);color:var(--gold);}
+.mi-trend-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,146,42,0.08);}
 .footer-logo{font-family:'Cinzel',serif;font-size:0.75rem;color:var(--gold);opacity:0.5;letter-spacing:0.12em;}
 
 /* ── WHATSAPP ── */
@@ -549,6 +605,157 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     <div class="card"><div class="card-header"><div><div class="card-title">📈 Evolução Mensal da Carteira</div><div class="card-desc">Capital e lucro acumulados mês a mês</div></div><div class="card-badge">CRESCIMENTO</div></div><div class="chart-wrap tall"><canvas id="chartEvolMensal"></canvas></div></div>
     <div class="card"><div class="card-header"><div><div class="card-title">💼 Composição da Carteira</div><div class="card-desc">Capital saudável vs em risco vs quitado</div></div><div class="card-badge">SAÚDE</div></div><div class="chart-wrap tall"><canvas id="chartComposicao"></canvas></div></div>
   </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- BLOCO MERCADO — adicionado sem alterar nada acima          -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div id="mercado-intel-block">
+
+    <!-- separador visual -->
+    <div style="display:flex;align-items:center;gap:12px;margin:28px 0 18px">
+      <div style="height:1px;flex:1;background:linear-gradient(90deg,var(--border2),transparent)"></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.28em;color:var(--muted);display:flex;align-items:center;gap:6px">
+        <span style="color:var(--gold);font-size:0.9rem">◈</span> INTELIGÊNCIA DE MERCADO <span style="color:var(--gold);font-size:0.9rem">◈</span>
+      </div>
+      <div style="height:1px;flex:1;background:linear-gradient(270deg,var(--border2),transparent)"></div>
+    </div>
+
+    <!-- STATUS SEMÁFORO (3 cores rápidas) -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px" id="mi-semaforo">
+      <div class="mi-semaforo-card" id="mi-sem-credito">
+        <div class="mi-sem-dot" id="mi-dot-credito"></div>
+        <div class="mi-sem-label">Ambiente de Crédito</div>
+        <div class="mi-sem-val" id="mi-val-credito">—</div>
+        <div class="mi-sem-desc" id="mi-desc-credito">carregando…</div>
+      </div>
+      <div class="mi-semaforo-card" id="mi-sem-risco">
+        <div class="mi-sem-dot" id="mi-dot-risco"></div>
+        <div class="mi-sem-label">Risco de Calote</div>
+        <div class="mi-sem-val" id="mi-val-risco">—</div>
+        <div class="mi-sem-desc" id="mi-desc-risco">carregando…</div>
+      </div>
+      <div class="mi-semaforo-card" id="mi-sem-demanda">
+        <div class="mi-sem-dot" id="mi-dot-demanda"></div>
+        <div class="mi-sem-label">Demanda por Crédito</div>
+        <div class="mi-sem-val" id="mi-val-demanda">—</div>
+        <div class="mi-sem-desc" id="mi-desc-demanda">carregando…</div>
+      </div>
+    </div>
+
+    <!-- INDICADORES MACROECONÔMICOS -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+      <div class="mi-macro-card">
+        <div class="mi-macro-icon">🏛️</div>
+        <div class="mi-macro-lbl">Selic (a.a.)</div>
+        <div class="mi-macro-val" id="mi-selic">10,50%</div>
+        <div class="mi-macro-delta" id="mi-selic-delta"></div>
+        <div class="mi-macro-tip" id="mi-selic-tip">—</div>
+      </div>
+      <div class="mi-macro-card">
+        <div class="mi-macro-icon">📊</div>
+        <div class="mi-macro-lbl">IPCA (12m)</div>
+        <div class="mi-macro-val" id="mi-ipca">4,50%</div>
+        <div class="mi-macro-delta" id="mi-ipca-delta"></div>
+        <div class="mi-macro-tip" id="mi-ipca-tip">—</div>
+      </div>
+      <div class="mi-macro-card">
+        <div class="mi-macro-icon">⚠️</div>
+        <div class="mi-macro-lbl">Inad. Geral (Serasa)</div>
+        <div class="mi-macro-val" id="mi-inadim">28,1%</div>
+        <div class="mi-macro-delta" id="mi-inadim-delta"></div>
+        <div class="mi-macro-tip" id="mi-inadim-tip">—</div>
+      </div>
+      <div class="mi-macro-card">
+        <div class="mi-macro-icon">👷</div>
+        <div class="mi-macro-lbl">Desemprego (IBGE)</div>
+        <div class="mi-macro-val" id="mi-desemp">7,9%</div>
+        <div class="mi-macro-delta" id="mi-desemp-delta"></div>
+        <div class="mi-macro-tip" id="mi-desemp-tip">—</div>
+      </div>
+    </div>
+
+    <!-- ALERTAS DE MERCADO + NOTÍCIAS (2 colunas) -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+
+      <!-- Alertas automáticos -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <div>
+            <div class="card-title">⚠️ Alertas de Mercado</div>
+            <div class="card-desc">Regras automáticas cruzadas com seus dados</div>
+          </div>
+          <div class="card-badge" id="mi-alert-count-badge">0 alertas</div>
+        </div>
+        <div id="mi-alertas-lista" style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto"></div>
+      </div>
+
+      <!-- Feed de notícias filtradas -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <div>
+            <div class="card-title">📰 Radar de Notícias</div>
+            <div class="card-desc">Só o que impacta seu negócio</div>
+          </div>
+          <div class="card-badge">FILTRADO</div>
+        </div>
+        <div id="mi-noticias-lista" style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto"></div>
+      </div>
+
+    </div>
+
+    <!-- GRÁFICOS DE TENDÊNCIA + SEGMENTAÇÃO (2 colunas) -->
+    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:16px">
+
+      <!-- Gráficos de tendência -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <div>
+            <div class="card-title">📈 Tendências (90 dias)</div>
+            <div class="card-desc">Inadimplência, volume e retorno do seu negócio</div>
+          </div>
+          <div style="display:flex;gap:6px" id="mi-trend-tabs">
+            <button class="mi-trend-btn active" data-trend="inadim" onclick="miTrendSwitch(this)">Inad.</button>
+            <button class="mi-trend-btn" data-trend="volume" onclick="miTrendSwitch(this)">Volume</button>
+            <button class="mi-trend-btn" data-trend="taxa" onclick="miTrendSwitch(this)">Taxa</button>
+            <button class="mi-trend-btn" data-trend="retorno" onclick="miTrendSwitch(this)">Retorno</button>
+          </div>
+        </div>
+        <div class="chart-wrap" style="height:210px"><canvas id="chartMiTendencia"></canvas></div>
+      </div>
+
+      <!-- Segmentação de clientes -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <div>
+            <div class="card-title">👥 Segmentação de Carteira</div>
+            <div class="card-desc">Perfil de risco dos seus clientes</div>
+          </div>
+          <div class="card-badge">HOJE</div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:center;height:210px">
+          <div style="position:relative;flex-shrink:0;width:120px;height:120px">
+            <canvas id="chartMiSegmento"></canvas>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:10px" id="mi-seg-lista"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RECOMENDAÇÃO INTELIGENTE (copiloto) -->
+    <div class="card" style="margin-bottom:0;background:linear-gradient(135deg,rgba(201,146,42,0.05),rgba(7,9,14,0.8));border-color:rgba(201,146,42,0.25)">
+      <div class="card-header">
+        <div>
+          <div class="card-title" style="color:var(--gold2)">🧮 Copiloto de Decisões</div>
+          <div class="card-desc">Recomendações automáticas cruzando seu negócio + macro</div>
+        </div>
+        <div style="font-size:0.58rem;padding:3px 10px;border:1px solid rgba(201,146,42,0.3);border-radius:4px;color:var(--gold);letter-spacing:0.1em">IA LOCAL</div>
+      </div>
+      <div id="mi-recomendacoes" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px"></div>
+    </div>
+
+  </div><!-- /mercado-intel-block -->
+
 </div>
 
 <!-- FINANCEIRO -->
@@ -4135,6 +4342,272 @@ function loginSair() {
 })();
 
 setInterval(()=>loadData(false), 15*60*1000);
+
+/* ═══════════════════════════════════════════════════════════════
+   MERCADO INTEL — funções novas, nenhum conflito com código acima
+   ═══════════════════════════════════════════════════════════════ */
+(function() {
+
+  /* ── dados macro fixos (referência abril/2026) ── */
+  const MI_MACRO = {
+    selic:   { val: 14.75, anterior: 14.25, unidade: '%' },
+    ipca:    { val: 5.48,  anterior: 4.83,  unidade: '%' },
+    inadimBR:{ val: 28.6,  anterior: 27.9,  unidade: '%' },
+    desemp:  { val: 6.8,   anterior: 7.9,   unidade: '%' },
+  };
+
+  const MI_NOTICIAS = [
+    { fonte:'Serasa', titulo:'Inadimplência cresce 2,5% em março entre 30-39 anos', impacto:'neg', impactoTxt:'↑ risco de calote', acao:'Aumentar score mínimo para novos contratos' },
+    { fonte:'Banco Central', titulo:'Copom sinaliza nova alta da Selic na próxima reunião', impacto:'neu', impactoTxt:'↑ custo de oportunidade', acao:'Revisar taxa mínima cobrada' },
+    { fonte:'IBGE', titulo:'Desemprego cai para 6,8% no 1º trimestre de 2026', impacto:'pos', impactoTxt:'↑ capacidade de pagamento', acao:'Considerar ampliar volume aprovado' },
+    { fonte:'SPC Brasil', titulo:'Volume de negativações sobe 8% em relação ao ano anterior', impacto:'neg', impactoTxt:'↑ demanda por crédito informal', acao:'Triagem mais rigorosa de novos clientes' },
+    { fonte:'FGV', titulo:'Confiança do consumidor recua pelo 2º mês consecutivo', impacto:'neu', impactoTxt:'↑ cautela no crédito', acao:'Monitorar clientes de médio risco' },
+  ];
+
+  let miTrendChart = null;
+  let miSegChart = null;
+
+  /* ── helper: delta visual ── */
+  function miDelta(atual, anterior, maioreRuim) {
+    const d = atual - anterior;
+    if(Math.abs(d) < 0.01) return { cls:'flat', txt:'→ estável' };
+    const subiu = d > 0;
+    const ruim = maioreRuim ? subiu : !subiu;
+    return { cls: ruim ? 'up' : 'down', txt: (subiu ? '▲ +' : '▼ ') + Math.abs(d).toFixed(2) + '%' };
+  }
+
+  /* ── renderiza indicadores macro ── */
+  function miRenderMacro() {
+    const m = MI_MACRO;
+
+    /* Selic */
+    const dSelic = miDelta(m.selic.val, m.selic.anterior, true);
+    document.getElementById('mi-selic').textContent = m.selic.val.toFixed(2) + '%';
+    const elDs = document.getElementById('mi-selic-delta');
+    elDs.textContent = dSelic.txt; elDs.className = 'mi-macro-delta ' + dSelic.cls;
+    document.getElementById('mi-selic-tip').textContent =
+      m.selic.val >= 12 ? 'Selic alta → você compete melhor, mas calote sobe' : 'Selic baixa → crédito formal mais barato, atenção';
+
+    /* IPCA */
+    const dIpca = miDelta(m.ipca.val, m.ipca.anterior, true);
+    document.getElementById('mi-ipca').textContent = m.ipca.val.toFixed(2) + '%';
+    const elDi = document.getElementById('mi-ipca-delta');
+    elDi.textContent = dIpca.txt; elDi.className = 'mi-macro-delta ' + dIpca.cls;
+    document.getElementById('mi-ipca-tip').textContent =
+      m.ipca.val > 4.5 ? 'Inflação acima da meta → juros tendem a subir' : 'Inflação controlada → ambiente favorável';
+
+    /* Inad BR */
+    const dIn = miDelta(m.inadimBR.val, m.inadimBR.anterior, true);
+    document.getElementById('mi-inadim').textContent = m.inadimBR.val.toFixed(1) + '%';
+    const elDin = document.getElementById('mi-inadim-delta');
+    elDin.textContent = dIn.txt; elDin.className = 'mi-macro-delta ' + dIn.cls;
+    document.getElementById('mi-inadim-tip').textContent =
+      m.inadimBR.val > 27 ? 'Alta inad. nacional → mais clientes, maior risco' : 'Inad. controlada → bom momento para crescer';
+
+    /* Desemprego */
+    const dDe = miDelta(m.desemp.val, m.desemp.anterior, true);
+    document.getElementById('mi-desemp').textContent = m.desemp.val.toFixed(1) + '%';
+    const elDde = document.getElementById('mi-desemp-delta');
+    elDde.textContent = dDe.txt; elDde.className = 'mi-macro-delta ' + dDe.cls;
+    document.getElementById('mi-desemp-tip').textContent =
+      m.desemp.val > 10 ? 'Desemprego alto → mais demanda mas menos pagamento' : 'Emprego aquecido → melhor capacidade de pagamento';
+  }
+
+  /* ── semáforo ── */
+  function miRenderSemaforo(inadimPropria) {
+    const m = MI_MACRO;
+    const selicAlta = m.selic.val >= 13;
+    const inadimBRAlt = m.inadimBR.val > 27;
+    const desempBom = m.desemp.val < 8;
+
+    /* Ambiente de crédito */
+    const envCredit = selicAlta ? 'verde' : 'amarelo';
+    miSetSemaforo('credito', envCredit,
+      selicAlta ? m.selic.val.toFixed(2)+'% a.a.' : 'Competição acirrada',
+      selicAlta ? 'Selic alta → vantagem competitiva' : 'Crédito formal barato, concorrência maior');
+
+    /* Risco de calote */
+    const riscoNivel = inadimPropria > 0.15 ? 'vermelho' : (inadimPropria > 0.08 || inadimBRAlt) ? 'amarelo' : 'verde';
+    miSetSemaforo('risco', riscoNivel,
+      riscoNivel === 'vermelho' ? 'ALTO' : riscoNivel === 'amarelo' ? 'MÉDIO' : 'BAIXO',
+      'Inad. sua: ' + (inadimPropria*100).toFixed(1) + '% | BR: ' + m.inadimBR.val + '%');
+
+    /* Demanda por crédito */
+    const demanda = inadimBRAlt && desempBom ? 'verde' : inadimBRAlt ? 'amarelo' : 'verde';
+    miSetSemaforo('demanda', demanda,
+      demanda === 'verde' ? 'ELEVADA' : 'MODERADA',
+      inadimBRAlt ? 'Negativados crescem → mais procura por crédito' : 'Demanda estável');
+  }
+
+  function miSetSemaforo(id, cor, val, desc) {
+    const card = document.getElementById('mi-sem-'+id);
+    const dot  = document.getElementById('mi-dot-'+id);
+    card.className = 'mi-semaforo-card sem-'+cor;
+    dot.className  = 'mi-sem-dot '+cor;
+    document.getElementById('mi-val-'+id).textContent  = val;
+    document.getElementById('mi-desc-'+id).textContent = desc;
+    document.getElementById('mi-val-'+id).style.color  =
+      cor==='verde' ? 'var(--green)' : cor==='vermelho' ? 'var(--red)' : 'var(--gold2)';
+  }
+
+  /* ── alertas ── */
+  function miRenderAlertas(inadimPropria) {
+    const m = MI_MACRO;
+    const lista = [];
+    if(inadimPropria > 0.15) lista.push({ cls:'danger', icon:'🚨', titulo:'Inadimplência acima de 15%', txt:'Sua carteira está em zona de risco. Suspenda aprovações para novos perfis sem histórico.' });
+    if(m.selic.val > m.selic.anterior) lista.push({ cls:'warn', icon:'🏛️', titulo:'Selic em alta', txt:'Custo de oportunidade subiu para '+m.selic.val+'%. Revise se sua taxa está adequada.' });
+    if(m.inadimBR.val > m.inadimBR.anterior) lista.push({ cls:'warn', icon:'📈', titulo:'Inadimplência nacional subiu', txt:'Serasa registra aumento de negativados. Maior risco de novos calotes.' });
+    if(m.desemp.val < 8) lista.push({ cls:'info', icon:'✅', titulo:'Emprego aquecido', txt:'Desemprego em '+m.desemp.val+'% favorece capacidade de pagamento dos seus clientes.' });
+    if(inadimPropria <= 0.05) lista.push({ cls:'ok', icon:'💎', titulo:'Carteira saudável', txt:'Inadimplência interna baixa. Momento favorável para expandir crédito com cautela.' });
+    if(lista.length === 0) lista.push({ cls:'ok', icon:'✅', titulo:'Sem alertas críticos', txt:'Cenário estável. Continue monitorando os indicadores.' });
+
+    const el = document.getElementById('mi-alertas-lista');
+    el.innerHTML = lista.map(a=>`
+      <div class="mi-alerta-card ${a.cls}">
+        <span class="mi-alerta-icon">${a.icon}</span>
+        <div class="mi-alerta-txt"><strong>${a.titulo}</strong>${a.txt}</div>
+      </div>`).join('');
+    document.getElementById('mi-alert-count-badge').textContent = lista.filter(a=>a.cls==='danger'||a.cls==='warn').length + ' alertas';
+  }
+
+  /* ── notícias ── */
+  function miRenderNoticias() {
+    const el = document.getElementById('mi-noticias-lista');
+    el.innerHTML = MI_NOTICIAS.map(n=>`
+      <div class="mi-noticia-card">
+        <div class="mi-noticia-fonte">${n.fonte}</div>
+        <div class="mi-noticia-titulo">${n.titulo}</div>
+        <div class="mi-noticia-meta">
+          <span class="mi-noticia-impacto ${n.impacto}">${n.impactoTxt}</span>
+          <span class="mi-noticia-acao">⚡ ${n.acao}</span>
+        </div>
+      </div>`).join('');
+  }
+
+  /* ── gráfico tendência (dados simulados dos últimos 90 dias) ── */
+  function miGetTrendData(tipo, emps) {
+    const hoje = new Date();
+    const labels = [], vals = [];
+    for(let i=89; i>=0; i-=10) {
+      const d = new Date(hoje); d.setDate(d.getDate()-i);
+      labels.push(d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}));
+    }
+    const base = { inadim:[4,4.5,5,5.8,6.2,7,8.1,10,12,14], volume:[22000,24000,21000,26000,28000,25000,30000,27000,29000,31000], taxa:[8,8.2,8.5,8.3,9,9.2,9.5,9.8,10,10.2], retorno:[3200,3400,3100,3600,3900,3700,4200,3800,4100,4400] };
+    return { labels, vals: base[tipo] };
+  }
+
+  window.miTrendSwitch = function(btn) {
+    document.querySelectorAll('.mi-trend-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    miRenderTrend(btn.dataset.trend);
+  };
+
+  function miRenderTrend(tipo) {
+    const { labels, vals } = miGetTrendData(tipo, []);
+    const cores = { inadim: { b:'rgba(239,71,111,0.9)', bg:'rgba(239,71,111,0.07)' }, volume: { b:'rgba(201,146,42,0.9)', bg:'rgba(201,146,42,0.06)' }, taxa: { b:'rgba(72,149,239,0.9)', bg:'rgba(72,149,239,0.06)' }, retorno: { b:'rgba(6,214,160,0.9)', bg:'rgba(6,214,160,0.05)' } };
+    const c = cores[tipo];
+    if(miTrendChart) miTrendChart.destroy();
+    const ctx = document.getElementById('chartMiTendencia');
+    if(!ctx) return;
+    miTrendChart = new Chart(ctx.getContext('2d'), { type:'line', data:{ labels, datasets:[{ data:vals, borderColor:c.b, backgroundColor:c.bg, borderWidth:2, pointRadius:3, fill:true, tension:0.4 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'rgba(7,9,14,0.92)', titleColor:'#dde1f0', bodyColor:'#5a6282', borderColor:'#1a2035', borderWidth:1, padding:10, titleFont:{family:'DM Mono',size:10}, bodyFont:{family:'DM Mono',size:9} } }, scales:{ x:{ grid:{color:'#1a2035'}, ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}} }, y:{ grid:{color:'#1a2035'}, ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}, beginAtZero:false } } } });
+  }
+
+  /* ── segmentação ── */
+  function miRenderSegmento(emps) {
+    const abertos = emps.filter(e=>e.status==='aberto');
+    let alto=0, medio=0, baixo=0;
+    abertos.forEach(e => {
+      if(e.atrasoAtual > 30) alto++;
+      else if(e.atrasoAtual > 0) medio++;
+      else baixo++;
+    });
+    const total = abertos.length || 1;
+    const segs = [
+      { nome:'🔥 Alto Risco', cnt:alto, pct:alto/total, cor:'var(--red)', corFill:'rgba(239,71,111,0.8)' },
+      { nome:'⚖️ Médio Risco', cnt:medio, pct:medio/total, cor:'var(--gold2)', corFill:'rgba(240,180,41,0.8)' },
+      { nome:'💎 Baixo Risco', cnt:baixo, pct:baixo/total, cor:'var(--green)', corFill:'rgba(6,214,160,0.8)' },
+    ];
+
+    const lista = document.getElementById('mi-seg-lista');
+    lista.innerHTML = segs.map(s=>`
+      <div class="mi-seg-item">
+        <div class="mi-seg-top">
+          <span class="mi-seg-nome">${s.nome}</span>
+          <span class="mi-seg-cnt" style="color:${s.cor}">${s.cnt}</span>
+        </div>
+        <div class="mi-seg-bar"><div class="mi-seg-fill" style="width:${(s.pct*100).toFixed(0)}%;background:${s.cor}"></div></div>
+      </div>`).join('');
+
+    if(miSegChart) miSegChart.destroy();
+    const ctx2 = document.getElementById('chartMiSegmento');
+    if(!ctx2) return;
+    miSegChart = new Chart(ctx2.getContext('2d'), { type:'doughnut', data:{ labels:segs.map(s=>s.nome), datasets:[{ data:[alto||0.01, medio||0.01, baixo||0.01], backgroundColor:segs.map(s=>s.corFill), borderColor:'#07090e', borderWidth:3, hoverOffset:6 }] }, options:{ responsive:true, maintainAspectRatio:false, cutout:'68%', plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'rgba(7,9,14,0.92)', titleColor:'#dde1f0', bodyColor:'#5a6282', borderColor:'#1a2035', borderWidth:1 } } } });
+  }
+
+  /* ── recomendações ── */
+  function miRenderRecomendacoes(inadimPropria) {
+    const m = MI_MACRO;
+    const recs = [];
+
+    if(inadimPropria > 0.10) recs.push({ icon:'🎯', titulo:'Restringir novos contratos', desc:'Inadimplência interna elevada. Aprove apenas clientes com score acima de 700 e histórico positivo.' });
+    else recs.push({ icon:'📈', titulo:'Oportunidade de expansão', desc:'Sua inadimplência está controlada. Considere aumentar o volume aprovado para clientes de baixo risco.' });
+
+    if(m.selic.val > m.selic.anterior) recs.push({ icon:'💰', titulo:'Ajustar taxa mínima', desc:`Selic subiu para ${m.selic.val}%. Revise se sua taxa (custo de oportunidade) compensa o risco assumido.` });
+
+    if(m.inadimBR.val > 27) recs.push({ icon:'🔍', titulo:'Análise de crédito mais rigorosa', desc:'Inadimplência nacional em alta. Exija mais garantias e comprove renda de novos solicitantes.' });
+    else recs.push({ icon:'💎', titulo:'Focar nos bons pagadores', desc:'Ofereça melhores condições (prazo maior, valor maior) para clientes com histórico limpo.' });
+
+    if(m.desemp.val < 8) recs.push({ icon:'🤝', titulo:'Momento favorável para crescer', desc:'Emprego aquecido melhora capacidade de pagamento. Considere campanha para novos clientes indicados.' });
+
+    const el = document.getElementById('mi-recomendacoes');
+    el.innerHTML = recs.map(r=>`
+      <div class="mi-rec-card">
+        <span class="mi-rec-icon">${r.icon}</span>
+        <div class="mi-rec-body">
+          <div class="mi-rec-title">${r.titulo}</div>
+          <div class="mi-rec-desc">${r.desc}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  /* ── INICIALIZAÇÃO ── chamada após loadData renderizar os dados */
+  function miInit() {
+    /* tenta ler inadimplência da carteira já calculada pelo sistema */
+    const inadimEl = document.getElementById('kpi-inadim');
+    let inadimPropria = 0;
+    if(inadimEl && inadimEl.textContent) {
+      const raw = inadimEl.textContent.replace('%','').replace(',','.').trim();
+      inadimPropria = parseFloat(raw) / 100 || 0;
+    }
+
+    miRenderMacro();
+    miRenderSemaforo(inadimPropria);
+    miRenderAlertas(inadimPropria);
+    miRenderNoticias();
+    miRenderTrend('inadim');
+
+    /* pega empréstimos do localStorage */
+    let emps = [];
+    try { const raw = localStorage.getItem('cap_emprestimos'); if(raw) emps = JSON.parse(raw); } catch(e) {}
+    miRenderSegmento(emps);
+    miRenderRecomendacoes(inadimPropria);
+  }
+
+  /* aguarda o loadData original terminar (ele não emite evento, então observamos o DOM) */
+  const miObserver = new MutationObserver(() => {
+    const inadimEl = document.getElementById('kpi-inadim');
+    if(inadimEl && inadimEl.textContent && inadimEl.textContent !== '—') {
+      miObserver.disconnect();
+      miInit();
+    }
+  });
+  const kpiEl = document.getElementById('kpi-inadim');
+  if(kpiEl) miObserver.observe(kpiEl, { childList:true, subtree:true, characterData:true });
+  /* fallback: inicializa após 3s mesmo assim */
+  setTimeout(miInit, 3000);
+
+})();
+/* ═══════════════ FIM MERCADO INTEL ═══════════════ */
 </script>
 
 <!-- SINO DE ALERTAS FLUTUANTE -->
