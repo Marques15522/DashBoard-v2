@@ -484,6 +484,31 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .sim-pi-status.warn{background:rgba(240,180,41,0.12);color:var(--gold2);border:1px solid rgba(240,180,41,0.3);}
 .sim-pi-status.bad{background:rgba(239,71,111,0.1);color:var(--red);border:1px solid rgba(239,71,111,0.25);}
 .sim-pi-status.nd{background:var(--s2);color:var(--muted);border:1px solid var(--border2);}
+/* ── CARD SEMANAL ── */
+.sem-config-bar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;padding:10px 14px;background:rgba(201,146,42,0.06);border:1px solid rgba(201,146,42,0.2);border-radius:10px;}
+.sem-config-bar label{font-size:0.56rem;color:var(--muted);letter-spacing:0.07em;white-space:nowrap;}
+.sem-config-input{background:var(--s2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:7px 10px;outline:none;width:160px;}
+.sem-config-input:focus{border-color:var(--gold);}
+.sem-config-btn{padding:7px 14px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:6px;font-family:'DM Mono',monospace;font-size:0.58rem;font-weight:700;cursor:pointer;white-space:nowrap;}
+.sem-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.sem-stat{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;}
+.sem-stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;line-height:1;}
+.sem-stat-lbl{font-size:0.48rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:3px;}
+.sem-table-wrap{overflow-x:auto;}
+.sem-table{width:100%;border-collapse:collapse;font-size:0.62rem;}
+.sem-table th{background:var(--s3);color:var(--muted);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.sem-table td{padding:9px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
+.sem-table tr:hover td{background:rgba(255,255,255,0.02);}
+.sem-badge-pago{background:rgba(6,214,160,0.1);color:var(--green);border:1px solid rgba(6,214,160,0.25);padding:2px 8px;border-radius:6px;font-size:0.5rem;font-weight:700;}
+.sem-badge-atrasado{background:rgba(239,71,111,0.1);color:var(--red);border:1px solid rgba(239,71,111,0.25);padding:2px 8px;border-radius:6px;font-size:0.5rem;font-weight:700;}
+.sem-badge-pendente{background:rgba(240,180,41,0.1);color:var(--gold2);border:1px solid rgba(240,180,41,0.25);padding:2px 8px;border-radius:6px;font-size:0.5rem;font-weight:700;}
+.sem-multa{color:var(--red);font-weight:700;}
+.sem-empty{text-align:center;padding:40px;color:var(--muted);font-size:0.68rem;}
+.sem-alerta-strip{background:rgba(239,71,111,0.07);border:1px solid rgba(239,71,111,0.2);border-radius:10px;padding:12px 16px;margin-bottom:14px;display:none;}
+.sem-alerta-strip.visible{display:block;}
+.sem-alerta-title{font-family:'Bebas Neue',sans-serif;font-size:0.72rem;color:var(--red);letter-spacing:0.12em;margin-bottom:6px;}
+.sem-alerta-item{font-size:0.62rem;color:var(--text);padding:3px 0;border-bottom:1px solid rgba(239,71,111,0.1);}
+.sem-alerta-item:last-child{border-bottom:none;}
 </style>
 </head>
 <body>
@@ -553,6 +578,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="nav-tab" data-tab="financeiro">💰 Financeiro</div>
   <div class="nav-tab" data-tab="risco">⚠️ Risco & Alertas</div>
   <div class="nav-tab" data-tab="clientes">👤 Clientes</div>
+  <div class="nav-tab" data-tab="semanal">📅 Semanal</div>
   <div class="nav-tab" data-tab="comparativo">📈 Comparativos</div>
   <div class="nav-tab" data-tab="agenda">📅 Agenda</div>
   <div class="nav-tab" data-tab="simulador">🧮 Simulador</div>
@@ -983,6 +1009,80 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 </div>
 
 <!-- COMPARATIVOS -->
+<div id="tab-semanal" class="tab-panel">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">📅 Controle de Empréstimos Semanais</div>
+        <div class="card-desc">Lê em tempo real da aba "Controle Semanal" do seu Google Sheets</div>
+      </div>
+      <div class="card-badge">AO VIVO</div>
+    </div>
+
+    <!-- Config do GID -->
+    <div class="sem-config-bar" id="sem-config-bar">
+      <label>🔗 GID da aba "Controle Semanal" no Google Sheets:</label>
+      <input class="sem-config-input" id="sem-gid-input" type="text" placeholder="Ex: 1234567890"
+        value="" oninput="">
+      <button class="sem-config-btn" onclick="semSalvarGid()">✓ Salvar e Carregar</button>
+      <span style="font-size:0.52rem;color:var(--muted)">Abra a aba no Sheets → URL → <strong style="color:var(--gold2)">#gid=XXXXXXX</strong></span>
+    </div>
+
+    <!-- Alertas de atraso -->
+    <div class="sem-alerta-strip" id="sem-alerta-strip">
+      <div class="sem-alerta-title">🔴 PARCELAS SEMANAIS ATRASADAS</div>
+      <div id="sem-alerta-body"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="sem-stats">
+      <div class="sem-stat">
+        <div class="sem-stat-val" id="sem-total-contratos" style="color:var(--gold)">—</div>
+        <div class="sem-stat-lbl">Contratos Ativos</div>
+      </div>
+      <div class="sem-stat">
+        <div class="sem-stat-val" id="sem-total-atrasado" style="color:var(--red)">—</div>
+        <div class="sem-stat-lbl">Parcelas Atrasadas</div>
+      </div>
+      <div class="sem-stat">
+        <div class="sem-stat-val" id="sem-total-multas" style="color:var(--red)">—</div>
+        <div class="sem-stat-lbl">Total Multas em Aberto</div>
+      </div>
+      <div class="sem-stat">
+        <div class="sem-stat-val" id="sem-total-recebido" style="color:var(--green)">—</div>
+        <div class="sem-stat-lbl">Recebido esta semana</div>
+      </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="sem-table-wrap">
+      <table class="sem-table">
+        <thead><tr>
+          <th>Contrato</th>
+          <th>Cliente</th>
+          <th>Semana</th>
+          <th>Vencimento</th>
+          <th>Parcela</th>
+          <th>Status</th>
+          <th>Dt. Pagamento</th>
+          <th>Valor Pago</th>
+          <th>Dias Atraso</th>
+          <th>Multa (R$30/dia)</th>
+          <th>Saldo Devedor</th>
+        </tr></thead>
+        <tbody id="sem-tbody">
+          <tr><td colspan="11" class="sem-empty">Configure o GID acima para carregar os dados da sua planilha.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:10px;font-size:0.55rem;color:var(--muted);text-align:right">
+      Multa calculada: R$ 30 fixos por dia de atraso · Teto: R$ 300 por parcela · 
+      <button onclick="semCarregar()" style="background:none;border:none;color:var(--gold2);cursor:pointer;font-family:'DM Mono',monospace;font-size:0.55rem">⟳ Atualizar agora</button>
+    </div>
+  </div>
+</div>
+
 <div id="tab-comparativo" class="tab-panel">
   <div class="section-label">MÊS ATUAL vs MÊS ANTERIOR</div>
   <div class="grid-2">
@@ -1677,6 +1777,9 @@ function doGet(e) {
 const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18};
 const CP={id:0,tipo:2,valor:3,data:4,juros:5};
 const GID_EMP=147333899, GID_PAG=647642652;
+// ⬇️ Cole aqui o GID da aba "Controle Semanal" do seu Google Sheets
+// Para achar: abra a aba no Sheets → olhe a URL: ...#gid=XXXXXXX
+const GID_SEM = localStorage.getItem('gid_semanal') || null;
 const fmt=v=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
 const pct=v=>(Number(v)*100).toFixed(1)+'%';
 let charts={};
@@ -4366,6 +4469,119 @@ function scoreBadgeHtml(total, temHistorico) {
   return `<span class="score-badge ${cls}" title="Score: ${total}/1000${temHistorico?' (ficha + histórico real)':' (só ficha — sem contratos ainda)'}">${emoji} ${label}</span>
     <div class="score-mini-bar"><div class="score-mini-fill" style="width:${total/10}%;background:${barColor}"></div></div>`;
 }
+
+// ════════════════════════════════════════════════════════
+// CONTROLE SEMANAL — lê aba do Google Sheets via CSV
+// ════════════════════════════════════════════════════════
+const MULTA_DIA = 30;
+const MULTA_TETO = 300;
+
+function semSalvarGid(){
+  const v = document.getElementById('sem-gid-input')?.value.trim();
+  if(!v || isNaN(v)){ alert('GID inválido. Use só os números do #gid=XXXXXXX na URL.'); return; }
+  localStorage.setItem('gid_semanal', v);
+  semCarregar();
+}
+
+function semParseBRL(str){
+  if(!str) return 0;
+  return parseFloat(String(str).replace(/[R$\s.]/g,'').replace(',','.')) || 0;
+}
+
+function semParseData(str){
+  if(!str||str.trim()==='') return null;
+  const p=str.trim().split('/');
+  if(p.length===3) return new Date(+p[2],+p[1]-1,+p[0]);
+  const d=new Date(str); return isNaN(d)?null:d;
+}
+
+function semDiasAtraso(venc,status,dtPago){
+  if(!venc) return 0;
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  if(status==='Pago'){ if(!dtPago) return 0; return Math.max(0,Math.floor((dtPago-venc)/86400000)); }
+  if(status==='Atrasado') return Math.max(0,Math.floor((hoje-venc)/86400000));
+  return 0;
+}
+
+function semFmt(v){ return 'R$\u00a0'+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function semFmtDt(d){ if(!d) return '—'; return d.toLocaleDateString('pt-BR'); }
+
+async function semCarregar(){
+  const gid=localStorage.getItem('gid_semanal');
+  const inp=document.getElementById('sem-gid-input');
+  if(inp&&gid) inp.value=gid;
+  const tbody=document.getElementById('sem-tbody');
+  if(!tbody) return;
+  if(!gid){ tbody.innerHTML='<tr><td colspan="11" class="sem-empty">Configure o GID acima para carregar os dados.</td></tr>'; return; }
+  tbody.innerHTML='<tr><td colspan="11" class="sem-empty" style="color:var(--gold)">⟳ Carregando...</td></tr>';
+  let rows;
+  try{ rows=await fetchSheet(parseInt(gid)); }
+  catch(e){ tbody.innerHTML=`<tr><td colspan="11" class="sem-empty" style="color:var(--red)">❌ Erro: ${e.message}<br><small>Verifique se a planilha está pública e o GID está correto.</small></td></tr>`; return; }
+
+  let startIdx=0;
+  for(let i=0;i<rows.length;i++){
+    const f=(rows[i][0]||'').toLowerCase();
+    if(f.includes('id')||f.includes('contrato')){ startIdx=f.includes('id')||f.includes('contrato')?i+1:i; break; }
+    if(f.startsWith('c-')||f.startsWith('emp')){ startIdx=i; break; }
+  }
+  const data=rows.slice(startIdx).filter(r=>r[0]&&r[0].trim()!=='');
+  if(!data.length){ tbody.innerHTML='<tr><td colspan="11" class="sem-empty">Nenhum dado encontrado.</td></tr>'; return; }
+
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const iniSem=new Date(hoje); iniSem.setDate(hoje.getDate()-hoje.getDay());
+  let totalAtrasado=0,totalMultas=0,totalRecSem=0;
+  const contratos=new Set(), alertas=[];
+
+  const htmlRows=data.map(r=>{
+    const id=(r[0]||'').trim(), cliente=(r[1]||'').trim(), semana=(r[2]||'').trim();
+    const vencStr=(r[3]||'').trim(), parcela=semParseBRL(r[4]), status=(r[5]||'Pendente').trim();
+    const dtPagoStr=(r[6]||'').trim(), vlrPago=semParseBRL(r[7]);
+    const venc=semParseData(vencStr), dtPago=semParseData(dtPagoStr);
+    const saldo=semParseBRL(r[10]);
+    const dias=semDiasAtraso(venc,status,dtPago);
+    const multa=Math.min(dias*MULTA_DIA,MULTA_TETO);
+    if(id) contratos.add(id);
+    if(status==='Atrasado'){ totalAtrasado++; totalMultas+=multa; alertas.push({cliente,id,semana,venc,dias,multa}); }
+    if(status==='Pago'&&dtPago&&dtPago>=iniSem) totalRecSem+=vlrPago;
+    const bc=status==='Pago'?'sem-badge-pago':status==='Atrasado'?'sem-badge-atrasado':'sem-badge-pendente';
+    return `<tr>
+      <td style="color:var(--gold2);font-weight:700">${id}</td>
+      <td>${cliente}</td>
+      <td style="color:var(--muted)">${semana}</td>
+      <td>${venc?semFmtDt(venc):vencStr||'—'}</td>
+      <td style="color:var(--gold)">${semFmt(parcela)}</td>
+      <td><span class="${bc}">${status.toUpperCase()}</span></td>
+      <td style="color:var(--muted)">${dtPago?semFmtDt(dtPago):'—'}</td>
+      <td style="color:${vlrPago>0?'var(--green)':'var(--muted)'}">${vlrPago>0?semFmt(vlrPago):'—'}</td>
+      <td style="color:${dias>0?'var(--red)':'var(--muted)'}">${dias>0?dias+' dias':'—'}</td>
+      <td style="color:${multa>0?'var(--red)':'var(--muted)'};font-weight:${multa>0?700:400}">${multa>0?semFmt(multa):'—'}</td>
+      <td style="color:${saldo<=0?'var(--green)':'var(--text)'}">${saldo<=0?'✅ Quitado':semFmt(saldo)}</td>
+    </tr>`;
+  }).join('');
+  tbody.innerHTML=htmlRows||'<tr><td colspan="11" class="sem-empty">Nenhum dado.</td></tr>';
+
+  const sv=id=>document.getElementById(id);
+  if(sv('sem-total-contratos')) sv('sem-total-contratos').textContent=contratos.size;
+  if(sv('sem-total-atrasado'))  sv('sem-total-atrasado').textContent=totalAtrasado;
+  if(sv('sem-total-multas'))    sv('sem-total-multas').textContent=semFmt(totalMultas);
+  if(sv('sem-total-recebido'))  sv('sem-total-recebido').textContent=semFmt(totalRecSem);
+
+  const strip=document.getElementById('sem-alerta-strip'), body=document.getElementById('sem-alerta-body');
+  if(alertas.length>0&&strip&&body){
+    strip.classList.add('visible');
+    body.innerHTML=alertas.map(a=>`<div class="sem-alerta-item">🔴 <strong>${a.cliente}</strong> — Contrato ${a.id} · Semana ${a.semana} · Venceu ${a.venc?semFmtDt(a.venc):'?'} · <strong style="color:var(--red)">${a.dias} dias · Multa: ${semFmt(a.multa)}</strong></div>`).join('');
+  } else if(strip) strip.classList.remove('visible');
+}
+
+// Carregar semanal quando a aba for clicada
+document.addEventListener('DOMContentLoaded',()=>{
+  const gid=localStorage.getItem('gid_semanal');
+  const inp=document.getElementById('sem-gid-input');
+  if(inp&&gid){ inp.value=gid; }
+  document.querySelectorAll('[data-tab]').forEach(btn=>{
+    btn.addEventListener('click',()=>{ if(btn.dataset.tab==='semanal') semCarregar(); });
+  });
+});
 
 let _primeiraVez = true;
 
