@@ -599,174 +599,209 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       <span style="font-size:0.55rem;color:var(--gold2)" id="meta-pct-txt">0%</span>
     </div>
   </div>
-  <div class="grid-5">
+  <!-- KPIs — linha única com 10 indicadores -->
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:10px">
     <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Exposição Total</div><div class="kpi-val" id="kpi-na-rua" style="color:var(--gold)">—</div><div class="kpi-sub" id="kpi-na-rua-sub">—</div></div>
     <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Carteira Ativa</div><div class="kpi-val" id="kpi-capital" style="color:var(--green)">—</div><div class="kpi-sub" id="kpi-cap-sub">—</div></div>
     <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">ROI da Carteira</div><div class="kpi-val" id="kpi-roi" style="color:var(--blue)">—</div><div class="kpi-sub">retorno sobre capital</div></div>
     <div class="kpi"><div class="kpi-accent" style="background:var(--red)"></div><div class="kpi-lbl">Inadimplência</div><div class="kpi-val" id="kpi-inadim" style="color:var(--red)">—</div><div class="kpi-sub" id="kpi-inadim-sub">—</div></div>
     <div class="kpi"><div class="kpi-accent" style="background:var(--purple)"></div><div class="kpi-lbl">Lucro Previsto</div><div class="kpi-val" id="kpi-lucro" style="color:var(--purple)">—</div><div class="kpi-sub">juros a receber</div></div>
   </div>
-  <div class="grid-5">
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">
     <div class="kpi"><div class="kpi-accent" style="background:var(--gold2)"></div><div class="kpi-lbl">A Receber (7d)</div><div class="kpi-val" id="kpi-semana" style="color:var(--gold2)">—</div><div class="kpi-sub">próximos 7 dias</div></div>
     <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Clientes Ativos</div><div class="kpi-val" id="kpi-cli-ativos" style="color:var(--green)">—</div><div class="kpi-sub" id="kpi-cli-sub">—</div></div>
     <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Lucro Realizado</div><div class="kpi-val" id="kpi-realizado" style="color:var(--blue)">—</div><div class="kpi-sub">juros recebidos</div></div>
     <div class="kpi"><div class="kpi-accent" style="background:var(--purple)"></div><div class="kpi-lbl">Ticket Médio</div><div class="kpi-val" id="kpi-ticket" style="color:var(--purple)">—</div><div class="kpi-sub">por contrato ativo</div></div>
     <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Prazo Médio</div><div class="kpi-val" id="kpi-prazo" style="color:var(--gold)">—</div><div class="kpi-sub">meses</div></div>
   </div>
-  <div class="grid-2">
-    <div class="card"><div class="card-header"><div><div class="card-title">📈 Evolução Mensal da Carteira</div><div class="card-desc">Capital e lucro acumulados mês a mês</div></div><div class="card-badge">CRESCIMENTO</div></div><div class="chart-wrap tall"><canvas id="chartEvolMensal"></canvas></div></div>
-    <div class="card"><div class="card-header"><div><div class="card-title">💼 Composição da Carteira</div><div class="card-desc">Capital saudável vs em risco vs quitado</div></div><div class="card-badge">SAÚDE</div></div><div class="chart-wrap tall"><canvas id="chartComposicao"></canvas></div></div>
-  </div>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- MAPA DE SÃO PAULO POR DISTRITOS — novo bloco              -->
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <div style="display:flex;align-items:center;gap:12px;margin:28px 0 18px">
-    <div style="height:1px;flex:1;background:linear-gradient(90deg,var(--border2),transparent)"></div>
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.28em;color:var(--muted);display:flex;align-items:center;gap:6px">
-      <span style="color:var(--blue);font-size:0.9rem">◈</span> MAPA DE CLIENTES — SÃO PAULO <span style="color:var(--blue);font-size:0.9rem">◈</span>
-    </div>
-    <div style="height:1px;flex:1;background:linear-gradient(270deg,var(--border2),transparent)"></div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr 320px;gap:16px;margin-bottom:16px;align-items:start">
-    <!-- Mapa SVG -->
-    <div class="card" style="margin-bottom:0;padding:0;overflow:hidden">
-      <div style="padding:14px 18px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-        <div>
-          <div class="card-title">🗺️ Mapa de Clientes — Distritos de São Paulo</div>
-          <div class="card-desc">Clique em um distrito para ver os clientes. Intensidade = concentração.</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:5px;font-size:0.53rem;color:var(--muted)">
-            <div style="width:8px;height:8px;border-radius:2px;background:rgba(22,27,42,0.9);border:1px solid #1a2035"></div><span>Sem clientes</span>
-            <div style="width:8px;height:8px;border-radius:2px;background:rgba(72,149,239,0.45);margin-left:4px"></div><span>Poucos</span>
-            <div style="width:8px;height:8px;border-radius:2px;background:rgba(72,149,239,0.95);margin-left:4px"></div><span>Muitos</span>
-          </div>
-          <div class="card-badge" id="mapa-total-distritos">0 distritos</div>
-        </div>
-      </div>
-      <div class="mapa-container" style="padding:10px;position:relative;background:rgba(8,11,20,0.6);">
-        <svg id="mapa-sp-svg" viewBox="0 0 800 640" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;display:block;"></svg>
-      </div>
-    </div>
-
-    <!-- Painel lateral do mapa -->
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <!-- Resumo do mapa -->
-      <div class="card" style="margin-bottom:0">
-        <div class="card-title" style="margin-bottom:12px">📍 Cobertura Geográfica</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-          <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--blue)" id="mapa-stat-distritos">0</div>
-            <div style="font-size:0.5rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-top:2px">Distritos</div>
-          </div>
-          <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--green)" id="mapa-stat-clientes">0</div>
-            <div style="font-size:0.5rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-top:2px">Clientes</div>
-          </div>
-        </div>
-        <div id="mapa-top-distritos" style="display:flex;flex-direction:column;gap:6px">
-          <div style="font-size:0.58rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">Top Distritos</div>
-          <div style="color:var(--muted2);font-size:0.62rem">Aguardando dados...</div>
-        </div>
-      </div>
-      <!-- Painel de detalhes do distrito clicado -->
-      <div class="card" style="margin-bottom:0;flex:1" id="mapa-detalhe-panel">
-        <div style="text-align:center;padding:20px 0">
-          <div style="font-size:1.8rem;margin-bottom:8px">🗺️</div>
-          <div style="font-size:0.7rem;color:var(--muted);line-height:1.6">Clique em um distrito<br>no mapa para ver detalhes</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- BLOCO MERCADO — adicionado sem alterar nada acima          -->
+  <!-- LAYOUT PRINCIPAL: MAPA (esq) + INTELIGÊNCIA (dir)         -->
   <!-- ═══════════════════════════════════════════════════════════ -->
   <div id="mercado-intel-block">
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:14px;margin-bottom:16px;align-items:start">
 
-    <!-- separador visual -->
-    <div style="display:flex;align-items:center;gap:12px;margin:28px 0 18px">
-      <div style="height:1px;flex:1;background:linear-gradient(90deg,var(--border2),transparent)"></div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.28em;color:var(--muted);display:flex;align-items:center;gap:6px">
-        <span style="color:var(--gold);font-size:0.9rem">◈</span> INTELIGÊNCIA DE MERCADO <span style="color:var(--gold);font-size:0.9rem">◈</span>
+    <!-- COLUNA ESQUERDA: MAPA + GRÁFICOS -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <!-- separador mapa -->
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="height:1px;flex:1;background:linear-gradient(90deg,var(--border2),transparent)"></div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.28em;color:var(--muted);display:flex;align-items:center;gap:6px">
+          <span style="color:var(--blue);font-size:0.9rem">◈</span> MAPA DE CLIENTES — SÃO PAULO <span style="color:var(--blue);font-size:0.9rem">◈</span>
+        </div>
+        <div style="height:1px;flex:1;background:linear-gradient(270deg,var(--border2),transparent)"></div>
       </div>
-      <div style="height:1px;flex:1;background:linear-gradient(270deg,var(--border2),transparent)"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 240px;gap:12px;align-items:start">
+        <!-- Mapa SVG -->
+        <div class="card" style="margin-bottom:0;padding:0;overflow:hidden">
+          <div style="padding:12px 16px 8px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+            <div>
+              <div class="card-title">🗺️ Mapa de Clientes — Distritos de São Paulo</div>
+              <div class="card-desc">Clique em um distrito para ver os clientes. Intensidade = concentração.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:5px;font-size:0.53rem;color:var(--muted)">
+                <div style="width:8px;height:8px;border-radius:2px;background:rgba(22,27,42,0.9);border:1px solid #1a2035"></div><span>Sem clientes</span>
+                <div style="width:8px;height:8px;border-radius:2px;background:rgba(72,149,239,0.45);margin-left:4px"></div><span>Poucos</span>
+                <div style="width:8px;height:8px;border-radius:2px;background:rgba(72,149,239,0.95);margin-left:4px"></div><span>Muitos</span>
+              </div>
+              <div class="card-badge" id="mapa-total-distritos">0 distritos</div>
+            </div>
+          </div>
+          <div class="mapa-container" style="padding:10px;position:relative;background:rgba(8,11,20,0.6);">
+            <svg id="mapa-sp-svg" viewBox="0 0 700 560" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;display:block;"></svg>
+          </div>
+        </div>
+
+        <!-- Painel lateral do mapa -->
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="card" style="margin-bottom:0">
+            <div class="card-title" style="margin-bottom:10px">📍 Cobertura Geográfica</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+              <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--blue)" id="mapa-stat-distritos">0</div>
+                <div style="font-size:0.5rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-top:2px">Distritos</div>
+              </div>
+              <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--green)" id="mapa-stat-clientes">0</div>
+                <div style="font-size:0.5rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-top:2px">Clientes</div>
+              </div>
+            </div>
+            <div id="mapa-top-distritos" style="display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:0.58rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px">Top Distritos</div>
+              <div style="color:var(--muted2);font-size:0.62rem">Aguardando dados...</div>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom:0;flex:1" id="mapa-detalhe-panel">
+            <div style="text-align:center;padding:20px 0">
+              <div style="font-size:1.8rem;margin-bottom:8px">🗺️</div>
+              <div style="font-size:0.7rem;color:var(--muted);line-height:1.6">Clique em um distrito<br>no mapa para ver detalhes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráficos abaixo do mapa: tendência + segmentação -->
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:12px">
+        <div class="card" style="margin-bottom:0">
+          <div class="card-header">
+            <div>
+              <div class="card-title">📈 Tendências (90 dias)</div>
+              <div class="card-desc">Inadimplência, volume e retorno do seu negócio</div>
+            </div>
+            <div style="display:flex;gap:6px" id="mi-trend-tabs">
+              <button class="mi-trend-btn active" data-trend="inadim" onclick="miTrendSwitch(this)">Inad.</button>
+              <button class="mi-trend-btn" data-trend="volume" onclick="miTrendSwitch(this)">Volume</button>
+              <button class="mi-trend-btn" data-trend="taxa" onclick="miTrendSwitch(this)">Taxa</button>
+              <button class="mi-trend-btn" data-trend="retorno" onclick="miTrendSwitch(this)">Retorno</button>
+            </div>
+          </div>
+          <div class="chart-wrap" style="height:180px"><canvas id="chartMiTendencia"></canvas></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="card-header">
+            <div>
+              <div class="card-title">👥 Segmentação de Carteira</div>
+              <div class="card-desc">Perfil de risco dos seus clientes</div>
+            </div>
+            <div class="card-badge">HOJE</div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:center;height:180px">
+            <div style="position:relative;flex-shrink:0;width:110px;height:110px">
+              <canvas id="chartMiSegmento"></canvas>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px" id="mi-seg-lista"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Evolução + Composição -->
+      <div class="grid-2" style="margin-bottom:0">
+        <div class="card" style="margin-bottom:0"><div class="card-header"><div><div class="card-title">📈 Evolução Mensal da Carteira</div><div class="card-desc">Capital e lucro acumulados mês a mês</div></div><div class="card-badge">CRESCIMENTO</div></div><div class="chart-wrap tall"><canvas id="chartEvolMensal"></canvas></div></div>
+        <div class="card" style="margin-bottom:0"><div class="card-header"><div><div class="card-title">💼 Composição da Carteira</div><div class="card-desc">Capital saudável vs em risco vs quitado</div></div><div class="card-badge">SAÚDE</div></div><div class="chart-wrap tall"><canvas id="chartComposicao"></canvas></div></div>
+      </div>
     </div>
 
-    <!-- STATUS SEMÁFORO (3 cores rápidas) -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px" id="mi-semaforo">
-      <div class="mi-semaforo-card" id="mi-sem-credito">
-        <div class="mi-sem-dot" id="mi-dot-credito"></div>
-        <div class="mi-sem-label">Ambiente de Crédito</div>
-        <div class="mi-sem-val" id="mi-val-credito">—</div>
-        <div class="mi-sem-desc" id="mi-desc-credito">carregando…</div>
+    <!-- COLUNA DIREITA: INTELIGÊNCIA DE MERCADO -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="height:1px;flex:1;background:linear-gradient(90deg,var(--border2),transparent)"></div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:0.62rem;letter-spacing:0.2em;color:var(--muted);display:flex;align-items:center;gap:4px">
+          <span style="color:var(--gold);font-size:0.8rem">◈</span> INTELIGÊNCIA DE MERCADO
+        </div>
+        <div style="height:1px;flex:1;background:linear-gradient(270deg,var(--border2),transparent)"></div>
       </div>
-      <div class="mi-semaforo-card" id="mi-sem-risco">
-        <div class="mi-sem-dot" id="mi-dot-risco"></div>
-        <div class="mi-sem-label">Risco de Calote</div>
-        <div class="mi-sem-val" id="mi-val-risco">—</div>
-        <div class="mi-sem-desc" id="mi-desc-risco">carregando…</div>
-      </div>
-      <div class="mi-semaforo-card" id="mi-sem-demanda">
-        <div class="mi-sem-dot" id="mi-dot-demanda"></div>
-        <div class="mi-sem-label">Demanda por Crédito</div>
-        <div class="mi-sem-val" id="mi-val-demanda">—</div>
-        <div class="mi-sem-desc" id="mi-desc-demanda">carregando…</div>
-      </div>
-    </div>
 
-    <!-- INDICADORES MACROECONÔMICOS -->
-    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px">
-      <div class="mi-macro-card">
-        <div class="mi-macro-icon">🏛️</div>
-        <div class="mi-macro-lbl">Selic (a.a.)</div>
-        <div class="mi-macro-val" id="mi-selic">10,50%</div>
-        <div class="mi-macro-delta" id="mi-selic-delta"></div>
-        <div class="mi-macro-tip" id="mi-selic-tip">—</div>
+      <!-- Semáforo -->
+      <div style="display:flex;flex-direction:column;gap:8px" id="mi-semaforo">
+        <div class="mi-semaforo-card" id="mi-sem-credito">
+          <div class="mi-sem-dot" id="mi-dot-credito"></div>
+          <div class="mi-sem-label">Ambiente de Crédito</div>
+          <div class="mi-sem-val" id="mi-val-credito">—</div>
+          <div class="mi-sem-desc" id="mi-desc-credito">carregando…</div>
+        </div>
+        <div class="mi-semaforo-card" id="mi-sem-risco">
+          <div class="mi-sem-dot" id="mi-dot-risco"></div>
+          <div class="mi-sem-label">Risco de Calote</div>
+          <div class="mi-sem-val" id="mi-val-risco">—</div>
+          <div class="mi-sem-desc" id="mi-desc-risco">carregando…</div>
+        </div>
+        <div class="mi-semaforo-card" id="mi-sem-demanda">
+          <div class="mi-sem-dot" id="mi-dot-demanda"></div>
+          <div class="mi-sem-label">Demanda por Crédito</div>
+          <div class="mi-sem-val" id="mi-val-demanda">—</div>
+          <div class="mi-sem-desc" id="mi-desc-demanda">carregando…</div>
+        </div>
       </div>
-      <div class="mi-macro-card">
-        <div class="mi-macro-icon">📊</div>
-        <div class="mi-macro-lbl">IPCA (12m)</div>
-        <div class="mi-macro-val" id="mi-ipca">4,50%</div>
-        <div class="mi-macro-delta" id="mi-ipca-delta"></div>
-        <div class="mi-macro-tip" id="mi-ipca-tip">—</div>
-      </div>
-      <div class="mi-macro-card">
-        <div class="mi-macro-icon">⚠️</div>
-        <div class="mi-macro-lbl">Inad. Geral (Serasa)</div>
-        <div class="mi-macro-val" id="mi-inadim">28,1%</div>
-        <div class="mi-macro-delta" id="mi-inadim-delta"></div>
-        <div class="mi-macro-tip" id="mi-inadim-tip">—</div>
-      </div>
-      <div class="mi-macro-card">
-        <div class="mi-macro-icon">👷</div>
-        <div class="mi-macro-lbl">Desemprego (IBGE)</div>
-        <div class="mi-macro-val" id="mi-desemp">7,9%</div>
-        <div class="mi-macro-delta" id="mi-desemp-delta"></div>
-        <div class="mi-macro-tip" id="mi-desemp-tip">—</div>
-      </div>
-      <div class="mi-macro-card">
-        <div class="mi-macro-icon">💳</div>
-        <div class="mi-macro-lbl">Endividamento</div>
-        <div class="mi-macro-val" id="mi-endiv">78,5%</div>
-        <div class="mi-macro-delta" id="mi-endiv-delta"></div>
-        <div class="mi-macro-tip" id="mi-endiv-tip">—</div>
-      </div>
-      <div class="mi-macro-card">
-        <div class="mi-macro-icon">📈</div>
-        <div class="mi-macro-lbl">Demanda Crédito</div>
-        <div class="mi-macro-val" id="mi-demanda-idx">Alta</div>
-        <div class="mi-macro-delta" id="mi-demanda-delta"></div>
-        <div class="mi-macro-tip" id="mi-demanda-tip">—</div>
-      </div>
-    </div>
 
-    <!-- ALERTAS DE MERCADO + NOTÍCIAS (2 colunas) -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+      <!-- Macro indicadores 2x3 -->
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+        <div class="mi-macro-card">
+          <div class="mi-macro-icon">🏛️</div>
+          <div class="mi-macro-lbl">Selic (a.a.)</div>
+          <div class="mi-macro-val" id="mi-selic">10,50%</div>
+          <div class="mi-macro-delta" id="mi-selic-delta"></div>
+          <div class="mi-macro-tip" id="mi-selic-tip">—</div>
+        </div>
+        <div class="mi-macro-card">
+          <div class="mi-macro-icon">📊</div>
+          <div class="mi-macro-lbl">IPCA (12m)</div>
+          <div class="mi-macro-val" id="mi-ipca">4,50%</div>
+          <div class="mi-macro-delta" id="mi-ipca-delta"></div>
+          <div class="mi-macro-tip" id="mi-ipca-tip">—</div>
+        </div>
+        <div class="mi-macro-card">
+          <div class="mi-macro-icon">⚠️</div>
+          <div class="mi-macro-lbl">Inad. Geral</div>
+          <div class="mi-macro-val" id="mi-inadim">28,1%</div>
+          <div class="mi-macro-delta" id="mi-inadim-delta"></div>
+          <div class="mi-macro-tip" id="mi-inadim-tip">—</div>
+        </div>
+        <div class="mi-macro-card">
+          <div class="mi-macro-icon">👷</div>
+          <div class="mi-macro-lbl">Desemprego</div>
+          <div class="mi-macro-val" id="mi-desemp">7,9%</div>
+          <div class="mi-macro-delta" id="mi-desemp-delta"></div>
+          <div class="mi-macro-tip" id="mi-desemp-tip">—</div>
+        </div>
+        <div class="mi-macro-card">
+          <div class="mi-macro-icon">💳</div>
+          <div class="mi-macro-lbl">Endividamento</div>
+          <div class="mi-macro-val" id="mi-endiv">78,5%</div>
+          <div class="mi-macro-delta" id="mi-endiv-delta"></div>
+          <div class="mi-macro-tip" id="mi-endiv-tip">—</div>
+        </div>
+        <div class="mi-macro-card">
+          <div class="mi-macro-icon">📈</div>
+          <div class="mi-macro-lbl">Demanda Crédito</div>
+          <div class="mi-macro-val" id="mi-demanda-idx">Alta</div>
+          <div class="mi-macro-delta" id="mi-demanda-delta"></div>
+          <div class="mi-macro-tip" id="mi-demanda-tip">—</div>
+        </div>
+      </div>
 
-      <!-- Alertas automáticos -->
+      <!-- Alertas -->
       <div class="card" style="margin-bottom:0">
         <div class="card-header">
           <div>
@@ -775,10 +810,10 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
           </div>
           <div class="card-badge" id="mi-alert-count-badge">0 alertas</div>
         </div>
-        <div id="mi-alertas-lista" style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto"></div>
+        <div id="mi-alertas-lista" style="display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto"></div>
       </div>
 
-      <!-- Feed de notícias filtradas -->
+      <!-- Notícias -->
       <div class="card" style="margin-bottom:0">
         <div class="card-header">
           <div>
@@ -787,62 +822,23 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
           </div>
           <div class="card-badge">FILTRADO</div>
         </div>
-        <div id="mi-noticias-lista" style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto"></div>
+        <div id="mi-noticias-lista" style="display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto"></div>
       </div>
 
-    </div>
-
-    <!-- GRÁFICOS DE TENDÊNCIA + SEGMENTAÇÃO (2 colunas) -->
-    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:16px">
-
-      <!-- Gráficos de tendência -->
-      <div class="card" style="margin-bottom:0">
+      <!-- Recomendação IA -->
+      <div class="card" style="margin-bottom:0;background:linear-gradient(135deg,rgba(201,146,42,0.05),rgba(7,9,14,0.8));border-color:rgba(201,146,42,0.25)">
         <div class="card-header">
           <div>
-            <div class="card-title">📈 Tendências (90 dias)</div>
-            <div class="card-desc">Inadimplência, volume e retorno do seu negócio</div>
+            <div class="card-title" style="color:var(--gold2)">🧮 Copiloto de Decisões</div>
+            <div class="card-desc">Recomendações automáticas cruzando seu negócio + macro</div>
           </div>
-          <div style="display:flex;gap:6px" id="mi-trend-tabs">
-            <button class="mi-trend-btn active" data-trend="inadim" onclick="miTrendSwitch(this)">Inad.</button>
-            <button class="mi-trend-btn" data-trend="volume" onclick="miTrendSwitch(this)">Volume</button>
-            <button class="mi-trend-btn" data-trend="taxa" onclick="miTrendSwitch(this)">Taxa</button>
-            <button class="mi-trend-btn" data-trend="retorno" onclick="miTrendSwitch(this)">Retorno</button>
-          </div>
+          <div style="font-size:0.58rem;padding:3px 10px;border:1px solid rgba(201,146,42,0.3);border-radius:4px;color:var(--gold);letter-spacing:0.1em">IA LOCAL</div>
         </div>
-        <div class="chart-wrap" style="height:210px"><canvas id="chartMiTendencia"></canvas></div>
+        <div id="mi-recomendacoes" style="display:flex;flex-direction:column;gap:8px"></div>
       </div>
-
-      <!-- Segmentação de clientes -->
-      <div class="card" style="margin-bottom:0">
-        <div class="card-header">
-          <div>
-            <div class="card-title">👥 Segmentação de Carteira</div>
-            <div class="card-desc">Perfil de risco dos seus clientes</div>
-          </div>
-          <div class="card-badge">HOJE</div>
-        </div>
-        <div style="display:flex;gap:14px;align-items:center;height:210px">
-          <div style="position:relative;flex-shrink:0;width:120px;height:120px">
-            <canvas id="chartMiSegmento"></canvas>
-          </div>
-          <div style="flex:1;display:flex;flex-direction:column;gap:10px" id="mi-seg-lista"></div>
-        </div>
-      </div>
-
     </div>
 
-    <!-- RECOMENDAÇÃO INTELIGENTE (copiloto) -->
-    <div class="card" style="margin-bottom:0;background:linear-gradient(135deg,rgba(201,146,42,0.05),rgba(7,9,14,0.8));border-color:rgba(201,146,42,0.25)">
-      <div class="card-header">
-        <div>
-          <div class="card-title" style="color:var(--gold2)">🧮 Copiloto de Decisões</div>
-          <div class="card-desc">Recomendações automáticas cruzando seu negócio + macro</div>
-        </div>
-        <div style="font-size:0.58rem;padding:3px 10px;border:1px solid rgba(201,146,42,0.3);border-radius:4px;color:var(--gold);letter-spacing:0.1em">IA LOCAL</div>
-      </div>
-      <div id="mi-recomendacoes" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px"></div>
-    </div>
-
+  </div>
   </div><!-- /mercado-intel-block -->
 
 </div>
