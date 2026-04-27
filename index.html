@@ -561,6 +561,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="nav-tab" data-tab="simulador">🧮 Simulador</div>
   <div class="nav-tab" data-tab="fluxo90">🔮 Fluxo 90d</div>
   <div class="nav-tab" data-tab="whatsapp">📱 WhatsApp</div>
+  <div class="nav-tab" data-tab="cadastro">✏️ Cadastro</div>
 </div>
 
 <!-- VISÃO GERAL -->
@@ -1206,6 +1207,171 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     <div id="wa-hist-list"><div style="color:var(--muted);font-size:0.65rem;padding:12px 0">Nenhum contato registrado ainda. Após enviar uma mensagem, o registro aparece aqui.</div></div>
   </div>
 </div>
+
+<!-- ════ ABA CADASTRO ════ -->
+<div id="tab-cadastro" class="tab-panel">
+
+  <!-- SYNC STATUS BAR -->
+  <div id="cad-sync-bar" style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(201,146,42,0.06);border:1px solid rgba(201,146,42,0.2);border-radius:10px;margin-bottom:16px;flex-wrap:wrap">
+    <span style="font-size:0.58rem;color:var(--muted)">🔗 Apps Script:</span>
+    <input id="cad-script-url" type="text" placeholder="Cole aqui a URL do Apps Script implantado..."
+      style="flex:1;min-width:260px;background:var(--s2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.6rem;padding:7px 10px;outline:none"
+      oninput="">
+    <button onclick="cadSalvarUrl()" style="padding:7px 14px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:6px;font-family:'DM Mono',monospace;font-size:0.58rem;font-weight:700;cursor:pointer">✓ Salvar URL</button>
+    <button onclick="cadSincronizar()" style="padding:7px 14px;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;font-family:'DM Mono',monospace;font-size:0.58rem;cursor:pointer">⟳ Sincronizar</button>
+    <span id="cad-sync-status" style="font-size:0.58rem;color:var(--muted)">—</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+    <!-- ── CADASTRAR EMPRÉSTIMO ── -->
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">📝 Novo Empréstimo</div><div class="card-desc">Preencha e salve — dados vão automaticamente para o Drive</div></div>
+        <div class="card-badge">CADASTRO</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="grid-column:1/-1">
+          <div class="pasta-label">👤 Cliente *</div>
+          <input class="pasta-input" id="cad-emp-nome" type="text" placeholder="Nome completo" list="cad-clientes-list">
+          <datalist id="cad-clientes-list"></datalist>
+        </div>
+        <div>
+          <div class="pasta-label">🪪 CPF</div>
+          <input class="pasta-input" id="cad-emp-cpf" type="text" placeholder="000.000.000-00" oninput="maskCPF(this)">
+        </div>
+        <div>
+          <div class="pasta-label">📞 Telefone</div>
+          <input class="pasta-input" id="cad-emp-tel" type="text" placeholder="(00) 00000-0000">
+        </div>
+        <div>
+          <div class="pasta-label">💰 Capital Emprestado (R$) *</div>
+          <input class="pasta-input" id="cad-emp-capital" type="number" placeholder="0.00" min="0">
+        </div>
+        <div>
+          <div class="pasta-label">📅 Data do Empréstimo *</div>
+          <input class="pasta-input" id="cad-emp-data" type="date">
+        </div>
+        <div>
+          <div class="pasta-label">📈 Taxa de Juros (%) *</div>
+          <input class="pasta-input" id="cad-emp-taxa" type="number" placeholder="10" min="0" step="0.1">
+        </div>
+        <div>
+          <div class="pasta-label">🗓️ Prazo *</div>
+          <input class="pasta-input" id="cad-emp-prazo" type="number" placeholder="6" min="1">
+        </div>
+        <div>
+          <div class="pasta-label">📐 Unidade</div>
+          <select class="sim-select" id="cad-emp-unidade">
+            <option value="mensal">Mensal</option>
+            <option value="semanal">Semanal</option>
+          </select>
+        </div>
+        <div>
+          <div class="pasta-label">⚙️ Tipo de Juros</div>
+          <select class="sim-select" id="cad-emp-tipo">
+            <option value="simples">Simples</option>
+            <option value="composto">Composto</option>
+          </select>
+        </div>
+        <div>
+          <div class="pasta-label">📊 Status</div>
+          <select class="sim-select" id="cad-emp-status">
+            <option value="Ativo">Ativo</option>
+            <option value="Em Atraso">Em Atraso</option>
+            <option value="Quitado">Quitado</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1">
+          <div class="pasta-label">📝 Observações</div>
+          <textarea class="pasta-input" id="cad-emp-obs" rows="2" style="resize:vertical" placeholder="Garantias, condições especiais..."></textarea>
+        </div>
+      </div>
+
+      <!-- Preview automático -->
+      <div id="cad-emp-preview" style="display:none;margin-top:12px;padding:12px 14px;background:var(--s2);border:1px solid var(--border);border-radius:10px;font-size:0.6rem;line-height:1.9"></div>
+
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button onclick="cadEmpPreview()" style="flex:1;padding:10px;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:8px;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer">👁 Preview</button>
+        <button onclick="cadEmpSalvar()" style="flex:2;padding:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:700;cursor:pointer;letter-spacing:0.06em">💾 SALVAR EMPRÉSTIMO</button>
+      </div>
+    </div>
+
+    <!-- ── REGISTRAR PAGAMENTO ── -->
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">💳 Registrar Pagamento</div><div class="card-desc">Vincule ao contrato e salve</div></div>
+        <div class="card-badge">PAGAMENTO</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="grid-column:1/-1">
+          <div class="pasta-label">🔗 ID do Contrato *</div>
+          <input class="pasta-input" id="cad-pag-id" type="text" placeholder="Ex: EMP001" list="cad-contratos-list" oninput="cadPagAutoFill(this.value)">
+          <datalist id="cad-contratos-list"></datalist>
+        </div>
+        <div style="grid-column:1/-1;display:none" id="cad-pag-info-box">
+          <div style="padding:8px 12px;background:rgba(72,149,239,0.07);border:1px solid rgba(72,149,239,0.2);border-radius:8px;font-size:0.6rem;color:var(--muted)" id="cad-pag-info"></div>
+        </div>
+        <div>
+          <div class="pasta-label">💰 Valor Pago (R$) *</div>
+          <input class="pasta-input" id="cad-pag-valor" type="number" placeholder="0.00" min="0" oninput="cadPagCalcJuros()">
+        </div>
+        <div>
+          <div class="pasta-label">📅 Data do Pagamento *</div>
+          <input class="pasta-input" id="cad-pag-data" type="date">
+        </div>
+        <div>
+          <div class="pasta-label">📂 Tipo</div>
+          <select class="sim-select" id="cad-pag-tipo">
+            <option value="Juros">Juros</option>
+            <option value="Parcela">Parcela</option>
+            <option value="Quitação">Quitação Total</option>
+            <option value="Amortização">Amortização</option>
+            <option value="Multa">Multa</option>
+          </select>
+        </div>
+        <div>
+          <div class="pasta-label">💵 Juros no Pagamento (R$)</div>
+          <input class="pasta-input" id="cad-pag-juros" type="number" placeholder="Calculado auto" min="0">
+        </div>
+        <div style="grid-column:1/-1">
+          <div class="pasta-label">📝 Observação</div>
+          <input class="pasta-input" id="cad-pag-obs" type="text" placeholder="Ex: Pix, dinheiro, transferência...">
+        </div>
+      </div>
+
+      <div style="margin-top:14px">
+        <button onclick="cadPagSalvar()" style="width:100%;padding:11px;background:linear-gradient(135deg,var(--green),#04b386);color:#07090e;border:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:700;cursor:pointer;letter-spacing:0.06em">💾 REGISTRAR PAGAMENTO</button>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+
+  <!-- ── LISTA DE CONTRATOS ── -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-header">
+      <div><div class="card-title">📋 Contratos Cadastrados</div><div class="card-desc">Gerencie os empréstimos salvos no Drive</div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="cad-lista-busca" type="text" placeholder="🔍 Buscar..." oninput="cadListaRender()"
+          style="background:var(--s2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.6rem;padding:6px 10px;outline:none;width:160px">
+        <div class="card-badge">CONTRATOS</div>
+      </div>
+    </div>
+    <div id="cad-lista-contratos" style="font-size:0.62rem;color:var(--muted);padding:12px 0">Carregando...</div>
+  </div>
+
+  <!-- ── LISTA DE PAGAMENTOS ── -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-header">
+      <div><div class="card-title">💳 Pagamentos Registrados</div><div class="card-desc">Histórico completo de recebimentos</div></div>
+      <div class="card-badge">PAGAMENTOS</div>
+    </div>
+    <div id="cad-lista-pagamentos" style="font-size:0.62rem;color:var(--muted);padding:12px 0">Carregando...</div>
+  </div>
+
+</div><!-- /tab-cadastro -->
 
 <div style="text-align:right;margin-top:8px;font-size:0.57rem;color:var(--muted)">última atualização: <span id="last-update">—</span> · auto-refresh 15 min</div>
 
@@ -4383,6 +4549,426 @@ function scoreBadgeHtml(total, temHistorico) {
     <div class="score-mini-bar"><div class="score-mini-fill" style="width:${total/10}%;background:${barColor}"></div></div>`;
 }
 
+// ════════════════════════════════════════════════════════
+// CADASTRO — motor de dados independente do Google Sheets
+// Salva empréstimos e pagamentos via Apps Script no Drive
+// ════════════════════════════════════════════════════════
+
+// ── Estado local (espelho do Drive) ──
+let _cadEmps = [];   // array de empréstimos
+let _cadPags = [];   // array de pagamentos
+
+// ── Utilitários ──
+function cadFmt(v){ return 'R$\u00a0'+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function cadGerarId(prefix){ return prefix+(Date.now()).toString(36).toUpperCase(); }
+function cadStatus(msg, cor){ const el=document.getElementById('cad-sync-status'); if(el){el.textContent=msg; el.style.color=cor||'var(--muted)';} }
+
+function cadSalvarUrl(){
+  const url=(document.getElementById('cad-script-url')?.value||'').trim();
+  if(!url.startsWith('https://')){ alert('URL inválida.'); return; }
+  localStorage.setItem('dossie_script_url', url);
+  cadStatus('✅ URL salva!','var(--green)');
+  cadSincronizar();
+}
+
+// ── Chamada ao Apps Script ──
+async function cadPost(action, extra={}){
+  const url = localStorage.getItem('dossie_script_url');
+  if(!url) throw new Error('URL do Apps Script não configurada. Vá na aba Cadastro e cole a URL.');
+  const body = JSON.stringify({ action, ...extra });
+  const r = await fetch(url, { method:'POST', body });
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const d = await r.json();
+  if(!d.ok) throw new Error(d.erro || 'Erro desconhecido');
+  return d;
+}
+
+// ── Sincronizar tudo do Drive ──
+async function cadSincronizar(){
+  cadStatus('⟳ Sincronizando...','var(--gold)');
+  try {
+    const d = await cadPost('sync_tudo');
+    _cadEmps = d.emprestimos || [];
+    _cadPags = d.pagamentos  || [];
+    // Mesclar pastas vindas do servidor
+    if(d.pastas){ try{ Object.assign(_pastas, d.pastas); pastaSalvarLocal(); }catch(e){} }
+    cadListaRender();
+    cadAtualizarDatalist();
+    cadStatus('✅ Sincronizado · '+_cadEmps.length+' contratos · '+_cadPags.length+' pagamentos','var(--green)');
+    // Re-renderizar o dashboard com os novos dados
+    cadRenderDashboard();
+  } catch(e){
+    cadStatus('❌ '+e.message,'var(--red)');
+  }
+}
+
+// ── Carregar do localStorage (offline) + tentar sync ──
+function cadCarregarLocal(){
+  try{ const r=localStorage.getItem('_cadEmps'); if(r) _cadEmps=JSON.parse(r); }catch(e){}
+  try{ const r=localStorage.getItem('_cadPags'); if(r) _cadPags=JSON.parse(r); }catch(e){}
+  // Preencher URL se salva
+  const url=localStorage.getItem('dossie_script_url');
+  const inp=document.getElementById('cad-script-url');
+  if(inp&&url) inp.value=url;
+}
+
+function cadSalvarLocal(){
+  try{ localStorage.setItem('_cadEmps', JSON.stringify(_cadEmps)); }catch(e){}
+  try{ localStorage.setItem('_cadPags', JSON.stringify(_cadPags)); }catch(e){}
+}
+
+// ── Converter dados do Sheets (migração) ──
+// Chamada automaticamente quando o Sheets ainda tem dados e o Drive está vazio
+function cadMigrarDoSheets(empRows, pagRows){
+  if(_cadEmps.length > 0) return; // já tem dados no Drive, não sobrescreve
+  const hoje = new Date();
+  function parseNum(v){ if(!v&&v!==0)return 0; let s=String(v).replace(/R\$/g,'').replace(/%/g,'').replace(/\s/g,''); if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.'); else if(s.includes(','))s=s.replace(',','.'); return parseFloat(s)||0; }
+  function parseTaxa(v){ const n=parseNum(v); return n>1?n/100:n; }
+  let migrados=0;
+  empRows.filter(r=>r[0]&&String(r[0]).trim().toUpperCase().startsWith('EMP')).forEach(r=>{
+    const id=String(r[CE.id]).trim();
+    if(_cadEmps.find(e=>e.id===id)) return;
+    _cadEmps.push({
+      id, nome:String(r[CE.nome]||'').trim(), cpf:String(r[CE.cpf]||'').trim(),
+      tel:String(r[CE.tel]||'').trim(), capital:parseNum(r[CE.cap]),
+      data:String(r[CE.data]||'').trim(), taxa:parseTaxa(r[CE.taxa]),
+      prazo:parseNum(r[CE.prazo]), tipoJuros:String(r[CE.tipoJuros]||'simples').trim(),
+      status:String(r[CE.status]||'Ativo').trim(), unidade:String(r[CE.unidade]||'mensal').trim(),
+      obs:String(r[CE.obs]||'').trim(), migrado:true, updatedAt:Date.now()
+    });
+    migrados++;
+  });
+  pagRows.filter(r=>r[0]&&String(r[0]).startsWith('EMP')).forEach(r=>{
+    const pagId='PAG'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+    _cadPags.push({
+      id:pagId, empId:String(r[CP.id]).trim(),
+      tipo:String(r[CP.tipo]||'Pagamento').trim(),
+      valor:parseNum(r[CP.valor]), juros:parseNum(r[CP.juros]),
+      data:String(r[CP.data]||'').trim(), migrado:true, updatedAt:Date.now()
+    });
+  });
+  if(migrados>0){
+    cadSalvarLocal();
+    cadStatus('📦 '+migrados+' contratos migrados do Sheets para o Drive. Clique em Sincronizar para salvar.','var(--gold)');
+    cadListaRender(); cadAtualizarDatalist();
+  }
+}
+
+// ── Calcular campos derivados de um empréstimo ──
+function cadCalcEmp(e){
+  const cap=e.capital||0, taxa=e.taxa||0, prazo=e.prazo||1;
+  const tipoJuros=e.tipoJuros||'simples';
+  let jTotal, valorTotal, parcela, proxVenc, vencContrato;
+  if(tipoJuros==='composto'){
+    jTotal = cap*(Math.pow(1+taxa,prazo)-1);
+  } else {
+    jTotal = cap*taxa*prazo;
+  }
+  valorTotal = cap+jTotal;
+  parcela    = valorTotal/prazo;
+  // Calcular próximo vencimento e vencimento contrato
+  if(e.data){
+    const d = new Date(e.data);
+    const mult = e.unidade==='semanal'?7:30;
+    vencContrato = new Date(d.getTime() + prazo*mult*86400000);
+    // Contar pagamentos feitos
+    const pagFeitos = _cadPags.filter(p=>p.empId===e.id&&p.tipo!=='Multa').length;
+    const parcelasRestantes = Math.max(0, prazo-pagFeitos);
+    if(parcelasRestantes>0){
+      proxVenc = new Date(d.getTime() + (pagFeitos+1)*mult*86400000);
+    }
+  }
+  // Saldo
+  const totalPago = _cadPags.filter(p=>p.empId===e.id).reduce((s,p)=>s+(p.valor||0),0);
+  const saldo     = Math.max(0, valorTotal-totalPago);
+  const jProx     = e.unidade==='semanal' ? cap*taxa : cap*taxa;
+  return {...e, jTotal, valorTotal, parcela, saldo, jProx,
+    proxVenc: proxVenc?proxVenc.toISOString().slice(0,10):'',
+    vencContrato: vencContrato?vencContrato.toISOString().slice(0,10):'',
+    totalPago};
+}
+
+// ── Preview automático ──
+function cadEmpPreview(){
+  const e = cadLerFormEmp();
+  if(!e.nome||!e.capital){ alert('Preencha nome e capital.'); return; }
+  const c = cadCalcEmp(e);
+  const box=document.getElementById('cad-emp-preview');
+  box.style.display='';
+  box.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <div><span style="color:var(--muted)">Capital:</span> <strong style="color:var(--gold)">${cadFmt(c.capital)}</strong></div>
+      <div><span style="color:var(--muted)">Taxa:</span> <strong>${(c.taxa*100).toFixed(1)}% ${c.unidade}</strong></div>
+      <div><span style="color:var(--muted)">Prazo:</span> <strong>${c.prazo} ${c.unidade==='semanal'?'semanas':'meses'}</strong></div>
+      <div><span style="color:var(--muted)">Juros Total:</span> <strong style="color:var(--green)">${cadFmt(c.jTotal)}</strong></div>
+      <div><span style="color:var(--muted)">Total a Receber:</span> <strong style="color:var(--green)">${cadFmt(c.valorTotal)}</strong></div>
+      <div><span style="color:var(--muted)">Parcela:</span> <strong>${cadFmt(c.parcela)}</strong></div>
+    </div>`;
+}
+
+// ── Ler formulário de empréstimo ──
+function cadLerFormEmp(id){
+  const g=k=>document.getElementById(k)?.value||'';
+  return {
+    id: id || cadGerarId('EMP'),
+    nome:    g('cad-emp-nome').trim(),
+    cpf:     g('cad-emp-cpf').trim(),
+    tel:     g('cad-emp-tel').trim(),
+    capital: parseFloat(g('cad-emp-capital'))||0,
+    data:    g('cad-emp-data'),
+    taxa:    (parseFloat(g('cad-emp-taxa'))||0)/100,
+    prazo:   parseInt(g('cad-emp-prazo'))||1,
+    unidade: g('cad-emp-unidade'),
+    tipoJuros: g('cad-emp-tipo'),
+    status:  g('cad-emp-status'),
+    obs:     g('cad-emp-obs').trim(),
+  };
+}
+
+// ── Salvar empréstimo ──
+async function cadEmpSalvar(idExistente){
+  const e = cadLerFormEmp(idExistente);
+  if(!e.nome) { alert('Informe o nome do cliente.'); return; }
+  if(!e.capital||e.capital<=0) { alert('Informe o capital emprestado.'); return; }
+  if(!e.data) { alert('Informe a data do empréstimo.'); return; }
+  e.updatedAt = Date.now();
+  // Salvar local imediatamente
+  const idx = _cadEmps.findIndex(x=>x.id===e.id);
+  if(idx>=0) _cadEmps[idx]=e; else _cadEmps.push(e);
+  cadSalvarLocal(); cadListaRender(); cadAtualizarDatalist();
+  cadLimparFormEmp();
+  cadStatus('💾 Salvo localmente...','var(--gold)');
+  cadRenderDashboard();
+  // Enviar ao Drive
+  try {
+    await cadPost('emp_salvar', {data: e});
+    cadStatus('✅ Empréstimo salvo no Drive!','var(--green)');
+  } catch(err){
+    cadStatus('⚠️ Salvo local. Drive offline: '+err.message,'var(--gold)');
+  }
+}
+
+// ── Limpar formulário de empréstimo ──
+function cadLimparFormEmp(){
+  ['cad-emp-nome','cad-emp-cpf','cad-emp-tel','cad-emp-capital','cad-emp-data','cad-emp-taxa','cad-emp-prazo','cad-emp-obs'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('cad-emp-unidade').value='mensal';
+  document.getElementById('cad-emp-tipo').value='simples';
+  document.getElementById('cad-emp-status').value='Ativo';
+  const pv=document.getElementById('cad-emp-preview'); if(pv) pv.style.display='none';
+  // Data padrão = hoje
+  const today=new Date().toISOString().slice(0,10);
+  const dataEl=document.getElementById('cad-emp-data'); if(dataEl) dataEl.value=today;
+}
+
+// ── Autofill de pagamento a partir do contrato ──
+function cadPagAutoFill(idDigitado){
+  const e = _cadEmps.find(x=>x.id===idDigitado.trim().toUpperCase()||x.id===idDigitado.trim());
+  const infoBox=document.getElementById('cad-pag-info-box');
+  const info=document.getElementById('cad-pag-info');
+  if(!e||!infoBox||!info){ if(infoBox) infoBox.style.display='none'; return; }
+  const c=cadCalcEmp(e);
+  infoBox.style.display='';
+  info.innerHTML=`📋 <strong>${e.nome}</strong> · Capital: <strong>${cadFmt(e.capital)}</strong> · Parcela: <strong style="color:var(--gold)">${cadFmt(c.parcela)}</strong> · Saldo: <strong style="color:var(--red)">${cadFmt(c.saldo)}</strong>`;
+  // Preencher valor padrão com a parcela
+  const vEl=document.getElementById('cad-pag-valor');
+  if(vEl&&!vEl.value) vEl.value=c.parcela.toFixed(2);
+  cadPagCalcJuros();
+}
+
+function cadPagCalcJuros(){
+  const id=(document.getElementById('cad-pag-id')?.value||'').trim();
+  const valor=parseFloat(document.getElementById('cad-pag-valor')?.value)||0;
+  const e=_cadEmps.find(x=>x.id===id);
+  const el=document.getElementById('cad-pag-juros');
+  if(!e||!el) return;
+  const juros = e.capital*(e.taxa||0);
+  if(!el.value) el.value=Math.min(valor,juros).toFixed(2);
+}
+
+// ── Salvar pagamento ──
+async function cadPagSalvar(){
+  const g=k=>document.getElementById(k)?.value||'';
+  const empId=(g('cad-pag-id')||'').trim().toUpperCase();
+  if(!empId){ alert('Informe o ID do contrato.'); return; }
+  const valor=parseFloat(g('cad-pag-valor'))||0;
+  if(!valor){ alert('Informe o valor pago.'); return; }
+  if(!g('cad-pag-data')){ alert('Informe a data do pagamento.'); return; }
+  const pag = {
+    id:    'PAG'+Date.now().toString(36).toUpperCase(),
+    empId, tipo:g('cad-pag-tipo'), valor,
+    juros: parseFloat(g('cad-pag-juros'))||valor,
+    data:  g('cad-pag-data'), obs:g('cad-pag-obs').trim(),
+    updatedAt: Date.now()
+  };
+  _cadPags.push(pag);
+  // Se tipo = Quitação, marcar contrato como Quitado
+  if(pag.tipo==='Quitação'){
+    const idx=_cadEmps.findIndex(e=>e.id===empId);
+    if(idx>=0){ _cadEmps[idx].status='Quitado'; _cadEmps[idx].updatedAt=Date.now(); }
+  }
+  cadSalvarLocal(); cadListaRender(); cadRenderDashboard();
+  // Limpar
+  ['cad-pag-id','cad-pag-valor','cad-pag-juros','cad-pag-obs'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('cad-pag-tipo').value='Juros';
+  document.getElementById('cad-pag-info-box').style.display='none';
+  cadStatus('💾 Pagamento salvo...','var(--gold)');
+  try {
+    await cadPost('pag_salvar', {data: pag});
+    cadStatus('✅ Pagamento salvo no Drive!','var(--green)');
+  } catch(err){
+    cadStatus('⚠️ Salvo local. Drive offline: '+err.message,'var(--gold)');
+  }
+}
+
+// ── Excluir contrato ──
+async function cadEmpExcluir(id){
+  if(!confirm('Excluir contrato '+id+'? Os pagamentos vinculados serão mantidos.')) return;
+  _cadEmps = _cadEmps.filter(e=>e.id!==id);
+  cadSalvarLocal(); cadListaRender(); cadRenderDashboard();
+  try{ await cadPost('emp_excluir', {id}); cadStatus('🗑 Contrato excluído','var(--muted)'); }
+  catch(e){ cadStatus('⚠️ Excluído local. Sincronize.','var(--gold)'); }
+}
+
+// ── Excluir pagamento ──
+async function cadPagExcluir(id){
+  if(!confirm('Excluir este pagamento?')) return;
+  _cadPags = _cadPags.filter(p=>p.id!==id);
+  cadSalvarLocal(); cadListaRender(); cadRenderDashboard();
+  try{ await cadPost('pag_excluir', {id}); }catch(e){}
+}
+
+// ── Editar contrato (preenche o formulário) ──
+function cadEmpEditar(id){
+  const e=_cadEmps.find(x=>x.id===id); if(!e) return;
+  const g=(k,v)=>{ const el=document.getElementById(k); if(el) el.value=v||''; };
+  g('cad-emp-nome',e.nome); g('cad-emp-cpf',e.cpf); g('cad-emp-tel',e.tel);
+  g('cad-emp-capital',e.capital); g('cad-emp-data',e.data);
+  g('cad-emp-taxa',(e.taxa*100).toFixed(2)); g('cad-emp-prazo',e.prazo);
+  g('cad-emp-unidade',e.unidade||'mensal'); g('cad-emp-tipo',e.tipoJuros||'simples');
+  g('cad-emp-status',e.status); g('cad-emp-obs',e.obs);
+  // Trocar o botão salvar para modo edição
+  const btn=document.querySelector('[onclick="cadEmpSalvar()"]');
+  if(btn){ btn.textContent='✏️ SALVAR EDIÇÃO'; btn.onclick=()=>cadEmpSalvar(id); }
+  // Scroll para o form
+  document.getElementById('tab-cadastro')?.scrollIntoView({behavior:'smooth'});
+}
+
+// ── Renderizar listas ──
+function cadListaRender(){
+  const q=(document.getElementById('cad-lista-busca')?.value||'').toLowerCase();
+  const cont=document.getElementById('cad-lista-contratos');
+  const pagCont=document.getElementById('cad-lista-pagamentos');
+  if(!cont||!pagCont) return;
+
+  const statusBadge=s=>{
+    const cls=s==='Ativo'||s==='ativo'?'ok':s==='Quitado'||s==='quitado'?'muted':'danger';
+    return `<span class="badge ${cls}">${s}</span>`;
+  };
+
+  const emps=q?_cadEmps.filter(e=>(e.nome||'').toLowerCase().includes(q)||(e.id||'').toLowerCase().includes(q)):_cadEmps;
+
+  if(!emps.length){ cont.innerHTML='<div style="color:var(--muted);padding:12px 0;font-size:0.65rem">Nenhum contrato cadastrado ainda. Preencha o formulário acima.</div>'; }
+  else {
+    cont.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:0.6rem">
+      <thead><tr style="border-bottom:1px solid var(--border)">
+        ${['ID','Cliente','Capital','Taxa','Prazo','Juros','Total','Status','Ações'].map(h=>`<th style="padding:7px 10px;color:var(--muted);text-align:left;font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase">${h}</th>`).join('')}
+      </tr></thead>
+      <tbody>${emps.map(e=>{
+        const c=cadCalcEmp(e);
+        return `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 10px;color:var(--gold2);font-weight:700">${e.id}</td>
+          <td style="padding:8px 10px">${e.nome}</td>
+          <td style="padding:8px 10px;color:var(--gold)">${cadFmt(e.capital)}</td>
+          <td style="padding:8px 10px">${((e.taxa||0)*100).toFixed(1)}% ${e.unidade==='semanal'?'sem':'mês'}</td>
+          <td style="padding:8px 10px">${e.prazo} ${e.unidade==='semanal'?'sem':'meses'}</td>
+          <td style="padding:8px 10px;color:var(--green)">${cadFmt(c.jTotal)}</td>
+          <td style="padding:8px 10px;color:var(--green)">${cadFmt(c.valorTotal)}</td>
+          <td style="padding:8px 10px">${statusBadge(e.status)}</td>
+          <td style="padding:8px 10px;white-space:nowrap">
+            <button onclick="cadEmpEditar('${e.id}')" style="background:rgba(201,146,42,0.1);border:1px solid rgba(201,146,42,0.25);color:var(--gold2);border-radius:5px;padding:3px 9px;font-family:'DM Mono',monospace;font-size:0.5rem;cursor:pointer;margin-right:4px">✏️ Editar</button>
+            <button onclick="cadEmpExcluir('${e.id}')" style="background:rgba(239,71,111,0.07);border:1px solid rgba(239,71,111,0.2);color:var(--red);border-radius:5px;padding:3px 9px;font-family:'DM Mono',monospace;font-size:0.5rem;cursor:pointer">🗑</button>
+          </td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  }
+
+  // Pagamentos
+  const pags=_cadPags.slice().reverse().slice(0,50);
+  if(!pags.length){ pagCont.innerHTML='<div style="color:var(--muted);padding:12px 0;font-size:0.65rem">Nenhum pagamento registrado.</div>'; }
+  else {
+    pagCont.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:0.6rem">
+      <thead><tr style="border-bottom:1px solid var(--border)">
+        ${['Data','Contrato','Cliente','Tipo','Valor','Juros','Obs',''].map(h=>`<th style="padding:7px 10px;color:var(--muted);text-align:left;font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase">${h}</th>`).join('')}
+      </tr></thead>
+      <tbody>${pags.map(p=>{
+        const e=_cadEmps.find(x=>x.id===p.empId);
+        return `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 10px;color:var(--muted)">${p.data||'—'}</td>
+          <td style="padding:8px 10px;color:var(--gold2)">${p.empId}</td>
+          <td style="padding:8px 10px">${e?e.nome:'—'}</td>
+          <td style="padding:8px 10px"><span class="badge blue">${p.tipo}</span></td>
+          <td style="padding:8px 10px;color:var(--green);font-weight:700">${cadFmt(p.valor)}</td>
+          <td style="padding:8px 10px;color:var(--muted)">${cadFmt(p.juros)}</td>
+          <td style="padding:8px 10px;color:var(--muted);font-size:0.52rem">${p.obs||'—'}</td>
+          <td style="padding:8px 10px"><button onclick="cadPagExcluir('${p.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.7rem">🗑</button></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  }
+}
+
+// ── Atualizar datalists (autocomplete) ──
+function cadAtualizarDatalist(){
+  const dl1=document.getElementById('cad-clientes-list');
+  const dl2=document.getElementById('cad-contratos-list');
+  if(dl1) dl1.innerHTML=[...new Set(_cadEmps.map(e=>e.nome))].map(n=>`<option value="${n}">`).join('');
+  if(dl2) dl2.innerHTML=_cadEmps.map(e=>`<option value="${e.id}" label="${e.nome} — ${cadFmt(e.capital)}">`).join('');
+}
+
+// ── Alimentar o render() existente com dados do Drive ──
+// Converte _cadEmps/_cadPags no formato esperado pelo render() original
+function cadRenderDashboard(){
+  if(!_cadEmps.length) return;
+  // Converter para o formato de rows CSV esperado pelo render()
+  const empRows = _cadEmps.map(e=>{
+    const c=cadCalcEmp(e);
+    const row=new Array(21).fill('');
+    row[CE.id]=e.id; row[CE.nome]=e.nome; row[CE.cpf]=e.cpf||''; row[CE.tel]=e.tel||'';
+    row[CE.cap]=e.capital; row[CE.data]=e.data; row[CE.taxa]=(e.taxa||0)*100+'%';
+    row[CE.prazo]=e.prazo; row[CE.tipoJuros]=e.tipoJuros||'simples';
+    row[CE.jTotal]=c.jTotal; row[CE.valorTotal]=c.valorTotal||'';
+    row[CE.saldo]=c.saldo; row[CE.jProx]=c.jProx||'';
+    row[CE.status]=e.status; row[CE.proxVenc]=c.proxVenc||'';
+    row[CE.vencContrato]=c.vencContrato||''; row[CE.unidade]=e.unidade||'mensal';
+    row[CE.obs]=e.obs||'';
+    return row;
+  });
+  const pagRows = _cadPags.map(p=>{
+    const row=new Array(6).fill('');
+    row[CP.id]=p.empId; row[CP.tipo]=p.tipo; row[CP.valor]=p.valor;
+    row[CP.data]=p.data; row[CP.juros]=p.juros||p.valor;
+    return row;
+  });
+  try { render(empRows, pagRows); } catch(e){ console.warn('cadRenderDashboard:', e); }
+}
+
+// ── Inicialização ──
+document.addEventListener('DOMContentLoaded', ()=>{
+  cadCarregarLocal();
+  cadListaRender(); cadAtualizarDatalist();
+  // Data padrão = hoje
+  const today=new Date().toISOString().slice(0,10);
+  const dataEmp=document.getElementById('cad-emp-data'); if(dataEmp) dataEmp.value=today;
+  const dataPag=document.getElementById('cad-pag-data'); if(dataPag) dataPag.value=today;
+  // Se já tem URL, sincronizar silenciosamente após 1s
+  if(localStorage.getItem('dossie_script_url')){
+    setTimeout(()=>cadSincronizar(), 1200);
+  }
+});
+
 let _primeiraVez = true;
 
 async function loadData(mostrarLoading){
@@ -4400,16 +4986,24 @@ async function loadData(mostrarLoading){
     console.log('📊 Capital Investimentos — emp:',empRows.length,'pag:',pagRows.length);
     try{
       render(empRows,pagRows);
+      // Migrar dados do Sheets para o Drive (só na primeira vez que tem dados no Sheets e Drive vazio)
+      try{ cadMigrarDoSheets(empRows, pagRows); }catch(me){ console.warn('migração:',me); }
     }catch(renderErr){
       console.error('❌ render() crash:',renderErr);
     }
     error.classList.remove('show');
   }catch(err){
     console.error('loadData erro:',err);
-    if(_primeiraVez || mostrarLoading){
-      error.classList.add('show');
-      const el=document.getElementById('error-msg');
-      if(el) el.textContent='Erro: '+err.message;
+    // ── Fallback: se Sheets falhou mas temos dados locais do Drive, usar eles ──
+    if(_cadEmps.length > 0){
+      console.log('📦 Sheets offline — usando dados locais do Drive ('+_cadEmps.length+' contratos)');
+      try{ cadRenderDashboard(); error.classList.remove('show'); }catch(e){}
+    } else {
+      if(_primeiraVez || mostrarLoading){
+        error.classList.add('show');
+        const el=document.getElementById('error-msg');
+        if(el) el.textContent='Erro: '+err.message;
+      }
     }
   }
   // SEMPRE mostra o main — independente de qualquer erro
