@@ -4398,7 +4398,11 @@ async function loadData(mostrarLoading){
     const[empT,pagT]=await Promise.all([fetchSheet(GID_EMP),fetchSheetPag()]);
     const empRows=empT.slice(autoSkipCSV(empT)),pagRows=pagT.slice(autoSkipCSV(pagT));
     console.log('📊 Capital Investimentos — emp:',empRows.length,'pag:',pagRows.length);
-    render(empRows,pagRows);
+    try{
+      render(empRows,pagRows);
+    }catch(renderErr){
+      console.error('❌ render() crash:',renderErr);
+    }
     error.classList.remove('show');
   }catch(err){
     console.error('loadData erro:',err);
@@ -4414,8 +4418,10 @@ async function loadData(mostrarLoading){
   try{ main.classList.remove('loading'); main.classList.add('visible'); }catch(e){}
   try{ main.style.opacity='1'; }catch(e){}
   _primeiraVez=false;
-  try{ pastaRender(); }catch(e){ console.warn('pastaRender erro:',e); }
+  try{ pastaRender(); }catch(e){ console.warn('pastaRender:',e); }
   try{ waHistRender(); }catch(e){}
+  // Garante que WhatsApp e Fluxo90 sempre renderizam
+  try{ if(!_waCli.length) waRenderCards(); }catch(e){}
 }
 // ════════════════════════════════════════════════════════
 // AUTENTICAÇÃO — senha local com hash simples
