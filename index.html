@@ -523,30 +523,57 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .vg-kpi-delta.down{color:var(--red);}
 .vg-kpi-sparkline{position:absolute;bottom:0;right:0;opacity:0.35;pointer-events:none;}
 
-/* MAIN GRID */
-.vg-main-grid{display:grid;grid-template-columns:1fr 320px;gap:14px;margin-bottom:14px;}
-@media(max-width:1024px){.vg-main-grid{grid-template-columns:1fr;}}
+/* MAIN GRID — mapa centralizado, paineis nas laterais */
+.vg-main-grid{display:grid;grid-template-columns:220px 1fr 260px;gap:12px;margin-bottom:14px;align-items:start;}
+@media(max-width:1200px){.vg-main-grid{grid-template-columns:1fr 260px;}}
+@media(max-width:900px){.vg-main-grid{grid-template-columns:1fr;}}
+
+/* PAINEL ESQUERDO */
+.vg-left-panel{display:flex;flex-direction:column;gap:12px;}
 
 /* MAPA */
 .vg-map-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative;animation:fadeUp 0.4s ease both;}
-.vg-map-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--border);}
-.vg-map-title{font-family:'Bebas Neue',sans-serif;font-size:0.82rem;letter-spacing:0.14em;color:var(--text);}
-.vg-map-subtitle{font-size:0.58rem;color:var(--muted);}
-.vg-map-search{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:5px 10px;font-size:0.58rem;color:var(--muted);}
-.vg-map-search input{background:none;border:none;outline:none;color:var(--text);font-family:'DM Mono',monospace;font-size:0.62rem;width:120px;}
-.vg-map-body{position:relative;height:340px;background:var(--s2);}
-.vg-map-svg{width:100%;height:100%;object-fit:cover;}
-.vg-map-legend{position:absolute;bottom:14px;left:14px;background:rgba(7,9,14,0.88);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;}
-.vg-map-leg-title{font-size:0.52rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;}
-.vg-map-leg-item{display:flex;align-items:center;gap:6px;font-size:0.58rem;color:var(--muted);margin-bottom:4px;}
+.vg-map-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;border-bottom:1px solid var(--border);}
+.vg-map-title{font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:0.14em;color:var(--text);}
+.vg-map-subtitle{font-size:0.56rem;color:var(--muted);}
+.vg-map-search{display:flex;align-items:center;gap:5px;background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:4px 9px;}
+.vg-map-search input{background:none;border:none;outline:none;color:var(--text);font-family:'DM Mono',monospace;font-size:0.6rem;width:130px;}
+.vg-map-body{position:relative;height:460px;background:#080b13;overflow:hidden;}
+.vg-zoom-btns{position:absolute;top:12px;right:12px;z-index:10;display:flex;flex-direction:column;gap:4px;}
+.vg-zoom-btn{width:32px;height:32px;border-radius:8px;background:rgba(12,15,24,0.95);border:1px solid var(--border2);color:var(--muted);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:all 0.15s;user-select:none;}
+.vg-zoom-btn:hover{border-color:var(--gold);color:var(--gold);}
+.vg-map-legend{position:absolute;bottom:12px;left:12px;background:rgba(7,9,14,0.92);border:1px solid var(--border2);border-radius:10px;padding:10px 13px;}
+.vg-map-leg-title{font-size:0.5rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:7px;}
+.vg-map-leg-item{display:flex;align-items:center;gap:6px;font-size:0.57rem;color:var(--muted);margin-bottom:3px;}
 .vg-map-leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.vg-map-tooltip{position:absolute;background:rgba(7,9,14,0.96);border:1px solid var(--gold);border-radius:10px;padding:14px 16px;min-width:190px;pointer-events:none;display:none;}
-.vg-map-tooltip.show{display:block;}
-.vg-map-tt-bairro{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--gold);letter-spacing:0.1em;margin-bottom:8px;}
-.vg-map-tt-row{display:flex;justify-content:space-between;font-size:0.62rem;margin-bottom:4px;}
-.vg-map-tt-lbl{color:var(--muted);}
-.vg-map-tt-val{color:var(--text);font-family:'Bebas Neue',sans-serif;}
-.vg-map-tt-link{display:block;margin-top:8px;font-size:0.58rem;color:var(--gold);text-align:right;cursor:pointer;}
+
+/* MODAL POP-UP BAIRRO */
+.vg-bairro-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
+.vg-bairro-modal-overlay.open{display:flex;}
+.vg-bairro-modal{background:var(--s1);border:1px solid var(--gold);border-radius:16px;width:min(500px,95vw);max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.7),0 0 40px rgba(201,146,42,0.1);}
+.vg-bm-header{padding:20px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.vg-bm-bairro{font-family:'Cinzel',serif;font-size:1.2rem;color:var(--gold);letter-spacing:0.06em;}
+.vg-bm-zona{font-size:0.58rem;color:var(--muted);margin-top:3px;}
+.vg-bm-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;line-height:1;padding:2px 6px;border-radius:4px;transition:color 0.2s;}
+.vg-bm-close:hover{color:var(--gold);}
+.vg-bm-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 22px;border-bottom:1px solid var(--border);}
+.vg-bm-kpi{background:var(--s2);border-radius:10px;padding:12px;text-align:center;}
+.vg-bm-kpi-lbl{font-size:0.52rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px;}
+.vg-bm-kpi-val{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;line-height:1;}
+.vg-bm-body{padding:16px 22px;}
+.vg-bm-section{font-family:'Bebas Neue',sans-serif;font-size:0.68rem;letter-spacing:0.18em;color:var(--muted);border-left:2px solid var(--gold);padding-left:8px;margin-bottom:10px;margin-top:16px;}
+.vg-bm-section:first-child{margin-top:0;}
+.vg-bm-cli-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:8px;margin-bottom:6px;gap:10px;}
+.vg-bm-cli-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:0.75rem;color:#07090e;flex-shrink:0;}
+.vg-bm-cli-nome{font-size:0.65rem;color:var(--text);flex:1;}
+.vg-bm-cli-val{font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--gold2);}
+.vg-bm-cli-status{font-size:0.5rem;padding:2px 6px;border-radius:10px;}
+.vg-bm-cli-status.ok{background:rgba(6,214,160,0.1);color:var(--green);border:1px solid rgba(6,214,160,0.2);}
+.vg-bm-cli-status.atraso{background:rgba(239,71,111,0.1);color:var(--red);border:1px solid rgba(239,71,111,0.2);}
+.vg-bm-footer{padding:12px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+.vg-bm-btn{font-family:'DM Mono',monospace;font-size:0.6rem;border-radius:7px;padding:7px 16px;cursor:pointer;letter-spacing:0.06em;}
+.vg-bm-btn.sec{background:transparent;border:1px solid var(--border2);color:var(--muted);}
+.vg-bm-btn.pri{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;font-weight:700;}
 
 /* PAINEL DIREITO */
 .vg-right-panel{display:flex;flex-direction:column;gap:12px;}
@@ -734,244 +761,11 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <span id="kpi-ticket" style="display:none"></span>
   <span id="kpi-prazo" style="display:none"></span>
 
-  <!-- GRID PRINCIPAL: MAPA + PAINEL DIREITO -->
+  <!-- GRID PRINCIPAL: PAINEL ESQUERDO + MAPA + PAINEL DIREITO -->
   <div class="vg-main-grid">
 
-    <!-- MAPA DE CLIENTES -->
-    <div class="vg-map-card">
-      <div class="vg-map-header">
-        <div>
-          <div class="vg-map-title">🗺 MAPA DE CLIENTES — SÃO PAULO</div>
-          <div class="vg-map-subtitle">Clientes ativos por bairro</div>
-        </div>
-        <div class="vg-map-search">
-          🔍 <input type="text" placeholder="Buscar bairro..." id="vg-map-search-input">
-        </div>
-      </div>
-      <div class="vg-map-body" id="vg-map-body">
-        <!-- SVG Map of São Paulo districts -->
-        <svg id="vg-sp-map" viewBox="0 0 800 580" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;cursor:default">
-          <defs>
-            <radialGradient id="mapGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="rgba(201,146,42,0.06)"/>
-              <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
-            </radialGradient>
-          </defs>
-          <rect width="800" height="580" fill="#0c0f18"/>
-          <rect width="800" height="580" fill="url(#mapGlow)"/>
-
-          <!-- Bairros de SP - polígonos simplificados com data-bairro para interatividade -->
-          <g id="sp-districts" stroke="#1a2035" stroke-width="1.2" fill-opacity="0.75">
-            <!-- Zona Centro -->
-            <polygon data-bairro="Sé" data-clientes="8" data-capital="185000" data-inadim="6.2"
-              points="390,240 420,230 445,245 440,270 415,275 388,265"
-              fill="rgba(155,93,229,0.5)" class="sp-district"/>
-            <polygon data-bairro="República" data-clientes="5" data-capital="110000" data-inadim="4.1"
-              points="365,235 390,240 388,265 360,268 355,250"
-              fill="rgba(155,93,229,0.4)" class="sp-district"/>
-            <polygon data-bairro="Bela Vista" data-clientes="3" data-capital="78000" data-inadim="3.5"
-              points="415,275 440,270 450,290 425,298 410,290"
-              fill="rgba(155,93,229,0.35)" class="sp-district"/>
-            <polygon data-bairro="Liberdade" data-clientes="4" data-capital="92000" data-inadim="5.0"
-              points="388,265 415,275 410,290 382,288 378,272"
-              fill="rgba(155,93,229,0.4)" class="sp-district"/>
-
-            <!-- Zona Leste -->
-            <polygon data-bairro="Itaquera" data-clientes="27" data-capital="589400" data-inadim="14.2"
-              points="560,210 640,200 680,230 670,290 610,300 555,270"
-              fill="rgba(239,71,111,0.55)" class="sp-district"/>
-            <polygon data-bairro="São Mateus" data-clientes="14" data-capital="298000" data-inadim="9.8"
-              points="490,240 560,210 555,270 500,278 485,260"
-              fill="rgba(240,180,41,0.45)" class="sp-district"/>
-            <polygon data-bairro="Penha" data-clientes="11" data-capital="230000" data-inadim="8.1"
-              points="480,180 560,210 490,240 455,220 460,190"
-              fill="rgba(240,180,41,0.4)" class="sp-district"/>
-            <polygon data-bairro="Tatuapé" data-clientes="9" data-capital="195000" data-inadim="7.2"
-              points="450,185 480,180 460,190 455,220 430,215 435,195"
-              fill="rgba(201,146,42,0.4)" class="sp-district"/>
-            <polygon data-bairro="Vila Prudente" data-clientes="7" data-capital="148000" data-inadim="6.5"
-              points="500,278 555,270 560,310 510,320 495,300"
-              fill="rgba(201,146,42,0.4)" class="sp-district"/>
-            <polygon data-bairro="Cidade Tiradentes" data-clientes="18" data-capital="413500" data-inadim="11.5"
-              points="640,200 720,210 730,260 680,270 670,290 680,230"
-              fill="rgba(239,71,111,0.5)" class="sp-district"/>
-
-            <!-- Zona Sul -->
-            <polygon data-bairro="Zona Sul (Diversos)" data-clientes="23" data-capital="524000" data-inadim="10.2"
-              points="340,340 420,320 460,350 450,400 390,420 330,400 320,370"
-              fill="rgba(239,71,111,0.45)" class="sp-district"/>
-            <polygon data-bairro="Santo Amaro" data-clientes="6" data-capital="128000" data-inadim="5.5"
-              points="290,370 330,360 330,400 295,405 280,390"
-              fill="rgba(201,146,42,0.35)" class="sp-district"/>
-            <polygon data-bairro="Campo Grande" data-clientes="4" data-capital="88000" data-inadim="4.8"
-              points="235,400 280,390 285,420 240,430 230,415"
-              fill="rgba(155,93,229,0.35)" class="sp-district"/>
-            <polygon data-bairro="Saúde" data-clientes="5" data-capital="112000" data-inadim="4.2"
-              points="420,320 460,310 460,350 420,355 415,335"
-              fill="rgba(201,146,42,0.35)" class="sp-district"/>
-
-            <!-- Zona Norte -->
-            <polygon data-bairro="Santana" data-clientes="10" data-capital="215000" data-inadim="7.4"
-              points="380,140 440,130 455,170 420,185 375,175"
-              fill="rgba(72,149,239,0.5)" class="sp-district"/>
-            <polygon data-bairro="Tucuruvi" data-clientes="7" data-capital="155000" data-inadim="6.0"
-              points="420,105 480,100 490,140 450,155 425,145"
-              fill="rgba(72,149,239,0.4)" class="sp-district"/>
-            <polygon data-bairro="Jaçanã" data-clientes="5" data-capital="108000" data-inadim="5.5"
-              points="480,80 530,90 535,120 490,140 480,100"
-              fill="rgba(6,214,160,0.4)" class="sp-district"/>
-            <polygon data-bairro="Tremembé" data-clientes="3" data-capital="65000" data-inadim="4.0"
-              points="440,70 480,80 480,100 440,105 430,88"
-              fill="rgba(6,214,160,0.35)" class="sp-district"/>
-
-            <!-- Zona Oeste -->
-            <polygon data-bairro="Lapa" data-clientes="9" data-capital="198000" data-inadim="7.0"
-              points="270,195 330,185 340,215 310,230 265,220"
-              fill="rgba(72,149,239,0.45)" class="sp-district"/>
-            <polygon data-bairro="Pinheiros" data-clientes="6" data-capital="138000" data-inadim="5.2"
-              points="310,230 355,225 360,255 325,265 305,250"
-              fill="rgba(6,214,160,0.4)" class="sp-district"/>
-            <polygon data-bairro="Butantã" data-clientes="5" data-capital="110000" data-inadim="4.8"
-              points="240,270 295,260 300,295 255,305 235,290"
-              fill="rgba(6,214,160,0.38)" class="sp-district"/>
-            <polygon data-bairro="Perdizes" data-clientes="4" data-capital="90000" data-inadim="3.8"
-              points="310,185 360,178 365,210 330,215 315,205"
-              fill="rgba(6,214,160,0.35)" class="sp-district"/>
-            <polygon data-bairro="Vila Leopoldina" data-clientes="3" data-capital="72000" data-inadim="3.2"
-              points="230,230 270,220 270,250 235,255 225,242"
-              fill="rgba(6,214,160,0.3)" class="sp-district"/>
-
-            <!-- Área sem clientes -->
-            <polygon data-bairro="Anhanguera" data-clientes="0" data-capital="0" data-inadim="0"
-              points="200,80 280,70 300,100 260,115 195,105"
-              fill="rgba(26,32,53,0.6)" class="sp-district"/>
-            <polygon data-bairro="Grajaú" data-clientes="14" data-capital="318000" data-inadim="9.2"
-              points="330,420 390,420 400,470 360,485 320,465"
-              fill="rgba(240,180,41,0.42)" class="sp-district"/>
-            <polygon data-bairro="Parelheiros" data-clientes="9" data-capital="222150" data-inadim="8.5"
-              points="300,470 360,485 350,530 300,535 280,510 285,478"
-              fill="rgba(201,146,42,0.4)" class="sp-district"/>
-          </g>
-
-          <!-- Pontos clientes meus (amarelos) -->
-          <g id="vg-client-dots">
-            <circle cx="395" cy="252" r="7" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
-            <circle cx="460" cy="195" r="7" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
-            <circle cx="595" cy="248" r="9" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
-            <circle cx="665" cy="228" r="8" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
-            <circle cx="340" cy="200" r="7" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
-            <circle cx="325" cy="252" r="7" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
-            <circle cx="375" cy="365" r="8" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
-            <circle cx="415" cy="155" r="7" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
-            <circle cx="530" cy="278" r="7" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
-            <circle cx="347" cy="457" r="7" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
-          </g>
-
-          <!-- Labels bairros principais -->
-          <g fill="#5a6282" font-family="DM Mono,monospace" font-size="8" text-anchor="middle">
-            <text x="600" y="250">Itaquera</text>
-            <text x="685" y="232">C. Tiradentes</text>
-            <text x="410" y="252">Sé</text>
-            <text x="375" y="380">Zona Sul</text>
-            <text x="410" y="155">Santana</text>
-            <text x="315" y="218">Lapa</text>
-            <text x="335" y="252">Pinheiros</text>
-            <text x="520" y="225">São Mateus</text>
-            <text x="345" y="468">Grajaú</text>
-            <text x="320" y="505">Parelheiros</text>
-          </g>
-
-          <!-- Botões zoom -->
-          <g>
-            <rect x="755" y="180" width="28" height="28" rx="6" fill="#111521" stroke="#1a2035"/>
-            <text x="769" y="198" text-anchor="middle" fill="#5a6282" font-size="16" font-family="monospace">+</text>
-            <rect x="755" y="212" width="28" height="28" rx="6" fill="#111521" stroke="#1a2035"/>
-            <text x="769" y="230" text-anchor="middle" fill="#5a6282" font-size="16" font-family="monospace">−</text>
-          </g>
-        </svg>
-
-        <!-- Tooltip do mapa -->
-        <div class="vg-map-tooltip" id="vg-map-tooltip">
-          <div class="vg-map-tt-bairro" id="vg-tt-bairro">—</div>
-          <div class="vg-map-tt-row"><span class="vg-map-tt-lbl">Clientes:</span><span class="vg-map-tt-val" id="vg-tt-cli">—</span></div>
-          <div class="vg-map-tt-row"><span class="vg-map-tt-lbl">Em aberto:</span><span class="vg-map-tt-val" id="vg-tt-cap">—</span></div>
-          <div class="vg-map-tt-row"><span class="vg-map-tt-lbl">Inadimplência:</span><span class="vg-map-tt-val" id="vg-tt-inadim">—</span></div>
-          <span class="vg-map-tt-link" onclick="document.querySelector('[data-tab=clientes]').click()">Ver detalhes →</span>
-        </div>
-
-        <!-- Legenda -->
-        <div class="vg-map-legend">
-          <div class="vg-map-leg-title">Clientes Ativos</div>
-          <div class="vg-map-leg-item"><div class="vg-map-leg-dot" style="background:rgba(26,32,53,0.9);border:1px solid #333"></div> 0</div>
-          <div class="vg-map-leg-item"><div class="vg-map-leg-dot" style="background:rgba(155,93,229,0.5)"></div> 1–5</div>
-          <div class="vg-map-leg-item"><div class="vg-map-leg-dot" style="background:rgba(72,149,239,0.5)"></div> 6–15</div>
-          <div class="vg-map-leg-item"><div class="vg-map-leg-dot" style="background:rgba(240,180,41,0.5)"></div> 16–30</div>
-          <div class="vg-map-leg-item"><div class="vg-map-leg-dot" style="background:rgba(239,71,111,0.55)"></div> 31+</div>
-          <div class="vg-map-leg-item" style="margin-top:4px"><div class="vg-map-leg-dot" style="background:var(--gold2)"></div> Meus Clientes</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PAINEL DIREITO -->
-    <div class="vg-right-panel">
-
-      <!-- INTELIGÊNCIA DE MERCADO -->
-      <div class="vg-intel-card">
-        <div class="vg-intel-header">
-          <div class="vg-intel-title">INTELIGÊNCIA DE MERCADO</div>
-          <div class="vg-intel-tabs">
-            <div class="vg-intel-tab active" onclick="vgIntelTab(this,'noticias')">Notícias</div>
-            <div class="vg-intel-tab" onclick="vgIntelTab(this,'impactos')">Impactos</div>
-            <div class="vg-intel-tab" onclick="vgIntelTab(this,'insights')">Insights</div>
-          </div>
-        </div>
-        <div class="vg-intel-body" id="vg-intel-body">
-          <div class="vg-news-item">
-            <div class="vg-news-icon neg">📉</div>
-            <div>
-              <div class="vg-news-title">Inadimplência cresce 8,1% e atinge maior nível dos últimos 12 meses</div>
-              <div class="vg-news-meta">
-                <span class="vg-news-impact neg">Impacto: Negativo</span>
-                <span class="vg-news-time">27/04/2026 · 20:38</span>
-              </div>
-            </div>
-          </div>
-          <div class="vg-news-item">
-            <div class="vg-news-icon neg">🏦</div>
-            <div>
-              <div class="vg-news-title">Banco Central sinaliza possível alta da Selic na próxima reunião</div>
-              <div class="vg-news-meta">
-                <span class="vg-news-impact neg">Impacto: Negativo</span>
-                <span class="vg-news-time">27/04/2026 · 19:45</span>
-              </div>
-            </div>
-          </div>
-          <div class="vg-news-item">
-            <div class="vg-news-icon pos">🛍</div>
-            <div>
-              <div class="vg-news-title">Vendas no varejo sobem 1,2% em março, acima do esperado</div>
-              <div class="vg-news-meta">
-                <span class="vg-news-impact pos">Impacto: Positivo</span>
-                <span class="vg-news-time">27/04/2026 · 18:15</span>
-              </div>
-            </div>
-          </div>
-          <div class="vg-news-item">
-            <div class="vg-news-icon pos">📊</div>
-            <div>
-              <div class="vg-news-title">Desemprego cai para 7,9%, menor índice desde 2015</div>
-              <div class="vg-news-meta">
-                <span class="vg-news-impact pos">Impacto: Positivo</span>
-                <span class="vg-news-time">27/04/2026 · 17:18</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="vg-intel-footer">
-          <a onclick="">Ver todas as notícias →</a>
-        </div>
-      </div>
-
+    <!-- PAINEL ESQUERDO: Alertas + Recomendação -->
+    <div class="vg-left-panel">
       <!-- ALERTAS ATIVOS -->
       <div class="vg-alerts-card">
         <div class="vg-alerts-header">
@@ -1005,6 +799,369 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
         <div class="vg-rec-btn" onclick="document.querySelector('[data-tab=risco]').click()">
           ← Ver análise completa →
         </div>
+      </div>
+
+      <!-- STATUS DA CARTEIRA -->
+      <div class="vg-status-card">
+        <div class="vg-status-header">
+          <div class="vg-status-title">📋 STATUS</div>
+          <span class="vg-status-link" onclick="document.querySelector('[data-tab=financeiro]').click()">Relatório</span>
+        </div>
+        <div class="vg-status-row">
+          <span class="vg-status-lbl">Total emprestado</span>
+          <span class="vg-status-val" id="vg-st-total">—</span>
+        </div>
+        <div class="vg-status-row">
+          <span class="vg-status-lbl">Em aberto</span>
+          <span class="vg-status-val" id="vg-st-aberto">—</span>
+        </div>
+        <div class="vg-status-row">
+          <span class="vg-status-lbl">Vencido 1–30d</span>
+          <span class="vg-status-val red" id="vg-st-v30">—</span>
+        </div>
+        <div class="vg-status-row">
+          <span class="vg-status-lbl">Vencido +30d</span>
+          <span class="vg-status-val red" id="vg-st-v30p">—</span>
+        </div>
+        <div style="padding-top:6px">
+          <div style="font-size:0.52rem;color:var(--muted);margin-bottom:2px">Inadimplência geral</div>
+          <div class="vg-status-inadim" id="vg-st-inadim-pct">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAPA DE CLIENTES — CENTRO -->
+    <div class="vg-map-card">
+      <div class="vg-map-header">
+        <div>
+          <div class="vg-map-title">🗺 MAPA DE CLIENTES — SÃO PAULO</div>
+          <div class="vg-map-subtitle">Clique em um distrito para ver detalhes</div>
+        </div>
+        <div class="vg-map-search">
+          🔍 <input type="text" placeholder="Buscar distrito..." id="vg-map-search-input" oninput="vgMapSearch(this.value)">
+        </div>
+      </div>
+      <div class="vg-map-body" id="vg-map-body">
+        <!-- SVG com zoom/pan via transform -->
+        <svg id="vg-sp-map" viewBox="0 0 900 780" xmlns="http://www.w3.org/2000/svg"
+          style="width:100%;height:100%;cursor:grab;display:block;"
+          onmousedown="vgDragStart(event)" onmousemove="vgDragMove(event)"
+          onmouseup="vgDragEnd()" onmouseleave="vgDragEnd()"
+          onwheel="vgWheel(event)">
+          <defs>
+            <filter id="districtGlow">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Fundo escuro -->
+          <rect width="900" height="780" fill="#06080f"/>
+          <!-- Grupo principal com zoom/pan -->
+          <g id="vg-map-g" transform="translate(0,0) scale(1)">
+            <!-- DISTRITOS DE SÃO PAULO - coordenadas mapeadas realisticamente -->
+            <!-- ZONA NORTE -->
+            <path id="d-perus" class="sp-d" data-id="perus" data-nome="Perus" data-zona="Zona Norte"
+              d="M 90,80 L 155,60 L 190,90 L 185,130 L 150,145 L 100,125 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-anhanguera" class="sp-d" data-id="anhanguera" data-nome="Anhanguera" data-zona="Zona Norte"
+              d="M 155,60 L 225,45 L 255,80 L 240,115 L 205,125 L 190,90 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-brasilandia" class="sp-d has-cli" data-id="brasilandia" data-nome="Brasilândia" data-zona="Zona Norte"
+              d="M 225,45 L 295,35 L 320,65 L 305,105 L 265,115 L 240,115 L 255,80 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-freguesia-o" class="sp-d has-cli" data-id="freguesia-o" data-nome="Freguesia do Ó" data-zona="Zona Norte"
+              d="M 240,115 L 265,115 L 305,105 L 310,140 L 275,155 L 245,145 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-jaragua" class="sp-d" data-id="jaragua" data-nome="Jaraguá" data-zona="Zona Norte"
+              d="M 90,80 L 100,125 L 75,150 L 55,135 L 60,95 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-tucuruvi" class="sp-d has-cli" data-id="tucuruvi" data-nome="Tucuruvi" data-zona="Zona Norte"
+              d="M 305,105 L 370,90 L 400,110 L 395,145 L 360,158 L 325,150 L 310,140 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-tremembe" class="sp-d has-cli" data-id="tremembe" data-nome="Tremembé" data-zona="Zona Norte"
+              d="M 370,90 L 430,70 L 465,95 L 455,130 L 420,145 L 400,110 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-jacana" class="sp-d has-cli" data-id="jacana" data-nome="Jaçanã" data-zona="Zona Norte"
+              d="M 430,70 L 495,55 L 525,85 L 510,120 L 475,130 L 455,130 L 465,95 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-santana" class="sp-d has-cli" data-id="santana" data-nome="Santana" data-zona="Zona Norte"
+              d="M 360,158 L 395,145 L 420,145 L 425,180 L 400,195 L 365,185 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-mandaqui" class="sp-d" data-id="mandaqui" data-nome="Mandaqui" data-zona="Zona Norte"
+              d="M 420,145 L 455,130 L 475,130 L 480,165 L 455,178 L 425,180 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+
+            <!-- ZONA LESTE -->
+            <path id="d-penha" class="sp-d has-cli" data-id="penha" data-nome="Penha" data-zona="Zona Leste"
+              d="M 510,120 L 555,105 L 590,125 L 585,165 L 555,178 L 520,165 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-ermelino" class="sp-d" data-id="ermelino" data-nome="Ermelino Matarazzo" data-zona="Zona Leste"
+              d="M 555,105 L 615,90 L 650,115 L 645,155 L 615,168 L 585,165 L 590,125 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-ponte-rasa" class="sp-d" data-id="ponte-rasa" data-nome="Ponte Rasa" data-zona="Zona Leste"
+              d="M 510,120 L 555,105 L 555,178 L 520,165 L 510,145 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-tatuape" class="sp-d has-cli" data-id="tatuape" data-nome="Tatuapé" data-zona="Zona Leste"
+              d="M 480,165 L 520,165 L 510,145 L 520,185 L 505,205 L 475,195 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-vila-matilde" class="sp-d" data-id="vila-matilde" data-nome="Vila Matilde" data-zona="Zona Leste"
+              d="M 520,165 L 555,178 L 560,215 L 535,228 L 510,220 L 505,205 L 520,185 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-guaianases" class="sp-d" data-id="guaianases" data-nome="Guaianases" data-zona="Zona Leste"
+              d="M 650,115 L 715,100 L 748,135 L 740,170 L 705,180 L 670,165 L 645,155 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-cidade-tiradentes" class="sp-d has-cli" data-id="cidade-tiradentes" data-nome="Cidade Tiradentes" data-zona="Zona Leste"
+              d="M 715,100 L 790,90 L 820,125 L 810,165 L 775,178 L 740,170 L 748,135 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-itaquera" class="sp-d has-cli" data-id="itaquera" data-nome="Itaquera" data-zona="Zona Leste"
+              d="M 645,155 L 670,165 L 705,180 L 700,220 L 665,235 L 635,225 L 625,195 L 615,168 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-sao-mateus" class="sp-d has-cli" data-id="sao-mateus" data-nome="São Mateus" data-zona="Zona Leste"
+              d="M 600,225 L 625,195 L 635,225 L 665,235 L 660,275 L 635,285 L 605,270 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-sao-rafael" class="sp-d" data-id="sao-rafael" data-nome="São Rafael" data-zona="Zona Leste"
+              d="M 660,275 L 695,265 L 720,290 L 710,325 L 680,335 L 655,320 L 635,285 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-iguatemi" class="sp-d" data-id="iguatemi" data-nome="Iguatemi" data-zona="Zona Leste"
+              d="M 700,220 L 740,210 L 770,235 L 760,270 L 730,280 L 695,265 L 660,275 L 665,235 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-vila-prudente" class="sp-d has-cli" data-id="vila-prudente" data-nome="Vila Prudente" data-zona="Zona Leste"
+              d="M 535,228 L 560,215 L 600,225 L 605,270 L 575,282 L 545,270 L 535,250 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-cidade-ademar-l" class="sp-d" data-id="sapopemba" data-nome="Sapopemba" data-zona="Zona Leste"
+              d="M 605,270 L 635,285 L 655,320 L 635,345 L 610,350 L 580,330 L 575,282 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+
+            <!-- CENTRO -->
+            <path id="d-se" class="sp-d has-cli" data-id="se" data-nome="Sé" data-zona="Centro"
+              d="M 395,275 L 430,265 L 455,280 L 450,310 L 420,318 L 398,305 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-republica" class="sp-d has-cli" data-id="republica" data-nome="República" data-zona="Centro"
+              d="M 365,270 L 395,275 L 398,305 L 370,310 L 355,295 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-bela-vista" class="sp-d" data-id="bela-vista" data-nome="Bela Vista" data-zona="Centro"
+              d="M 420,318 L 450,310 L 460,335 L 440,348 L 415,340 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-liberdade" class="sp-d" data-id="liberdade" data-nome="Liberdade" data-zona="Centro"
+              d="M 398,305 L 420,318 L 415,340 L 390,345 L 378,325 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-consolacao" class="sp-d" data-id="consolacao" data-nome="Consolação" data-zona="Centro"
+              d="M 340,255 L 365,248 L 365,270 L 355,295 L 335,285 L 328,268 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-santa-cecilia" class="sp-d" data-id="santa-cecilia" data-nome="Santa Cecília" data-zona="Centro"
+              d="M 340,225 L 375,218 L 390,240 L 365,248 L 340,255 L 330,242 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-bom-retiro" class="sp-d" data-id="bom-retiro" data-nome="Bom Retiro" data-zona="Centro"
+              d="M 375,218 L 410,205 L 430,225 L 430,265 L 395,275 L 390,240 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-bras" class="sp-d" data-id="bras" data-nome="Brás" data-zona="Centro"
+              d="M 430,265 L 455,280 L 475,268 L 505,270 L 505,295 L 475,305 L 450,310 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-mooca" class="sp-d has-cli" data-id="mooca" data-nome="Mooca" data-zona="Centro-Leste"
+              d="M 455,280 L 505,270 L 535,250 L 545,270 L 535,290 L 505,295 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-ipiranga" class="sp-d" data-id="ipiranga" data-nome="Ipiranga" data-zona="Centro-Sul"
+              d="M 450,310 L 505,295 L 535,290 L 545,320 L 535,345 L 505,355 L 465,350 L 460,335 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+
+            <!-- ZONA OESTE -->
+            <path id="d-lapa" class="sp-d has-cli" data-id="lapa" data-nome="Lapa" data-zona="Zona Oeste"
+              d="M 245,210 L 285,195 L 305,215 L 300,248 L 270,255 L 248,242 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-perdizes" class="sp-d has-cli" data-id="perdizes" data-nome="Perdizes" data-zona="Zona Oeste"
+              d="M 285,195 L 325,185 L 340,205 L 340,225 L 330,242 L 300,248 L 305,215 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-pinheiros" class="sp-d has-cli" data-id="pinheiros" data-nome="Pinheiros" data-zona="Zona Oeste"
+              d="M 245,248 L 270,255 L 300,248 L 328,268 L 315,290 L 290,295 L 255,278 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-butanta" class="sp-d has-cli" data-id="butanta" data-nome="Butantã" data-zona="Zona Oeste"
+              d="M 170,265 L 210,252 L 245,248 L 255,278 L 245,308 L 212,318 L 175,305 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-alto-pinheiros" class="sp-d" data-id="alto-pinheiros" data-nome="Alto de Pinheiros" data-zona="Zona Oeste"
+              d="M 210,190 L 245,178 L 285,195 L 305,215 L 270,225 L 245,225 L 210,225 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-vila-leo" class="sp-d" data-id="vila-leo" data-nome="Vila Leopoldina" data-zona="Zona Oeste"
+              d="M 155,190 L 200,178 L 210,190 L 210,225 L 185,235 L 160,225 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-pirituba" class="sp-d" data-id="pirituba" data-nome="Pirituba" data-zona="Zona Oeste"
+              d="M 100,145 L 150,145 L 185,160 L 185,200 L 155,210 L 120,200 L 100,175 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-jaguara" class="sp-d" data-id="jaguara" data-nome="Jaguará" data-zona="Zona Oeste"
+              d="M 100,175 L 120,200 L 155,210 L 155,230 L 135,240 L 105,228 L 95,210 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+
+            <!-- ZONA SUL -->
+            <path id="d-saude" class="sp-d has-cli" data-id="saude" data-nome="Saúde" data-zona="Zona Sul"
+              d="M 415,340 L 440,348 L 465,350 L 465,375 L 440,382 L 415,372 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-jabaquara" class="sp-d" data-id="jabaquara" data-nome="Jabaquara" data-zona="Zona Sul"
+              d="M 378,325 L 415,340 L 415,372 L 390,382 L 365,368 L 360,348 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-vila-mariana" class="sp-d" data-id="vila-mariana" data-nome="Vila Mariana" data-zona="Zona Sul"
+              d="M 335,285 L 355,295 L 378,325 L 360,348 L 335,342 L 318,318 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-campo-belo" class="sp-d" data-id="campo-belo" data-nome="Campo Belo" data-zona="Zona Sul"
+              d="M 290,295 L 318,318 L 335,342 L 320,365 L 295,368 L 272,352 L 272,325 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-santo-amaro" class="sp-d has-cli" data-id="santo-amaro" data-nome="Santo Amaro" data-zona="Zona Sul"
+              d="M 245,308 L 272,325 L 272,352 L 250,370 L 222,360 L 215,335 L 228,318 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-campo-grande" class="sp-d has-cli" data-id="campo-grande" data-nome="Campo Grande" data-zona="Zona Sul"
+              d="M 175,305 L 215,335 L 222,360 L 205,382 L 172,385 L 150,365 L 152,338 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-pedreira" class="sp-d" data-id="pedreira" data-nome="Pedreira" data-zona="Zona Sul"
+              d="M 152,338 L 172,385 L 165,415 L 140,420 L 118,400 L 120,370 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-cidade-ademar" class="sp-d" data-id="cidade-ademar" data-nome="Cidade Ademar" data-zona="Zona Sul"
+              d="M 205,382 L 222,360 L 250,370 L 260,400 L 248,425 L 222,430 L 205,415 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-Socorro" class="sp-d" data-id="socorro" data-nome="Socorro" data-zona="Zona Sul"
+              d="M 248,425 L 260,400 L 295,368 L 310,390 L 318,420 L 295,445 L 265,448 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-cursino" class="sp-d" data-id="cursino" data-nome="Cursino" data-zona="Zona Sul"
+              d="M 320,365 L 360,368 L 375,395 L 355,420 L 325,422 L 310,390 L 295,368 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-sapopemba-s" class="sp-d" data-id="vila-andrade" data-nome="Vila Andrade" data-zona="Zona Sul"
+              d="M 175,390 L 205,415 L 222,430 L 215,460 L 190,468 L 162,450 L 158,420 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-cidade-dutra" class="sp-d" data-id="cidade-dutra" data-nome="Cidade Dutra" data-zona="Zona Sul"
+              d="M 215,460 L 248,448 L 265,448 L 275,478 L 255,500 L 225,498 L 208,480 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-grajau" class="sp-d has-cli" data-id="grajau" data-nome="Grajaú" data-zona="Zona Sul"
+              d="M 265,448 L 295,445 L 318,420 L 355,435 L 360,475 L 335,498 L 300,502 L 275,478 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-parelheiros" class="sp-d has-cli" data-id="parelheiros" data-nome="Parelheiros" data-zona="Zona Sul"
+              d="M 225,498 L 255,500 L 275,478 L 300,502 L 310,540 L 285,560 L 248,555 L 225,535 Z"
+              fill="#b0bec5" stroke="#cfd8dc" stroke-width="1.5"/>
+            <path id="d-marsilac" class="sp-d" data-id="marsilac" data-nome="Marsilac" data-zona="Zona Sul"
+              d="M 248,555 L 285,560 L 310,540 L 330,570 L 315,610 L 270,620 L 235,600 L 225,570 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-mboi" class="sp-d" data-id="m-boi-mirim" data-nome="M'Boi Mirim" data-zona="Zona Sul"
+              d="M 155,415 L 165,415 L 162,450 L 190,468 L 208,480 L 225,535 L 205,555 L 165,540 L 142,505 L 138,465 L 148,440 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+            <path id="d-capao-redondo" class="sp-d" data-id="capao-redondo" data-nome="Capão Redondo" data-zona="Zona Sul"
+              d="M 155,415 L 140,420 L 125,440 L 130,470 L 148,480 L 160,465 L 165,440 L 162,420 Z"
+              fill="#1e2a3a" stroke="#2a3a52" stroke-width="1.5"/>
+          </g>
+          <!-- Grupo de bolinhas douradas (meus clientes) -->
+          <g id="vg-client-dots"></g>
+        </svg>
+
+        <!-- Botões zoom -->
+        <div class="vg-zoom-btns">
+          <button class="vg-zoom-btn" onclick="vgZoom(1.25)" title="Zoom In">+</button>
+          <button class="vg-zoom-btn" onclick="vgZoom(0.8)" title="Zoom Out">−</button>
+          <button class="vg-zoom-btn" onclick="vgZoomReset()" title="Resetar" style="font-size:0.6rem">↺</button>
+        </div>
+
+        <!-- Legenda -->
+        <div class="vg-map-legend">
+          <div class="vg-map-leg-title">Legenda</div>
+          <div class="vg-map-leg-item"><div class="vg-map-leg-dot" style="background:#1e2a3a;border:1px solid #2a3a52"></div> Sem clientes</div>
+          <div class="vg-map-leg-item"><div class="vg-map-leg-dot" style="background:#b0bec5"></div> Com clientes</div>
+          <div class="vg-map-leg-item"><div class="vg-map-leg-dot" style="background:var(--gold2);box-shadow:0 0 5px rgba(232,184,75,0.5)"></div> Clientes ativos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAINEL DIREITO -->
+    <div class="vg-right-panel">
+      <!-- INTELIGÊNCIA DE MERCADO -->
+      <div class="vg-intel-card">
+        <div class="vg-intel-header">
+          <div class="vg-intel-title">INTELIGÊNCIA DE MERCADO</div>
+          <div class="vg-intel-tabs">
+            <div class="vg-intel-tab active" onclick="vgIntelTab(this,'noticias')">Notícias</div>
+            <div class="vg-intel-tab" onclick="vgIntelTab(this,'impactos')">Impactos</div>
+            <div class="vg-intel-tab" onclick="vgIntelTab(this,'insights')">Insights</div>
+          </div>
+        </div>
+        <div class="vg-intel-body" id="vg-intel-body">
+          <div class="vg-news-item">
+            <div class="vg-news-icon neg">📉</div>
+            <div>
+              <div class="vg-news-title">Inadimplência cresce 8,1% e atinge maior nível dos últimos 12 meses</div>
+              <div class="vg-news-meta"><span class="vg-news-impact neg">Impacto: Negativo</span><span class="vg-news-time">27/04/2026 · 20:38</span></div>
+            </div>
+          </div>
+          <div class="vg-news-item">
+            <div class="vg-news-icon neg">🏦</div>
+            <div>
+              <div class="vg-news-title">Banco Central sinaliza possível alta da Selic na próxima reunião</div>
+              <div class="vg-news-meta"><span class="vg-news-impact neg">Impacto: Negativo</span><span class="vg-news-time">27/04/2026 · 19:45</span></div>
+            </div>
+          </div>
+          <div class="vg-news-item">
+            <div class="vg-news-icon pos">🛍</div>
+            <div>
+              <div class="vg-news-title">Vendas no varejo sobem 1,2% em março, acima do esperado</div>
+              <div class="vg-news-meta"><span class="vg-news-impact pos">Impacto: Positivo</span><span class="vg-news-time">27/04/2026 · 18:15</span></div>
+            </div>
+          </div>
+          <div class="vg-news-item">
+            <div class="vg-news-icon pos">📊</div>
+            <div>
+              <div class="vg-news-title">Desemprego cai para 7,9%, menor índice desde 2015</div>
+              <div class="vg-news-meta"><span class="vg-news-impact pos">Impacto: Positivo</span><span class="vg-news-time">27/04/2026 · 17:18</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="vg-intel-footer"><a onclick="">Ver todas as notícias →</a></div>
+      </div>
+
+      <!-- CARTEIRA DE CLIENTES -->
+      <div class="vg-cart-card">
+        <div class="vg-cart-header">
+          <div class="vg-cart-title">💼 CARTEIRA</div>
+          <span class="vg-cart-link" onclick="document.querySelector('[data-tab=clientes]').click()">Ver todos</span>
+        </div>
+        <div class="vg-cart-donut">
+          <canvas id="chartComposicao" width="150" height="150" style="max-width:150px;max-height:150px"></canvas>
+          <div class="vg-cart-center">
+            <div class="vg-cart-center-num" id="vg-cart-total">—</div>
+            <div class="vg-cart-center-lbl">Clientes</div>
+          </div>
+        </div>
+        <div class="vg-cart-legend">
+          <div class="vg-cart-leg-item"><div style="display:flex;align-items:center"><div class="vg-cart-leg-dot" style="background:var(--green)"></div> Baixo Risco</div><span id="vg-cart-baixo" style="color:var(--green)">—</span></div>
+          <div class="vg-cart-leg-item"><div style="display:flex;align-items:center"><div class="vg-cart-leg-dot" style="background:var(--gold2)"></div> Médio Risco</div><span id="vg-cart-medio" style="color:var(--gold2)">—</span></div>
+          <div class="vg-cart-leg-item"><div style="display:flex;align-items:center"><div class="vg-cart-leg-dot" style="background:var(--red)"></div> Alto Risco</div><span id="vg-cart-alto" style="color:var(--red)">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL BAIRRO POP-UP -->
+  <div class="vg-bairro-modal-overlay" id="vg-bairro-modal" onclick="if(event.target===this)vgModalClose()">
+    <div class="vg-bairro-modal">
+      <div class="vg-bm-header">
+        <div>
+          <div class="vg-bm-bairro" id="vg-bm-nome">—</div>
+          <div class="vg-bm-zona" id="vg-bm-zona">—</div>
+        </div>
+        <button class="vg-bm-close" onclick="vgModalClose()">✕</button>
+      </div>
+      <div class="vg-bm-kpis">
+        <div class="vg-bm-kpi">
+          <div class="vg-bm-kpi-lbl">Clientes</div>
+          <div class="vg-bm-kpi-val" id="vg-bm-ncli" style="color:var(--gold2)">—</div>
+        </div>
+        <div class="vg-bm-kpi">
+          <div class="vg-bm-kpi-lbl">Total Emprestado</div>
+          <div class="vg-bm-kpi-val" id="vg-bm-capital" style="color:var(--green);font-size:1rem">—</div>
+        </div>
+        <div class="vg-bm-kpi">
+          <div class="vg-bm-kpi-lbl">Inadimplência</div>
+          <div class="vg-bm-kpi-val" id="vg-bm-inadim" style="color:var(--red)">—</div>
+        </div>
+      </div>
+      <div class="vg-bm-body">
+        <div class="vg-bm-section">CLIENTES NESTE DISTRITO</div>
+        <div id="vg-bm-lista-cli">—</div>
+      </div>
+      <div class="vg-bm-footer">
+        <button class="vg-bm-btn sec" onclick="vgModalClose()">Fechar</button>
+        <button class="vg-bm-btn pri" onclick="document.querySelector('[data-tab=clientes]').click();vgModalClose()">Ver Carteira Completa</button>
       </div>
     </div>
   </div>
