@@ -502,54 +502,802 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="nav-tab" data-tab="whatsapp">📱 WhatsApp</div>
 </div>
 
-<!-- VISÃO GERAL -->
+<!-- VISÃO GERAL — NOVO LAYOUT -->
+<style>
+/* ── VISÃO GERAL NOVA ── */
+.vg-header-strip{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap;}
+.vg-title-block{display:flex;flex-direction:column;gap:2px;}
+.vg-title{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold);letter-spacing:0.06em;}
+.vg-subtitle{font-size:0.6rem;color:var(--muted);letter-spacing:0.08em;}
+.vg-export-btn{display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:8px;padding:9px 18px;font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:700;cursor:pointer;letter-spacing:0.07em;white-space:nowrap;}
+
+/* KPI STRIP TOP */
+.vg-kpi-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px;}
+@media(max-width:1100px){.vg-kpi-strip{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:640px){.vg-kpi-strip{grid-template-columns:repeat(2,1fr);}}
+.vg-kpi{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;animation:fadeUp 0.4s ease both;}
+.vg-kpi-lbl{font-size:0.58rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+.vg-kpi-val{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;line-height:1;margin-bottom:3px;}
+.vg-kpi-delta{font-size:0.58rem;display:flex;align-items:center;gap:3px;}
+.vg-kpi-delta.up{color:var(--green);}
+.vg-kpi-delta.down{color:var(--red);}
+.vg-kpi-sparkline{position:absolute;bottom:0;right:0;opacity:0.35;pointer-events:none;}
+
+/* MAIN GRID */
+.vg-main-grid{display:grid;grid-template-columns:1fr 320px;gap:14px;margin-bottom:14px;}
+@media(max-width:1024px){.vg-main-grid{grid-template-columns:1fr;}}
+
+/* MAPA */
+.vg-map-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative;animation:fadeUp 0.4s ease both;}
+.vg-map-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--border);}
+.vg-map-title{font-family:'Bebas Neue',sans-serif;font-size:0.82rem;letter-spacing:0.14em;color:var(--text);}
+.vg-map-subtitle{font-size:0.58rem;color:var(--muted);}
+.vg-map-search{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:5px 10px;font-size:0.58rem;color:var(--muted);}
+.vg-map-search input{background:none;border:none;outline:none;color:var(--text);font-family:'DM Mono',monospace;font-size:0.62rem;width:120px;}
+.vg-map-body{position:relative;height:340px;background:var(--s2);}
+.vg-map-svg{width:100%;height:100%;object-fit:cover;}
+.vg-map-legend{position:absolute;bottom:14px;left:14px;background:rgba(7,9,14,0.88);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;}
+.vg-map-leg-title{font-size:0.52rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;}
+.vg-map-leg-item{display:flex;align-items:center;gap:6px;font-size:0.58rem;color:var(--muted);margin-bottom:4px;}
+.vg-map-leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.vg-map-tooltip{position:absolute;background:rgba(7,9,14,0.96);border:1px solid var(--gold);border-radius:10px;padding:14px 16px;min-width:190px;pointer-events:none;display:none;}
+.vg-map-tooltip.show{display:block;}
+.vg-map-tt-bairro{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--gold);letter-spacing:0.1em;margin-bottom:8px;}
+.vg-map-tt-row{display:flex;justify-content:space-between;font-size:0.62rem;margin-bottom:4px;}
+.vg-map-tt-lbl{color:var(--muted);}
+.vg-map-tt-val{color:var(--text);font-family:'Bebas Neue',sans-serif;}
+.vg-map-tt-link{display:block;margin-top:8px;font-size:0.58rem;color:var(--gold);text-align:right;cursor:pointer;}
+
+/* PAINEL DIREITO */
+.vg-right-panel{display:flex;flex-direction:column;gap:12px;}
+
+/* INTELIGÊNCIA DE MERCADO */
+.vg-intel-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:fadeUp 0.4s ease both;flex:1;}
+.vg-intel-header{padding:14px 16px 0;}
+.vg-intel-title{font-family:'Bebas Neue',sans-serif;font-size:0.82rem;letter-spacing:0.14em;color:var(--text);margin-bottom:10px;}
+.vg-intel-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);}
+.vg-intel-tab{font-size:0.6rem;padding:7px 14px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;letter-spacing:0.06em;transition:all 0.2s;user-select:none;}
+.vg-intel-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.vg-intel-body{padding:10px 14px;max-height:220px;overflow-y:auto;}
+.vg-news-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.vg-news-item:last-child{border-bottom:none;}
+.vg-news-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;}
+.vg-news-icon.neg{background:rgba(239,71,111,0.12);}
+.vg-news-icon.pos{background:rgba(6,214,160,0.1);}
+.vg-news-icon.neu{background:rgba(72,149,239,0.1);}
+.vg-news-title{font-size:0.65rem;color:var(--text);line-height:1.4;margin-bottom:3px;}
+.vg-news-meta{display:flex;align-items:center;gap:6px;font-size:0.52rem;}
+.vg-news-impact{font-size:0.5rem;padding:1px 6px;border-radius:10px;}
+.vg-news-impact.neg{color:var(--red);background:rgba(239,71,111,0.1);}
+.vg-news-impact.pos{color:var(--green);background:rgba(6,214,160,0.08);}
+.vg-news-time{color:var(--muted2);}
+.vg-intel-footer{padding:8px 14px;border-top:1px solid var(--border);text-align:center;}
+.vg-intel-footer a{font-size:0.58rem;color:var(--muted);cursor:pointer;text-decoration:none;}
+.vg-intel-footer a:hover{color:var(--gold);}
+
+/* ALERTAS CARD */
+.vg-alerts-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:fadeUp 0.5s ease both;}
+.vg-alerts-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);}
+.vg-alerts-title{font-family:'Bebas Neue',sans-serif;font-size:0.78rem;letter-spacing:0.12em;color:var(--text);}
+.vg-alerts-ver{font-size:0.55rem;color:var(--gold2);cursor:pointer;}
+.vg-alerts-ver:hover{color:var(--gold);}
+.vg-alert-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border);}
+.vg-alert-item:last-child{border-bottom:none;}
+.vg-alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.vg-alert-dot.red{background:var(--red);box-shadow:0 0 6px rgba(239,71,111,0.4);}
+.vg-alert-dot.yellow{background:var(--gold2);}
+.vg-alert-dot.orange{background:#f4a261;}
+.vg-alert-txt{font-size:0.62rem;color:var(--text);line-height:1.4;}
+
+/* RECOMENDAÇÃO */
+.vg-rec-card{background:linear-gradient(135deg,rgba(155,93,229,0.12),rgba(72,149,239,0.08));border:1px solid rgba(155,93,229,0.25);border-radius:14px;padding:14px;animation:fadeUp 0.6s ease both;position:relative;overflow:hidden;}
+.vg-rec-card::before{content:'';position:absolute;top:-30px;right:-30px;width:80px;height:80px;border-radius:50%;background:rgba(155,93,229,0.15);pointer-events:none;}
+.vg-rec-icon{font-size:1.6rem;position:absolute;top:14px;right:14px;opacity:0.6;}
+.vg-rec-title{font-family:'Bebas Neue',sans-serif;font-size:0.78rem;letter-spacing:0.12em;color:var(--purple);margin-bottom:4px;}
+.vg-rec-sub{font-size:0.58rem;color:var(--muted);margin-bottom:10px;}
+.vg-rec-item{display:flex;align-items:center;gap:7px;font-size:0.6rem;color:var(--text);margin-bottom:5px;}
+.vg-rec-item::before{content:'✓';color:var(--purple);font-size:0.65rem;flex-shrink:0;}
+.vg-rec-btn{margin-top:10px;display:inline-flex;align-items:center;gap:5px;font-size:0.58rem;color:var(--purple);background:rgba(155,93,229,0.1);border:1px solid rgba(155,93,229,0.25);border-radius:20px;padding:5px 12px;cursor:pointer;letter-spacing:0.04em;}
+.vg-rec-btn:hover{background:rgba(155,93,229,0.2);}
+
+/* BOTTOM GRID */
+.vg-bottom-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;}
+@media(max-width:960px){.vg-bottom-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:640px){.vg-bottom-grid{grid-template-columns:1fr;}}
+
+/* TENDÊNCIAS */
+.vg-trend-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px;animation:fadeUp 0.4s ease both;}
+.vg-trend-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.vg-trend-title{font-family:'Bebas Neue',sans-serif;font-size:0.78rem;letter-spacing:0.12em;color:var(--text);}
+.vg-trend-select{background:var(--s2);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.55rem;padding:3px 8px;cursor:pointer;outline:none;}
+.vg-trend-big{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;line-height:1;color:var(--red);margin-bottom:4px;}
+.vg-trend-delta{font-size:0.6rem;color:var(--red);margin-bottom:10px;}
+.vg-trend-sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.vg-trend-sub{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;}
+.vg-trend-sub-lbl{font-size:0.52rem;color:var(--muted);margin-bottom:3px;}
+.vg-trend-sub-val{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--green);}
+.vg-trend-sub-delta{font-size:0.52rem;color:var(--green);}
+
+/* CARTEIRA */
+.vg-cart-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px;animation:fadeUp 0.5s ease both;}
+.vg-cart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.vg-cart-title{font-family:'Bebas Neue',sans-serif;font-size:0.78rem;letter-spacing:0.12em;color:var(--text);}
+.vg-cart-link{font-size:0.55rem;color:var(--gold2);cursor:pointer;}
+.vg-cart-donut{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.vg-cart-center{position:absolute;text-align:center;pointer-events:none;}
+.vg-cart-center-num{font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:var(--text);}
+.vg-cart-center-lbl{font-size:0.52rem;color:var(--muted);}
+.vg-cart-legend{display:flex;flex-direction:column;gap:6px;}
+.vg-cart-leg-item{display:flex;align-items:center;justify-content:space-between;font-size:0.6rem;}
+.vg-cart-leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;margin-right:6px;}
+
+/* STATUS CARTEIRA */
+.vg-status-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px;animation:fadeUp 0.6s ease both;}
+.vg-status-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.vg-status-title{font-family:'Bebas Neue',sans-serif;font-size:0.78rem;letter-spacing:0.12em;color:var(--text);}
+.vg-status-link{font-size:0.55rem;color:var(--gold2);cursor:pointer;}
+.vg-status-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
+.vg-status-row:last-child{border-bottom:none;}
+.vg-status-lbl{font-size:0.65rem;color:var(--muted);}
+.vg-status-val{font-size:0.72rem;color:var(--text);font-family:'DM Mono',monospace;}
+.vg-status-val.red{color:var(--red);}
+.vg-status-inadim{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--red);padding-top:8px;}
+
+/* BAIRROS */
+.vg-bairros-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:fadeUp 0.7s ease both;}
+.vg-bairros-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);}
+.vg-bairros-title{font-family:'Bebas Neue',sans-serif;font-size:0.78rem;letter-spacing:0.12em;color:var(--text);}
+.vg-bairros-row{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border);font-size:0.62rem;}
+.vg-bairros-row:last-child{border-bottom:none;}
+.vg-bairros-nome{color:var(--text);}
+.vg-bairros-cli{color:var(--muted);}
+.vg-bairros-val{color:var(--gold2);font-family:'DM Mono',monospace;}
+
+/* Hidden inputs preservados */
+#meta-input, #meta-bar-fill, #meta-realizado-txt, #meta-pct-txt, #meta-bar-wrap, #meta-desc, #notif-venc{display:none!important;}
+</style>
+
 <div id="tab-visao" class="tab-panel active">
-  <div id="alertasBanner"></div>
-  <!-- NOTIFICAÇÃO VENCIMENTOS HOJE/AMANHÃ -->
-  <div id="notif-venc" style="display:none;background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.3);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;animation:fadeUp 0.4s ease">
-    <span style="font-size:1.2rem">🔔</span>
-    <div style="flex:1"><div id="notif-venc-texto" style="font-size:0.8rem;color:var(--red);font-weight:600"></div><div id="notif-venc-sub" style="font-size:0.58rem;color:var(--muted);margin-top:2px"></div></div>
-    <button onclick="document.getElementById('notif-venc').style.display='none'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem">✕</button>
+  <!-- Elementos ocultos preservados para compatibilidade com JS -->
+  <div id="alertasBanner" style="display:none"></div>
+  <div id="notif-venc" style="display:none!important">
+    <div id="notif-venc-texto"></div><div id="notif-venc-sub"></div>
   </div>
-  <!-- META MENSAL -->
-  <div id="meta-bar-wrap" style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px;animation:fadeUp 0.4s ease">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div>
-        <div style="font-size:0.58rem;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:2px">🎯 Meta de Juros do Mês</div>
-        <div style="font-size:0.62rem;color:var(--muted2)" id="meta-desc">—</div>
+  <div id="meta-bar-wrap" style="display:none!important">
+    <div id="meta-desc"></div>
+    <input id="meta-input" type="number">
+    <div id="meta-bar-fill"></div>
+    <span id="meta-realizado-txt"></span>
+    <span id="meta-pct-txt"></span>
+  </div>
+
+  <!-- HEADER DA ABA -->
+  <div class="vg-header-strip">
+    <div class="vg-title-block">
+      <div class="vg-title">Visão Geral</div>
+      <div class="vg-subtitle">Panorama do mercado e da sua operação</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-size:0.62rem;color:var(--muted);display:flex;align-items:center;gap:7px">
+        📅 <span id="vg-today-date2">—</span>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <input id="meta-input" type="number" placeholder="Ex: 1000" style="background:var(--s2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.62rem;padding:5px 10px;width:130px;outline:none" onchange="salvarMeta()">
-        <button onclick="salvarMeta()" style="background:rgba(201,146,42,0.12);border:1px solid rgba(201,146,42,0.3);color:var(--gold2);border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:0.58rem;cursor:pointer;letter-spacing:0.06em">DEFINIR</button>
+      <button class="vg-export-btn" onclick="window.print()">
+        ↗ Exportar Relatório
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI STRIP -->
+  <div class="vg-kpi-strip">
+    <div class="vg-kpi" style="--delay:0s;animation-delay:0s">
+      <div class="vg-kpi-lbl">Score de Mercado</div>
+      <div class="vg-kpi-val" style="color:var(--gold)">7,2<span style="font-size:1rem;opacity:0.6"> /10</span></div>
+      <div class="vg-kpi-delta" style="color:var(--gold2)">⚠ Risco Médio</div>
+    </div>
+    <div class="vg-kpi" style="animation-delay:0.05s">
+      <div class="vg-kpi-lbl">SELIC</div>
+      <div class="vg-kpi-val" style="color:var(--blue)">10,50%</div>
+      <div class="vg-kpi-delta up">↑ 0,25 p.p. (mês)</div>
+    </div>
+    <div class="vg-kpi" style="animation-delay:0.1s">
+      <div class="vg-kpi-lbl">Inflação (IPCA)</div>
+      <div class="vg-kpi-val" style="color:var(--gold2)">4,50%</div>
+      <div class="vg-kpi-delta up">↑ 0,20 p.p. (mês)</div>
+    </div>
+    <div class="vg-kpi" style="animation-delay:0.15s">
+      <div class="vg-kpi-lbl">Inadimplência (Geral)</div>
+      <div class="vg-kpi-val" id="kpi-inadim" style="color:var(--red)">—</div>
+      <div class="vg-kpi-delta down" id="kpi-inadim-sub">—</div>
+    </div>
+    <div class="vg-kpi" style="animation-delay:0.2s">
+      <div class="vg-kpi-lbl">Demanda por Crédito</div>
+      <div class="vg-kpi-val" style="color:var(--green);font-size:1.2rem;padding-top:6px">R$ Alta</div>
+      <div class="vg-kpi-delta up">↑ 12% (mês)</div>
+    </div>
+    <div class="vg-kpi" style="animation-delay:0.25s">
+      <div class="vg-kpi-lbl">Lucro Total (Mês)</div>
+      <div class="vg-kpi-val" id="kpi-lucro" style="color:var(--green);font-size:1.3rem"></div>
+      <div class="vg-kpi-delta up" id="kpi-lucro-delta">↑ via juros recebidos</div>
+    </div>
+  </div>
+
+  <!-- KPIs OCULTOS PARA COMPATIBILIDADE JS -->
+  <span id="kpi-na-rua" style="display:none"></span>
+  <span id="kpi-na-rua-sub" style="display:none"></span>
+  <span id="kpi-capital" style="display:none"></span>
+  <span id="kpi-cap-sub" style="display:none"></span>
+  <span id="kpi-roi" style="display:none"></span>
+  <span id="kpi-semana" style="display:none"></span>
+  <span id="kpi-cli-ativos" style="display:none"></span>
+  <span id="kpi-cli-sub" style="display:none"></span>
+  <span id="kpi-realizado" style="display:none"></span>
+  <span id="kpi-ticket" style="display:none"></span>
+  <span id="kpi-prazo" style="display:none"></span>
+
+  <!-- GRID PRINCIPAL: MAPA + PAINEL DIREITO -->
+  <div class="vg-main-grid">
+
+    <!-- MAPA DE CLIENTES -->
+    <div class="vg-map-card">
+      <div class="vg-map-header">
+        <div>
+          <div class="vg-map-title">🗺 MAPA DE CLIENTES — SÃO PAULO</div>
+          <div class="vg-map-subtitle">Clientes ativos por bairro</div>
+        </div>
+        <div class="vg-map-search">
+          🔍 <input type="text" placeholder="Buscar bairro..." id="vg-map-search-input">
+        </div>
+      </div>
+      <div class="vg-map-body" id="vg-map-body">
+        <!-- SVG Map of São Paulo districts -->
+        <svg id="vg-sp-map" viewBox="0 0 800 580" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;cursor:default">
+          <defs>
+            <radialGradient id="mapGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(201,146,42,0.06)"/>
+              <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+            </radialGradient>
+          </defs>
+          <rect width="800" height="580" fill="#0c0f18"/>
+          <rect width="800" height="580" fill="url(#mapGlow)"/>
+
+          <!-- Bairros de SP - polígonos simplificados com data-bairro para interatividade -->
+          <g id="sp-districts" stroke="#1a2035" stroke-width="1.2" fill-opacity="0.75">
+            <!-- Zona Centro -->
+            <polygon data-bairro="Sé" data-clientes="8" data-capital="185000" data-inadim="6.2"
+              points="390,240 420,230 445,245 440,270 415,275 388,265"
+              fill="rgba(155,93,229,0.5)" class="sp-district"/>
+            <polygon data-bairro="República" data-clientes="5" data-capital="110000" data-inadim="4.1"
+              points="365,235 390,240 388,265 360,268 355,250"
+              fill="rgba(155,93,229,0.4)" class="sp-district"/>
+            <polygon data-bairro="Bela Vista" data-clientes="3" data-capital="78000" data-inadim="3.5"
+              points="415,275 440,270 450,290 425,298 410,290"
+              fill="rgba(155,93,229,0.35)" class="sp-district"/>
+            <polygon data-bairro="Liberdade" data-clientes="4" data-capital="92000" data-inadim="5.0"
+              points="388,265 415,275 410,290 382,288 378,272"
+              fill="rgba(155,93,229,0.4)" class="sp-district"/>
+
+            <!-- Zona Leste -->
+            <polygon data-bairro="Itaquera" data-clientes="27" data-capital="589400" data-inadim="14.2"
+              points="560,210 640,200 680,230 670,290 610,300 555,270"
+              fill="rgba(239,71,111,0.55)" class="sp-district"/>
+            <polygon data-bairro="São Mateus" data-clientes="14" data-capital="298000" data-inadim="9.8"
+              points="490,240 560,210 555,270 500,278 485,260"
+              fill="rgba(240,180,41,0.45)" class="sp-district"/>
+            <polygon data-bairro="Penha" data-clientes="11" data-capital="230000" data-inadim="8.1"
+              points="480,180 560,210 490,240 455,220 460,190"
+              fill="rgba(240,180,41,0.4)" class="sp-district"/>
+            <polygon data-bairro="Tatuapé" data-clientes="9" data-capital="195000" data-inadim="7.2"
+              points="450,185 480,180 460,190 455,220 430,215 435,195"
+              fill="rgba(201,146,42,0.4)" class="sp-district"/>
+            <polygon data-bairro="Vila Prudente" data-clientes="7" data-capital="148000" data-inadim="6.5"
+              points="500,278 555,270 560,310 510,320 495,300"
+              fill="rgba(201,146,42,0.4)" class="sp-district"/>
+            <polygon data-bairro="Cidade Tiradentes" data-clientes="18" data-capital="413500" data-inadim="11.5"
+              points="640,200 720,210 730,260 680,270 670,290 680,230"
+              fill="rgba(239,71,111,0.5)" class="sp-district"/>
+
+            <!-- Zona Sul -->
+            <polygon data-bairro="Zona Sul (Diversos)" data-clientes="23" data-capital="524000" data-inadim="10.2"
+              points="340,340 420,320 460,350 450,400 390,420 330,400 320,370"
+              fill="rgba(239,71,111,0.45)" class="sp-district"/>
+            <polygon data-bairro="Santo Amaro" data-clientes="6" data-capital="128000" data-inadim="5.5"
+              points="290,370 330,360 330,400 295,405 280,390"
+              fill="rgba(201,146,42,0.35)" class="sp-district"/>
+            <polygon data-bairro="Campo Grande" data-clientes="4" data-capital="88000" data-inadim="4.8"
+              points="235,400 280,390 285,420 240,430 230,415"
+              fill="rgba(155,93,229,0.35)" class="sp-district"/>
+            <polygon data-bairro="Saúde" data-clientes="5" data-capital="112000" data-inadim="4.2"
+              points="420,320 460,310 460,350 420,355 415,335"
+              fill="rgba(201,146,42,0.35)" class="sp-district"/>
+
+            <!-- Zona Norte -->
+            <polygon data-bairro="Santana" data-clientes="10" data-capital="215000" data-inadim="7.4"
+              points="380,140 440,130 455,170 420,185 375,175"
+              fill="rgba(72,149,239,0.5)" class="sp-district"/>
+            <polygon data-bairro="Tucuruvi" data-clientes="7" data-capital="155000" data-inadim="6.0"
+              points="420,105 480,100 490,140 450,155 425,145"
+              fill="rgba(72,149,239,0.4)" class="sp-district"/>
+            <polygon data-bairro="Jaçanã" data-clientes="5" data-capital="108000" data-inadim="5.5"
+              points="480,80 530,90 535,120 490,140 480,100"
+              fill="rgba(6,214,160,0.4)" class="sp-district"/>
+            <polygon data-bairro="Tremembé" data-clientes="3" data-capital="65000" data-inadim="4.0"
+              points="440,70 480,80 480,100 440,105 430,88"
+              fill="rgba(6,214,160,0.35)" class="sp-district"/>
+
+            <!-- Zona Oeste -->
+            <polygon data-bairro="Lapa" data-clientes="9" data-capital="198000" data-inadim="7.0"
+              points="270,195 330,185 340,215 310,230 265,220"
+              fill="rgba(72,149,239,0.45)" class="sp-district"/>
+            <polygon data-bairro="Pinheiros" data-clientes="6" data-capital="138000" data-inadim="5.2"
+              points="310,230 355,225 360,255 325,265 305,250"
+              fill="rgba(6,214,160,0.4)" class="sp-district"/>
+            <polygon data-bairro="Butantã" data-clientes="5" data-capital="110000" data-inadim="4.8"
+              points="240,270 295,260 300,295 255,305 235,290"
+              fill="rgba(6,214,160,0.38)" class="sp-district"/>
+            <polygon data-bairro="Perdizes" data-clientes="4" data-capital="90000" data-inadim="3.8"
+              points="310,185 360,178 365,210 330,215 315,205"
+              fill="rgba(6,214,160,0.35)" class="sp-district"/>
+            <polygon data-bairro="Vila Leopoldina" data-clientes="3" data-capital="72000" data-inadim="3.2"
+              points="230,230 270,220 270,250 235,255 225,242"
+              fill="rgba(6,214,160,0.3)" class="sp-district"/>
+
+            <!-- Área sem clientes -->
+            <polygon data-bairro="Anhanguera" data-clientes="0" data-capital="0" data-inadim="0"
+              points="200,80 280,70 300,100 260,115 195,105"
+              fill="rgba(26,32,53,0.6)" class="sp-district"/>
+            <polygon data-bairro="Grajaú" data-clientes="14" data-capital="318000" data-inadim="9.2"
+              points="330,420 390,420 400,470 360,485 320,465"
+              fill="rgba(240,180,41,0.42)" class="sp-district"/>
+            <polygon data-bairro="Parelheiros" data-clientes="9" data-capital="222150" data-inadim="8.5"
+              points="300,470 360,485 350,530 300,535 280,510 285,478"
+              fill="rgba(201,146,42,0.4)" class="sp-district"/>
+          </g>
+
+          <!-- Pontos clientes meus (amarelos) -->
+          <g id="vg-client-dots">
+            <circle cx="395" cy="252" r="7" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
+            <circle cx="460" cy="195" r="7" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
+            <circle cx="595" cy="248" r="9" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
+            <circle cx="665" cy="228" r="8" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
+            <circle cx="340" cy="200" r="7" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
+            <circle cx="325" cy="252" r="7" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
+            <circle cx="375" cy="365" r="8" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
+            <circle cx="415" cy="155" r="7" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
+            <circle cx="530" cy="278" r="7" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
+            <circle cx="347" cy="457" r="7" fill="var(--gold2)" opacity="0.9" class="vg-my-client"/>
+          </g>
+
+          <!-- Labels bairros principais -->
+          <g fill="#5a6282" font-family="DM Mono,monospace" font-size="8" text-anchor="middle">
+            <text x="600" y="250">Itaquera</text>
+            <text x="685" y="232">C. Tiradentes</text>
+            <text x="410" y="252">Sé</text>
+            <text x="375" y="380">Zona Sul</text>
+            <text x="410" y="155">Santana</text>
+            <text x="315" y="218">Lapa</text>
+            <text x="335" y="252">Pinheiros</text>
+            <text x="520" y="225">São Mateus</text>
+            <text x="345" y="468">Grajaú</text>
+            <text x="320" y="505">Parelheiros</text>
+          </g>
+
+          <!-- Botões zoom -->
+          <g>
+            <rect x="755" y="180" width="28" height="28" rx="6" fill="#111521" stroke="#1a2035"/>
+            <text x="769" y="198" text-anchor="middle" fill="#5a6282" font-size="16" font-family="monospace">+</text>
+            <rect x="755" y="212" width="28" height="28" rx="6" fill="#111521" stroke="#1a2035"/>
+            <text x="769" y="230" text-anchor="middle" fill="#5a6282" font-size="16" font-family="monospace">−</text>
+          </g>
+        </svg>
+
+        <!-- Tooltip do mapa -->
+        <div class="vg-map-tooltip" id="vg-map-tooltip">
+          <div class="vg-map-tt-bairro" id="vg-tt-bairro">—</div>
+          <div class="vg-map-tt-row"><span class="vg-map-tt-lbl">Clientes:</span><span class="vg-map-tt-val" id="vg-tt-cli">—</span></div>
+          <div class="vg-map-tt-row"><span class="vg-map-tt-lbl">Em aberto:</span><span class="vg-map-tt-val" id="vg-tt-cap">—</span></div>
+          <div class="vg-map-tt-row"><span class="vg-map-tt-lbl">Inadimplência:</span><span class="vg-map-tt-val" id="vg-tt-inadim">—</span></div>
+          <span class="vg-map-tt-link" onclick="document.querySelector('[data-tab=clientes]').click()">Ver detalhes →</span>
+        </div>
+
+        <!-- Legenda -->
+        <div class="vg-map-legend">
+          <div class="vg-map-leg-title">Clientes Ativos</div>
+          <div class="vg-map-leg-item"><div class="vg-map-leg-dot" style="background:rgba(26,32,53,0.9);border:1px solid #333"></div> 0</div>
+          <div class="vg-map-leg-item"><div class="vg-map-leg-dot" style="background:rgba(155,93,229,0.5)"></div> 1–5</div>
+          <div class="vg-map-leg-item"><div class="vg-map-leg-dot" style="background:rgba(72,149,239,0.5)"></div> 6–15</div>
+          <div class="vg-map-leg-item"><div class="vg-map-leg-dot" style="background:rgba(240,180,41,0.5)"></div> 16–30</div>
+          <div class="vg-map-leg-item"><div class="vg-map-leg-dot" style="background:rgba(239,71,111,0.55)"></div> 31+</div>
+          <div class="vg-map-leg-item" style="margin-top:4px"><div class="vg-map-leg-dot" style="background:var(--gold2)"></div> Meus Clientes</div>
+        </div>
       </div>
     </div>
-    <div style="background:var(--s2);border-radius:6px;height:8px;overflow:hidden">
-      <div id="meta-bar-fill" style="height:100%;border-radius:6px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width 1s ease;width:0%"></div>
+
+    <!-- PAINEL DIREITO -->
+    <div class="vg-right-panel">
+
+      <!-- INTELIGÊNCIA DE MERCADO -->
+      <div class="vg-intel-card">
+        <div class="vg-intel-header">
+          <div class="vg-intel-title">INTELIGÊNCIA DE MERCADO</div>
+          <div class="vg-intel-tabs">
+            <div class="vg-intel-tab active" onclick="vgIntelTab(this,'noticias')">Notícias</div>
+            <div class="vg-intel-tab" onclick="vgIntelTab(this,'impactos')">Impactos</div>
+            <div class="vg-intel-tab" onclick="vgIntelTab(this,'insights')">Insights</div>
+          </div>
+        </div>
+        <div class="vg-intel-body" id="vg-intel-body">
+          <div class="vg-news-item">
+            <div class="vg-news-icon neg">📉</div>
+            <div>
+              <div class="vg-news-title">Inadimplência cresce 8,1% e atinge maior nível dos últimos 12 meses</div>
+              <div class="vg-news-meta">
+                <span class="vg-news-impact neg">Impacto: Negativo</span>
+                <span class="vg-news-time">27/04/2026 · 20:38</span>
+              </div>
+            </div>
+          </div>
+          <div class="vg-news-item">
+            <div class="vg-news-icon neg">🏦</div>
+            <div>
+              <div class="vg-news-title">Banco Central sinaliza possível alta da Selic na próxima reunião</div>
+              <div class="vg-news-meta">
+                <span class="vg-news-impact neg">Impacto: Negativo</span>
+                <span class="vg-news-time">27/04/2026 · 19:45</span>
+              </div>
+            </div>
+          </div>
+          <div class="vg-news-item">
+            <div class="vg-news-icon pos">🛍</div>
+            <div>
+              <div class="vg-news-title">Vendas no varejo sobem 1,2% em março, acima do esperado</div>
+              <div class="vg-news-meta">
+                <span class="vg-news-impact pos">Impacto: Positivo</span>
+                <span class="vg-news-time">27/04/2026 · 18:15</span>
+              </div>
+            </div>
+          </div>
+          <div class="vg-news-item">
+            <div class="vg-news-icon pos">📊</div>
+            <div>
+              <div class="vg-news-title">Desemprego cai para 7,9%, menor índice desde 2015</div>
+              <div class="vg-news-meta">
+                <span class="vg-news-impact pos">Impacto: Positivo</span>
+                <span class="vg-news-time">27/04/2026 · 17:18</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="vg-intel-footer">
+          <a onclick="">Ver todas as notícias →</a>
+        </div>
+      </div>
+
+      <!-- ALERTAS ATIVOS -->
+      <div class="vg-alerts-card">
+        <div class="vg-alerts-header">
+          <div class="vg-alerts-title">🔔 ALERTAS ATIVOS</div>
+          <span class="vg-alerts-ver" onclick="document.querySelector('[data-tab=risco]').click()">Ver todos</span>
+        </div>
+        <div id="vg-alertas-lista">
+          <div class="vg-alert-item">
+            <div class="vg-alert-dot red"></div>
+            <div class="vg-alert-txt">Inadimplência acima de 15% na região de Itaquera</div>
+          </div>
+          <div class="vg-alert-item">
+            <div class="vg-alert-dot yellow"></div>
+            <div class="vg-alert-txt">Risco alto de atraso nos próximos 7 dias em 12 contratos</div>
+          </div>
+          <div class="vg-alert-item">
+            <div class="vg-alert-dot orange"></div>
+            <div class="vg-alert-txt">Cliente com parcela vencida há 5 dias</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECOMENDAÇÃO INTELIGENTE -->
+      <div class="vg-rec-card">
+        <div class="vg-rec-icon">🧠</div>
+        <div class="vg-rec-title">RECOMENDAÇÃO INTELIGENTE</div>
+        <div class="vg-rec-sub">Com base no cenário atual, sugerimos:</div>
+        <div class="vg-rec-item">Aumentar juros em 5% para novos contratos</div>
+        <div class="vg-rec-item">Reduzir prazo máximo para 12 meses</div>
+        <div class="vg-rec-item">Priorizar clientes com score acima de 700</div>
+        <div class="vg-rec-btn" onclick="document.querySelector('[data-tab=risco]').click()">
+          ← Ver análise completa →
+        </div>
+      </div>
     </div>
-    <div style="display:flex;justify-content:space-between;margin-top:6px">
-      <span style="font-size:0.55rem;color:var(--muted)" id="meta-realizado-txt">R$ 0 realizados</span>
-      <span style="font-size:0.55rem;color:var(--gold2)" id="meta-pct-txt">0%</span>
+  </div>
+
+  <!-- GRID INFERIOR: TENDÊNCIAS + CARTEIRA + STATUS -->
+  <div class="vg-bottom-grid">
+
+    <!-- TENDÊNCIAS -->
+    <div class="vg-trend-card">
+      <div class="vg-trend-header">
+        <div class="vg-trend-title">📈 TENDÊNCIAS</div>
+        <select class="vg-trend-select">
+          <option>Últimos 30 dias</option>
+          <option>Últimos 60 dias</option>
+          <option>Este ano</option>
+        </select>
+      </div>
+      <div style="font-size:0.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Inadimplência (%)</div>
+      <div class="vg-trend-big" id="vg-trend-inadim">—</div>
+      <div class="vg-trend-delta" id="vg-trend-inadim-delta">contratos em atraso</div>
+      <div style="height:60px;margin:8px 0"><canvas id="chartTrendInadim"></canvas></div>
+      <div class="vg-trend-sub-grid">
+        <div class="vg-trend-sub">
+          <div class="vg-trend-sub-lbl">Volume Emprestado</div>
+          <div class="vg-trend-sub-val" id="vg-trend-capital">—</div>
+          <div class="vg-trend-sub-delta up" id="vg-trend-cap-delta">carteira ativa</div>
+        </div>
+        <div class="vg-trend-sub">
+          <div class="vg-trend-sub-lbl">Retorno Líquido</div>
+          <div class="vg-trend-sub-val" id="vg-trend-lucro" style="color:var(--gold2)">—</div>
+          <div class="vg-trend-sub-delta up" id="vg-trend-lucro-delta" style="color:var(--gold2)">ROI da carteira</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARTEIRA DE CLIENTES -->
+    <div class="vg-cart-card">
+      <div class="vg-cart-header">
+        <div class="vg-cart-title">💼 CARTEIRA DE CLIENTES</div>
+        <span class="vg-cart-link" onclick="document.querySelector('[data-tab=clientes]').click()">Ver todos</span>
+      </div>
+      <div class="vg-cart-donut">
+        <canvas id="chartComposicao" width="180" height="180" style="max-width:180px;max-height:180px"></canvas>
+        <div class="vg-cart-center">
+          <div class="vg-cart-center-num" id="vg-cart-total">—</div>
+          <div class="vg-cart-center-lbl">Clientes</div>
+        </div>
+      </div>
+      <div class="vg-cart-legend" id="vg-cart-legend">
+        <div class="vg-cart-leg-item">
+          <div style="display:flex;align-items:center"><div class="vg-cart-leg-dot" style="background:var(--green)"></div> Baixo Risco</div>
+          <span id="vg-cart-baixo" style="color:var(--green)">—</span>
+        </div>
+        <div class="vg-cart-leg-item">
+          <div style="display:flex;align-items:center"><div class="vg-cart-leg-dot" style="background:var(--gold2)"></div> Médio Risco</div>
+          <span id="vg-cart-medio" style="color:var(--gold2)">—</span>
+        </div>
+        <div class="vg-cart-leg-item">
+          <div style="display:flex;align-items:center"><div class="vg-cart-leg-dot" style="background:var(--red)"></div> Alto Risco</div>
+          <span id="vg-cart-alto" style="color:var(--red)">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATUS DA CARTEIRA -->
+    <div class="vg-status-card">
+      <div class="vg-status-header">
+        <div class="vg-status-title">📋 STATUS DA CARTEIRA</div>
+        <span class="vg-status-link" onclick="document.querySelector('[data-tab=financeiro]').click()">Ver relatório</span>
+      </div>
+      <div class="vg-status-row">
+        <span class="vg-status-lbl">Total emprestado</span>
+        <span class="vg-status-val" id="vg-st-total">—</span>
+      </div>
+      <div class="vg-status-row">
+        <span class="vg-status-lbl">Em aberto</span>
+        <span class="vg-status-val" id="vg-st-aberto">—</span>
+      </div>
+      <div class="vg-status-row">
+        <span class="vg-status-lbl">Vencido (1–30 dias)</span>
+        <span class="vg-status-val red" id="vg-st-v30">—</span>
+      </div>
+      <div class="vg-status-row">
+        <span class="vg-status-lbl">Vencido (+30 dias)</span>
+        <span class="vg-status-val red" id="vg-st-v30p">—</span>
+      </div>
+      <div style="padding-top:4px">
+        <div style="font-size:0.55rem;color:var(--muted);margin-bottom:2px">Inadimplência geral</div>
+        <div class="vg-status-inadim" id="vg-st-inadim-pct">—</div>
+      </div>
     </div>
   </div>
-  <div class="grid-5">
-    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Exposição Total</div><div class="kpi-val" id="kpi-na-rua" style="color:var(--gold)">—</div><div class="kpi-sub" id="kpi-na-rua-sub">—</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Carteira Ativa</div><div class="kpi-val" id="kpi-capital" style="color:var(--green)">—</div><div class="kpi-sub" id="kpi-cap-sub">—</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">ROI da Carteira</div><div class="kpi-val" id="kpi-roi" style="color:var(--blue)">—</div><div class="kpi-sub">retorno sobre capital</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--red)"></div><div class="kpi-lbl">Inadimplência</div><div class="kpi-val" id="kpi-inadim" style="color:var(--red)">—</div><div class="kpi-sub" id="kpi-inadim-sub">—</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--purple)"></div><div class="kpi-lbl">Lucro Previsto</div><div class="kpi-val" id="kpi-lucro" style="color:var(--purple)">—</div><div class="kpi-sub">juros a receber</div></div>
+
+  <!-- PRINCIPAIS BAIRROS (rodapé) -->
+  <div class="vg-bairros-card">
+    <div class="vg-bairros-header">
+      <div class="vg-bairros-title">📍 PRINCIPAIS BAIRROS</div>
+      <span style="font-size:0.55rem;color:var(--gold2);cursor:pointer">Ver todos</span>
+    </div>
+    <div class="vg-bairros-row" style="background:var(--s2);font-size:0.55rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase">
+      <span>BAIRRO</span><span></span><span>CLIENTES</span><span>EM ABERTO</span>
+    </div>
+    <div class="vg-bairros-row">
+      <span class="vg-bairros-nome">Itaquera</span><div style="background:rgba(239,71,111,0.15);height:4px;border-radius:2px;width:100%"><div style="background:var(--red);height:4px;border-radius:2px;width:85%"></div></div><span class="vg-bairros-cli">27 clientes</span><span class="vg-bairros-val">R$ 58.940</span>
+    </div>
+    <div class="vg-bairros-row">
+      <span class="vg-bairros-nome">Zona Sul (Diversos)</span><div style="background:rgba(239,71,111,0.1);height:4px;border-radius:2px;width:100%"><div style="background:var(--gold2);height:4px;border-radius:2px;width:70%"></div></div><span class="vg-bairros-cli">23 clientes</span><span class="vg-bairros-val">R$ 52.300</span>
+    </div>
+    <div class="vg-bairros-row">
+      <span class="vg-bairros-nome">Cidade Tiradentes</span><div style="background:rgba(201,146,42,0.1);height:4px;border-radius:2px;width:100%"><div style="background:var(--gold);height:4px;border-radius:2px;width:55%"></div></div><span class="vg-bairros-cli">18 clientes</span><span class="vg-bairros-val">R$ 41.250</span>
+    </div>
+    <div class="vg-bairros-row">
+      <span class="vg-bairros-nome">Grajaú</span><div style="background:rgba(72,149,239,0.1);height:4px;border-radius:2px;width:100%"><div style="background:var(--blue);height:4px;border-radius:2px;width:42%"></div></div><span class="vg-bairros-cli">14 clientes</span><span class="vg-bairros-val">R$ 31.800</span>
+    </div>
+    <div class="vg-bairros-row">
+      <span class="vg-bairros-nome">Parelheiros</span><div style="background:rgba(6,214,160,0.1);height:4px;border-radius:2px;width:100%"><div style="background:var(--green);height:4px;border-radius:2px;width:30%"></div></div><span class="vg-bairros-cli">9 clientes</span><span class="vg-bairros-val">R$ 22.150</span>
+    </div>
   </div>
-  <div class="grid-5">
-    <div class="kpi"><div class="kpi-accent" style="background:var(--gold2)"></div><div class="kpi-lbl">A Receber (7d)</div><div class="kpi-val" id="kpi-semana" style="color:var(--gold2)">—</div><div class="kpi-sub">próximos 7 dias</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Clientes Ativos</div><div class="kpi-val" id="kpi-cli-ativos" style="color:var(--green)">—</div><div class="kpi-sub" id="kpi-cli-sub">—</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Lucro Realizado</div><div class="kpi-val" id="kpi-realizado" style="color:var(--blue)">—</div><div class="kpi-sub">juros recebidos</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--purple)"></div><div class="kpi-lbl">Ticket Médio</div><div class="kpi-val" id="kpi-ticket" style="color:var(--purple)">—</div><div class="kpi-sub">por contrato ativo</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Prazo Médio</div><div class="kpi-val" id="kpi-prazo" style="color:var(--gold)">—</div><div class="kpi-sub">meses</div></div>
-  </div>
-  <div class="grid-2">
-    <div class="card"><div class="card-header"><div><div class="card-title">📈 Evolução Mensal da Carteira</div><div class="card-desc">Capital e lucro acumulados mês a mês</div></div><div class="card-badge">CRESCIMENTO</div></div><div class="chart-wrap tall"><canvas id="chartEvolMensal"></canvas></div></div>
-    <div class="card"><div class="card-header"><div><div class="card-title">💼 Composição da Carteira</div><div class="card-desc">Capital saudável vs em risco vs quitado</div></div><div class="card-badge">SAÚDE</div></div><div class="chart-wrap tall"><canvas id="chartComposicao"></canvas></div></div>
-  </div>
+
+  <!-- Canvas ocultos que o JS original tenta renderizar (evita erros) -->
+  <canvas id="chartEvolMensal" style="display:none"></canvas>
+
 </div>
+
+<script>
+// ── VISÃO GERAL — lógica do novo layout ──
+(function(){
+  const fmt2=v=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+  const pct2=v=>(Number(v)*100).toFixed(1)+'%';
+
+  // Atualiza data no header da aba
+  const dateEl=document.getElementById('vg-today-date2');
+  if(dateEl){
+    const now=new Date();
+    dateEl.textContent=now.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'})+' '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  }
+
+  // Tooltip do mapa
+  const districts=document.querySelectorAll('.sp-district');
+  const tooltip=document.getElementById('vg-map-tooltip');
+  const mapBody=document.getElementById('vg-map-body');
+  districts.forEach(el=>{
+    el.style.cursor='pointer';
+    el.style.transition='fill-opacity 0.2s';
+    el.addEventListener('mouseenter',function(e){
+      const clientes=this.dataset.clientes;
+      const capital=parseFloat(this.dataset.capital||0);
+      const inadim=this.dataset.inadim;
+      document.getElementById('vg-tt-bairro').textContent=this.dataset.bairro||'—';
+      document.getElementById('vg-tt-cli').textContent=clientes;
+      document.getElementById('vg-tt-cap').textContent=fmt2(capital);
+      document.getElementById('vg-tt-inadim').textContent=inadim+'%';
+      tooltip.classList.add('show');
+      this.style.fillOpacity='1';
+    });
+    el.addEventListener('mouseleave',function(){
+      tooltip.classList.remove('show');
+      this.style.fillOpacity='0.75';
+    });
+    el.addEventListener('mousemove',function(e){
+      const rect=mapBody.getBoundingClientRect();
+      let x=e.clientX-rect.left+14;
+      let y=e.clientY-rect.top+14;
+      if(x+200>rect.width)x=e.clientX-rect.left-210;
+      if(y+160>rect.height)y=e.clientY-rect.top-160;
+      tooltip.style.left=x+'px';
+      tooltip.style.top=y+'px';
+    });
+  });
+
+  // Intel tabs
+  window.vgIntelTab=function(el,tab){
+    document.querySelectorAll('.vg-intel-tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    const body=document.getElementById('vg-intel-body');
+    if(tab==='impactos'){
+      body.innerHTML=`
+        <div class="vg-news-item"><div class="vg-news-icon neg">⚠️</div><div><div class="vg-news-title">Alta da Selic pode reduzir margem de lucro líquida em até 2 p.p.</div><div class="vg-news-meta"><span class="vg-news-impact neg">Alto Impacto</span></div></div></div>
+        <div class="vg-news-item"><div class="vg-news-icon pos">✅</div><div><div class="vg-news-title">Queda do desemprego aumenta capacidade de pagamento dos mutuários</div><div class="vg-news-meta"><span class="vg-news-impact pos">Positivo</span></div></div></div>
+        <div class="vg-news-item"><div class="vg-news-icon neg">📊</div><div><div class="vg-news-title">Inadimplência crescente exige reforço nas garantias contratuais</div><div class="vg-news-meta"><span class="vg-news-impact neg">Moderado</span></div></div></div>`;
+    } else if(tab==='insights'){
+      body.innerHTML=`
+        <div class="vg-news-item"><div class="vg-news-icon pos">🧠</div><div><div class="vg-news-title">Clientes da Zona Leste têm 2× mais inadimplência — priorize garantias</div><div class="vg-news-meta"><span class="vg-news-impact neg">Ação Recomendada</span></div></div></div>
+        <div class="vg-news-item"><div class="vg-news-icon pos">📈</div><div><div class="vg-news-title">Zona Sul tem potencial de expansão com baixo risco — considere prospecção ativa</div><div class="vg-news-meta"><span class="vg-news-impact pos">Oportunidade</span></div></div></div>
+        <div class="vg-news-item"><div class="vg-news-icon neu">💡</div><div><div class="vg-news-title">Clientes com prazo acima de 6 meses pagam 30% mais juros no total</div><div class="vg-news-meta"><span class="vg-news-impact pos">Insight</span></div></div></div>`;
+    } else {
+      body.innerHTML=`
+        <div class="vg-news-item"><div class="vg-news-icon neg">📉</div><div><div class="vg-news-title">Inadimplência cresce 8,1% e atinge maior nível dos últimos 12 meses</div><div class="vg-news-meta"><span class="vg-news-impact neg">Impacto: Negativo</span><span class="vg-news-time">27/04/2026 · 20:38</span></div></div></div>
+        <div class="vg-news-item"><div class="vg-news-icon neg">🏦</div><div><div class="vg-news-title">Banco Central sinaliza possível alta da Selic na próxima reunião</div><div class="vg-news-meta"><span class="vg-news-impact neg">Impacto: Negativo</span><span class="vg-news-time">27/04/2026 · 19:45</span></div></div></div>
+        <div class="vg-news-item"><div class="vg-news-icon pos">🛍</div><div><div class="vg-news-title">Vendas no varejo sobem 1,2% em março, acima do esperado</div><div class="vg-news-meta"><span class="vg-news-impact pos">Impacto: Positivo</span><span class="vg-news-time">27/04/2026 · 18:15</span></div></div></div>
+        <div class="vg-news-item"><div class="vg-news-icon pos">📊</div><div><div class="vg-news-title">Desemprego cai para 7,9%, menor índice desde 2015</div><div class="vg-news-meta"><span class="vg-news-impact pos">Impacto: Positivo</span><span class="vg-news-time">27/04/2026 · 17:18</span></div></div></div>`;
+    }
+  };
+
+  // Hook na função render para atualizar os novos elementos
+  const _origRender=window.render;
+  if(typeof _origRender==='function'){
+    window.render=function(empRows,pagRows){
+      _origRender(empRows,pagRows);
+      vgAtualizarDados();
+    };
+  }
+  // Também tenta atualizar quando dados já estiverem prontos
+  document.addEventListener('DOMContentLoaded',()=>{setTimeout(vgAtualizarDados,500);});
+})();
+
+function vgAtualizarDados(){
+  try{
+    // Pega valores já renderizados pelos spans ocultos
+    const getV=id=>{const el=document.getElementById(id);return el?el.textContent.trim():'—';};
+
+    // KPI strip - inadimplência já está vinculada ao id kpi-inadim
+    // Tendências
+    const inadEl=document.getElementById('kpi-inadim');
+    if(inadEl&&inadEl.textContent!=='—'){
+      const v=inadEl.textContent;
+      document.getElementById('vg-trend-inadim').textContent=v;
+    }
+    const capEl=document.getElementById('kpi-capital');
+    if(capEl&&capEl.textContent!=='—'){
+      document.getElementById('vg-trend-capital').textContent=capEl.textContent;
+    }
+    const lucroEl=document.getElementById('kpi-lucro');
+    if(lucroEl&&lucroEl.textContent!=='—'){
+      document.getElementById('vg-trend-lucro').textContent=lucroEl.textContent;
+      // Também atualiza KPI strip
+      const lucroStrip=document.querySelector('.vg-kpi-val#kpi-lucro');
+      // kpi-lucro já é o id do elemento no strip
+    }
+    const roiEl=document.getElementById('kpi-roi');
+    if(roiEl&&roiEl.textContent!=='—'){
+      document.getElementById('vg-trend-lucro-delta').textContent='ROI: '+roiEl.textContent;
+    }
+
+    // Status da carteira
+    const naRuaEl=document.getElementById('kpi-na-rua');
+    if(naRuaEl&&naRuaEl.textContent!=='—'){
+      const el=document.getElementById('vg-st-total');
+      if(el)el.textContent=naRuaEl.textContent;
+    }
+    const capEl2=document.getElementById('kpi-capital');
+    if(capEl2&&capEl2.textContent!=='—'){
+      const el=document.getElementById('vg-st-aberto');
+      if(el)el.textContent=capEl2.textContent;
+    }
+    const semEl=document.getElementById('kpi-semana');
+    if(semEl&&semEl.textContent!=='—'){
+      const el=document.getElementById('vg-st-v30');
+      if(el)el.textContent=semEl.textContent;
+    }
+    const inadEl2=document.getElementById('kpi-inadim');
+    if(inadEl2&&inadEl2.textContent!=='—'){
+      const el=document.getElementById('vg-st-inadim-pct');
+      if(el)el.textContent=inadEl2.textContent;
+    }
+
+    // Carteira donut total
+    const cliEl=document.getElementById('kpi-cli-ativos');
+    if(cliEl&&cliEl.textContent!=='—'){
+      const el=document.getElementById('vg-cart-total');
+      if(el)el.textContent=cliEl.textContent;
+    }
+
+    // Sparkline tendência inadimplência (mini chart)
+    if(window.Chart&&document.getElementById('chartTrendInadim')){
+      if(window._chartTrendInadim)window._chartTrendInadim.destroy();
+      const ctx=document.getElementById('chartTrendInadim').getContext('2d');
+      window._chartTrendInadim=new Chart(ctx,{
+        type:'line',
+        data:{labels:['Jan','Fev','Mar','Abr'],datasets:[{data:[12,13.5,15.2,16.8],borderColor:'rgba(239,71,111,0.8)',backgroundColor:'rgba(239,71,111,0.08)',borderWidth:2,pointRadius:0,fill:true,tension:0.4}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}
+      });
+    }
+
+    // Alertas da carteira
+    const alertasList=document.getElementById('vg-alertas-lista');
+    const popoverList=document.getElementById('alert-popover-list');
+    if(alertasList&&popoverList&&popoverList.querySelector('.alert-bar')){
+      const items=popoverList.querySelectorAll('.alert-bar');
+      let html='';
+      items.forEach(item=>{
+        const isCrit=item.classList.contains('danger')||item.classList.contains('warn');
+        if(isCrit){
+          const txt=item.querySelector('span:last-child')||item.querySelector('strong');
+          const dotCls=item.classList.contains('danger')?'red':'yellow';
+          html+=`<div class="vg-alert-item"><div class="vg-alert-dot ${dotCls}"></div><div class="vg-alert-txt">${item.textContent.trim().slice(0,80)}</div></div>`;
+        }
+      });
+      if(html)alertasList.innerHTML=html;
+    }
+  }catch(e){console.log('vgAtualizarDados:',e);}
+}
+</script>
 
 <!-- FINANCEIRO -->
 <div id="tab-financeiro" class="tab-panel">
