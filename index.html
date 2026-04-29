@@ -572,7 +572,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div id="alertasBanner"></div>
 
   <!-- NOTIFICAÇÃO VENCIMENTOS -->
-  <div id="notif-venc" style="display:none;background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.3);border-radius:12px;padding:14px 18px;margin-bottom:20px;align-items:center;gap:12px;animation:fadeUp 0.4s ease">
+  <div id="notif-venc" style="display:none;background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.3);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;animation:fadeUp 0.4s ease">
     <span style="font-size:1.2rem">🔔</span>
     <div style="flex:1"><div id="notif-venc-texto" style="font-size:0.8rem;color:var(--red);font-weight:600"></div><div id="notif-venc-sub" style="font-size:0.58rem;color:var(--muted);margin-top:2px"></div></div>
     <button onclick="document.getElementById('notif-venc').style.display='none'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem">✕</button>
@@ -602,7 +602,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
   <!-- KPIs + MAPA layout centralizado -->
   <style>
-  .visao-hub{display:grid;grid-template-columns:200px 1fr 200px;gap:14px;margin-bottom:24px;align-items:start;}
+  .visao-hub{display:grid;grid-template-columns:200px 1fr;gap:14px;margin-bottom:24px;align-items:start;}
   .visao-col{display:flex;flex-direction:column;gap:10px;}
   .visao-right{display:flex;flex-direction:column;gap:14px;}
   .kpi-sm{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:12px 14px;position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;animation:fadeUp 0.4s ease both;}
@@ -613,11 +613,10 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   .kpi-sm-sub{font-size:0.54rem;color:var(--muted);}
   #mapa-clientes-wrap{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;animation:fadeUp 0.4s ease both;}
   #mapa-clientes-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-  #mapa-clientes{height:420px;width:100%;}
+  #mapa-clientes{height:520px;width:100%;}
   #mapa-clientes-footer{padding:8px 14px;border-top:1px solid var(--border);display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
   .mapa-legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;}
   .kpis-row-bottom{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
-  @media(max-width:1100px){.visao-hub{grid-template-columns:180px 1fr 180px;}}
   @media(max-width:900px){.visao-hub{grid-template-columns:1fr;}.kpis-row-bottom{grid-template-columns:repeat(3,1fr);}}
   @media(max-width:600px){.kpis-row-bottom{grid-template-columns:1fr 1fr;}}
   </style>
@@ -627,34 +626,6 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     <span style="display:inline-block;width:16px;height:1px;background:var(--gold);opacity:0.5"></span>
     PAINEL DE CONTROLE
     <span style="flex:1;height:1px;background:var(--border)"></span>
-  </div>
-
-  <!-- CARDS TOPO — 4 KPIs acima do mapa -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px" id="visao-top-cards">
-    <div class="kpi-sm" style="border-color:rgba(201,146,42,0.2);background:linear-gradient(135deg,rgba(201,146,42,0.06) 0%,var(--s1) 80%)">
-      <div class="kpi-sm-accent" style="background:linear-gradient(90deg,var(--gold),var(--gold2))"></div>
-      <div class="kpi-sm-lbl">💰 Entra Hoje</div>
-      <div class="kpi-sm-val" id="kpi-top-entra" style="color:var(--gold)">R$ 0</div>
-      <div class="kpi-sm-sub" id="kpi-top-entra-sub">0 pagamento(s)</div>
-    </div>
-    <div class="kpi-sm" style="border-color:rgba(6,214,160,0.2);background:linear-gradient(135deg,rgba(6,214,160,0.05) 0%,var(--s1) 80%)">
-      <div class="kpi-sm-accent" style="background:var(--green)"></div>
-      <div class="kpi-sm-lbl">📋 Cobranças Hoje</div>
-      <div class="kpi-sm-val" id="kpi-top-cobr" style="color:var(--green)">0</div>
-      <div class="kpi-sm-sub">vencimentos do dia</div>
-    </div>
-    <div class="kpi-sm" style="border-color:rgba(239,71,111,0.2);background:linear-gradient(135deg,rgba(239,71,111,0.05) 0%,var(--s1) 80%)">
-      <div class="kpi-sm-accent" style="background:var(--red)"></div>
-      <div class="kpi-sm-lbl">⚠️ Em Atraso</div>
-      <div class="kpi-sm-val" id="kpi-top-atraso" style="color:var(--red)">0</div>
-      <div class="kpi-sm-sub" id="kpi-top-atraso-sub">carteira limpa</div>
-    </div>
-    <div class="kpi-sm" style="border-color:rgba(72,149,239,0.2);background:linear-gradient(135deg,rgba(72,149,239,0.05) 0%,var(--s1) 80%)">
-      <div class="kpi-sm-accent" style="background:var(--blue)"></div>
-      <div class="kpi-sm-lbl">📅 Próx. 7 Dias</div>
-      <div class="kpi-sm-val" id="kpi-top-prox7" style="color:var(--blue)">R$ 0</div>
-      <div class="kpi-sm-sub">a receber esta semana</div>
-    </div>
   </div>
 
   <div class="visao-hub">
@@ -707,6 +678,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
         <span style="font-size:0.52rem;color:var(--muted)">
           <span class="mapa-legend-dot" style="background:var(--green)"></span>Em dia
           <span class="mapa-legend-dot" style="background:var(--red);margin-left:8px"></span>Atraso
+          <span class="mapa-legend-dot" style="background:var(--gold);margin-left:8px"></span>Cadastrado
           <span class="mapa-legend-dot" style="background:var(--muted);margin-left:8px"></span>Quitado
         </span>
         <span style="font-size:0.5rem;color:var(--muted2);margin-left:auto">📍 baseado no endereço cadastrado</span>
@@ -748,34 +720,6 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     </div>
 
   </div><!-- /.visao-hub -->
-
-  <!-- CARDS RODAPÉ — abaixo do mapa -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px" id="visao-bottom-cards">
-    <div class="kpi-sm" style="border-color:rgba(201,146,42,0.15)">
-      <div class="kpi-sm-accent" style="background:var(--gold)"></div>
-      <div class="kpi-sm-lbl">🏆 Melhor Cliente</div>
-      <div class="kpi-sm-val" id="kpi-melhor-cli" style="color:var(--gold);font-size:1rem">—</div>
-      <div class="kpi-sm-sub" id="kpi-melhor-cli-sub">maior lucro gerado</div>
-    </div>
-    <div class="kpi-sm" style="border-color:rgba(6,214,160,0.15)">
-      <div class="kpi-sm-accent" style="background:var(--green)"></div>
-      <div class="kpi-sm-lbl">✅ Contratos Quitados</div>
-      <div class="kpi-sm-val" id="kpi-quit" style="color:var(--green)">—</div>
-      <div class="kpi-sm-sub" id="kpi-quit-sub">histórico completo</div>
-    </div>
-    <div class="kpi-sm" style="border-color:rgba(155,93,229,0.15)">
-      <div class="kpi-sm-accent" style="background:var(--purple)"></div>
-      <div class="kpi-sm-lbl">📊 Total Contratos</div>
-      <div class="kpi-sm-val" id="kpi-total-contr" style="color:var(--purple)">—</div>
-      <div class="kpi-sm-sub">ativos + quitados</div>
-    </div>
-    <div class="kpi-sm" style="border-color:rgba(72,149,239,0.15)">
-      <div class="kpi-sm-accent" style="background:var(--blue)"></div>
-      <div class="kpi-sm-lbl">💹 Rentabilidade Mês</div>
-      <div class="kpi-sm-val" id="kpi-rent-mes" style="color:var(--blue)">—</div>
-      <div class="kpi-sm-sub">juros recebidos este mês</div>
-    </div>
-  </div>
 
   <!-- BRIEFING DO DIA -->
   <div id="briefing-dia" style="display:none;border-radius:14px;padding:18px 22px;margin-bottom:24px;animation:fadeUp 0.4s ease;border:1px solid rgba(201,146,42,0.15);background:rgba(201,146,42,0.03)">
@@ -1977,7 +1921,6 @@ const fmt=v=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:
 const pct=v=>(Number(v)*100).toFixed(1)+'%';
 let charts={};
 const TOOLTIP={backgroundColor:'#111521',borderColor:'#212840',borderWidth:1,titleColor:'#dde1f0',bodyColor:'#5a6282',padding:10,titleFont:{family:'DM Mono',size:11},bodyFont:{family:'DM Mono',size:10}};
-  Chart.defaults.devicePixelRatio = window.devicePixelRatio || 2;
 function destroyChart(k){if(charts[k]){charts[k].destroy();delete charts[k];}}
 
 // Tab switching + auto-sync polling
@@ -2178,28 +2121,6 @@ function render(empRows,pagRows){
   document.getElementById('cli-inativos-n').textContent=cliInativos.length;
   document.getElementById('cli-recorrencia').textContent=pct(recorrPct);
   document.getElementById('cli-tempo-rel').textContent=tempoRelMed.toFixed(1);
-
-  // CARDS TOPO
-  const venceHojeCount=abertos.filter(e=>e.proxVenc&&e.proxVenc.getTime()===hoje.getTime()).length;
-  const entraHoje=abertos.filter(e=>e.proxVenc&&e.proxVenc.getTime()===hoje.getTime()).reduce((s,e)=>s+e.jProx,0);
-  document.getElementById('kpi-top-entra').textContent=fmt(entraHoje);
-  document.getElementById('kpi-top-entra-sub').textContent=venceHojeCount+' pagamento(s)';
-  document.getElementById('kpi-top-cobr').textContent=venceHojeCount;
-  document.getElementById('kpi-top-atraso').textContent=atrasado.length;
-  document.getElementById('kpi-top-atraso-sub').textContent=atrasado.length===0?'carteira limpa':fmt(capRisco)+' em risco';
-  document.getElementById('kpi-top-prox7').textContent=fmt(proxSemana);
-
-  // CARDS RODAPÉ
-  const melhorCli=[...clientes].sort((a,b)=>b.totalJuros-a.totalJuros)[0];
-  document.getElementById('kpi-melhor-cli').textContent=melhorCli?melhorCli.nome.split(' ')[0]:'—';
-  document.getElementById('kpi-melhor-cli-sub').textContent=melhorCli?fmt(melhorCli.totalJuros):'sem dados';
-  document.getElementById('kpi-quit').textContent=quitados.length;
-  document.getElementById('kpi-quit-sub').textContent=quitados.length>0?fmt(capQuit)+' quitados':'nenhum ainda';
-  document.getElementById('kpi-total-contr').textContent=emps.length;
-  // Rentabilidade do mês atual
-  const mesAtual=hoje.getMonth(),anoAtual=hoje.getFullYear();
-  const rentMes=pags.filter(p=>p.data&&p.data.getMonth()===mesAtual&&p.data.getFullYear()===anoAtual).reduce((s,p)=>s+p.juros,0);
-  document.getElementById('kpi-rent-mes').textContent=fmt(rentMes);
 
   // ALERTAS
   const alertas=[];
@@ -3441,98 +3362,198 @@ calcOportunidade(); // inicializa com valores padrão
 // ── MAPA DE CLIENTES — SP ─────────────────────────────────────────────────
 let _mapaLeaflet = null;
 let _mapaMarkers = [];
+let _geocodeCache = {}; // cache em memória para evitar requisições repetidas
 
-// Coordenadas aproximadas dos principais bairros de SP
+// Carrega cache de geocodificação do localStorage
+try {
+  const gc = localStorage.getItem('_geocode_cache_v2');
+  if (gc) _geocodeCache = JSON.parse(gc);
+} catch(e) { _geocodeCache = {}; }
+
+function salvarGeocodeCache() {
+  try { localStorage.setItem('_geocode_cache_v2', JSON.stringify(_geocodeCache)); } catch(e) {}
+}
+
+// Geocodifica endereço via Nominatim (OpenStreetMap) — gratuito, sem API key
+// Retorna Promise<[lat, lng] | null>
+async function geocodificarEndereco(endereco) {
+  if (!endereco || endereco.trim().length < 5) return null;
+
+  const key = endereco.trim().toLowerCase();
+  if (_geocodeCache[key]) return _geocodeCache[key]; // cache hit
+
+  // Garante "São Paulo" no contexto para melhorar resultados
+  let query = endereco.trim();
+  if (!query.match(/s[aã]o paulo|sp\b/i)) query += ', São Paulo, SP, Brasil';
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}&countrycodes=br&viewbox=-47.0,-23.3,-46.3,-24.0&bounded=0`;
+    const res = await fetch(url, { headers: { 'Accept-Language': 'pt-BR' } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data && data.length > 0) {
+      const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+      _geocodeCache[key] = coords;
+      salvarGeocodeCache();
+      return coords;
+    }
+  } catch(e) { /* silencioso — sem console.error */ }
+
+  // Fallback: tenta só bairro/cidade extraído
+  const fallback = extrairBairroSP_fallback(endereco);
+  if (fallback) {
+    _geocodeCache[key] = fallback;
+    salvarGeocodeCache();
+  }
+  return fallback;
+}
+
+// Fallback com dicionário de bairros (mantido como backup)
 const SP_BAIRROS = {
-  'centro': [-23.5505, -46.6333],
-  'sé': [-23.5506, -46.6340],
-  'república': [-23.5433, -46.6395],
-  'bela vista': [-23.5612, -46.6472],
-  'consolação': [-23.5531, -46.6573],
-  'cerqueira césar': [-23.5622, -46.6680],
-  'jardins': [-23.5730, -46.6687],
-  'jardim paulista': [-23.5730, -46.6687],
-  'itaim bibi': [-23.5861, -46.6836],
-  'vila olímpia': [-23.5942, -46.6882],
-  'moema': [-23.6020, -46.6641],
-  'saúde': [-23.6200, -46.6219],
-  'ipiranga': [-23.5908, -46.6068],
-  'santo andré': [-23.6568, -46.5321],
-  'são bernardo': [-23.6917, -46.5650],
-  'são caetano': [-23.6203, -46.5505],
-  'abc': [-23.6700, -46.5400],
-  'guarulhos': [-23.4640, -46.5333],
-  'osasco': [-23.5327, -46.7919],
-  'taboão': [-23.6077, -46.7920],
-  'santana': [-23.4957, -46.6275],
-  'tucuruvi': [-23.4761, -46.6009],
-  'penha': [-23.5327, -46.5449],
-  'tatuapé': [-23.5379, -46.5705],
-  'mooca': [-23.5636, -46.5986],
-  'brás': [-23.5444, -46.6113],
-  'belém': [-23.5441, -46.5877],
-  'água rasa': [-23.5552, -46.5649],
-  'vila prudente': [-23.5877, -46.5612],
-  'são mateus': [-23.6077, -46.4940],
-  'itaquera': [-23.5397, -46.4579],
-  'guaianases': [-23.5403, -46.3827],
-  'cidade tiradentes': [-23.5892, -46.4028],
-  'ermelino matarazzo': [-23.4918, -46.4580],
-  'são miguel': [-23.5064, -46.4430],
-  'vila formosa': [-23.5518, -46.5286],
-  'campo belo': [-23.6136, -46.6694],
-  'campo grande': [-23.6405, -46.6900],
-  'santo amaro': [-23.6540, -46.7110],
-  'brooklin': [-23.6100, -46.6971],
-  'morumbi': [-23.6192, -46.7212],
-  'butantã': [-23.5718, -46.7317],
-  'pinheiros': [-23.5652, -46.6928],
-  'lapa': [-23.5257, -46.7078],
-  'barra funda': [-23.5249, -46.6605],
-  'limão': [-23.4899, -46.6701],
-  'pirituba': [-23.4699, -46.7266],
-  'jaraguá': [-23.4573, -46.7663],
-  'perus': [-23.4010, -46.7599],
-  'brasilândia': [-23.4390, -46.6900],
-  'cachoeirinha': [-23.4558, -46.6476],
-  'casa verde': [-23.4889, -46.6560],
-  'vila maria': [-23.5096, -46.5972],
-  'vila guilherme': [-23.5117, -46.5805],
-  'vila medeiros': [-23.4982, -46.5605],
-  'jaçanã': [-23.4671, -46.5564],
-  'tremembé': [-23.4364, -46.5806],
-  'horto florestal': [-23.4628, -46.6163],
-  'santana': [-23.4957, -46.6275],
-  'mandaqui': [-23.4746, -46.6189],
-  'campo limpo': [-23.6355, -46.7490],
-  'capão redondo': [-23.6549, -46.7727],
-  'm\'boi mirim': [-23.6795, -46.7602],
-  'parelheiros': [-23.8027, -46.7405],
-  'cidade dutra': [-23.7056, -46.6680],
-  'grajaú': [-23.7218, -46.6795],
-  'socorro': [-23.7093, -46.6440],
-  'pedreira': [-23.7213, -46.6285],
-  'cursino': [-23.6236, -46.6188],
-  'vila mariana': [-23.5902, -46.6367],
-  'jabaquara': [-23.6520, -46.6374],
+  'cidade lider':[-23.5440,-46.4930],'cidade líder':[-23.5440,-46.4930],
+  'centro': [-23.5505, -46.6333],'sé': [-23.5506, -46.6340],'república': [-23.5433, -46.6395],
+  'bela vista': [-23.5612, -46.6472],'consolação': [-23.5531, -46.6573],
+  'cerqueira césar': [-23.5622, -46.6680],'jardins': [-23.5730, -46.6687],
+  'jardim paulista': [-23.5730, -46.6687],'itaim bibi': [-23.5861, -46.6836],
+  'vila olímpia': [-23.5942, -46.6882],'moema': [-23.6020, -46.6641],
+  'saúde': [-23.6200, -46.6219],'ipiranga': [-23.5908, -46.6068],
+  'santo andré': [-23.6568, -46.5321],'são bernardo': [-23.6917, -46.5650],
+  'são caetano': [-23.6203, -46.5505],'guarulhos': [-23.4640, -46.5333],
+  'osasco': [-23.5327, -46.7919],'taboão': [-23.6077, -46.7920],
+  'santana': [-23.4957, -46.6275],'tucuruvi': [-23.4761, -46.6009],
+  'penha': [-23.5327, -46.5449],'tatuapé': [-23.5379, -46.5705],
+  'mooca': [-23.5636, -46.5986],'brás': [-23.5444, -46.6113],
+  'belém': [-23.5441, -46.5877],'água rasa': [-23.5552, -46.5649],
+  'vila prudente': [-23.5877, -46.5612],'são mateus': [-23.6077, -46.4940],
+  'itaquera': [-23.5397, -46.4579],'guaianases': [-23.5403, -46.3827],
+  'cidade tiradentes': [-23.5892, -46.4028],'ermelino matarazzo': [-23.4918, -46.4580],
+  'são miguel': [-23.5064, -46.4430],'vila formosa': [-23.5518, -46.5286],
+  'campo belo': [-23.6136, -46.6694],'campo grande': [-23.6405, -46.6900],
+  'santo amaro': [-23.6540, -46.7110],'brooklin': [-23.6100, -46.6971],
+  'morumbi': [-23.6192, -46.7212],'butantã': [-23.5718, -46.7317],
+  'pinheiros': [-23.5652, -46.6928],'lapa': [-23.5257, -46.7078],
+  'barra funda': [-23.5249, -46.6605],'limão': [-23.4899, -46.6701],
+  'pirituba': [-23.4699, -46.7266],'casa verde': [-23.4889, -46.6560],
+  'vila maria': [-23.5096, -46.5972],'campo limpo': [-23.6355, -46.7490],
+  'capão redondo': [-23.6549, -46.7727],'grajaú': [-23.7218, -46.6795],
+  'cursino': [-23.6236, -46.6188],'vila mariana': [-23.5902, -46.6367],
+  'jabaquara': [-23.6520, -46.6374],'jaçanã': [-23.4671, -46.5564],
 };
 
-function extrairBairroSP(endereco) {
+function extrairBairroSP_fallback(endereco) {
   if (!endereco) return null;
   const end = endereco.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   for (const [bairro, coords] of Object.entries(SP_BAIRROS)) {
     const bNorm = bairro.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     if (end.includes(bNorm)) return coords;
   }
-  // Fallback: se contém "sp" ou "são paulo", joga no centro com ruído
   if (end.includes('sao paulo') || end.includes('sp')) {
-    return [-23.5505 + (Math.random() - 0.5) * 0.15, -46.6333 + (Math.random() - 0.5) * 0.15];
+    return [-23.5505 + (Math.random()-0.5)*0.1, -46.6333 + (Math.random()-0.5)*0.1];
   }
   return null;
 }
 
+// Ícone dourado pulsante via DivIcon
+function criarIconeCliente(cor, status) {
+  const isGold = cor === '#c9922a';
+  const pulseColor = cor;
+  return L.divIcon({
+    className: '',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    popupAnchor: [0, -14],
+    html: `<div style="
+      width:14px;height:14px;border-radius:50%;
+      background:${cor};
+      border:2px solid ${isGold ? '#f5d080' : cor};
+      box-shadow:0 0 0 0 ${cor}88;
+      animation:mapaMarkerPulse 2.5s ease-out infinite;
+      position:relative;cursor:pointer;
+    "></div>`,
+  });
+}
+
+// Injeta a animação de pulse uma vez no head
+(function injetarEstilosMapa() {
+  if (document.getElementById('mapa-pulse-style')) return;
+  const s = document.createElement('style');
+  s.id = 'mapa-pulse-style';
+  s.textContent = `
+    @keyframes mapaMarkerPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(201,146,42,0.7); }
+      70%  { box-shadow: 0 0 0 10px rgba(201,146,42,0); }
+      100% { box-shadow: 0 0 0 0 rgba(201,146,42,0); }
+    }
+    .mapa-popup-rico .leaflet-popup-content-wrapper {
+      background:#0c0f18;border:1px solid #212840;color:#dde1f0;
+      box-shadow:0 8px 32px rgba(0,0,0,0.7);border-radius:12px;padding:0;min-width:220px;
+    }
+    .mapa-popup-rico .leaflet-popup-content { margin:0; }
+    .mapa-popup-rico .leaflet-popup-tip-container { display:none; }
+    .mapa-popup-rico .leaflet-popup-close-button { color:#5a6282!important;top:8px!important;right:10px!important;font-size:16px!important; }
+  `;
+  document.head.appendChild(s);
+})();
+
+function fmt2(v) {
+  if (!v && v !== 0) return '—';
+  return 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+
+function construirPopup(p, cor, status) {
+  const comp = _comportamento[(p.nome||'').toLowerCase().trim()] || {};
+  const statusIcon = cor === '#ef476f' ? '🔴' : cor === '#06d6a0' ? '🟢' : cor === '#5a6282' ? '⚫' : '🔵';
+  const initials = (p.nome||'?').trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+  const capTotal = comp.capitalTotal || 0;
+  const jurosTotal = comp.jurosTotal || 0;
+  const lucroReal = comp.lucroReal || 0;
+
+  return `
+    <div style="font-family:'DM Mono',monospace;overflow:hidden;border-radius:12px;">
+      <!-- Cabeçalho dourado -->
+      <div style="background:linear-gradient(135deg,rgba(201,146,42,0.18) 0%,rgba(12,15,24,0.95) 100%);padding:14px 16px 10px;border-bottom:1px solid #212840;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#c9922a,#e8b84b);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#07090e;flex-shrink:0;">${initials}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:700;color:#e8b84b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nome || '—'}</div>
+            <div style="font-size:9px;color:#5a6282;margin-top:1px;letter-spacing:0.06em;">${statusIcon} ${status.toUpperCase()}</div>
+          </div>
+        </div>
+      </div>
+      <!-- Corpo -->
+      <div style="padding:10px 14px;display:flex;flex-direction:column;gap:6px;">
+        ${p.endereco ? `<div style="font-size:9px;color:#5a6282;display:flex;gap:5px;align-items:flex-start;"><span>📍</span><span style="line-height:1.4;">${p.endereco}</span></div>` : ''}
+        ${p.tel ? `<div style="font-size:9px;color:#5a6282;">📱 ${p.tel}</div>` : ''}
+        ${p.empresa ? `<div style="font-size:9px;color:#5a6282;">🏢 ${p.empresa}${p.cargo ? ' · '+p.cargo : ''}</div>` : ''}
+        <!-- KPIs financeiros -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:4px;">
+          <div style="background:#111521;border:1px solid #1a2035;border-radius:7px;padding:7px 8px;">
+            <div style="font-size:7.5px;color:#5a6282;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px;">Capital</div>
+            <div style="font-size:11px;color:#c9922a;font-weight:700;">${fmt2(capTotal)}</div>
+          </div>
+          <div style="background:#111521;border:1px solid #1a2035;border-radius:7px;padding:7px 8px;">
+            <div style="font-size:7.5px;color:#5a6282;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px;">Juros Previstos</div>
+            <div style="font-size:11px;color:#9b5de5;font-weight:700;">${fmt2(jurosTotal)}</div>
+          </div>
+          <div style="background:#111521;border:1px solid #1a2035;border-radius:7px;padding:7px 8px;">
+            <div style="font-size:7.5px;color:#5a6282;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px;">Já Recebido</div>
+            <div style="font-size:11px;color:#06d6a0;font-weight:700;">${fmt2(lucroReal)}</div>
+          </div>
+          <div style="background:#111521;border:1px solid #1a2035;border-radius:7px;padding:7px 8px;">
+            <div style="font-size:7.5px;color:#5a6282;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px;">Contratos</div>
+            <div style="font-size:11px;color:#4895ef;font-weight:700;">${comp.qtdContratos || 0}</div>
+          </div>
+        </div>
+        ${comp.mesesRelac > 0 ? `<div style="font-size:9px;color:#5a6282;margin-top:2px;">🕐 Relacionamento: ${comp.mesesRelac} meses</div>` : ''}
+        ${comp.recorrente ? `<div style="font-size:9px;color:#4895ef;">↩ Cliente recorrente</div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
 function iniciarMapa() {
-  if (_mapaLeaflet) return; // já iniciado
+  if (_mapaLeaflet) return;
   const el = document.getElementById('mapa-clientes');
   if (!el || typeof L === 'undefined') return;
 
@@ -3543,73 +3564,76 @@ function iniciarMapa() {
     attributionControl: false,
   });
 
-  // Tile escuro compatível com o tema
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     maxZoom: 18,
   }).addTo(_mapaLeaflet);
 
-  // Atualiza marcadores com dados das pastas
   setTimeout(atualizarMapaClientes, 300);
 }
 
-function atualizarMapaClientes() {
+async function atualizarMapaClientes() {
   if (!_mapaLeaflet) return;
 
-  // Remove markers antigos
   _mapaMarkers.forEach(m => m.remove());
   _mapaMarkers = [];
 
   const pastas = Object.values(_pastas || {});
+  const countEl = document.getElementById('mapa-clientes-count');
+  if (countEl) countEl.textContent = 'Geocodificando endereços...';
+
   let plotados = 0;
   const bairroCount = {};
 
-  pastas.forEach(p => {
-    if (!p.endereco && !p.nome) return;
-    const coords = extrairBairroSP(p.endereco);
-    if (!coords) return;
+  // Processa em sequência para respeitar rate limit do Nominatim (1 req/seg)
+  for (const p of pastas) {
+    if (!p.endereco) continue;
 
-    // Adiciona pequeno ruído para não sobrepor exatamente
-    const bairroKey = coords.join(',');
+    const coords = await geocodificarEndereco(p.endereco);
+    if (!coords) continue;
+
+    // Pequeno jitter para não sobrepor marcadores no mesmo ponto
+    const bairroKey = coords.map(c => c.toFixed(3)).join(',');
     bairroCount[bairroKey] = (bairroCount[bairroKey] || 0) + 1;
-    const jitter = bairroCount[bairroKey] * 0.0015;
+    const jitter = Math.min(bairroCount[bairroKey] - 1, 5) * 0.0012;
     const lat = coords[0] + (Math.random() - 0.5) * jitter;
     const lng = coords[1] + (Math.random() - 0.5) * jitter;
 
-    // Cor por status
+    // Status e cor — dourado para clientes sem contrato ainda
     const comp = _comportamento[(p.nome||'').toLowerCase().trim()] || {};
     let cor, status;
-    if (comp.temAtraso) { cor = '#ef476f'; status = 'Em atraso'; }
-    else if (comp.qtdContratos > 0 && comp.ativo) { cor = '#06d6a0'; status = 'Em dia'; }
-    else if (comp.qtdQuitados > 0 && !comp.ativo) { cor = '#5a6282'; status = 'Quitado'; }
-    else { cor = '#4895ef'; status = 'Cadastrado'; }
+    if (comp.temAtraso)                              { cor = '#ef476f'; status = 'Em atraso'; }
+    else if (comp.qtdContratos > 0 && comp.ativo)   { cor = '#06d6a0'; status = 'Em dia'; }
+    else if (comp.qtdQuitados > 0 && !comp.ativo)   { cor = '#5a6282'; status = 'Quitado'; }
+    else                                             { cor = '#c9922a'; status = 'Cadastrado'; }
 
-    const marker = L.circleMarker([lat, lng], {
-      radius: 7,
-      fillColor: cor,
-      color: cor,
-      weight: 1.5,
-      opacity: 0.9,
-      fillOpacity: 0.75,
+    const icon = criarIconeCliente(cor, status);
+    const marker = L.marker([lat, lng], { icon });
+
+    marker.bindPopup(construirPopup(p, cor, status), {
+      className: 'mapa-popup-rico',
+      maxWidth: 260,
+      minWidth: 220,
     });
-
-    marker.bindPopup(`
-      <div style="font-family:'DM Mono',monospace;font-size:11px;min-width:140px">
-        <div style="font-weight:700;color:#c9922a;margin-bottom:4px">${p.nome || '—'}</div>
-        <div style="color:#aaa">📍 ${p.endereco || 'Endereço não informado'}</div>
-        <div style="margin-top:4px;color:${cor}">● ${status}</div>
-      </div>
-    `, { className: 'mapa-popup' });
 
     marker.addTo(_mapaLeaflet);
     _mapaMarkers.push(marker);
     plotados++;
-  });
 
-  const countEl = document.getElementById('mapa-clientes-count');
+    // Atualiza contagem em tempo real
+    if (countEl) countEl.textContent = `Plotando... ${plotados} cliente(s)`;
+
+    // Aguarda 1.1s entre requisições para respeitar o rate limit do Nominatim
+    // (só se a entrada NÃO estava em cache)
+    const key = p.endereco.trim().toLowerCase();
+    if (!_geocodeCache[key] || bairroCount[bairroKey] > 1) {
+      await new Promise(r => setTimeout(r, 1100));
+    }
+  }
+
   if (countEl) {
     countEl.textContent = plotados > 0
-      ? `${plotados} cliente(s) plotado(s) de ${pastas.length} cadastrado(s)`
-      : `${pastas.length} cliente(s) cadastrado(s) — adicione endereços para visualizar no mapa`;
+      ? `${plotados} cliente(s) no mapa · clique para detalhes`
+      : `${pastas.length} cliente(s) cadastrado(s) — adicione endereços para visualizar`;
   }
 }
 
@@ -4912,6 +4936,9 @@ function atualizarComportamento(clientes) {
       recorrente:   c.recorrente   || false,
       temAtraso:    c.temAtraso    || false,
       ativo:        c.ativo        || false,
+      capitalTotal: c.totalCap     || 0,
+      jurosTotal:   c.totalJuros   || 0,
+      lucroReal:    c.totalPago    || 0,
     };
   });
   // NÃO chama pastaRender() aqui — é chamado no finally do loadData
