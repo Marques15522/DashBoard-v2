@@ -5596,17 +5596,59 @@ function noticiaTag(titulo) {
   return { label:'ECONOMIA', cor:'#c9922a' };
 }
 
-// 8 categorias de interesse com queries específicas para o Google News
+// 8 categorias — usa múltiplos proxies com fallback
 const CATEGORIAS_NOTICIAS = [
-  { label:'SELIC/JUROS',      cor:'#ef476f', q:'Selic+Banco+Central+taxa+juros+COPOM'         },
-  { label:'INFLAÇÃO',         cor:'#9b5de5', q:'IPCA+inflação+Brasil'                          },
-  { label:'INADIMPLÊNCIA',    cor:'#ef476f', q:'inadimplência+Serasa+SPC+calote+brasil'        },
-  { label:'EMPREGO',          cor:'#e8b84b', q:'desemprego+IBGE+mercado+trabalho+brasil'       },
-  { label:'CRÉDITO/LEIS',     cor:'#4895ef', q:'lei+crédito+CMN+regulação+juros+consumidor'    },
-  { label:'ENDIVIDAMENTO',    cor:'#c9922a', q:'endividamento+famílias+CNC+dívida+brasil'      },
-  { label:'ECONOMIA',         cor:'#06d6a0', q:'economia+brasil+dólar+crise+PIB'               },
-  { label:'FRAUDES',          cor:'#ff6b6b', q:'fraude+golpe+financeiro+banco+fintech+brasil'  },
+  { label:'SELIC/JUROS',   cor:'#ef476f', q:'Selic COPOM Banco Central taxa juros'       },
+  { label:'INFLAÇÃO',      cor:'#9b5de5', q:'IPCA inflação Brasil preços'                },
+  { label:'INADIMPLÊNCIA', cor:'#ef476f', q:'inadimplência Serasa calote crédito brasil' },
+  { label:'EMPREGO',       cor:'#e8b84b', q:'desemprego IBGE mercado trabalho brasil'    },
+  { label:'CRÉDITO/LEIS',  cor:'#4895ef', q:'regulação crédito CMN lei juros consumidor' },
+  { label:'ENDIVIDAMENTO', cor:'#c9922a', q:'endividamento famílias dívida CNC brasil'   },
+  { label:'ECONOMIA',      cor:'#06d6a0', q:'economia brasil dólar PIB crise'            },
+  { label:'FRAUDES',       cor:'#ff6b6b', q:'fraude golpe financeiro banco fintech'      },
 ];
+
+async function fetchRSS(rssUrl) {
+  // Tenta 3 proxies diferentes em sequência
+  const proxies = [
+    `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=3`,
+    `https://feeds.googleapis.com/feeds/api/standardprofiles/-/`, // fallback
+  ];
+
+  // Proxy 1: rss2json
+  try {
+    const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=3`, { signal: AbortSignal.timeout(8000) });
+    if (r.ok) {
+      const d = await r.json();
+      if (d.status === 'ok' && d.items?.length) return d.items;
+    }
+  } catch(e) {}
+
+  // Proxy 2: rssbridge via allorigins
+  try {
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
+    const r = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
+    if (r.ok) {
+      const raw = await r.json();
+      const xml = raw.contents || '';
+      // Parse XML manual simples
+      const items = [];
+      const regex = /<item>([\s\S]*?)<\/item>/g;
+      let m;
+      while ((m = regex.exec(xml)) !== null && items.length < 3) {
+        const block = m[1];
+        const title = (block.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || block.match(/<title>(.*?)<\/title>/))?.[1] || '';
+        const link  = (block.match(/<link>(.*?)<\/link>/))?.[1] || (block.match(/<guid>(.*?)<\/guid>/))?.[1] || '#';
+        const pub   = (block.match(/<pubDate>(.*?)<\/pubDate>/))?.[1] || '';
+        const src   = (block.match(/<source[^>]*>(.*?)<\/source>/))?.[1] || '';
+        if (title) items.push({ title, link, pubDate: pub, author: src });
+      }
+      if (items.length) return items;
+    }
+  } catch(e) {}
+
+  return [];
+}
 
 async function noticiasCarregar() {
   const lista = document.getElementById('noticias-lista');
@@ -5615,32 +5657,24 @@ async function noticiasCarregar() {
 
   const todasNoticias = [];
 
-  for (const cat of CATEGORIAS_NOTICIAS) {
-    try {
-      const rssUrl = `https://news.google.com/rss/search?q=${cat.q}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
-      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=3`;
-      const r = await fetch(apiUrl, { signal: AbortSignal.timeout(10000) });
-      if (!r.ok) continue;
-      const d = await r.json();
-      if (d.status !== 'ok') continue;
-      (d.items || []).slice(0, 2).forEach(item => {
-        if (!item.title) return;
-        // Extrai URL real do redirect do Google News
-        let url = item.link || '#';
-        try {
-          const m = url.match(/url=([^&]+)/);
-          if (m) url = decodeURIComponent(m[1]);
-        } catch(e) {}
-        todasNoticias.push({
-          titulo: item.title.replace(/ - [^-]{2,40}$/, '').trim(),
-          url,
-          fonte: item.author || item.source || cat.label,
-          data: item.pubDate ? new Date(item.pubDate) : new Date(),
-          categoria: cat
-        });
+  // Busca as 8 categorias em paralelo (mais rápido)
+  await Promise.all(CATEGORIAS_NOTICIAS.map(async (cat) => {
+    const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(cat.q)}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+    const items = await fetchRSS(rssUrl);
+    items.slice(0, 2).forEach(item => {
+      if (!item.title) return;
+      let url = item.link || '#';
+      // Decodifica redirect do Google News se necessário
+      try { const m = url.match(/url=([^&]+)/); if (m) url = decodeURIComponent(m[1]); } catch(e) {}
+      todasNoticias.push({
+        titulo: item.title.replace(/ - [^-]{2,50}$/, '').trim(),
+        url,
+        fonte: item.author || item.source || 'Google News',
+        data: item.pubDate ? new Date(item.pubDate) : new Date(),
+        categoria: cat
       });
-    } catch(e) { console.warn('Feed falhou:', cat.label, e.message); }
-  }
+    });
+  }));
 
   // Deduplicar e ordenar por data
   const vistos = new Set();
@@ -5654,7 +5688,7 @@ async function noticiasCarregar() {
   _ultimasNoticias = top;
 
   if (top.length === 0) {
-    lista.innerHTML = '<div class="noticia-loading" style="color:var(--muted)">Sem notícias no momento. <span style="color:var(--gold);cursor:pointer;text-decoration:underline" onclick="noticiasCarregar()">Tentar novamente</span></div>';
+    lista.innerHTML = '<div class="noticia-loading" style="color:var(--muted)">Sem notícias carregadas. <span style="color:var(--gold);cursor:pointer;text-decoration:underline" onclick="noticiasCarregar()">Tentar novamente</span></div>';
     return;
   }
 
