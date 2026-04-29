@@ -525,6 +525,24 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 <!-- VISÃO GERAL -->
 <div id="tab-visao" class="tab-panel active">
   <div id="alertasBanner"></div>
+  <!-- RESUMO DO DIA -->
+  <div id="briefing-dia" style="display:none;border-radius:14px;padding:18px 22px;margin-bottom:16px;animation:fadeUp 0.4s ease;border:1px solid rgba(201,146,42,0.25);background:linear-gradient(135deg,rgba(201,146,42,0.06) 0%,rgba(7,9,14,0) 60%)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:1.4rem">☀️</span>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.15em;color:var(--gold2)" id="briefing-saudacao">BOM DIA</div>
+          <div style="font-size:0.58rem;color:var(--muted)" id="briefing-data-longa">—</div>
+        </div>
+      </div>
+      <div style="font-size:0.58rem;color:var(--muted2);letter-spacing:0.08em">RESUMO DO DIA</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px" id="briefing-cards"></div>
+    <div id="briefing-acoes" style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;display:none">
+      <div style="font-size:0.58rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:8px">📋 AÇÕES PRIORITÁRIAS HOJE</div>
+      <div id="briefing-acoes-list" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+  </div>
   <!-- NOTIFICAÇÃO VENCIMENTOS HOJE/AMANHÃ -->
   <div id="notif-venc" style="display:none;background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.3);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;animation:fadeUp 0.4s ease">
     <span style="font-size:1.2rem">🔔</span>
@@ -573,6 +591,12 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
 <!-- FINANCEIRO -->
 <div id="tab-financeiro" class="tab-panel">
+  <div class="section-label">HISTÓRICO REAL DE RECEBIMENTOS</div>
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">💵 Recebimentos Mês a Mês — Últimos 3 Meses</div><div class="card-desc">Juros efetivamente recebidos por mês (caixa real)</div></div><div class="card-badge">CAIXA REAL</div></div>
+    <div class="chart-wrap tall"><canvas id="chartHistRecebimentos"></canvas></div>
+    <div style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px" id="histRecebSummary"></div>
+  </div>
   <div class="section-label">FLUXO DE CAIXA</div>
   <div class="grid-2">
     <div class="card"><div class="card-header"><div><div class="card-title">📊 Recebimentos Previstos — 8 Semanas</div><div class="card-desc">Juros previstos a entrar por semana</div></div><div class="card-badge">PREVISÃO</div></div><div class="chart-wrap tall"><canvas id="chartProjecao"></canvas></div></div>
@@ -617,6 +641,13 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="section-label">CLUSTERIZAÇÃO DE CLIENTES</div>
   <div class="card"><div class="card-header"><div><div class="card-title">🧩 Perfil de Clientes</div><div class="card-desc">Agrupamento automático por comportamento: Premium · Regular Fiel · Alto Risco · Inativo</div></div><div class="card-badge">IA</div></div><div class="profile-grid" id="profileGrid"></div></div>
   <div class="card"><div class="card-header"><div><div class="card-title">📋 Histórico de Pagamentos por Cliente</div><div class="card-desc">Pontualidade e volume registrado</div></div><div class="card-badge">HISTÓRICO</div></div><div class="hist-list" id="histList"></div></div>
+
+  <!-- RENTABILIDADE POR CLIENTE -->
+  <div class="section-label">💎 RENTABILIDADE POR CLIENTE</div>
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">📊 Ranking de Rentabilidade</div><div class="card-desc">Juros gerados vs capital emprestado — quem realmente vale mais para o negócio</div></div><div class="card-badge">ROI</div></div>
+    <div id="rentabilidade-list" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
 
   <!-- PASTAS DE CLIENTES -->
   <div class="section-label" style="margin-top:28px">🗂️ PASTAS DE CLIENTES — DADOS PESSOAIS & DOCUMENTOS</div>
@@ -1098,6 +1129,11 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
 <!-- WHATSAPP -->
 <div id="tab-whatsapp" class="tab-panel">
+  <div class="section-label">📋 RÉGUA DE COBRANÇA — AÇÕES DO DIA</div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header"><div><div class="card-title">🎯 Quem Acionar Hoje</div><div class="card-desc">Vencimentos de hoje e nos próximos 3 dias — template já sugerido por perfil</div></div><div class="card-badge">PRIORIDADE</div></div>
+    <div id="regua-cobranca-list"><div style="color:var(--muted);font-size:0.68rem;padding:12px 0">Carregando...</div></div>
+  </div>
   <div class="section-label">MENSAGENS WHATSAPP — ENVIO RÁPIDO</div>
   <div class="wa-summary">
     <div class="wa-sum"><div class="wa-sum-val" id="wa-n-total" style="color:var(--gold)">—</div><div class="wa-sum-lbl">Total Clientes</div></div>
@@ -2095,6 +2131,198 @@ function render(empRows,pagRows){
     </div>
     <div style="font-size:0.52rem;color:var(--muted2);margin-top:8px">* Projeção assume reinvestimento total dos juros mensalmente (juros compostos)</div>
   ` : `<div style="color:var(--muted);font-size:0.68rem;padding:20px 0;text-align:center">Dados insuficientes para projeção.</div>`;
+
+  // ── FEATURE 1: RESUMO DO DIA ─────────────────────────────
+  const em3dias = new Date(hoje); em3dias.setDate(hoje.getDate()+3); em3dias.setHours(23,59,59,999);
+  const hora = hoje.getHours();
+  const saudacao = hora < 12 ? 'BOM DIA' : hora < 18 ? 'BOA TARDE' : 'BOA NOITE';
+  const emoji = hora < 12 ? '☀️' : hora < 18 ? '🌤️' : '🌙';
+  document.getElementById('briefing-saudacao').textContent = saudacao;
+  document.querySelector('#briefing-dia span[style*="font-size:1.4rem"]').textContent = emoji;
+  document.getElementById('briefing-data-longa').textContent = hoje.toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+
+  const venceHoje = abertos.filter(e => { if(!e.proxVenc) return false; const d=new Date(e.proxVenc); d.setHours(0,0,0,0); return d.getTime()===hoje.getTime(); });
+  const totalHoje = venceHoje.reduce((s,e)=>s+e.jProx,0);
+  const emAtrasoBr = atrasado.map(e => {
+    const dias = e.proxVenc ? Math.max(0,Math.floor((hoje-e.proxVenc)/86400000)) : 0;
+    return {...e, dias};
+  }).sort((a,b)=>b.dias-a.dias);
+
+  const briefCards = [
+    { icon:'💰', label:'Entra Hoje', val: totalHoje>0 ? fmt(totalHoje) : 'R$ 0', cor: totalHoje>0?'var(--green)':'var(--muted)', sub: venceHoje.length+' pagamento(s)' },
+    { icon:'📋', label:'Cobranças Hoje', val: venceHoje.length, cor:'var(--gold2)', sub:'vencimentos do dia' },
+    { icon:'⚠️', label:'Em Atraso', val: atrasado.length, cor: atrasado.length>0?'var(--red)':'var(--green)', sub: atrasado.length>0?fmt(capRisco)+' em risco':'carteira limpa' },
+    { icon:'📅', label:'Próx. 7 Dias', val: fmt(proxSemana), cor:'var(--blue)', sub:'a receber esta semana' },
+  ];
+  document.getElementById('briefing-cards').innerHTML = briefCards.map(c=>`
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+      <div style="font-size:1rem;margin-bottom:4px">${c.icon}</div>
+      <div style="font-size:0.58rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:3px">${c.label}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:${c.cor};line-height:1">${c.val}</div>
+      <div style="font-size:0.52rem;color:var(--muted2);margin-top:3px">${c.sub}</div>
+    </div>`).join('');
+
+  const acoesList = [];
+  venceHoje.forEach(e => acoesList.push({ urgencia:'green', icon:'✅', texto:`<strong>${e.nome||e.id}</strong> — vence hoje · ${fmt(e.jProx)} · enviar aviso de cobrança` }));
+  // próximos 3 dias (excluindo hoje)
+  abertos.filter(e => {
+    if(!e.proxVenc) return false;
+    const d=new Date(e.proxVenc); d.setHours(0,0,0,0);
+    return d > hoje && e.proxVenc <= em3dias;
+  }).forEach(e => {
+    const diasAte = Math.round((new Date(e.proxVenc).setHours(0,0,0,0) - hoje) / 86400000);
+    acoesList.push({ urgencia:'blue', icon:'⏰', texto:`<strong>${e.nome||e.id}</strong> — vence em ${diasAte} dia(s) · ${fmt(e.jProx)} · enviar lembrete antecipado` });
+  });
+
+  if(acoesList.length > 0) {
+    document.getElementById('briefing-acoes').style.display = 'block';
+    document.getElementById('briefing-acoes-list').innerHTML = acoesList.map(a=>`
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;background:var(--s2);border-radius:8px;border-left:3px solid var(--${a.urgencia==='red'?'red':'green'})">
+        <span style="font-size:0.9rem;flex-shrink:0">${a.icon}</span>
+        <span style="font-size:0.68rem;color:var(--text);line-height:1.5">${a.texto}</span>
+      </div>`).join('');
+  }
+  document.getElementById('briefing-dia').style.display = 'block';
+
+  // ── FEATURE 2: HISTÓRICO REAL DE RECEBIMENTOS (3 meses) ─
+  const hoje12 = new Date(hoje);
+  const hist12Map = {};
+  for(let i=2; i>=0; i--) {
+    const d = new Date(hoje12.getFullYear(), hoje12.getMonth()-i, 1);
+    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    hist12Map[k] = 0;
+  }
+  pags.forEach(p => {
+    if(!p.data) return;
+    const k = `${p.data.getFullYear()}-${String(p.data.getMonth()+1).padStart(2,'0')}`;
+    if(k in hist12Map) hist12Map[k] += p.juros;
+  });
+  const hist12Keys = Object.keys(hist12Map).sort();
+  const hist12Labels = hist12Keys.map(k => { const[y,m]=k.split('-'); return new Date(+y,+m-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'}); });
+  const hist12Vals = hist12Keys.map(k => hist12Map[k]);
+  const hist12Total = hist12Vals.reduce((s,v)=>s+v,0);
+  const hist12Max = Math.max(...hist12Vals);
+  const hist12Med = hist12Total / hist12Keys.length;
+  const hist12MelhorIdx = hist12Vals.indexOf(hist12Max);
+
+  destroyChart('histReceb');
+  charts.histReceb = new Chart(document.getElementById('chartHistRecebimentos').getContext('2d'), {
+    type:'bar',
+    data:{
+      labels: hist12Labels,
+      datasets:[{
+        label:'Recebido',
+        data: hist12Vals,
+        backgroundColor: hist12Vals.map((v,i)=> i===hist12MelhorIdx ? 'rgba(201,146,42,0.9)' : v>0 ? 'rgba(6,214,160,0.7)' : 'rgba(90,98,130,0.3)'),
+        borderRadius:6, borderSkipped:false
+      },{
+        label:'Média',
+        data: hist12Keys.map(()=>hist12Med),
+        type:'line', borderColor:'rgba(72,149,239,0.6)', borderWidth:1.5,
+        borderDash:[4,4], pointRadius:0, fill:false
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}
+  });
+
+  const mesAtualK = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}`;
+  const mesAnteriorK = (() => { const d=new Date(hoje.getFullYear(),hoje.getMonth()-1,1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; })();
+  const recebMesAtual = hist12Map[mesAtualK]||0;
+  const recebMesAnt = hist12Map[mesAnteriorK]||0;
+  const varMes = recebMesAnt>0 ? ((recebMesAtual-recebMesAnt)/recebMesAnt*100).toFixed(1) : null;
+  document.getElementById('histRecebSummary').innerHTML = [
+    {lbl:'Total 3 Meses', val:fmt(hist12Total), cor:'var(--green)'},
+    {lbl:'Melhor Mês', val:fmt(hist12Max), cor:'var(--gold)'},
+    {lbl:'Média Mensal', val:fmt(hist12Med), cor:'var(--blue)'},
+    {lbl:'Mês Atual', val:fmt(recebMesAtual), cor: varMes!==null&&parseFloat(varMes)>=0?'var(--green)':'var(--red)', sub: varMes!==null?(parseFloat(varMes)>=0?'▲ +':'▼ ')+varMes+'% vs mês ant.':'primeiro mês'},
+  ].map(s=>`<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+    <div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:3px">${s.lbl}</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:${s.cor}">${s.val}</div>
+    ${s.sub?`<div style="font-size:0.5rem;color:var(--muted2);margin-top:2px">${s.sub}</div>`:''}
+  </div>`).join('');
+
+  // ── FEATURE 3: RÉGUA DE COBRANÇA ─────────────────────────
+  const vence3d = abertos.filter(e => {
+    if(!e.proxVenc) return false;
+    const d = new Date(e.proxVenc); d.setHours(0,0,0,0);
+    return d >= hoje && e.proxVenc <= em3dias;
+  });
+
+  const reguaPrioridade = [];
+  vence3d.forEach(e => {
+    const d = new Date(e.proxVenc); d.setHours(0,0,0,0);
+    const isHoje = d.getTime() === hoje.getTime();
+    const diasAte = Math.round((d - hoje) / 86400000);
+    reguaPrioridade.push({...e, tipo: isHoje?'hoje':'proximo', diasAte, tplSugerido:'vencimento', urgencia: isHoje?3:2});
+  });
+  reguaPrioridade.sort((a,b)=>b.urgencia-a.urgencia||a.diasAte-b.diasAte);
+
+  if(reguaPrioridade.length===0){
+    document.getElementById('regua-cobranca-list').innerHTML=`<div class="alert-bar ok"><span class="alert-icon">✅</span><span style="font-size:0.72rem">Nenhum vencimento hoje nem nos próximos 3 dias.</span></div>`;
+  } else {
+    const tplsAtual = tplLoad();
+    document.getElementById('regua-cobranca-list').innerHTML = reguaPrioridade.map(e => {
+      const isHoje = e.tipo==='hoje';
+      const corBorda = isHoje?'var(--gold)':'var(--blue)';
+      const badge = isHoje
+        ? `<span style="font-size:0.56rem;padding:2px 7px;border-radius:4px;background:rgba(201,146,42,0.1);border:1px solid rgba(201,146,42,0.3);color:var(--gold2)">📅 VENCE HOJE</span>`
+        : `<span style="font-size:0.56rem;padding:2px 7px;border-radius:4px;background:rgba(72,149,239,0.1);border:1px solid rgba(72,149,239,0.3);color:var(--blue)">⏰ em ${e.diasAte} dia(s)</span>`;
+      const tplLbl = tplsAtual[e.tplSugerido]?.lbl || e.tplSugerido;
+      const tel = e.tel ? e.tel.replace(/\D/g,'') : '';
+      const telBtn = tel ? `<a href="https://wa.me/55${tel}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.25);color:var(--green);border-radius:6px;font-family:'DM Mono',monospace;font-size:0.58rem;text-decoration:none;cursor:pointer">📱 Abrir WA</a>` :
+        `<span style="font-size:0.58rem;color:var(--muted2)">sem telefone</span>`;
+      const vencStr = e.proxVenc ? e.proxVenc.toLocaleDateString('pt-BR') : '—';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--s2);border-radius:10px;border-left:3px solid ${corBorda};flex-wrap:wrap">
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:0.75rem;color:var(--text);font-weight:600">${e.nome||e.id}</span>
+            ${badge}
+          </div>
+          <div style="font-size:0.57rem;color:var(--muted)">${e.id} · ${fmt(e.jProx)} · vence ${vencStr} · 💬 Sugestão: <span style="color:var(--gold2)">${tplLbl}</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">${telBtn}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── FEATURE 4: RENTABILIDADE POR CLIENTE ─────────────────
+  const rentRanking = clientes.filter(c=>c.totalCap>0||c.totalJuros>0).map(c => {
+    const capTotal = c.contratos.reduce((s,e)=>s+e.capital,0);
+    const roi = capTotal > 0 ? c.totalJuros / capTotal : 0;
+    const recebido = c.totalPago;
+    const recebidoROI = capTotal > 0 ? recebido / capTotal : 0;
+    return {...c, capTotal, roi, recebido, recebidoROI};
+  }).sort((a,b)=>b.roi-a.roi);
+
+  const maxRoiRent = rentRanking.length ? rentRanking[0].roi : 1;
+  document.getElementById('rentabilidade-list').innerHTML = rentRanking.length===0
+    ? `<div style="color:var(--muted);font-size:0.68rem;padding:12px 0">Nenhum dado disponível.</div>`
+    : rentRanking.map((c,i) => {
+      const corRoi = c.roi>0.3?'var(--gold)':c.roi>0.15?'var(--green)':'var(--blue)';
+      const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+      const barW = maxRoiRent>0 ? (c.roi/maxRoiRent*100).toFixed(1) : 0;
+      const statusBadge = c.soQuitados?`<span style="font-size:0.5rem;padding:2px 6px;border-radius:4px;background:rgba(90,98,130,0.1);border:1px solid var(--border2);color:var(--muted)">QUITADO</span>`:
+        c.temAtraso?`<span style="font-size:0.5rem;padding:2px 6px;border-radius:4px;background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.3);color:var(--red)">ATRASO</span>`:
+        `<span style="font-size:0.5rem;padding:2px 6px;border-radius:4px;background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.25);color:var(--green)">ATIVO</span>`;
+      return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            ${medal?`<span style="font-size:1rem">${medal}</span>`:`<span style="font-size:0.75rem;color:var(--muted);font-family:'Bebas Neue',sans-serif;min-width:18px">#${i+1}</span>`}
+            <span style="font-size:0.75rem;color:var(--text)">${c.nome}</span>
+            ${statusBadge}
+          </div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:${corRoi};line-height:1">${(c.roi*100).toFixed(1)}%<span style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--muted);margin-left:4px">ROI</span></div>
+        </div>
+        <div style="background:var(--border);border-radius:3px;height:4px;margin-bottom:10px;overflow:hidden">
+          <div style="height:100%;width:${barW}%;background:${corRoi};border-radius:3px;transition:width 1s ease"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+          <div style="font-size:0.57rem"><div style="color:var(--muted);margin-bottom:1px">Capital total</div><div style="color:var(--text)">${fmt(c.capTotal)}</div></div>
+          <div style="font-size:0.57rem"><div style="color:var(--muted);margin-bottom:1px">Juros gerados</div><div style="color:var(--green)">${fmt(c.totalJuros)}</div></div>
+          <div style="font-size:0.57rem"><div style="color:var(--muted);margin-bottom:1px">Já recebido</div><div style="color:var(--gold)">${fmt(c.recebido)}</div></div>
+        </div>
+      </div>`;
+    }).join('');
 
   // CALENDÁRIO MENSAL
   const DIAS_SEMANA=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
