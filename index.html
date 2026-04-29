@@ -468,6 +468,38 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .score-rec-box.atencao{background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.25);color:var(--gold2);}
 .score-rec-box.reprovado{background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.25);color:var(--red);}
 .score-rec-title{font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:0.1em;margin-bottom:5px;}
+
+  /* ── CARD NOTÍCIAS ── */
+  #card-noticias{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:fadeUp 0.4s ease both;}
+  .noticia-item{display:flex;flex-direction:column;gap:4px;padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;text-decoration:none;}
+  .noticia-item:last-child{border-bottom:none;}
+  .noticia-item:hover{background:rgba(201,146,42,0.05);}
+  .noticia-tag{font-size:0.47rem;letter-spacing:0.14em;text-transform:uppercase;padding:2px 7px;border-radius:3px;border:1px solid;display:inline-block;width:fit-content;}
+  .noticia-titulo{font-size:0.7rem;color:var(--text);line-height:1.45;font-weight:500;}
+  .noticia-fonte{font-size:0.52rem;color:var(--muted);margin-top:1px;}
+  .noticia-loading{padding:20px;text-align:center;font-size:0.65rem;color:var(--muted);}
+  /* ── CARD IA ── */
+  #card-ia{background:var(--s1);border:1px solid rgba(155,93,229,0.3);border-radius:14px;overflow:hidden;animation:fadeUp 0.5s ease both;}
+  #ia-chat-box{display:flex;flex-direction:column;gap:10px;padding:14px;min-height:180px;max-height:320px;overflow-y:auto;}
+  .ia-msg{display:flex;gap:8px;align-items:flex-start;}
+  .ia-msg.user{flex-direction:row-reverse;}
+  .ia-bubble{font-size:0.68rem;line-height:1.55;padding:9px 12px;border-radius:10px;max-width:88%;}
+  .ia-msg.bot .ia-bubble{background:var(--s2);border:1px solid var(--border);color:var(--text);}
+  .ia-msg.user .ia-bubble{background:rgba(155,93,229,0.15);border:1px solid rgba(155,93,229,0.3);color:var(--text);}
+  .ia-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;margin-top:2px;}
+  .ia-msg.bot .ia-avatar{background:rgba(155,93,229,0.2);border:1px solid rgba(155,93,229,0.3);}
+  .ia-msg.user .ia-avatar{background:rgba(201,146,42,0.2);border:1px solid rgba(201,146,42,0.3);}
+  #ia-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);}
+  #ia-input{flex:1;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:8px 12px;outline:none;transition:border-color 0.2s;}
+  #ia-input:focus{border-color:var(--purple);}
+  #ia-send{background:rgba(155,93,229,0.15);border:1px solid rgba(155,93,229,0.35);color:var(--purple);border-radius:8px;padding:8px 14px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+  #ia-send:hover{background:rgba(155,93,229,0.25);}
+  #ia-send:disabled{opacity:0.4;cursor:not-allowed;}
+  .ia-typing{display:flex;gap:4px;align-items:center;padding:2px 0;}
+  .ia-typing span{width:5px;height:5px;border-radius:50%;background:var(--muted);animation:iaDot 1.2s infinite;}
+  .ia-typing span:nth-child(2){animation-delay:0.2s;}
+  .ia-typing span:nth-child(3){animation-delay:0.4s;}
+  @keyframes iaDot{0%,80%,100%{transform:scale(0.7);opacity:0.4;}40%{transform:scale(1);opacity:1;}}
 </style>
 </head>
 <body>
@@ -787,6 +819,45 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     <div id="briefing-acoes" style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;display:none">
       <div id="briefing-acoes-list" style="display:flex;flex-direction:column;gap:6px"></div>
     </div>
+  </div>
+
+
+  <!-- INTELIGÊNCIA: NOTÍCIAS + IA -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+
+    <!-- CARD NOTÍCIAS -->
+    <div id="card-noticias">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:0.82rem;letter-spacing:0.1em;color:var(--text)">📰 Notícias do Mercado</div>
+          <div style="font-size:0.5rem;color:var(--muted);margin-top:1px">impacto direto no seu negócio · clique para ler</div>
+        </div>
+        <button onclick="noticiasCarregar()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:0.55rem;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">↺ Atualizar</button>
+      </div>
+      <div id="noticias-lista"><div class="noticia-loading">⏳ Carregando notícias...</div></div>
+    </div>
+
+    <!-- CARD IA -->
+    <div id="card-ia">
+      <div style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid rgba(155,93,229,0.2)">
+        <div style="width:28px;height:28px;border-radius:50%;background:rgba(155,93,229,0.15);border:1px solid rgba(155,93,229,0.35);display:flex;align-items:center;justify-content:center;font-size:0.9rem">🤖</div>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:0.82rem;letter-spacing:0.1em;color:var(--text)">Assistente de Decisões</div>
+          <div style="font-size:0.5rem;color:var(--muted)">IA com contexto dos seus dados + notícias</div>
+        </div>
+      </div>
+      <div id="ia-chat-box">
+        <div class="ia-msg bot">
+          <div class="ia-avatar">🤖</div>
+          <div class="ia-bubble">Olá! Sou seu assistente de decisões. Analiso seus dados do dashboard junto com as notícias do mercado para te dar recomendações estratégicas. Pergunte qualquer coisa ou clique em uma notícia para eu analisar o impacto no seu negócio.</div>
+        </div>
+      </div>
+      <div id="ia-input-row">
+        <input id="ia-input" type="text" placeholder="Ex: Como o aumento do desemprego afeta minha carteira?" onkeydown="if(event.key==='Enter')iaEnviar()">
+        <button id="ia-send" onclick="iaEnviar()">Analisar ➤</button>
+      </div>
+    </div>
+
   </div>
 
   <!-- GRÁFICOS -->
@@ -5101,13 +5172,11 @@ async function loadData(mostrarLoading){
 
     // Sincroniza endereços da aba Clientes nas pastas
     // Estrutura: col0=ID, col1=Nome, col2=CPF, col3=Tel, col4=Email, col5=Endereço, col6=Empresa, col7=Cargo, col8=Salário, col9=Status
-    const idsNaPlanilha = new Set();
     cliT.filter(row => String(row[0]||'').trim().startsWith('CLI')).forEach(row => {
       const id = String(row[0]||'').trim();
       const nome = String(row[1]||'').trim();
       const endereco = String(row[5]||'').trim();
       if (!nome) return;
-      idsNaPlanilha.add(id);
       // Cria ou atualiza pasta com endereço da planilha
       if (!_pastas[id]) _pastas[id] = { id, nome };
       if (endereco && !_pastas[id].endereco) _pastas[id].endereco = endereco;
@@ -5116,13 +5185,6 @@ async function loadData(mostrarLoading){
       if (!_pastas[id].empresa) _pastas[id].empresa = String(row[6]||'').trim();
       if (!_pastas[id].cargo) _pastas[id].cargo = String(row[7]||'').trim();
       if (!_pastas[id].nome) _pastas[id].nome = nome;
-    });
-    // Remove do localStorage qualquer cliente que não existe mais na planilha
-    Object.keys(_pastas).forEach(id => {
-      if (!idsNaPlanilha.has(id)) {
-        delete _pastas[id];
-        try { localStorage.removeItem('pastas_docs_' + id); } catch(e) {}
-      }
     });
     pastaSalvarLocal();
 
@@ -5529,6 +5591,215 @@ function cxExportar() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download='caixa_capital_investimentos.csv'; a.click();
   URL.revokeObjectURL(url);
+}
+
+
+// ════════════════════════════════════════════════════════
+// NOTÍCIAS DO MERCADO
+// ════════════════════════════════════════════════════════
+let _ultimasNoticias = [];
+
+const FEEDS_NOTICIAS = [
+  { url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.folha.uol.com.br%2Feconomia%2Frss091.xml&count=5', fonte: 'Folha Economia' },
+  { url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fagenciabrasil.ebc.com.br%2Frss%2Feconomia%2Ffeed.xml&count=5', fonte: 'Agência Brasil' },
+  { url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.infomoney.com.br%2Ffeed%2F&count=5', fonte: 'InfoMoney' },
+];
+
+const PALAVRAS_RELEVANTES = [
+  'juros','selic','inadimplência','crédito','empréstimo','desemprego','inflação',
+  'ipca','renda','salário','cdi','bc','banco central','economia','financ',
+  'endividamento','pix','microcrédito','consignado','taxa','mercado'
+];
+
+function noticiaRelevante(titulo) {
+  const t = titulo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  return PALAVRAS_RELEVANTES.some(p => t.includes(p));
+}
+
+function noticiaTag(titulo) {
+  const t = titulo.toLowerCase();
+  if (t.includes('selic') || t.includes('juros') || t.includes('bc') || t.includes('banco central'))
+    return { label: 'SELIC/JUROS', cor: '#ef476f' };
+  if (t.includes('inadimpl') || t.includes('calote') || t.includes('atraso'))
+    return { label: 'INADIMPLÊNCIA', cor: '#ef476f' };
+  if (t.includes('desemprego') || t.includes('emprego') || t.includes('trabalho'))
+    return { label: 'EMPREGO', cor: '#e8b84b' };
+  if (t.includes('inflação') || t.includes('ipca') || t.includes('preço'))
+    return { label: 'INFLAÇÃO', cor: '#9b5de5' };
+  if (t.includes('crédito') || t.includes('empréstimo') || t.includes('financiamento'))
+    return { label: 'CRÉDITO', cor: '#4895ef' };
+  if (t.includes('pix') || t.includes('pagamento') || t.includes('banco'))
+    return { label: 'PAGAMENTOS', cor: '#06d6a0' };
+  return { label: 'ECONOMIA', cor: '#c9922a' };
+}
+
+async function noticiasCarregar() {
+  const lista = document.getElementById('noticias-lista');
+  if (!lista) return;
+  lista.innerHTML = '<div class="noticia-loading">⏳ Buscando notícias relevantes...</div>';
+
+  const todasNoticias = [];
+  for (const feed of FEEDS_NOTICIAS) {
+    try {
+      const r = await fetch(feed.url);
+      const d = await r.json();
+      if (d.items) {
+        d.items.forEach(item => {
+          if (noticiaRelevante(item.title || '')) {
+            todasNoticias.push({
+              titulo: item.title,
+              url: item.link,
+              fonte: feed.fonte,
+              data: item.pubDate ? new Date(item.pubDate) : new Date()
+            });
+          }
+        });
+      }
+    } catch(e) { /* ignora feed com erro */ }
+  }
+
+  // Ordena por data, pega as 6 mais recentes
+  todasNoticias.sort((a, b) => b.data - a.data);
+  const top = todasNoticias.slice(0, 6);
+  _ultimasNoticias = top;
+
+  if (top.length === 0) {
+    lista.innerHTML = '<div class="noticia-loading" style="color:var(--muted)">Nenhuma notícia relevante encontrada no momento.</div>';
+    return;
+  }
+
+  lista.innerHTML = top.map(n => {
+    const tag = noticiaTag(n.titulo);
+    const horasAtras = Math.round((Date.now() - n.data.getTime()) / 3600000);
+    const tempo = horasAtras < 1 ? 'agora' : horasAtras < 24 ? `${horasAtras}h atrás` : `${Math.round(horasAtras/24)}d atrás`;
+    return `<a class="noticia-item" href="${n.url}" target="_blank" rel="noopener" onclick="iaAnalisarNoticia('${n.titulo.replace(/'/g,'\'').replace(/"/g,'&quot;')}')">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="noticia-tag" style="color:${tag.cor};border-color:${tag.cor}40;background:${tag.cor}12">${tag.label}</span>
+        <span style="font-size:0.48rem;color:var(--muted2)">${tempo} · ${n.fonte}</span>
+      </div>
+      <div class="noticia-titulo">${n.titulo}</div>
+    </a>`;
+  }).join('');
+}
+
+// Carrega notícias automaticamente e atualiza a cada 15min
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(noticiasCarregar, 1200);
+  setInterval(noticiasCarregar, 15 * 60 * 1000);
+});
+
+// ════════════════════════════════════════════════════════
+// ASSISTENTE DE IA — TOMADA DE DECISÕES
+// ════════════════════════════════════════════════════════
+let _iaHistorico = [];
+
+function iaDadosDashboard() {
+  // Coleta dados reais do dashboard para contexto da IA
+  const dados = {
+    totalCapital: document.getElementById('kpi-capital')?.textContent || '—',
+    clientesAtivos: document.getElementById('kpi-cli-ativos')?.textContent || '—',
+    lucroRealizado: document.getElementById('kpi-realizado')?.textContent || '—',
+    ticketMedio: document.getElementById('kpi-ticket')?.textContent || '—',
+    aReceber7d: document.getElementById('kpi-semana')?.textContent || '—',
+    prazoMedio: document.getElementById('kpi-prazo')?.textContent || '—',
+    melhorCliente: document.getElementById('kpi-melhor-cli')?.textContent || '—',
+    totalContratos: document.getElementById('kpi-total-contr')?.textContent || '—',
+  };
+  return dados;
+}
+
+function iaAdicionarMensagem(texto, tipo) {
+  const box = document.getElementById('ia-chat-box');
+  if (!box) return;
+  const div = document.createElement('div');
+  div.className = 'ia-msg ' + tipo;
+  if (tipo === 'bot') {
+    div.innerHTML = `<div class="ia-avatar">🤖</div><div class="ia-bubble">${texto}</div>`;
+  } else {
+    div.innerHTML = `<div class="ia-bubble">${texto}</div><div class="ia-avatar">👤</div>`;
+  }
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return div;
+}
+
+function iaAdicionarTyping() {
+  const box = document.getElementById('ia-chat-box');
+  const div = document.createElement('div');
+  div.className = 'ia-msg bot';
+  div.id = 'ia-typing';
+  div.innerHTML = `<div class="ia-avatar">🤖</div><div class="ia-bubble"><div class="ia-typing"><span></span><span></span><span></span></div></div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function iaEnviar() {
+  const input = document.getElementById('ia-input');
+  const btn = document.getElementById('ia-send');
+  const pergunta = input.value.trim();
+  if (!pergunta || btn.disabled) return;
+
+  input.value = '';
+  btn.disabled = true;
+  iaAdicionarMensagem(pergunta, 'user');
+  iaAdicionarTyping();
+
+  const dados = iaDadosDashboard();
+  const noticias = _ultimasNoticias.slice(0,4).map(n => `- ${n.titulo} (${n.fonte})`).join('\n');
+
+  const systemPrompt = `Você é um assistente financeiro especializado em negócios de empréstimo a juros (agiotagem legalizada / crédito pessoal informal). Analise os dados do dashboard e as notícias do mercado para dar recomendações estratégicas PRÁTICAS e DIRETAS.
+
+DADOS ATUAIS DO NEGÓCIO:
+- Capital em carteira: ${dados.totalCapital}
+- Clientes ativos: ${dados.clientesAtivos}
+- Lucro realizado: ${dados.lucroRealizado}
+- Ticket médio: ${dados.ticketMedio}
+- A receber (7 dias): ${dados.aReceber7d}
+- Prazo médio: ${dados.prazoMedio}
+- Melhor cliente: ${dados.melhorCliente}
+- Total contratos: ${dados.totalContratos}
+
+NOTÍCIAS RECENTES DO MERCADO:
+${noticias || 'Nenhuma notícia carregada ainda.'}
+
+Responda em português, de forma CONCISA (máximo 4 parágrafos curtos). Use bullet points quando listar ações. Seja direto e prático — o usuário quer saber O QUE FAZER, não teoria. Não use markdown com ** ou ##, use texto simples.`;
+
+  _iaHistorico.push({ role: 'user', content: pergunta });
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: _iaHistorico.slice(-6) // mantém últimas 3 trocas
+      })
+    });
+    const data = await resp.json();
+    const resposta = data.content?.[0]?.text || 'Não consegui gerar uma resposta. Tente novamente.';
+    _iaHistorico.push({ role: 'assistant', content: resposta });
+
+    document.getElementById('ia-typing')?.remove();
+    iaAdicionarMensagem(resposta.replace(/\n/g, '<br>'), 'bot');
+  } catch(e) {
+    document.getElementById('ia-typing')?.remove();
+    iaAdicionarMensagem('Erro ao conectar com a IA. Verifique sua conexão e tente novamente.', 'bot');
+  }
+
+  btn.disabled = false;
+  document.getElementById('ia-input')?.focus();
+}
+
+function iaAnalisarNoticia(titulo) {
+  const input = document.getElementById('ia-input');
+  if (input) {
+    input.value = `Saiu uma notícia: "${titulo}". Como isso impacta meu negócio e o que devo fazer?`;
+    // Rola até o card de IA
+    document.getElementById('card-ia')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => iaEnviar(), 300);
+  }
 }
 
 // Inicializa campos da aba Caixa ao carregar
