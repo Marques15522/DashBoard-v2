@@ -5596,6 +5596,18 @@ function noticiaTag(titulo) {
   return { label:'ECONOMIA', cor:'#c9922a' };
 }
 
+// 8 categorias de interesse com queries específicas para o Google News
+const CATEGORIAS_NOTICIAS = [
+  { label:'SELIC/JUROS',      cor:'#ef476f', q:'Selic+Banco+Central+taxa+juros+COPOM'         },
+  { label:'INFLAÇÃO',         cor:'#9b5de5', q:'IPCA+inflação+Brasil'                          },
+  { label:'INADIMPLÊNCIA',    cor:'#ef476f', q:'inadimplência+Serasa+SPC+calote+brasil'        },
+  { label:'EMPREGO',          cor:'#e8b84b', q:'desemprego+IBGE+mercado+trabalho+brasil'       },
+  { label:'CRÉDITO/LEIS',     cor:'#4895ef', q:'lei+crédito+CMN+regulação+juros+consumidor'    },
+  { label:'ENDIVIDAMENTO',    cor:'#c9922a', q:'endividamento+famílias+CNC+dívida+brasil'      },
+  { label:'ECONOMIA',         cor:'#06d6a0', q:'economia+brasil+dólar+crise+PIB'               },
+  { label:'FRAUDES',          cor:'#ff6b6b', q:'fraude+golpe+financeiro+banco+fintech+brasil'  },
+];
+
 async function noticiasCarregar() {
   const lista = document.getElementById('noticias-lista');
   if (!lista) return;
@@ -5603,42 +5615,42 @@ async function noticiasCarregar() {
 
   const todasNoticias = [];
 
-  // Google News RSS via rss2json (funciona sem CORS)
-  const queries = [
-    { q: 'juros+selic+crédito+brasil', fonte: 'Google News' },
-    { q: 'inadimplência+empréstimo+brasil', fonte: 'Google News' },
-    { q: 'desemprego+inflação+brasil', fonte: 'Google News' },
-  ];
-
-  for (const rq of queries) {
+  for (const cat of CATEGORIAS_NOTICIAS) {
     try {
-      const rssUrl = `https://news.google.com/rss/search?q=${rq.q}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
-      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=5`;
-      const r = await fetch(apiUrl, { signal: AbortSignal.timeout(8000) });
+      const rssUrl = `https://news.google.com/rss/search?q=${cat.q}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=3`;
+      const r = await fetch(apiUrl, { signal: AbortSignal.timeout(10000) });
       if (!r.ok) continue;
       const d = await r.json();
-      (d.items || []).forEach(item => {
-        if (item.title && noticiaRelevante(item.title)) {
-          todasNoticias.push({
-            titulo: item.title.replace(/ - [^-]+$/, '').trim(),
-            url: item.link || '#',
-            fonte: item.author || rq.fonte,
-            data: item.pubDate ? new Date(item.pubDate) : new Date()
-          });
-        }
+      if (d.status !== 'ok') continue;
+      (d.items || []).slice(0, 2).forEach(item => {
+        if (!item.title) return;
+        // Extrai URL real do redirect do Google News
+        let url = item.link || '#';
+        try {
+          const m = url.match(/url=([^&]+)/);
+          if (m) url = decodeURIComponent(m[1]);
+        } catch(e) {}
+        todasNoticias.push({
+          titulo: item.title.replace(/ - [^-]{2,40}$/, '').trim(),
+          url,
+          fonte: item.author || item.source || cat.label,
+          data: item.pubDate ? new Date(item.pubDate) : new Date(),
+          categoria: cat
+        });
       });
-    } catch(e) {}
+    } catch(e) { console.warn('Feed falhou:', cat.label, e.message); }
   }
 
-  // Deduplicar e ordenar
+  // Deduplicar e ordenar por data
   const vistos = new Set();
   const unicas = todasNoticias.filter(n => {
-    const k = n.titulo.slice(0,35).toLowerCase();
+    const k = n.titulo.slice(0, 40).toLowerCase();
     if (vistos.has(k)) return false;
     vistos.add(k); return true;
   });
-  unicas.sort((a,b) => b.data - a.data);
-  const top = unicas.slice(0, 6);
+  unicas.sort((a, b) => b.data - a.data);
+  const top = unicas.slice(0, 10);
   _ultimasNoticias = top;
 
   if (top.length === 0) {
@@ -5647,19 +5659,18 @@ async function noticiasCarregar() {
   }
 
   lista.innerHTML = top.map(n => {
-    const tag = noticiaTag(n.titulo);
+    const cat = n.categoria;
     const h = Math.round((Date.now() - n.data.getTime()) / 3600000);
     const tempo = h < 1 ? 'agora' : h < 24 ? `${h}h atrás` : `${Math.round(h/24)}d atrás`;
-    return `<a class="noticia-item" href="${n.url}" target="_blank" rel="noopener">
+    return `<a class="noticia-item" href="${n.url}" target="_blank" rel="noopener noreferrer">
       <div style="display:flex;align-items:center;gap:6px">
-        <span class="noticia-tag" style="color:${tag.cor};border-color:${tag.cor}40;background:${tag.cor}12">${tag.label}</span>
+        <span class="noticia-tag" style="color:${cat.cor};border-color:${cat.cor}40;background:${cat.cor}12">${cat.label}</span>
         <span style="font-size:0.48rem;color:var(--muted2)">${tempo} · ${n.fonte}</span>
       </div>
       <div class="noticia-titulo">${n.titulo}</div>
     </a>`;
   }).join('');
 
-  // Atualiza sugestões sempre que chegar notícias novas
   sugestoesAtualizar();
 }
 
