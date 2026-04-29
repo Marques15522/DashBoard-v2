@@ -5570,126 +5570,161 @@ function cxExportar() {
 
 
 // ════════════════════════════════════════════════════════
-// NOTÍCIAS DO MERCADO
+// NOTÍCIAS DO MERCADO — powered by Claude AI + Web Search
 // ════════════════════════════════════════════════════════
 let _ultimasNoticias = [];
+let _noticiasCache = null;
+let _noticiasCacheTime = 0;
+const NOTICIAS_CACHE_TTL = 15 * 60 * 1000; // 15 minutos
 
-const PALAVRAS_RELEVANTES = [
-  'juros','selic','inadimplência','crédito','empréstimo','desemprego','inflação',
-  'ipca','renda','salário','cdi','banco central','economia','financ',
-  'endividamento','pix','microcrédito','consignado','taxa','mercado','inadimpl'
-];
+const TAG_CORES = {
+  'SELIC/JUROS':   '#ef476f',
+  'INADIMPLÊNCIA': '#ef476f',
+  'INFLAÇÃO':      '#9b5de5',
+  'CRÉDITO':       '#4895ef',
+  'EMPREGO':       '#e8b84b',
+  'ECONOMIA':      '#06d6a0',
+  'FRAUDES':       '#ff6b6b',
+  'ENDIVIDAMENTO': '#c9922a',
+  'PIX/PAGAMENTOS':'#06d6a0',
+  'LEGISLAÇÃO':    '#4895ef',
+};
 
-function noticiaRelevante(titulo) {
-  const t = (titulo||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-  return PALAVRAS_RELEVANTES.some(p => t.includes(p.normalize('NFD').replace(/[̀-ͯ]/g,'')));
-}
-
-function noticiaTag(titulo) {
-  const t = (titulo||'').toLowerCase();
-  if (t.includes('selic') || t.includes('juros') || t.includes('banco central')) return { label:'SELIC/JUROS', cor:'#ef476f' };
-  if (t.includes('inadimpl') || t.includes('calote')) return { label:'INADIMPLÊNCIA', cor:'#ef476f' };
-  if (t.includes('desemprego') || t.includes('emprego') || t.includes('trabalho')) return { label:'EMPREGO', cor:'#e8b84b' };
-  if (t.includes('inflação') || t.includes('ipca')) return { label:'INFLAÇÃO', cor:'#9b5de5' };
-  if (t.includes('crédito') || t.includes('empréstimo')) return { label:'CRÉDITO', cor:'#4895ef' };
-  if (t.includes('pix') || t.includes('pagamento')) return { label:'PAGAMENTOS', cor:'#06d6a0' };
-  return { label:'ECONOMIA', cor:'#c9922a' };
-}
-
-// 8 categorias de notícias
-const CATEGORIAS_NOTICIAS = [
-  { label:'SELIC/JUROS',   cor:'#ef476f', q:'Selic COPOM Banco Central taxa juros'       },
-  { label:'INFLAÇÃO',      cor:'#9b5de5', q:'IPCA inflação Brasil preços'                },
-  { label:'INADIMPLÊNCIA', cor:'#ef476f', q:'inadimplência Serasa calote crédito brasil' },
-  { label:'EMPREGO',       cor:'#e8b84b', q:'desemprego IBGE mercado trabalho brasil'    },
-  { label:'CRÉDITO/LEIS',  cor:'#4895ef', q:'regulação crédito CMN lei juros consumidor' },
-  { label:'ENDIVIDAMENTO', cor:'#c9922a', q:'endividamento famílias dívida CNC brasil'   },
-  { label:'ECONOMIA',      cor:'#06d6a0', q:'economia brasil dólar PIB crise'            },
-  { label:'FRAUDES',       cor:'#ff6b6b', q:'fraude golpe financeiro banco fintech'      },
-];
-
-function parseXMLNoticias(xml, cat) {
-  const items = [];
-  const blocks = xml.match(/<item>([\s\S]*?)<\/item>/g) || [];
-  for (const block of blocks.slice(0, 2)) {
-    const getTag = (tag) => {
-      const m = block.match(new RegExp(`<${tag}[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/${tag}>`));
-      return m ? m[1].trim() : '';
-    };
-    const title = getTag('title').replace(/ - [^-]{2,50}$/, '').trim();
-    let link = getTag('link') || getTag('guid');
-    const pubDate = getTag('pubDate');
-    const source = getTag('source');
-    if (!title) continue;
-    // Decodifica redirect Google News
-    try { const m = link.match(/url=([^&]+)/); if (m) link = decodeURIComponent(m[1]); } catch(e) {}
-    items.push({ title, url: link || '#', fonte: source || 'Google News', data: pubDate ? new Date(pubDate) : new Date(), categoria: cat });
-  }
-  return items;
-}
-
-async function fetchCatNoticias(cat) {
-  const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(cat.q)}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
-  
-  // Lista de proxies CORS que funcionam com GitHub Pages
-  const proxies = [
-    `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`,
-    `https://cors-anywhere.herokuapp.com/${rssUrl}`,
-    `https://thingproxy.freeboard.io/fetch/${rssUrl}`,
-  ];
-
-  for (const proxyUrl of proxies) {
-    try {
-      const r = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
-      if (!r.ok) continue;
-      const xml = await r.text();
-      if (!xml.includes('<item>')) continue;
-      const items = parseXMLNoticias(xml, cat);
-      if (items.length > 0) return items;
-    } catch(e) {}
-  }
-  return [];
+function tagCor(tag) {
+  return TAG_CORES[tag] || '#c9922a';
 }
 
 async function noticiasCarregar() {
   const lista = document.getElementById('noticias-lista');
   if (!lista) return;
-  lista.innerHTML = '<div class="noticia-loading">⏳ Buscando notícias...</div>';
 
-  // Busca todas as categorias em paralelo
-  const resultados = await Promise.all(CATEGORIAS_NOTICIAS.map(cat => fetchCatNoticias(cat)));
-  const todasNoticias = resultados.flat();
-
-  // Deduplicar e ordenar
-  const vistos = new Set();
-  const unicas = todasNoticias.filter(n => {
-    const k = n.title.slice(0, 40).toLowerCase();
-    if (vistos.has(k)) return false;
-    vistos.add(k); return true;
-  });
-  unicas.sort((a, b) => b.data - a.data);
-  const top = unicas.slice(0, 10);
-  _ultimasNoticias = top;
-
-  if (top.length === 0) {
-    lista.innerHTML = '<div class="noticia-loading" style="color:var(--muted)">Sem notícias carregadas. <span style="color:var(--gold);cursor:pointer;text-decoration:underline" onclick="noticiasCarregar()">Tentar novamente</span></div>';
+  // Cache: não recarrega se chamado recentemente
+  const agora = Date.now();
+  if (_noticiasCache && (agora - _noticiasCacheTime) < NOTICIAS_CACHE_TTL) {
+    renderizarNoticias(_noticiasCache);
     return;
   }
 
-  lista.innerHTML = top.map(n => {
-    const cat = n.categoria;
-    const h = Math.round((Date.now() - n.data.getTime()) / 3600000);
-    const tempo = h < 1 ? 'agora' : h < 24 ? `${h}h atrás` : `${Math.round(h/24)}d atrás`;
-    return `<a class="noticia-item" href="${n.url}" target="_blank" rel="noopener noreferrer">
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="noticia-tag" style="color:${cat.cor};border-color:${cat.cor}40;background:${cat.cor}12">${cat.label}</span>
-        <span style="font-size:0.48rem;color:var(--muted2)">${tempo} · ${n.fonte}</span>
+  lista.innerHTML = `
+    <div class="noticia-loading" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px 16px">
+      <div style="display:flex;gap:4px;align-items:flex-end;height:20px">
+        <span style="display:block;width:3px;background:var(--gold);border-radius:2px;animation:barBounce 0.9s ease-in-out infinite;animation-delay:0s;height:8px"></span>
+        <span style="display:block;width:3px;background:var(--gold);border-radius:2px;animation:barBounce 0.9s ease-in-out infinite;animation-delay:0.15s;height:8px"></span>
+        <span style="display:block;width:3px;background:var(--gold);border-radius:2px;animation:barBounce 0.9s ease-in-out infinite;animation-delay:0.3s;height:8px"></span>
+        <span style="display:block;width:3px;background:var(--gold);border-radius:2px;animation:barBounce 0.9s ease-in-out infinite;animation-delay:0.45s;height:8px"></span>
       </div>
-      <div class="noticia-titulo">${n.title}</div>
+      <div style="font-size:0.62rem;color:var(--gold)">🤖 IA buscando notícias relevantes...</div>
+      <div style="font-size:0.55rem;color:var(--muted2)">Selic · Inadimplência · Crédito · Economia</div>
+    </div>
+    <style>
+      @keyframes barBounce {
+        0%,100% { height:6px; opacity:0.5; }
+        50%      { height:18px; opacity:1; }
+      }
+    </style>`;
+
+  try {
+    const hoje = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+    const prompt = `Você é um assistente especializado em empréstimos a juros (agiotagem legalizada / crédito informal / crédito privado). 
+Hoje é ${hoje}. Busque as notícias mais recentes (últimos 7 dias) que sejam relevantes para um credor pessoa física que empresta dinheiro a juros no Brasil.
+
+Foque nestas categorias:
+1. Taxa Selic e decisões do COPOM
+2. Índices de inadimplência (Serasa, Boa Vista, CNC)
+3. Inflação (IPCA, IGP) e poder de compra
+4. Desemprego e renda das famílias brasileiras
+5. Regulamentação de crédito (CMN, BCB, leis)
+6. Endividamento das famílias
+7. Fraudes e golpes financeiros
+8. PIX, economia e mercado financeiro
+
+Responda APENAS com JSON válido, sem texto antes ou depois, sem markdown. Formato:
+{
+  "noticias": [
+    {
+      "titulo": "Título da notícia em português (máx 90 chars)",
+      "tag": "SELIC/JUROS",
+      "impacto": "Uma frase curta (máx 80 chars) explicando o impacto direto para quem empresta dinheiro",
+      "url": "URL real e completa da notícia",
+      "fonte": "Nome do veículo",
+      "tempo": "Xh atrás ou Xd atrás"
+    }
+  ]
+}
+
+Retorne exatamente 8 notícias reais e verificáveis. Tags permitidas: SELIC/JUROS, INADIMPLÊNCIA, INFLAÇÃO, CRÉDITO, EMPREGO, ECONOMIA, FRAUDES, ENDIVIDAMENTO, PIX/PAGAMENTOS, LEGISLAÇÃO.`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    const data = await response.json();
+
+    // Extrai o texto da resposta (pode conter blocos tool_use e text)
+    const textos = (data.content || [])
+      .filter(b => b.type === 'text')
+      .map(b => b.text)
+      .join('');
+
+    // Parse JSON — tenta diretamente, depois dentro de blocos
+    let parsed;
+    try {
+      const clean = textos.replace(/```json|```/g, '').trim();
+      // Pega apenas o JSON object
+      const match = clean.match(/\{[\s\S]*\}/);
+      parsed = JSON.parse(match ? match[0] : clean);
+    } catch(e) {
+      throw new Error('JSON inválido na resposta');
+    }
+
+    const noticias = (parsed.noticias || []).slice(0, 8);
+    if (noticias.length === 0) throw new Error('Nenhuma notícia retornada');
+
+    _noticiasCache = noticias;
+    _noticiasCacheTime = Date.now();
+    _ultimasNoticias = noticias.map(n => ({ titulo: n.titulo, tag: n.tag }));
+
+    renderizarNoticias(noticias);
+    sugestoesAtualizar();
+
+  } catch(err) {
+    console.error('noticiasCarregar:', err);
+    lista.innerHTML = `
+      <div class="noticia-loading" style="padding:20px 16px;text-align:center">
+        <div style="font-size:0.62rem;color:var(--muted);margin-bottom:8px">⚠️ Não foi possível carregar as notícias</div>
+        <span style="color:var(--gold);cursor:pointer;font-size:0.6rem;text-decoration:underline" onclick="noticiasCarregar()">↺ Tentar novamente</span>
+      </div>`;
+  }
+}
+
+function renderizarNoticias(noticias) {
+  const lista = document.getElementById('noticias-lista');
+  if (!lista) return;
+
+  lista.innerHTML = noticias.map((n, i) => {
+    const cor = tagCor(n.tag);
+    const url = n.url && n.url.startsWith('http') ? n.url : '#';
+    const abrirLink = url !== '#'
+      ? `href="${url}" target="_blank" rel="noopener noreferrer"`
+      : `href="#" onclick="return false"`;
+    return `
+    <a class="noticia-item" ${abrirLink} style="animation:fadeUp 0.3s ease both;animation-delay:${i * 0.05}s">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span class="noticia-tag" style="color:${cor};border-color:${cor}40;background:${cor}12">${n.tag}</span>
+        <span style="font-size:0.48rem;color:var(--muted2)">${n.tempo || ''} · ${n.fonte || 'IA'}</span>
+      </div>
+      <div class="noticia-titulo">${n.titulo}</div>
+      ${n.impacto ? `<div style="font-size:0.58rem;color:var(--muted);margin-top:2px;line-height:1.4">💡 ${n.impacto}</div>` : ''}
     </a>`;
   }).join('');
-
-  sugestoesAtualizar();
 }
 
 // ════════════════════════════════════════════════════════
