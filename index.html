@@ -654,7 +654,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <!-- BRIEFING DO DIA — reposicionado abaixo dos KPIs -->
   <div id="briefing-dia" style="display:none;border-radius:14px;padding:18px 22px;margin-bottom:24px;animation:fadeUp 0.4s ease;border:1px solid rgba(201,146,42,0.15);background:rgba(201,146,42,0.03)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-      <div style="font-size:0.56rem;letter-spacing:0.18em;color:var(--gold);text-transform:uppercase">📋 Ações Prioritárias Hoje</div>
+      <div style="font-size:0.56rem;letter-spacing:0.18em;color:var(--gold);text-transform:uppercase"><span id="briefing-emoji" style="font-size:1rem">☀️</span> Ações Prioritárias Hoje</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px" id="briefing-cards"></div>
     <div id="briefing-acoes" style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;display:none">
@@ -2329,7 +2329,8 @@ function render(empRows,pagRows){
   const saudacao = hora < 12 ? 'BOM DIA' : hora < 18 ? 'BOA TARDE' : 'BOA NOITE';
   const emoji = hora < 12 ? '☀️' : hora < 18 ? '🌤️' : '🌙';
   document.getElementById('briefing-saudacao').textContent = saudacao;
-  document.querySelector('#briefing-dia span[style*="font-size:1.4rem"]').textContent = emoji;
+  const emojiEl = document.getElementById('briefing-emoji');
+  if(emojiEl) emojiEl.textContent = emoji;
   document.getElementById('briefing-data-longa').textContent = hoje.toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
 
   const venceHoje = abertos.filter(e => { if(!e.proxVenc) return false; const d=new Date(e.proxVenc); d.setHours(0,0,0,0); return d.getTime()===hoje.getTime(); });
