@@ -513,6 +513,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 <div class="nav-tabs">
   <div class="nav-tab active" data-tab="visao">📊 Visão Geral</div>
   <div class="nav-tab" data-tab="financeiro">💰 Financeiro</div>
+  <div class="nav-tab" data-tab="caixa">🏦 Caixa</div>
   <div class="nav-tab" data-tab="risco">⚠️ Risco & Alertas</div>
   <div class="nav-tab" data-tab="clientes">👤 Clientes</div>
   <div class="nav-tab" data-tab="comparativo">📈 Comparativos</div>
@@ -608,6 +609,94 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   </div>
   <div class="card"><div class="card-header"><div><div class="card-title">🔮 Cenários de Resultado — 12 Meses</div><div class="card-desc">Projeção de lucro com base em diferentes taxas de inadimplência</div></div><div class="card-badge">CENÁRIOS</div></div><div class="scenario-grid" id="scenarioGrid"></div><div class="chart-wrap"><canvas id="chartCenarios"></canvas></div></div>
   <div class="card"><div class="card-header"><div><div class="card-title">💰 Saldo Projetado — 12 Meses</div><div class="card-desc">Capital + juros acumulados (cenário realista)</div></div><div class="card-badge">PROJEÇÃO</div></div><div class="chart-wrap xtall"><canvas id="chartSaldoProj"></canvas></div></div>
+</div>
+
+<!-- CAIXA -->
+<div id="tab-caixa" class="tab-panel">
+  <div class="section-label">SALDO DO CAIXA</div>
+  <div class="grid-4" id="caixa-kpis">
+    <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Entradas (mês)</div><div class="kpi-val" id="cx-entrada-mes" style="color:var(--green)">—</div><div class="kpi-sub">juros recebidos</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--red)"></div><div class="kpi-lbl">Saídas (mês)</div><div class="kpi-val" id="cx-saida-mes" style="color:var(--red)">—</div><div class="kpi-sub">todos os tipos</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Resultado (mês)</div><div class="kpi-val" id="cx-resultado-mes" style="color:var(--gold)">—</div><div class="kpi-sub">entradas − saídas</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Saldo Acumulado</div><div class="kpi-val" id="cx-saldo-total" style="color:var(--blue)">—</div><div class="kpi-sub">histórico completo</div></div>
+  </div>
+
+  <div class="grid-2">
+    <!-- LANÇAR SAÍDA -->
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">➕ Lançar Movimentação</div><div class="card-desc">Registre entradas manuais ou saídas de qualquer tipo</div></div></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;gap:8px">
+          <button id="cx-btn-saida" onclick="cxSetTipo('saida')" style="flex:1;padding:10px;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.7rem;cursor:pointer;letter-spacing:0.06em;border:1px solid rgba(239,71,111,0.4);background:rgba(239,71,111,0.12);color:var(--red);transition:all 0.2s">💸 SAÍDA</button>
+          <button id="cx-btn-entrada" onclick="cxSetTipo('entrada')" style="flex:1;padding:10px;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.7rem;cursor:pointer;letter-spacing:0.06em;border:1px solid var(--border2);background:transparent;color:var(--muted);transition:all 0.2s">💵 ENTRADA MANUAL</button>
+        </div>
+        <div>
+          <div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">Categoria</div>
+          <select id="cx-categoria" style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:9px 12px;outline:none">
+            <option value="capital">💸 Capital Emprestado (novo contrato)</option>
+            <option value="operacional">🏢 Despesa Operacional (aluguel, celular…)</option>
+            <option value="pessoal">👤 Despesa Pessoal</option>
+            <option value="retirada">💰 Retirada de Lucro</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">Descrição</div>
+          <input id="cx-descricao" type="text" placeholder="Ex: Aluguel abril, Empréstimo João…" style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:9px 12px;outline:none;transition:border-color 0.2s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border2)'">
+        </div>
+        <div class="grid-2" style="gap:10px;margin-bottom:0">
+          <div>
+            <div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">Valor (R$)</div>
+            <input id="cx-valor" type="number" min="0" step="0.01" placeholder="0,00" style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:9px 12px;outline:none;transition:border-color 0.2s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border2)'">
+          </div>
+          <div>
+            <div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">Data</div>
+            <input id="cx-data" type="date" style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:9px 12px;outline:none;transition:border-color 0.2s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border2)'">
+          </div>
+        </div>
+        <button onclick="cxLancar()" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:0.95rem;letter-spacing:0.15em;cursor:pointer;margin-top:2px;transition:opacity 0.2s" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">REGISTRAR LANÇAMENTO</button>
+        <div id="cx-feedback" style="font-size:0.62rem;min-height:18px;text-align:center"></div>
+      </div>
+    </div>
+
+    <!-- GRÁFICO ENTRADAS x SAÍDAS -->
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">📊 Entradas vs Saídas</div><div class="card-desc">Fluxo real por mês</div></div><div class="card-badge">FLUXO REAL</div></div>
+      <div class="chart-wrap tall"><canvas id="chartCaixa"></canvas></div>
+    </div>
+  </div>
+
+  <!-- BREAKDOWN DE SAÍDAS -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">🍩 Composição das Saídas</div><div class="card-desc">Quanto vai para cada categoria</div></div><div class="card-badge">CATEGORIAS</div></div>
+      <div class="chart-wrap" style="height:220px"><canvas id="chartCaixaCat"></canvas></div>
+      <div id="cx-cat-legend" style="margin-top:12px;display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">📈 Saldo Acumulado</div><div class="card-desc">Evolução do caixa ao longo do tempo</div></div><div class="card-badge">EVOLUÇÃO</div></div>
+      <div class="chart-wrap tall"><canvas id="chartCaixaSaldo"></canvas></div>
+    </div>
+  </div>
+
+  <!-- HISTÓRICO -->
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">📋 Histórico de Lançamentos</div><div class="card-desc">Todas as movimentações registradas</div></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select id="cx-filtro-cat" onchange="cxRenderHistorico()" style="background:var(--s2);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.6rem;padding:5px 8px;outline:none">
+          <option value="todos">Todas categorias</option>
+          <option value="entrada_auto">💵 Entradas automáticas</option>
+          <option value="entrada_manual">💵 Entradas manuais</option>
+          <option value="capital">💸 Capital Emprestado</option>
+          <option value="operacional">🏢 Operacional</option>
+          <option value="pessoal">👤 Pessoal</option>
+          <option value="retirada">💰 Retirada</option>
+        </select>
+        <button onclick="cxExportar()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;letter-spacing:0.06em" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border2)'">⬇ Exportar CSV</button>
+      </div>
+    </div>
+    <div id="cx-historico-list"></div>
+  </div>
 </div>
 
 <!-- RISCO & ALERTAS -->
@@ -4435,6 +4524,273 @@ function loginSair() {
 })();
 
 setInterval(()=>loadData(false), 15*60*1000);
+
+// ══════════════════════════════════════════════════════════
+// CAIXA — lançamentos manuais + entradas automáticas
+// ══════════════════════════════════════════════════════════
+const CX_KEY = 'caixa_lancamentos';
+let _cxTipo = 'saida'; // 'saida' | 'entrada'
+
+const CX_CAT_LABELS = {
+  capital:        { icon:'💸', label:'Capital Emprestado',  cor:'rgba(155,93,229,0.8)' },
+  operacional:    { icon:'🏢', label:'Despesa Operacional', cor:'rgba(239,71,111,0.8)' },
+  pessoal:        { icon:'👤', label:'Despesa Pessoal',     cor:'rgba(240,180,41,0.8)' },
+  retirada:       { icon:'💰', label:'Retirada de Lucro',   cor:'rgba(90,98,130,0.8)'  },
+  entrada_manual: { icon:'💵', label:'Entrada Manual',      cor:'rgba(6,214,160,0.8)'  },
+  entrada_auto:   { icon:'🏦', label:'Juros Recebidos',     cor:'rgba(72,149,239,0.7)' },
+};
+
+function cxLoad() {
+  try { return JSON.parse(localStorage.getItem(CX_KEY) || '[]'); } catch(e) { return []; }
+}
+function cxSave(lancamentos) {
+  try { localStorage.setItem(CX_KEY, JSON.stringify(lancamentos)); } catch(e) {}
+}
+
+function cxSetTipo(tipo) {
+  _cxTipo = tipo;
+  const btnS = document.getElementById('cx-btn-saida');
+  const btnE = document.getElementById('cx-btn-entrada');
+  const sel  = document.getElementById('cx-categoria');
+  if (tipo === 'saida') {
+    btnS.style.background = 'rgba(239,71,111,0.18)'; btnS.style.borderColor = 'rgba(239,71,111,0.6)'; btnS.style.color = 'var(--red)';
+    btnE.style.background = 'transparent'; btnE.style.borderColor = 'var(--border2)'; btnE.style.color = 'var(--muted)';
+    sel.style.display = '';
+  } else {
+    btnE.style.background = 'rgba(6,214,160,0.12)'; btnE.style.borderColor = 'rgba(6,214,160,0.4)'; btnE.style.color = 'var(--green)';
+    btnS.style.background = 'transparent'; btnS.style.borderColor = 'var(--border2)'; btnS.style.color = 'var(--muted)';
+    sel.style.display = 'none';
+  }
+}
+
+function cxLancar() {
+  const desc  = document.getElementById('cx-descricao').value.trim();
+  const valor = parseFloat(document.getElementById('cx-valor').value);
+  const data  = document.getElementById('cx-data').value;
+  const cat   = _cxTipo === 'entrada' ? 'entrada_manual' : document.getElementById('cx-categoria').value;
+  const fb    = document.getElementById('cx-feedback');
+
+  if (!desc)  { fb.innerHTML = '<span style="color:var(--red)">⚠️ Preencha a descrição.</span>'; return; }
+  if (!valor || valor <= 0) { fb.innerHTML = '<span style="color:var(--red)">⚠️ Informe um valor válido.</span>'; return; }
+  if (!data)  { fb.innerHTML = '<span style="color:var(--red)">⚠️ Informe a data.</span>'; return; }
+
+  const lancamentos = cxLoad();
+  lancamentos.push({
+    id: Date.now(),
+    tipo: _cxTipo,
+    categoria: cat,
+    descricao: desc,
+    valor,
+    data,
+  });
+  cxSave(lancamentos);
+
+  // Limpa campos
+  document.getElementById('cx-descricao').value = '';
+  document.getElementById('cx-valor').value = '';
+  fb.innerHTML = '<span style="color:var(--green)">✅ Lançamento registrado!</span>';
+  setTimeout(() => { fb.innerHTML = ''; }, 3000);
+
+  cxRender();
+}
+
+function cxRender(pagsExternas) {
+  // pagsExternas = array de pagamentos vindos da planilha (pags do render principal)
+  // Se não informado, usa cache global
+  const pags = pagsExternas || window._cxPagsCache || [];
+  window._cxPagsCache = pags;
+
+  const lancamentos = cxLoad();
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+
+  // Monta entradas automáticas dos últimos 6 meses a partir da planilha
+  const autoEntradas = pags.map(p => ({
+    id: 'auto_' + (p.id||'') + '_' + (p.data ? p.data.getTime() : Math.random()),
+    tipo: 'entrada',
+    categoria: 'entrada_auto',
+    descricao: 'Juros recebidos — ' + (p.id||''),
+    valor: p.juros,
+    data: p.data ? p.data.toISOString().slice(0,10) : null,
+    _auto: true,
+  })).filter(e => e.data && e.valor > 0);
+
+  const todos = [...autoEntradas, ...lancamentos].sort((a,b) => (b.data||'').localeCompare(a.data||''));
+
+  // ─ KPIs do mês atual ─
+  const mesK = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}`;
+  const doMes = todos.filter(l => (l.data||'').startsWith(mesK));
+  const entradaMes = doMes.filter(l=>l.tipo==='entrada').reduce((s,l)=>s+l.valor,0);
+  const saidaMes   = doMes.filter(l=>l.tipo==='saida').reduce((s,l)=>s+l.valor,0);
+  const resultMes  = entradaMes - saidaMes;
+  const saldoTotal = todos.reduce((s,l) => l.tipo==='entrada' ? s+l.valor : s-l.valor, 0);
+
+  const fmt2 = v => 'R$ ' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('cx-entrada-mes').textContent  = fmt2(entradaMes);
+  document.getElementById('cx-saida-mes').textContent    = fmt2(saidaMes);
+  const resEl = document.getElementById('cx-resultado-mes');
+  resEl.textContent = fmt2(resultMes);
+  resEl.style.color = resultMes >= 0 ? 'var(--green)' : 'var(--red)';
+  const saldoEl = document.getElementById('cx-saldo-total');
+  saldoEl.textContent = fmt2(saldoTotal);
+  saldoEl.style.color = saldoTotal >= 0 ? 'var(--blue)' : 'var(--red)';
+
+  // ─ Gráfico Entradas vs Saídas (6 meses) ─
+  const meses6 = [];
+  for(let i=5; i>=0; i--) {
+    const d = new Date(hoje.getFullYear(), hoje.getMonth()-i, 1);
+    meses6.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+  }
+  const lab6 = meses6.map(k => { const[y,m]=k.split('-'); return new Date(+y,+m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}); });
+  const ent6 = meses6.map(k => todos.filter(l=>l.tipo==='entrada'&&(l.data||'').startsWith(k)).reduce((s,l)=>s+l.valor,0));
+  const sai6 = meses6.map(k => todos.filter(l=>l.tipo==='saida'&&(l.data||'').startsWith(k)).reduce((s,l)=>s+l.valor,0));
+
+  destroyChart('caixa');
+  charts.caixa = new Chart(document.getElementById('chartCaixa').getContext('2d'), {
+    type:'bar',
+    data:{ labels:lab6, datasets:[
+      { label:'Entradas', data:ent6, backgroundColor:'rgba(6,214,160,0.7)', borderRadius:5, borderSkipped:false },
+      { label:'Saídas',   data:sai6, backgroundColor:'rgba(239,71,111,0.65)', borderRadius:5, borderSkipped:false },
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt2(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt2(v)},beginAtZero:true}}}
+  });
+
+  // ─ Gráfico Composição Saídas (donut) ─
+  const saidasAll = [...lancamentos,...autoEntradas].filter(l=>l.tipo==='saida');
+  const catTotals = {};
+  saidasAll.forEach(l => { catTotals[l.categoria] = (catTotals[l.categoria]||0) + l.valor; });
+  const catKeys = Object.keys(catTotals);
+  destroyChart('caixaCat');
+  if(catKeys.length > 0) {
+    charts.caixaCat = new Chart(document.getElementById('chartCaixaCat').getContext('2d'), {
+      type:'doughnut',
+      data:{ labels: catKeys.map(k=>CX_CAT_LABELS[k]?.label||k), datasets:[{ data:catKeys.map(k=>catTotals[k]), backgroundColor:catKeys.map(k=>CX_CAT_LABELS[k]?.cor||'rgba(90,98,130,0.6)'), borderColor:'#07090e', borderWidth:3, hoverOffset:8 }]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>` ${ctx.label}: ${fmt2(ctx.raw)}`}}}}
+    });
+    const totalSaidas = catKeys.reduce((s,k)=>s+catTotals[k],0);
+    document.getElementById('cx-cat-legend').innerHTML = catKeys.sort((a,b)=>catTotals[b]-catTotals[a]).map(k=>{
+      const pct = totalSaidas>0?(catTotals[k]/totalSaidas*100).toFixed(1):'0';
+      const info = CX_CAT_LABELS[k]||{icon:'•',label:k,cor:'var(--muted)'};
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${info.cor};flex-shrink:0"></span>
+          <span style="font-size:0.65rem;color:var(--text)">${info.icon} ${info.label}</span>
+        </div>
+        <div style="text-align:right">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:0.85rem;color:var(--red)">${fmt2(catTotals[k])}</span>
+          <span style="font-size:0.5rem;color:var(--muted);margin-left:5px">${pct}%</span>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    document.getElementById('cx-cat-legend').innerHTML = '<div style="color:var(--muted);font-size:0.65rem;text-align:center;padding:16px 0">Nenhuma saída registrada ainda.</div>';
+  }
+
+  // ─ Gráfico Saldo Acumulado ─
+  const todosCron = [...todos].sort((a,b)=>(a.data||'').localeCompare(b.data||''));
+  let saldoAcc = 0;
+  const saldoPts = todosCron.map(l => {
+    saldoAcc += l.tipo==='entrada' ? l.valor : -l.valor;
+    return { x: l.data, y: saldoAcc };
+  });
+  // Agrupa por dia para o gráfico
+  const saldoDayMap = {};
+  todosCron.forEach(l => {
+    if(!l.data) return;
+    if(!saldoDayMap[l.data]) saldoDayMap[l.data] = 0;
+    saldoDayMap[l.data] += l.tipo==='entrada' ? l.valor : -l.valor;
+  });
+  const saldoDays = Object.keys(saldoDayMap).sort();
+  let acc2 = 0;
+  const saldoVals = saldoDays.map(d => { acc2 += saldoDayMap[d]; return acc2; });
+  const saldoLabels = saldoDays.map(d => new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}));
+
+  destroyChart('caixaSaldo');
+  charts.caixaSaldo = new Chart(document.getElementById('chartCaixaSaldo').getContext('2d'), {
+    type:'line',
+    data:{ labels:saldoLabels, datasets:[{ label:'Saldo', data:saldoVals, borderColor:'rgba(72,149,239,0.9)', backgroundColor:'rgba(72,149,239,0.06)', borderWidth:2, pointRadius:saldoVals.length<30?4:0, fill:true, tension:0.3 }]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' Saldo: '+fmt2(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},maxTicksLimit:8}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt2(v)}}}}
+  });
+
+  // ─ Histórico ─
+  cxRenderHistorico(todos);
+}
+
+function cxRenderHistorico(todosParam) {
+  const filtro = document.getElementById('cx-filtro-cat')?.value || 'todos';
+  const lancamentos = cxLoad();
+  const pags = window._cxPagsCache || [];
+  const autoEntradas = pags.map(p => ({
+    id:'auto_'+(p.id||'')+'_'+(p.data?p.data.getTime():0),
+    tipo:'entrada', categoria:'entrada_auto',
+    descricao:'Juros recebidos — '+(p.id||''),
+    valor:p.juros,
+    data:p.data?p.data.toISOString().slice(0,10):null,
+    _auto:true,
+  })).filter(e=>e.data&&e.valor>0);
+
+  let todos = [...autoEntradas, ...lancamentos].sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+  if(filtro !== 'todos') todos = todos.filter(l=>l.categoria===filtro);
+
+  const fmt2 = v => 'R$ '+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const el = document.getElementById('cx-historico-list');
+  if(!todos.length) { el.innerHTML = '<div style="color:var(--muted);font-size:0.68rem;padding:16px 0;text-align:center">Nenhum lançamento encontrado.</div>'; return; }
+
+  el.innerHTML = todos.map(l => {
+    const isEnt = l.tipo === 'entrada';
+    const info = CX_CAT_LABELS[l.categoria] || {icon:'•', label:l.categoria, cor:'var(--muted)'};
+    const corVal = isEnt ? 'var(--green)' : 'var(--red)';
+    const sinal  = isEnt ? '+' : '−';
+    const dataFmt = l.data ? new Date(l.data+'T12:00:00').toLocaleDateString('pt-BR') : '—';
+    const delBtn  = l._auto ? '' : `<button onclick="cxDeletar(${l.id})" title="Excluir" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.75rem;padding:2px 5px;border-radius:4px;transition:color 0.2s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕</button>`;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 4px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+        <span style="font-size:1rem;flex-shrink:0">${info.icon}</span>
+        <div style="min-width:0">
+          <div style="font-size:0.7rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.descricao}</div>
+          <div style="font-size:0.55rem;color:var(--muted);margin-top:1px">${info.label} · ${dataFmt}${l._auto?' · <span style="color:var(--muted2)">automático</span>':''}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${corVal}">${sinal} ${fmt2(l.valor)}</span>
+        ${delBtn}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function cxDeletar(id) {
+  if(!confirm('Excluir este lançamento?')) return;
+  const lista = cxLoad().filter(l => l.id !== id);
+  cxSave(lista);
+  cxRender();
+}
+
+function cxExportar() {
+  const lancamentos = cxLoad();
+  const pags = window._cxPagsCache || [];
+  const autoEntradas = pags.map(p => ({
+    tipo:'entrada', categoria:'entrada_auto',
+    descricao:'Juros recebidos — '+(p.id||''),
+    valor:p.juros,
+    data:p.data?p.data.toISOString().slice(0,10):'',
+  })).filter(e=>e.data&&e.valor>0);
+
+  const todos = [...autoEntradas,...lancamentos].sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+  const header = 'Data,Tipo,Categoria,Descrição,Valor\n';
+  const rows = todos.map(l=>`${l.data},${l.tipo},${CX_CAT_LABELS[l.categoria]?.label||l.categoria},"${l.descricao}",${l.valor}`).join('\n');
+  const blob = new Blob(['\uFEFF'+header+rows], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='caixa_capital_investimentos.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Inicializa campos da aba Caixa ao carregar
+window.addEventListener('DOMContentLoaded', () => {
+  const dataInput = document.getElementById('cx-data');
+  if(dataInput) dataInput.value = new Date().toISOString().slice(0,10);
+  cxSetTipo('saida');
+});
+
 </script>
 
 <!-- SINO DE ALERTAS FLUTUANTE -->
