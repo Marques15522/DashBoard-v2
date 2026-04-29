@@ -470,15 +470,19 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .score-rec-title{font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:0.1em;margin-bottom:5px;}
 
   /* ── CARD NOTÍCIAS ── */
-  #card-noticias{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:fadeUp 0.4s ease both;}
-  .noticia-item{display:flex;flex-direction:column;gap:4px;padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;text-decoration:none;}
+  #card-noticias{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:fadeUp 0.4s ease both;display:flex;flex-direction:column;position:relative;}
+  #noticias-lista{overflow-y:auto;max-height:210px;scroll-behavior:smooth;}
+  #noticias-lista::-webkit-scrollbar{width:3px;}
+  #noticias-lista::-webkit-scrollbar-track{background:transparent;}
+  #noticias-lista::-webkit-scrollbar-thumb{background:rgba(201,146,42,0.3);border-radius:2px;}
+  #noticias-lista::-webkit-scrollbar-thumb:hover{background:var(--gold);}
+  #noticias-fade{height:32px;background:linear-gradient(to top,var(--s1) 40%,transparent);margin-top:-32px;pointer-events:none;flex-shrink:0;}
+  .noticia-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border);text-decoration:none;transition:background 0.15s,border-left-color 0.15s;border-left:2px solid transparent;}
   .noticia-item:last-child{border-bottom:none;}
-  .noticia-item:hover{background:rgba(201,146,42,0.05);}
-  .noticia-tag{font-size:0.47rem;letter-spacing:0.14em;text-transform:uppercase;padding:2px 7px;border-radius:3px;border:1px solid;display:inline-block;width:fit-content;}
-  .noticia-titulo{font-size:0.7rem;color:var(--text);line-height:1.45;font-weight:500;}
-  .noticia-fonte{font-size:0.52rem;color:var(--muted);margin-top:1px;}
+  .noticia-item:hover{background:rgba(201,146,42,0.06);border-left-color:var(--gold);}
+  .noticia-titulo{font-size:0.66rem;color:var(--text);line-height:1.4;}
+  .noticia-fonte{font-size:0.47rem;color:var(--muted);margin-top:2px;}
   .noticia-loading{padding:20px;text-align:center;font-size:0.65rem;color:var(--muted);}
-  /* card-ia removido */
 </style>
 </head>
 <body>
