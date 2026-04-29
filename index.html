@@ -572,7 +572,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div id="alertasBanner"></div>
 
   <!-- NOTIFICAÇÃO VENCIMENTOS -->
-  <div id="notif-venc" style="display:none;background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.3);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;animation:fadeUp 0.4s ease">
+  <div id="notif-venc" style="display:none;background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.3);border-radius:12px;padding:14px 18px;margin-bottom:20px;align-items:center;gap:12px;animation:fadeUp 0.4s ease">
     <span style="font-size:1.2rem">🔔</span>
     <div style="flex:1"><div id="notif-venc-texto" style="font-size:0.8rem;color:var(--red);font-weight:600"></div><div id="notif-venc-sub" style="font-size:0.58rem;color:var(--muted);margin-top:2px"></div></div>
     <button onclick="document.getElementById('notif-venc').style.display='none'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem">✕</button>
@@ -602,7 +602,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
   <!-- KPIs + MAPA layout centralizado -->
   <style>
-  .visao-hub{display:grid;grid-template-columns:200px 1fr;gap:14px;margin-bottom:24px;align-items:start;}
+  .visao-hub{display:grid;grid-template-columns:200px 1fr 200px;gap:14px;margin-bottom:24px;align-items:start;}
   .visao-col{display:flex;flex-direction:column;gap:10px;}
   .visao-right{display:flex;flex-direction:column;gap:14px;}
   .kpi-sm{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:12px 14px;position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;animation:fadeUp 0.4s ease both;}
@@ -613,10 +613,11 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   .kpi-sm-sub{font-size:0.54rem;color:var(--muted);}
   #mapa-clientes-wrap{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;animation:fadeUp 0.4s ease both;}
   #mapa-clientes-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-  #mapa-clientes{height:520px;width:100%;}
+  #mapa-clientes{height:420px;width:100%;}
   #mapa-clientes-footer{padding:8px 14px;border-top:1px solid var(--border);display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
   .mapa-legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;}
   .kpis-row-bottom{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+  @media(max-width:1100px){.visao-hub{grid-template-columns:180px 1fr 180px;}}
   @media(max-width:900px){.visao-hub{grid-template-columns:1fr;}.kpis-row-bottom{grid-template-columns:repeat(3,1fr);}}
   @media(max-width:600px){.kpis-row-bottom{grid-template-columns:1fr 1fr;}}
   </style>
@@ -626,6 +627,34 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     <span style="display:inline-block;width:16px;height:1px;background:var(--gold);opacity:0.5"></span>
     PAINEL DE CONTROLE
     <span style="flex:1;height:1px;background:var(--border)"></span>
+  </div>
+
+  <!-- CARDS TOPO — 4 KPIs acima do mapa -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px" id="visao-top-cards">
+    <div class="kpi-sm" style="border-color:rgba(201,146,42,0.2);background:linear-gradient(135deg,rgba(201,146,42,0.06) 0%,var(--s1) 80%)">
+      <div class="kpi-sm-accent" style="background:linear-gradient(90deg,var(--gold),var(--gold2))"></div>
+      <div class="kpi-sm-lbl">💰 Entra Hoje</div>
+      <div class="kpi-sm-val" id="kpi-top-entra" style="color:var(--gold)">R$ 0</div>
+      <div class="kpi-sm-sub" id="kpi-top-entra-sub">0 pagamento(s)</div>
+    </div>
+    <div class="kpi-sm" style="border-color:rgba(6,214,160,0.2);background:linear-gradient(135deg,rgba(6,214,160,0.05) 0%,var(--s1) 80%)">
+      <div class="kpi-sm-accent" style="background:var(--green)"></div>
+      <div class="kpi-sm-lbl">📋 Cobranças Hoje</div>
+      <div class="kpi-sm-val" id="kpi-top-cobr" style="color:var(--green)">0</div>
+      <div class="kpi-sm-sub">vencimentos do dia</div>
+    </div>
+    <div class="kpi-sm" style="border-color:rgba(239,71,111,0.2);background:linear-gradient(135deg,rgba(239,71,111,0.05) 0%,var(--s1) 80%)">
+      <div class="kpi-sm-accent" style="background:var(--red)"></div>
+      <div class="kpi-sm-lbl">⚠️ Em Atraso</div>
+      <div class="kpi-sm-val" id="kpi-top-atraso" style="color:var(--red)">0</div>
+      <div class="kpi-sm-sub" id="kpi-top-atraso-sub">carteira limpa</div>
+    </div>
+    <div class="kpi-sm" style="border-color:rgba(72,149,239,0.2);background:linear-gradient(135deg,rgba(72,149,239,0.05) 0%,var(--s1) 80%)">
+      <div class="kpi-sm-accent" style="background:var(--blue)"></div>
+      <div class="kpi-sm-lbl">📅 Próx. 7 Dias</div>
+      <div class="kpi-sm-val" id="kpi-top-prox7" style="color:var(--blue)">R$ 0</div>
+      <div class="kpi-sm-sub">a receber esta semana</div>
+    </div>
   </div>
 
   <div class="visao-hub">
@@ -719,6 +748,34 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     </div>
 
   </div><!-- /.visao-hub -->
+
+  <!-- CARDS RODAPÉ — abaixo do mapa -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px" id="visao-bottom-cards">
+    <div class="kpi-sm" style="border-color:rgba(201,146,42,0.15)">
+      <div class="kpi-sm-accent" style="background:var(--gold)"></div>
+      <div class="kpi-sm-lbl">🏆 Melhor Cliente</div>
+      <div class="kpi-sm-val" id="kpi-melhor-cli" style="color:var(--gold);font-size:1rem">—</div>
+      <div class="kpi-sm-sub" id="kpi-melhor-cli-sub">maior lucro gerado</div>
+    </div>
+    <div class="kpi-sm" style="border-color:rgba(6,214,160,0.15)">
+      <div class="kpi-sm-accent" style="background:var(--green)"></div>
+      <div class="kpi-sm-lbl">✅ Contratos Quitados</div>
+      <div class="kpi-sm-val" id="kpi-quit" style="color:var(--green)">—</div>
+      <div class="kpi-sm-sub" id="kpi-quit-sub">histórico completo</div>
+    </div>
+    <div class="kpi-sm" style="border-color:rgba(155,93,229,0.15)">
+      <div class="kpi-sm-accent" style="background:var(--purple)"></div>
+      <div class="kpi-sm-lbl">📊 Total Contratos</div>
+      <div class="kpi-sm-val" id="kpi-total-contr" style="color:var(--purple)">—</div>
+      <div class="kpi-sm-sub">ativos + quitados</div>
+    </div>
+    <div class="kpi-sm" style="border-color:rgba(72,149,239,0.15)">
+      <div class="kpi-sm-accent" style="background:var(--blue)"></div>
+      <div class="kpi-sm-lbl">💹 Rentabilidade Mês</div>
+      <div class="kpi-sm-val" id="kpi-rent-mes" style="color:var(--blue)">—</div>
+      <div class="kpi-sm-sub">juros recebidos este mês</div>
+    </div>
+  </div>
 
   <!-- BRIEFING DO DIA -->
   <div id="briefing-dia" style="display:none;border-radius:14px;padding:18px 22px;margin-bottom:24px;animation:fadeUp 0.4s ease;border:1px solid rgba(201,146,42,0.15);background:rgba(201,146,42,0.03)">
@@ -1920,6 +1977,7 @@ const fmt=v=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:
 const pct=v=>(Number(v)*100).toFixed(1)+'%';
 let charts={};
 const TOOLTIP={backgroundColor:'#111521',borderColor:'#212840',borderWidth:1,titleColor:'#dde1f0',bodyColor:'#5a6282',padding:10,titleFont:{family:'DM Mono',size:11},bodyFont:{family:'DM Mono',size:10}};
+  Chart.defaults.devicePixelRatio = window.devicePixelRatio || 2;
 function destroyChart(k){if(charts[k]){charts[k].destroy();delete charts[k];}}
 
 // Tab switching + auto-sync polling
@@ -2120,6 +2178,28 @@ function render(empRows,pagRows){
   document.getElementById('cli-inativos-n').textContent=cliInativos.length;
   document.getElementById('cli-recorrencia').textContent=pct(recorrPct);
   document.getElementById('cli-tempo-rel').textContent=tempoRelMed.toFixed(1);
+
+  // CARDS TOPO
+  const venceHojeCount=abertos.filter(e=>e.proxVenc&&e.proxVenc.getTime()===hoje.getTime()).length;
+  const entraHoje=abertos.filter(e=>e.proxVenc&&e.proxVenc.getTime()===hoje.getTime()).reduce((s,e)=>s+e.jProx,0);
+  document.getElementById('kpi-top-entra').textContent=fmt(entraHoje);
+  document.getElementById('kpi-top-entra-sub').textContent=venceHojeCount+' pagamento(s)';
+  document.getElementById('kpi-top-cobr').textContent=venceHojeCount;
+  document.getElementById('kpi-top-atraso').textContent=atrasado.length;
+  document.getElementById('kpi-top-atraso-sub').textContent=atrasado.length===0?'carteira limpa':fmt(capRisco)+' em risco';
+  document.getElementById('kpi-top-prox7').textContent=fmt(proxSemana);
+
+  // CARDS RODAPÉ
+  const melhorCli=[...clientes].sort((a,b)=>b.totalJuros-a.totalJuros)[0];
+  document.getElementById('kpi-melhor-cli').textContent=melhorCli?melhorCli.nome.split(' ')[0]:'—';
+  document.getElementById('kpi-melhor-cli-sub').textContent=melhorCli?fmt(melhorCli.totalJuros):'sem dados';
+  document.getElementById('kpi-quit').textContent=quitados.length;
+  document.getElementById('kpi-quit-sub').textContent=quitados.length>0?fmt(capQuit)+' quitados':'nenhum ainda';
+  document.getElementById('kpi-total-contr').textContent=emps.length;
+  // Rentabilidade do mês atual
+  const mesAtual=hoje.getMonth(),anoAtual=hoje.getFullYear();
+  const rentMes=pags.filter(p=>p.data&&p.data.getMonth()===mesAtual&&p.data.getFullYear()===anoAtual).reduce((s,p)=>s+p.juros,0);
+  document.getElementById('kpi-rent-mes').textContent=fmt(rentMes);
 
   // ALERTAS
   const alertas=[];
