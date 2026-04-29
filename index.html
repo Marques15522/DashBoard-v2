@@ -1739,7 +1739,7 @@ async function dossieSyncCarregar() {
       const idsServidor = new Set(Object.keys(data.pastas));
 
       for (const [id, pSheet] of Object.entries(data.pastas)) {
-        if (_deletedIds.has(id)) continue; // nunca restaura clientes deletados
+        if (_deletedIds.has(id)) continue;
         const pLocal = _pastas[id];
         if (!pLocal || (pSheet.updatedAt >= (pLocal.updatedAt || 0))) {
           // Pasta do servidor é mais nova — baixa docs faltantes
@@ -1982,13 +1982,7 @@ function destroyChart(k){if(charts[k]){charts[k].destroy();delete charts[k];}}
 
 // Tab switching + auto-sync polling
 let _syncInterval = null;
-// IDs excluídos — persiste no localStorage para sobreviver a reloads
-let _deletedIds = (() => {
-  try { return new Set(JSON.parse(localStorage.getItem('_deletedIds_v1') || '[]')); } catch(e) { return new Set(); }
-})();
-function _deletedIdsSave() {
-  try { localStorage.setItem('_deletedIds_v1', JSON.stringify([..._deletedIds])); } catch(e) {}
-}
+let _deletedIds = new Set(); // IDs excluídos localmente — nunca restaurar do servidor
 
 function iniciarSyncPolling() {
   if (_syncInterval) return;
@@ -3446,7 +3440,6 @@ calcOportunidade(); // inicializa com valores padrão
 // ── MAPA DE CLIENTES — SP ─────────────────────────────────────────────────
 let _mapaLeaflet = null;
 let _mapaMarkers = [];
-let _mapaRunToken = 0;
 let _geocodeCache = {}; // cache em memória para evitar requisições repetidas
 
 // Carrega cache de geocodificação do localStorage
@@ -3659,14 +3652,10 @@ function iniciarMapa() {
 async function atualizarMapaClientes() {
   if (!_mapaLeaflet) return;
 
-  // Incrementa token: loop anterior (se ainda rodando) vai parar
-  const myToken = ++_mapaRunToken;
-
   _mapaMarkers.forEach(m => m.remove());
   _mapaMarkers = [];
 
-  // Filtra clientes deletados antes de plotar
-  const pastas = Object.values(_pastas || {}).filter(p => !_deletedIds.has(p.id));
+  const pastas = Object.values(_pastas || {});
   const countEl = document.getElementById('mapa-clientes-count');
   if (countEl) countEl.textContent = 'Geocodificando endereços...';
 
@@ -3675,11 +3664,9 @@ async function atualizarMapaClientes() {
 
   // Processa em sequência para respeitar rate limit do Nominatim (1 req/seg)
   for (const p of pastas) {
-    if (myToken !== _mapaRunToken) return; // cancelado por nova chamada
     if (!p.endereco) continue;
 
     const coords = await geocodificarEndereco(p.endereco);
-    if (myToken !== _mapaRunToken) return; // cancelado após await
     if (!coords) continue;
 
     // Pequeno jitter para não sobrepor marcadores no mesmo ponto
@@ -3721,7 +3708,6 @@ async function atualizarMapaClientes() {
     }
   }
 
-  if (myToken !== _mapaRunToken) return;
   if (countEl) {
     countEl.textContent = plotados > 0
       ? `${plotados} cliente(s) no mapa · clique para detalhes`
@@ -4381,8 +4367,6 @@ function pastaCarregar(){
     const s=localStorage.getItem('pastas_cli');
     if(s){
       _pastas=JSON.parse(s);
-      // Remove imediatamente qualquer pasta que foi deletada
-      Object.keys(_pastas).forEach(id => { if (_deletedIds.has(id)) delete _pastas[id]; });
       Object.keys(_pastas).forEach(id=>{
         // Tenta carregar docs da chave separada (formato novo)
         try{
@@ -4694,14 +4678,11 @@ async function pastaExcluir(id){
   // 1. Para o polling para não reaparecer durante o processo
   pararSyncPolling();
 
-  // 2. Remove localmente e marca como deletado (permanente, sobrevive a reload)
-  _deletedIds.add(id);
-  _deletedIdsSave();
+  // 2. Remove localmente
   try{localStorage.removeItem('pastas_docs_'+id);}catch(e){}
   delete _pastas[id];
   pastaSalvarLocal();
   pastaRender();
-  atualizarMapaClientes(); // remove marcador do mapa imediatamente
   syncStatusUpdate('⏳ Removendo da planilha...', 'var(--gold2)');
 
   // 3. Manda o delete pro servidor e aguarda confirmação
@@ -5120,11 +5101,13 @@ async function loadData(mostrarLoading){
 
     // Sincroniza endereços da aba Clientes nas pastas
     // Estrutura: col0=ID, col1=Nome, col2=CPF, col3=Tel, col4=Email, col5=Endereço, col6=Empresa, col7=Cargo, col8=Salário, col9=Status
+    const idsNaPlanilha = new Set();
     cliT.filter(row => String(row[0]||'').trim().startsWith('CLI')).forEach(row => {
       const id = String(row[0]||'').trim();
       const nome = String(row[1]||'').trim();
       const endereco = String(row[5]||'').trim();
       if (!nome) return;
+      idsNaPlanilha.add(id);
       // Cria ou atualiza pasta com endereço da planilha
       if (!_pastas[id]) _pastas[id] = { id, nome };
       if (endereco && !_pastas[id].endereco) _pastas[id].endereco = endereco;
@@ -5133,6 +5116,13 @@ async function loadData(mostrarLoading){
       if (!_pastas[id].empresa) _pastas[id].empresa = String(row[6]||'').trim();
       if (!_pastas[id].cargo) _pastas[id].cargo = String(row[7]||'').trim();
       if (!_pastas[id].nome) _pastas[id].nome = nome;
+    });
+    // Remove do localStorage qualquer cliente que não existe mais na planilha
+    Object.keys(_pastas).forEach(id => {
+      if (!idsNaPlanilha.has(id)) {
+        delete _pastas[id];
+        try { localStorage.removeItem('pastas_docs_' + id); } catch(e) {}
+      }
     });
     pastaSalvarLocal();
 
