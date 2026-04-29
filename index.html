@@ -4683,6 +4683,7 @@ async function pastaExcluir(id){
   delete _pastas[id];
   pastaSalvarLocal();
   pastaRender();
+  atualizarMapaClientes();
   syncStatusUpdate('⏳ Removendo da planilha...', 'var(--gold2)');
 
   // 3. Manda o delete pro servidor e aguarda confirmação
@@ -5100,23 +5101,15 @@ async function loadData(mostrarLoading){
     const empRows=empT.slice(autoSkipCSV(empT)),pagRows=pagT.slice(autoSkipCSV(pagT));
 
     // Sincroniza endereços da aba Clientes nas pastas
-    // Estrutura: col0=ID, col1=Nome, col2=CPF, col3=Tel, col4=Email, col5=Endereço/Residência, col6=Empresa, col7=Cargo, col8=Salário, col9=Status
-    // Detecta dinamicamente a coluna de endereço pelo cabeçalho
-    let colEndereco = 5; // padrão
-    const cliHeader = cliT.find(row => String(row[0]||'').trim().toUpperCase().startsWith('ID') || String(row[0]||'').trim().toUpperCase() === 'ID');
-    if (cliHeader) {
-      const idx = cliHeader.findIndex(c => String(c||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes('enderec') || String(c||'').toLowerCase().includes('resid'));
-      if (idx >= 0) colEndereco = idx;
-    }
+    // Estrutura: col0=ID, col1=Nome, col2=CPF, col3=Tel, col4=Email, col5=Endereço, col6=Empresa, col7=Cargo, col8=Salário, col9=Status
     cliT.filter(row => String(row[0]||'').trim().startsWith('CLI')).forEach(row => {
       const id = String(row[0]||'').trim();
       const nome = String(row[1]||'').trim();
-      const endereco = String(row[colEndereco]||'').trim();
+      const endereco = String(row[5]||'').trim();
       if (!nome) return;
       // Cria ou atualiza pasta com endereço da planilha
       if (!_pastas[id]) _pastas[id] = { id, nome };
-      // Sempre sincroniza o endereço da planilha (sobrescreve local se planilha tiver valor)
-      if (endereco) _pastas[id].endereco = endereco;
+      if (endereco && !_pastas[id].endereco) _pastas[id].endereco = endereco;
       // Atualiza nome/telefone/empresa se pasta não tiver
       if (!_pastas[id].tel) _pastas[id].tel = String(row[3]||'').trim();
       if (!_pastas[id].empresa) _pastas[id].empresa = String(row[6]||'').trim();
