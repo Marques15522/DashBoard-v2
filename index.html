@@ -849,7 +849,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       <div id="ia-chat-box">
         <div class="ia-msg bot">
           <div class="ia-avatar">🤖</div>
-          <div class="ia-bubble">Olá! Sou seu assistente de decisões. Analiso seus dados do dashboard junto com as notícias do mercado para te dar recomendações estratégicas. Pergunte qualquer coisa ou clique em uma notícia para eu analisar o impacto no seu negócio.</div>
+          <div class="ia-bubble">Olá! Sou seu assistente de decisões. Analiso seus dados + notícias do mercado para recomendações estratégicas.<br><br>Para começar, <span style="color:var(--gold);cursor:pointer;text-decoration:underline" onclick="iaConfigurarKey()">configure sua API Key da Anthropic</span> (gratuito em console.anthropic.com). Depois é só perguntar!</div>
         </div>
       </div>
       <div id="ia-input-row">
@@ -5599,10 +5599,11 @@ function cxExportar() {
 // ════════════════════════════════════════════════════════
 let _ultimasNoticias = [];
 
+// API pública sem CORS via allorigins proxy
 const FEEDS_NOTICIAS = [
-  { url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.folha.uol.com.br%2Feconomia%2Frss091.xml&count=5', fonte: 'Folha Economia' },
-  { url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fagenciabrasil.ebc.com.br%2Frss%2Feconomia%2Ffeed.xml&count=5', fonte: 'Agência Brasil' },
-  { url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.infomoney.com.br%2Ffeed%2F&count=5', fonte: 'InfoMoney' },
+  { url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.folha.uol.com.br%2Feconomia%2Frss091.xml&count=8&api_key=', fonte: 'Folha' },
+  { url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.infomoney.com.br%2Ffeed%2F&count=8&api_key=', fonte: 'InfoMoney' },
+  { url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fexame.com%2Ffeed%2F&count=8&api_key=', fonte: 'Exame' },
 ];
 
 const PALAVRAS_RELEVANTES = [
@@ -5641,8 +5642,11 @@ async function noticiasCarregar() {
   const todasNoticias = [];
   for (const feed of FEEDS_NOTICIAS) {
     try {
-      const r = await fetch(feed.url);
-      const d = await r.json();
+      // allorigins.win resolve CORS para qualquer URL pública
+      const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(feed.url);
+      const r = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
+      const raw = await r.json();
+      const d = JSON.parse(raw.contents || '{}');
       if (d.items) {
         d.items.forEach(item => {
           if (noticiaRelevante(item.title || '')) {
@@ -5655,16 +5659,15 @@ async function noticiasCarregar() {
           }
         });
       }
-    } catch(e) { /* ignora feed com erro */ }
+    } catch(e) { console.warn('Feed falhou:', feed.fonte, e.message); }
   }
 
-  // Ordena por data, pega as 6 mais recentes
   todasNoticias.sort((a, b) => b.data - a.data);
   const top = todasNoticias.slice(0, 6);
   _ultimasNoticias = top;
 
   if (top.length === 0) {
-    lista.innerHTML = '<div class="noticia-loading" style="color:var(--muted)">Nenhuma notícia relevante encontrada no momento.</div>';
+    lista.innerHTML = '<div class="noticia-loading" style="color:var(--muted)">Nenhuma notícia no momento. <span style="cursor:pointer;color:var(--gold);text-decoration:underline" onclick="noticiasCarregar()">Tentar novamente</span></div>';
     return;
   }
 
@@ -5672,7 +5675,8 @@ async function noticiasCarregar() {
     const tag = noticiaTag(n.titulo);
     const horasAtras = Math.round((Date.now() - n.data.getTime()) / 3600000);
     const tempo = horasAtras < 1 ? 'agora' : horasAtras < 24 ? `${horasAtras}h atrás` : `${Math.round(horasAtras/24)}d atrás`;
-    return `<a class="noticia-item" href="${n.url}" target="_blank" rel="noopener" onclick="iaAnalisarNoticia('${n.titulo.replace(/'/g,'\'').replace(/"/g,'&quot;')}')">
+    const tituloEscaped = n.titulo.replace(/\\/g,'').replace(/'/g,"\\'").replace(/"/g,'&quot;').slice(0,120);
+    return `<a class="noticia-item" href="${n.url}" target="_blank" rel="noopener" onclick="event.preventDefault();iaAnalisarNoticia('${tituloEscaped}');window.open('${n.url}','_blank')">
       <div style="display:flex;align-items:center;gap:6px">
         <span class="noticia-tag" style="color:${tag.cor};border-color:${tag.cor}40;background:${tag.cor}12">${tag.label}</span>
         <span style="font-size:0.48rem;color:var(--muted2)">${tempo} · ${n.fonte}</span>
@@ -5733,11 +5737,31 @@ function iaAdicionarTyping() {
   box.scrollTop = box.scrollHeight;
 }
 
+function iaConfigurarKey() {
+  const key = prompt('Cole sua API Key da Anthropic (começa com sk-ant-):\n\nObtena em: https://console.anthropic.com/settings/keys');
+  if (key && key.startsWith('sk-')) {
+    try { localStorage.setItem('_anthropic_key', key); } catch(e) {}
+    iaAdicionarMensagem('✅ API Key configurada! Agora pode fazer perguntas.', 'bot');
+  } else if (key) {
+    iaAdicionarMensagem('⚠️ Chave inválida. Deve começar com sk-ant-.', 'bot');
+  }
+}
+
+function iaGetKey() {
+  try { return localStorage.getItem('_anthropic_key') || ''; } catch(e) { return ''; }
+}
+
 async function iaEnviar() {
   const input = document.getElementById('ia-input');
   const btn = document.getElementById('ia-send');
   const pergunta = input.value.trim();
   if (!pergunta || btn.disabled) return;
+
+  const apiKey = iaGetKey();
+  if (!apiKey) {
+    iaAdicionarMensagem('🔑 Para usar o assistente, você precisa configurar sua API Key da Anthropic. <span style="color:var(--gold);cursor:pointer;text-decoration:underline" onclick="iaConfigurarKey()">Clique aqui para configurar</span>', 'bot');
+    return;
+  }
 
   input.value = '';
   btn.disabled = true;
@@ -5747,7 +5771,7 @@ async function iaEnviar() {
   const dados = iaDadosDashboard();
   const noticias = _ultimasNoticias.slice(0,4).map(n => `- ${n.titulo} (${n.fonte})`).join('\n');
 
-  const systemPrompt = `Você é um assistente financeiro especializado em negócios de empréstimo a juros (agiotagem legalizada / crédito pessoal informal). Analise os dados do dashboard e as notícias do mercado para dar recomendações estratégicas PRÁTICAS e DIRETAS.
+  const systemPrompt = `Você é um assistente financeiro especializado em negócios de empréstimo a juros (crédito pessoal informal). Analise os dados do dashboard e notícias para dar recomendações PRÁTICAS e DIRETAS.
 
 DADOS ATUAIS DO NEGÓCIO:
 - Capital em carteira: ${dados.totalCapital}
@@ -5759,33 +5783,55 @@ DADOS ATUAIS DO NEGÓCIO:
 - Melhor cliente: ${dados.melhorCliente}
 - Total contratos: ${dados.totalContratos}
 
-NOTÍCIAS RECENTES DO MERCADO:
-${noticias || 'Nenhuma notícia carregada ainda.'}
+NOTÍCIAS RECENTES:
+${noticias || 'Nenhuma carregada.'}
 
-Responda em português, de forma CONCISA (máximo 4 parágrafos curtos). Use bullet points quando listar ações. Seja direto e prático — o usuário quer saber O QUE FAZER, não teoria. Não use markdown com ** ou ##, use texto simples.`;
+Responda em português, de forma CONCISA. Use bullet points para ações. Seja direto — o usuário quer saber O QUE FAZER. Sem markdown com ** ou ##.`;
 
   _iaHistorico.push({ role: 'user', content: pergunta });
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    // Usa allorigins como proxy CORS para a API Anthropic
+    const payload = JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 800,
+      system: systemPrompt,
+      messages: _iaHistorico.slice(-6)
+    });
+
+    const proxyUrl = 'https://api.allorigins.win/post?url=' + encodeURIComponent('https://api.anthropic.com/v1/messages');
+    const resp = await fetch(proxyUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: _iaHistorico.slice(-6) // mantém últimas 3 trocas
-      })
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01'
+        },
+        body: payload
+      }),
+      signal: AbortSignal.timeout(30000)
     });
-    const data = await resp.json();
-    const resposta = data.content?.[0]?.text || 'Não consegui gerar uma resposta. Tente novamente.';
-    _iaHistorico.push({ role: 'assistant', content: resposta });
 
+    const raw = await resp.json();
+    const data = JSON.parse(raw.contents || '{}');
+
+    if (data.error) throw new Error(data.error.message || 'Erro da API');
+    const resposta = data.content?.[0]?.text || 'Sem resposta.';
+    _iaHistorico.push({ role: 'assistant', content: resposta });
     document.getElementById('ia-typing')?.remove();
     iaAdicionarMensagem(resposta.replace(/\n/g, '<br>'), 'bot');
   } catch(e) {
     document.getElementById('ia-typing')?.remove();
-    iaAdicionarMensagem('Erro ao conectar com a IA. Verifique sua conexão e tente novamente.', 'bot');
+    console.error('IA erro:', e.message);
+    if (e.message.includes('401') || e.message.includes('invalid')) {
+      try { localStorage.removeItem('_anthropic_key'); } catch(x) {}
+      iaAdicionarMensagem('❌ API Key inválida ou expirada. <span style="color:var(--gold);cursor:pointer;text-decoration:underline" onclick="iaConfigurarKey()">Configurar nova key</span>', 'bot');
+    } else {
+      iaAdicionarMensagem('⚠️ Erro: ' + e.message.slice(0,100) + '. Tente novamente.', 'bot');
+    }
   }
 
   btn.disabled = false;
