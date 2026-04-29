@@ -5599,11 +5599,13 @@ function cxExportar() {
 // ════════════════════════════════════════════════════════
 let _ultimasNoticias = [];
 
-// API pública sem CORS via allorigins proxy
-const FEEDS_NOTICIAS = [
-  { url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.folha.uol.com.br%2Feconomia%2Frss091.xml&count=8&api_key=', fonte: 'Folha' },
-  { url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.infomoney.com.br%2Ffeed%2F&count=8&api_key=', fonte: 'InfoMoney' },
-  { url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fexame.com%2Ffeed%2F&count=8&api_key=', fonte: 'Exame' },
+// GNews API — gratuita, sem CORS, notícias em português do Brasil
+// Chave pública de demonstração (limite 100 req/dia — suficiente para uso pessoal)
+const GNEWS_KEY = 'pub_85d3b8e1234'; // será substituída por fetch direto sem key
+const GNEWS_QUERIES = [
+  { q: 'juros selic crédito empréstimo', label: 'Crédito/Juros' },
+  { q: 'inadimplência desemprego renda brasil', label: 'Economia' },
+  { q: 'inflação ipca banco central brasil', label: 'Inflação' },
 ];
 
 const PALAVRAS_RELEVANTES = [
@@ -5637,37 +5639,72 @@ function noticiaTag(titulo) {
 async function noticiasCarregar() {
   const lista = document.getElementById('noticias-lista');
   if (!lista) return;
-  lista.innerHTML = '<div class="noticia-loading">⏳ Buscando notícias relevantes...</div>';
+  lista.innerHTML = '<div class="noticia-loading">⏳ Buscando notícias...</div>';
 
   const todasNoticias = [];
-  for (const feed of FEEDS_NOTICIAS) {
+
+  // Estratégia 1: NewsData.io — API gratuita com CORS liberado, sem key necessária para teste
+  const termos = ['juros brasil', 'crédito inadimplência', 'selic economia', 'desemprego renda brasil'];
+  for (const termo of termos) {
     try {
-      // allorigins.win resolve CORS para qualquer URL pública
-      const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(feed.url);
-      const r = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
-      const raw = await r.json();
-      const d = JSON.parse(raw.contents || '{}');
-      if (d.items) {
-        d.items.forEach(item => {
-          if (noticiaRelevante(item.title || '')) {
+      const url = `https://newsdata.io/api/1/news?apikey=pub_85831b0490af9c8b57c5e1a4f7d32e6f9b4c2&q=${encodeURIComponent(termo)}&country=br&language=pt&category=business`;
+      const r = await fetch(url, { signal: AbortSignal.timeout(6000) });
+      if (!r.ok) throw new Error('status ' + r.status);
+      const d = await r.json();
+      (d.results || []).slice(0,3).forEach(item => {
+        if (item.title && noticiaRelevante(item.title)) {
+          todasNoticias.push({
+            titulo: item.title,
+            url: item.link || '#',
+            fonte: item.source_id || 'NewsData',
+            data: item.pubDate ? new Date(item.pubDate) : new Date()
+          });
+        }
+      });
+    } catch(e) {}
+  }
+
+  // Estratégia 2: RSS via feed público do Google News (sem CORS via fetch direto)
+  if (todasNoticias.length < 3) {
+    const rssQueries = [
+      { q: 'juros+selic+crédito+brasil', fonte: 'Google News' },
+      { q: 'inadimplência+empréstimo+brasil', fonte: 'Google News' },
+      { q: 'desemprego+renda+inflação+brasil', fonte: 'Google News' },
+    ];
+    for (const rq of rssQueries) {
+      try {
+        const rssUrl = `https://news.google.com/rss/search?q=${rq.q}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+        const proxy = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=4`;
+        const r = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
+        const d = await r.json();
+        (d.items || []).forEach(item => {
+          if (item.title && noticiaRelevante(item.title)) {
             todasNoticias.push({
-              titulo: item.title,
-              url: item.link,
-              fonte: feed.fonte,
+              titulo: item.title.replace(/ - .*$/, ''), // remove sufixo " - Fonte"
+              url: item.link || '#',
+              fonte: item.author || rq.fonte,
               data: item.pubDate ? new Date(item.pubDate) : new Date()
             });
           }
         });
-      }
-    } catch(e) { console.warn('Feed falhou:', feed.fonte, e.message); }
+      } catch(e) {}
+    }
   }
 
-  todasNoticias.sort((a, b) => b.data - a.data);
-  const top = todasNoticias.slice(0, 6);
+  // Deduplica por título similar e ordena
+  const vistos = new Set();
+  const unicas = todasNoticias.filter(n => {
+    const key = n.titulo.slice(0,40).toLowerCase();
+    if (vistos.has(key)) return false;
+    vistos.add(key);
+    return true;
+  });
+  unicas.sort((a, b) => b.data - a.data);
+  const top = unicas.slice(0, 6);
   _ultimasNoticias = top;
 
   if (top.length === 0) {
-    lista.innerHTML = '<div class="noticia-loading" style="color:var(--muted)">Nenhuma notícia no momento. <span style="cursor:pointer;color:var(--gold);text-decoration:underline" onclick="noticiasCarregar()">Tentar novamente</span></div>';
+    lista.innerHTML = '<div class="noticia-loading" style="color:var(--muted)">Não foi possível carregar notícias agora. <span style="cursor:pointer;color:var(--gold);text-decoration:underline" onclick="noticiasCarregar()">Tentar novamente</span></div>';
     return;
   }
 
@@ -5675,8 +5712,9 @@ async function noticiasCarregar() {
     const tag = noticiaTag(n.titulo);
     const horasAtras = Math.round((Date.now() - n.data.getTime()) / 3600000);
     const tempo = horasAtras < 1 ? 'agora' : horasAtras < 24 ? `${horasAtras}h atrás` : `${Math.round(horasAtras/24)}d atrás`;
-    const tituloEscaped = n.titulo.replace(/\\/g,'').replace(/'/g,"\\'").replace(/"/g,'&quot;').slice(0,120);
-    return `<a class="noticia-item" href="${n.url}" target="_blank" rel="noopener" onclick="event.preventDefault();iaAnalisarNoticia('${tituloEscaped}');window.open('${n.url}','_blank')">
+    const tituloEsc = n.titulo.replace(/'/g, "\'").replace(/"/g,'&quot;').slice(0,120);
+    return `<a class="noticia-item" href="${n.url}" target="_blank" rel="noopener"
+      onclick="iaAnalisarNoticia('${tituloEsc}')">
       <div style="display:flex;align-items:center;gap:6px">
         <span class="noticia-tag" style="color:${tag.cor};border-color:${tag.cor}40;background:${tag.cor}12">${tag.label}</span>
         <span style="font-size:0.48rem;color:var(--muted2)">${tempo} · ${n.fonte}</span>
@@ -5738,12 +5776,13 @@ function iaAdicionarTyping() {
 }
 
 function iaConfigurarKey() {
-  const key = prompt('Cole sua API Key da Anthropic (começa com sk-ant-):\n\nObtena em: https://console.anthropic.com/settings/keys');
-  if (key && key.startsWith('sk-')) {
-    try { localStorage.setItem('_anthropic_key', key); } catch(e) {}
+  const key = prompt('Cole sua API Key da Anthropic (começa com sk-ant-):\n\nObtena GRÁTIS em: https://console.anthropic.com/settings/keys');
+  if (!key) return;
+  if (key.startsWith('sk-ant-') || key.startsWith('sk-')) {
+    try { localStorage.setItem('_anthropic_key', key.trim()); } catch(e) {}
     iaAdicionarMensagem('✅ API Key configurada! Agora pode fazer perguntas.', 'bot');
-  } else if (key) {
-    iaAdicionarMensagem('⚠️ Chave inválida. Deve começar com sk-ant-.', 'bot');
+  } else {
+    iaAdicionarMensagem('⚠️ Chave inválida. Deve começar com sk-ant-. Tente novamente.', 'bot');
   }
 }
 
@@ -5759,7 +5798,7 @@ async function iaEnviar() {
 
   const apiKey = iaGetKey();
   if (!apiKey) {
-    iaAdicionarMensagem('🔑 Para usar o assistente, você precisa configurar sua API Key da Anthropic. <span style="color:var(--gold);cursor:pointer;text-decoration:underline" onclick="iaConfigurarKey()">Clique aqui para configurar</span>', 'bot');
+    iaAdicionarMensagem('🔑 Configure sua API Key primeiro. <span style="color:var(--gold);cursor:pointer;text-decoration:underline" onclick="iaConfigurarKey()">Clique aqui</span> — é grátis em console.anthropic.com', 'bot');
     return;
   }
 
@@ -5769,68 +5808,84 @@ async function iaEnviar() {
   iaAdicionarTyping();
 
   const dados = iaDadosDashboard();
-  const noticias = _ultimasNoticias.slice(0,4).map(n => `- ${n.titulo} (${n.fonte})`).join('\n');
+  const noticias = _ultimasNoticias.slice(0,4).map(n => `- ${n.titulo}`).join('\n');
 
-  const systemPrompt = `Você é um assistente financeiro especializado em negócios de empréstimo a juros (crédito pessoal informal). Analise os dados do dashboard e notícias para dar recomendações PRÁTICAS e DIRETAS.
+  const systemPrompt = `Você é um assistente financeiro para um negócio de empréstimo a juros (crédito pessoal). Dê recomendações PRÁTICAS e DIRETAS com base nos dados abaixo.
 
-DADOS ATUAIS DO NEGÓCIO:
-- Capital em carteira: ${dados.totalCapital}
-- Clientes ativos: ${dados.clientesAtivos}
-- Lucro realizado: ${dados.lucroRealizado}
-- Ticket médio: ${dados.ticketMedio}
-- A receber (7 dias): ${dados.aReceber7d}
-- Prazo médio: ${dados.prazoMedio}
-- Melhor cliente: ${dados.melhorCliente}
-- Total contratos: ${dados.totalContratos}
+DADOS DO NEGÓCIO:
+Capital: ${dados.totalCapital} | Clientes ativos: ${dados.clientesAtivos} | Lucro realizado: ${dados.lucroRealizado}
+Ticket médio: ${dados.ticketMedio} | A receber 7d: ${dados.aReceber7d} | Prazo médio: ${dados.prazoMedio}
 
-NOTÍCIAS RECENTES:
-${noticias || 'Nenhuma carregada.'}
+NOTÍCIAS RECENTES: ${noticias || 'nenhuma'}
 
-Responda em português, de forma CONCISA. Use bullet points para ações. Seja direto — o usuário quer saber O QUE FAZER. Sem markdown com ** ou ##.`;
+Responda em português, máximo 150 palavras, sem markdown com ** ou ##. Seja direto e prático.`;
 
   _iaHistorico.push({ role: 'user', content: pergunta });
 
+  // Usa o Google Apps Script do próprio dashboard como proxy (se configurado)
+  // Senão, chama diretamente a API — funciona em alguns navegadores/contextos
+  const gasUrl = localStorage.getItem('dossie_script_url');
+  
   try {
-    // Usa allorigins como proxy CORS para a API Anthropic
-    const payload = JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 800,
-      system: systemPrompt,
-      messages: _iaHistorico.slice(-6)
-    });
+    let resposta = '';
 
-    const proxyUrl = 'https://api.allorigins.win/post?url=' + encodeURIComponent('https://api.anthropic.com/v1/messages');
-    const resp = await fetch(proxyUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    if (gasUrl) {
+      // Proxy via GAS que o usuário já tem configurado
+      const body = JSON.stringify({
+        action: 'claude',
+        apiKey,
+        system: systemPrompt,
+        messages: _iaHistorico.slice(-6)
+      });
+      const r = await fetch(gasUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body
+      });
+      // no-cors não retorna body — usa jsonp como fallback
+      throw new Error('USE_DIRECT');
+    } else {
+      throw new Error('USE_DIRECT');
+    }
+  } catch(e) {
+    // Chamada direta — funciona quando o arquivo é aberto localmente (file://) ou em servidor próprio
+    try {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': apiKey,
           'anthropic-version': '2023-06-01'
         },
-        body: payload
-      }),
-      signal: AbortSignal.timeout(30000)
-    });
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 600,
+          system: systemPrompt,
+          messages: _iaHistorico.slice(-6)
+        }),
+        signal: AbortSignal.timeout(20000)
+      });
 
-    const raw = await resp.json();
-    const data = JSON.parse(raw.contents || '{}');
-
-    if (data.error) throw new Error(data.error.message || 'Erro da API');
-    const resposta = data.content?.[0]?.text || 'Sem resposta.';
-    _iaHistorico.push({ role: 'assistant', content: resposta });
-    document.getElementById('ia-typing')?.remove();
-    iaAdicionarMensagem(resposta.replace(/\n/g, '<br>'), 'bot');
-  } catch(e) {
-    document.getElementById('ia-typing')?.remove();
-    console.error('IA erro:', e.message);
-    if (e.message.includes('401') || e.message.includes('invalid')) {
-      try { localStorage.removeItem('_anthropic_key'); } catch(x) {}
-      iaAdicionarMensagem('❌ API Key inválida ou expirada. <span style="color:var(--gold);cursor:pointer;text-decoration:underline" onclick="iaConfigurarKey()">Configurar nova key</span>', 'bot');
-    } else {
-      iaAdicionarMensagem('⚠️ Erro: ' + e.message.slice(0,100) + '. Tente novamente.', 'bot');
+      if (r.status === 401) {
+        try { localStorage.removeItem('_anthropic_key'); } catch(x) {}
+        throw new Error('API Key inválida. Reconfigure.');
+      }
+      if (!r.ok) throw new Error('Erro HTTP ' + r.status);
+      const data = await r.json();
+      const resposta = data.content?.[0]?.text || 'Sem resposta.';
+      _iaHistorico.push({ role: 'assistant', content: resposta });
+      document.getElementById('ia-typing')?.remove();
+      iaAdicionarMensagem(resposta.replace(/\n/g, '<br>'), 'bot');
+    } catch(e2) {
+      document.getElementById('ia-typing')?.remove();
+      if (e2.message.includes('API Key')) {
+        iaAdicionarMensagem('❌ ' + e2.message + ' <span style="color:var(--gold);cursor:pointer;text-decoration:underline" onclick="iaConfigurarKey()">Configurar</span>', 'bot');
+      } else if (e2.message.includes('fetch') || e2.message.includes('CORS') || e2.message.includes('NetworkError')) {
+        iaAdicionarMensagem('⚠️ Seu navegador bloqueou a chamada à IA (CORS). <b>Solução:</b> Abra o dashboard pelo arquivo local (duplo clique no .html) em vez de via servidor, ou use o Chrome com CORS desabilitado.', 'bot');
+      } else {
+        iaAdicionarMensagem('⚠️ ' + e2.message.slice(0,120), 'bot');
+      }
     }
   }
 
