@@ -3440,6 +3440,7 @@ calcOportunidade(); // inicializa com valores padrão
 // ── MAPA DE CLIENTES — SP ─────────────────────────────────────────────────
 let _mapaLeaflet = null;
 let _mapaMarkers = [];
+let _mapaRunToken = 0; // cancela runs anteriores ao excluir cliente
 let _geocodeCache = {}; // cache em memória para evitar requisições repetidas
 
 // Carrega cache de geocodificação do localStorage
@@ -3652,6 +3653,9 @@ function iniciarMapa() {
 async function atualizarMapaClientes() {
   if (!_mapaLeaflet) return;
 
+  // Incrementa token: qualquer run anterior que ainda esteja no loop vai parar
+  const myToken = ++_mapaRunToken;
+
   _mapaMarkers.forEach(m => m.remove());
   _mapaMarkers = [];
 
@@ -3664,9 +3668,13 @@ async function atualizarMapaClientes() {
 
   // Processa em sequência para respeitar rate limit do Nominatim (1 req/seg)
   for (const p of pastas) {
+    // Se uma nova chamada foi feita (ex: cliente excluído), abandona este loop
+    if (myToken !== _mapaRunToken) return;
+
     if (!p.endereco) continue;
 
     const coords = await geocodificarEndereco(p.endereco);
+    if (myToken !== _mapaRunToken) return; // checa novamente após await
     if (!coords) continue;
 
     // Pequeno jitter para não sobrepor marcadores no mesmo ponto
@@ -3708,6 +3716,7 @@ async function atualizarMapaClientes() {
     }
   }
 
+  if (myToken !== _mapaRunToken) return;
   if (countEl) {
     countEl.textContent = plotados > 0
       ? `${plotados} cliente(s) no mapa · clique para detalhes`
@@ -4683,7 +4692,7 @@ async function pastaExcluir(id){
   delete _pastas[id];
   pastaSalvarLocal();
   pastaRender();
-  atualizarMapaClientes();
+  atualizarMapaClientes(); // remove marcador do mapa imediatamente
   syncStatusUpdate('⏳ Removendo da planilha...', 'var(--gold2)');
 
   // 3. Manda o delete pro servidor e aguarda confirmação
