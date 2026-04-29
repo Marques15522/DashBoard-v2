@@ -1215,7 +1215,24 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
             <option value="composto">Composto</option>
           </select>
         </div>
-        <div class="sim-field"><label class="sim-label">👤 Nome do Cliente <span style="color:var(--red)">*</span></label><input class="sim-input" id="sim-cliente" type="text" placeholder="Nome completo do cliente"></div>
+        <div class="sim-field"><label class="sim-label">👤 Nome do Cliente <span style="color:var(--red)">*</span></label>
+          <div style="position:relative">
+            <input class="sim-input" id="sim-cliente" type="text" placeholder="Nome completo do cliente" oninput="simClienteInput()" autocomplete="off">
+            <div id="sim-cliente-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--s2);border:1px solid var(--border2);border-radius:8px;z-index:200;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.4);margin-top:4px"></div>
+          </div>
+        </div>
+        <!-- SCORE DO CLIENTE -->
+        <div id="sim-score-panel" style="display:none;background:var(--s2);border-radius:12px;padding:14px 16px;margin-bottom:4px;border:1px solid var(--border);animation:fadeUp 0.3s ease">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+            <div style="font-size:0.56rem;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase">📊 Score do Cliente</div>
+            <div id="sim-score-badge" style="font-family:'Bebas Neue',sans-serif;font-size:1rem"></div>
+          </div>
+          <div style="background:var(--border);border-radius:4px;height:6px;margin-bottom:10px;overflow:hidden">
+            <div id="sim-score-bar" style="height:100%;border-radius:4px;transition:width 0.8s ease;width:0%"></div>
+          </div>
+          <div id="sim-score-rec" style="font-size:0.63rem;line-height:1.7;color:var(--text);padding:10px 12px;border-radius:8px;border-left:3px solid var(--muted)"></div>
+          <div id="sim-score-historico" style="font-size:0.55rem;color:var(--muted);margin-top:8px"></div>
+        </div>
         <div class="sim-field"><label class="sim-label">🪪 CPF do Cliente <span style="color:var(--muted);font-size:0.5rem">(opcional)</span></label><input class="sim-input" id="sim-cpf" type="text" placeholder="000.000.000-00" maxlength="14"></div>
         <div class="sim-field"><label class="sim-label">📞 Telefone do Cliente <span style="color:var(--muted);font-size:0.5rem">(opcional)</span></label><input class="sim-input" id="sim-tel" type="text" placeholder="(00) 00000-0000" required></div>
         <div class="sim-field"><label class="sim-label">📅 Data de Início do Contrato</label><input class="sim-input" id="sim-inicio" type="date"></div>
@@ -3271,6 +3288,156 @@ function calcDesagio(){
 
 // calcDesagio e calcOportunidade são chamados quando o usuário abre a aba Simulador
 calcOportunidade(); // inicializa com valores padrão
+
+// ── AUTOCOMPLETE + SCORE DO CLIENTE NO SIMULADOR ──────────────────────────
+function simClienteInput() {
+  const query = (document.getElementById('sim-cliente').value || '').toLowerCase().trim();
+  const dropdown = document.getElementById('sim-cliente-dropdown');
+
+  // Esconde score se campo vazio
+  if (!query || query.length < 2) {
+    dropdown.style.display = 'none';
+    document.getElementById('sim-score-panel').style.display = 'none';
+    return;
+  }
+
+  // Busca clientes nas pastas cujo nome contém o texto digitado
+  const pastas = Object.values(_pastas || {});
+  const matches = pastas.filter(p => p.nome && p.nome.toLowerCase().includes(query)).slice(0, 6);
+
+  if (matches.length === 0) {
+    dropdown.style.display = 'none';
+    document.getElementById('sim-score-panel').style.display = 'none';
+    return;
+  }
+
+  // Monta dropdown de sugestões
+  dropdown.style.display = 'block';
+  dropdown.innerHTML = matches.map(p => {
+    const { total } = calcScoreFinal(p);
+    const cor = total >= 650 ? 'var(--green)' : total >= 450 ? 'var(--gold)' : 'var(--red)';
+    const label = total >= 800 ? 'EXCELENTE' : total >= 650 ? 'BOM' : total >= 500 ? 'MÉDIO' : total >= 300 ? 'RISCO' : total > 0 ? 'CRÍTICO' : 'SEM DADOS';
+    return `<div onclick="simClienteSelecionar(${JSON.stringify(p.id)})"
+      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;transition:background 0.15s"
+      onmouseover="this.style.background='rgba(255,255,255,0.04)'"
+      onmouseout="this.style.background=''"
+    >
+      <div>
+        <div style="font-size:0.7rem;color:var(--text)">${p.nome}</div>
+        <div style="font-size:0.52rem;color:var(--muted);margin-top:2px">${p.cpf || 'CPF não informado'}</div>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:0.85rem;color:${cor};white-space:nowrap">${total > 0 ? total : '—'} <span style="font-family:'DM Mono',monospace;font-size:0.5rem">${label}</span></div>
+    </div>`;
+  }).join('');
+
+  // Se só tem 1 match exato, já exibe o score
+  if (matches.length === 1 && matches[0].nome.toLowerCase() === query) {
+    simClienteSelecionar(matches[0].id);
+    dropdown.style.display = 'none';
+  }
+}
+
+function simClienteSelecionar(id) {
+  const pasta = (_pastas || {})[id];
+  if (!pasta) return;
+
+  // Preenche o campo nome
+  document.getElementById('sim-cliente').value = pasta.nome;
+  document.getElementById('sim-cliente-dropdown').style.display = 'none';
+
+  // Preenche CPF e telefone se disponíveis
+  if (pasta.cpf) document.getElementById('sim-cpf').value = pasta.cpf;
+  if (pasta.telefone) document.getElementById('sim-tel').value = pasta.telefone;
+
+  // Calcula score
+  const { total, temHistorico, scoreComp } = calcScoreFinal(pasta);
+  const comp = _comportamento[(pasta.nome||'').toLowerCase().trim()] || {};
+
+  const cor = total >= 650 ? 'var(--green)' : total >= 450 ? 'var(--gold2)' : 'var(--red)';
+  const panel = document.getElementById('sim-score-panel');
+  panel.style.display = 'block';
+  panel.style.borderColor = cor.replace('var(', '').replace(')', '');
+
+  // Badge score
+  let emoji, label;
+  if (total >= 800)      { emoji='🟢'; label='EXCELENTE'; }
+  else if (total >= 650) { emoji='🟢'; label='BOM'; }
+  else if (total >= 500) { emoji='🟡'; label='MÉDIO'; }
+  else if (total >= 300) { emoji='🔴'; label='RISCO'; }
+  else if (total > 0)    { emoji='🔴'; label='CRÍTICO'; }
+  else                   { emoji='⚫'; label='SEM DADOS'; }
+
+  document.getElementById('sim-score-badge').innerHTML =
+    `<span style="color:${cor}">${emoji} ${total > 0 ? total+'/1000' : '—'} · ${label}</span>`;
+  document.getElementById('sim-score-bar').style.width = (total/10)+'%';
+  document.getElementById('sim-score-bar').style.background = cor;
+
+  // Recomendação de limite, taxa e prazo
+  let recHtml, borderCor;
+  if (total >= 750) {
+    borderCor = 'var(--green)';
+    recHtml = `<strong style="color:var(--green)">✅ CRÉDITO RECOMENDADO</strong><br>
+      Score excelente. Cliente de baixo risco.<br>
+      💰 <strong>Limite sugerido:</strong> até 50% da renda cadastrada<br>
+      📈 <strong>Taxa recomendada:</strong> 15% a 20% a.m.<br>
+      📅 <strong>Prazo seguro:</strong> até 6 meses`;
+  } else if (total >= 600) {
+    borderCor = 'var(--green)';
+    recHtml = `<strong style="color:var(--green)">✅ APROVADO COM ATENÇÃO</strong><br>
+      Bom perfil, risco controlado.<br>
+      💰 <strong>Limite sugerido:</strong> até 35% da renda cadastrada<br>
+      📈 <strong>Taxa recomendada:</strong> 18% a 25% a.m.<br>
+      📅 <strong>Prazo seguro:</strong> até 4 meses`;
+  } else if (total >= 450) {
+    borderCor = 'var(--gold2)';
+    recHtml = `<strong style="color:var(--gold2)">⚠️ CRÉDITO COM RESTRIÇÕES</strong><br>
+      Perfil de risco médio. Empreste com cautela.<br>
+      💰 <strong>Limite sugerido:</strong> até 20% da renda cadastrada<br>
+      📈 <strong>Taxa recomendada:</strong> 25% a 30% a.m.<br>
+      📅 <strong>Prazo seguro:</strong> máximo 2 meses<br>
+      🔐 Exija 2 referências e comprovante de renda`;
+  } else if (total >= 250) {
+    borderCor = 'var(--red)';
+    recHtml = `<strong style="color:var(--red)">🔴 ALTO RISCO</strong><br>
+      Perfil preocupante. Se decidir emprestar, proteja-se ao máximo.<br>
+      💰 <strong>Limite máximo:</strong> valor mínimo (10% da renda)<br>
+      📈 <strong>Taxa mínima:</strong> 30%+ a.m.<br>
+      📅 <strong>Prazo:</strong> máximo 1 mês<br>
+      🔐 Exija avalista, garantia ou cheque caução`;
+  } else if (total > 0) {
+    borderCor = 'var(--red)';
+    recHtml = `<strong style="color:var(--red)">🚫 NÃO RECOMENDADO</strong><br>
+      Score muito baixo. Alta probabilidade de inadimplência.`;
+  } else {
+    borderCor = 'var(--muted)';
+    recHtml = `<strong style="color:var(--muted)">⚫ SEM DADOS SUFICIENTES</strong><br>
+      Este cliente não possui ficha de crédito cadastrada. Avalie manualmente antes de prosseguir.`;
+  }
+
+  const rec = document.getElementById('sim-score-rec');
+  rec.innerHTML = recHtml;
+  rec.style.borderLeftColor = borderCor;
+  rec.style.background = borderCor === 'var(--green)' ? 'rgba(6,214,160,0.06)' :
+                          borderCor === 'var(--gold2)' ? 'rgba(240,180,41,0.06)' :
+                          borderCor === 'var(--red)'   ? 'rgba(239,71,111,0.06)' : 'rgba(255,255,255,0.03)';
+
+  // Histórico comportamental
+  const hist = document.getElementById('sim-score-historico');
+  if (temHistorico && comp.qtdContratos > 0) {
+    const inadimTxt = comp.qtdAtraso > 0 ? `<span style="color:var(--red)">⚠️ ${comp.qtdAtraso} atraso(s)</span>` : `<span style="color:var(--green)">✓ sem atrasos</span>`;
+    hist.innerHTML = `📋 Histórico: ${comp.qtdContratos} contrato(s) · ${comp.qtdQuitados} quitado(s) · ${inadimTxt} · ${comp.mesesRelac || 0} meses de relacionamento${comp.recorrente?' · 🔄 recorrente':''}${comp.temAtraso?' · <span style="color:var(--red)">contrato atual em atraso</span>':''}`;
+  } else {
+    hist.innerHTML = `📋 Sem histórico de contratos — score baseado apenas na ficha cadastral`;
+  }
+}
+
+// Fecha dropdown ao clicar fora
+document.addEventListener('click', e => {
+  if (!e.target.closest('#sim-cliente') && !e.target.closest('#sim-cliente-dropdown')) {
+    const dd = document.getElementById('sim-cliente-dropdown');
+    if (dd) dd.style.display = 'none';
+  }
+});
 
 function simPDF(){
   const valor=parseFloat(document.getElementById('sim-valor')?.value)||0;
