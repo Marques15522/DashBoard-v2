@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Capital Investimentos — Dashboard Estratégico</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#07090e;--s1:#0c0f18;--s2:#111521;--s3:#161b2a;--border:#1a2035;--border2:#212840;--gold:#c9922a;--gold2:#e8b84b;--gold3:#f5d080;--green:#06d6a0;--red:#ef476f;--blue:#4895ef;--purple:#9b5de5;--text:#dde1f0;--muted:#5a6282;--muted2:#3d4466;}
@@ -598,60 +600,125 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     </div>
   </div>
 
-  <!-- KPIs PRINCIPAIS — linha 1 -->
-  <div style="font-size:0.52rem;letter-spacing:0.2em;color:var(--muted2);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+  <!-- KPIs + MAPA layout centralizado -->
+  <style>
+  .visao-hub{display:grid;grid-template-columns:1fr 380px 1fr;gap:14px;margin-bottom:24px;align-items:start;}
+  .visao-col{display:flex;flex-direction:column;gap:10px;}
+  .kpi-sm{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px 14px;position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;animation:fadeUp 0.4s ease both;}
+  .kpi-sm:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.3);}
+  .kpi-sm-accent{position:absolute;top:0;left:0;right:0;height:2px;}
+  .kpi-sm-lbl{font-size:0.6rem;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:5px;}
+  .kpi-sm-val{font-family:'Bebas Neue',sans-serif;font-size:1.55rem;line-height:1;margin-bottom:2px;}
+  .kpi-sm-sub{font-size:0.58rem;color:var(--muted);}
+  #mapa-clientes-wrap{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;animation:fadeUp 0.4s ease both;}
+  #mapa-clientes-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  #mapa-clientes{height:360px;width:100%;}
+  #mapa-clientes-footer{padding:8px 14px;border-top:1px solid var(--border);display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+  .mapa-legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;}
+  @media(max-width:1100px){.visao-hub{grid-template-columns:1fr 1fr;}.visao-col:last-child{grid-column:1/-1;display:grid;grid-template-columns:repeat(5,1fr);}}
+  @media(max-width:700px){.visao-hub{grid-template-columns:1fr;}}
+  </style>
+
+  <!-- seção label -->
+  <div style="font-size:0.52rem;letter-spacing:0.2em;color:var(--muted2);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px">
     <span style="display:inline-block;width:16px;height:1px;background:var(--gold);opacity:0.5"></span>
-    INDICADORES PRINCIPAIS
+    PAINEL DE CONTROLE
     <span style="flex:1;height:1px;background:var(--border)"></span>
   </div>
-  <div class="grid-5" style="margin-bottom:12px">
-    <div class="kpi" style="border-color:rgba(201,146,42,0.2);background:linear-gradient(135deg,rgba(201,146,42,0.06) 0%,var(--s1) 70%)">
-      <div class="kpi-accent" style="background:linear-gradient(90deg,var(--gold),var(--gold2))"></div>
-      <div class="kpi-lbl">Exposição Total</div>
-      <div class="kpi-val" id="kpi-na-rua" style="color:var(--gold)">—</div>
-      <div class="kpi-sub" id="kpi-na-rua-sub">—</div>
-    </div>
-    <div class="kpi" style="border-color:rgba(6,214,160,0.2);background:linear-gradient(135deg,rgba(6,214,160,0.05) 0%,var(--s1) 70%)">
-      <div class="kpi-accent" style="background:var(--green)"></div>
-      <div class="kpi-lbl">Carteira Ativa</div>
-      <div class="kpi-val" id="kpi-capital" style="color:var(--green)">—</div>
-      <div class="kpi-sub" id="kpi-cap-sub">—</div>
-    </div>
-    <div class="kpi" style="border-color:rgba(72,149,239,0.2);background:linear-gradient(135deg,rgba(72,149,239,0.05) 0%,var(--s1) 70%)">
-      <div class="kpi-accent" style="background:var(--blue)"></div>
-      <div class="kpi-lbl">ROI da Carteira</div>
-      <div class="kpi-val" id="kpi-roi" style="color:var(--blue)">—</div>
-      <div class="kpi-sub">retorno sobre capital</div>
-    </div>
-    <div class="kpi" style="border-color:rgba(239,71,111,0.2);background:linear-gradient(135deg,rgba(239,71,111,0.05) 0%,var(--s1) 70%)">
-      <div class="kpi-accent" style="background:var(--red)"></div>
-      <div class="kpi-lbl">Inadimplência</div>
-      <div class="kpi-val" id="kpi-inadim" style="color:var(--red)">—</div>
-      <div class="kpi-sub" id="kpi-inadim-sub">—</div>
-    </div>
-    <div class="kpi" style="border-color:rgba(155,93,229,0.2);background:linear-gradient(135deg,rgba(155,93,229,0.05) 0%,var(--s1) 70%)">
-      <div class="kpi-accent" style="background:var(--purple)"></div>
-      <div class="kpi-lbl">Lucro Previsto</div>
-      <div class="kpi-val" id="kpi-lucro" style="color:var(--purple)">—</div>
-      <div class="kpi-sub">juros a receber</div>
-    </div>
-  </div>
 
-  <!-- KPIs SECUNDÁRIOS — linha 2 -->
-  <div style="font-size:0.52rem;letter-spacing:0.2em;color:var(--muted2);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px">
-    <span style="display:inline-block;width:16px;height:1px;background:var(--blue);opacity:0.5"></span>
-    MÉTRICAS OPERACIONAIS
-    <span style="flex:1;height:1px;background:var(--border)"></span>
-  </div>
-  <div class="grid-5" style="margin-bottom:24px">
-    <div class="kpi"><div class="kpi-accent" style="background:var(--gold2)"></div><div class="kpi-lbl">A Receber (7d)</div><div class="kpi-val" id="kpi-semana" style="color:var(--gold2)">—</div><div class="kpi-sub">próximos 7 dias</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Clientes Ativos</div><div class="kpi-val" id="kpi-cli-ativos" style="color:var(--green)">—</div><div class="kpi-sub" id="kpi-cli-sub">—</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Lucro Realizado</div><div class="kpi-val" id="kpi-realizado" style="color:var(--blue)">—</div><div class="kpi-sub">juros recebidos</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--purple)"></div><div class="kpi-lbl">Ticket Médio</div><div class="kpi-val" id="kpi-ticket" style="color:var(--purple)">—</div><div class="kpi-sub">por contrato ativo</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Prazo Médio</div><div class="kpi-val" id="kpi-prazo" style="color:var(--gold)">—</div><div class="kpi-sub">meses</div></div>
-  </div>
+  <div class="visao-hub">
 
-  <!-- BRIEFING DO DIA — reposicionado abaixo dos KPIs -->
+    <!-- COLUNA ESQUERDA — 5 KPIs -->
+    <div class="visao-col">
+      <div class="kpi-sm" style="border-color:rgba(201,146,42,0.2);background:linear-gradient(135deg,rgba(201,146,42,0.06) 0%,var(--s1) 80%)">
+        <div class="kpi-sm-accent" style="background:linear-gradient(90deg,var(--gold),var(--gold2))"></div>
+        <div class="kpi-sm-lbl">Exposição Total</div>
+        <div class="kpi-sm-val" id="kpi-na-rua" style="color:var(--gold)">—</div>
+        <div class="kpi-sm-sub" id="kpi-na-rua-sub">—</div>
+      </div>
+      <div class="kpi-sm" style="border-color:rgba(6,214,160,0.2);background:linear-gradient(135deg,rgba(6,214,160,0.05) 0%,var(--s1) 80%)">
+        <div class="kpi-sm-accent" style="background:var(--green)"></div>
+        <div class="kpi-sm-lbl">Carteira Ativa</div>
+        <div class="kpi-sm-val" id="kpi-capital" style="color:var(--green)">—</div>
+        <div class="kpi-sm-sub" id="kpi-cap-sub">—</div>
+      </div>
+      <div class="kpi-sm" style="border-color:rgba(72,149,239,0.2);background:linear-gradient(135deg,rgba(72,149,239,0.05) 0%,var(--s1) 80%)">
+        <div class="kpi-sm-accent" style="background:var(--blue)"></div>
+        <div class="kpi-sm-lbl">ROI da Carteira</div>
+        <div class="kpi-sm-val" id="kpi-roi" style="color:var(--blue)">—</div>
+        <div class="kpi-sm-sub">retorno sobre capital</div>
+      </div>
+      <div class="kpi-sm" style="border-color:rgba(239,71,111,0.2);background:linear-gradient(135deg,rgba(239,71,111,0.05) 0%,var(--s1) 80%)">
+        <div class="kpi-sm-accent" style="background:var(--red)"></div>
+        <div class="kpi-sm-lbl">Inadimplência</div>
+        <div class="kpi-sm-val" id="kpi-inadim" style="color:var(--red)">—</div>
+        <div class="kpi-sm-sub" id="kpi-inadim-sub">—</div>
+      </div>
+      <div class="kpi-sm" style="border-color:rgba(155,93,229,0.2);background:linear-gradient(135deg,rgba(155,93,229,0.05) 0%,var(--s1) 80%)">
+        <div class="kpi-sm-accent" style="background:var(--purple)"></div>
+        <div class="kpi-sm-lbl">Lucro Previsto</div>
+        <div class="kpi-sm-val" id="kpi-lucro" style="color:var(--purple)">—</div>
+        <div class="kpi-sm-sub">juros a receber</div>
+      </div>
+    </div>
+
+    <!-- CENTRO — MAPA SP -->
+    <div id="mapa-clientes-wrap">
+      <div id="mapa-clientes-header">
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:0.82rem;letter-spacing:0.1em;color:var(--text)">📍 Distribuição de Clientes — SP</div>
+          <div style="font-size:0.52rem;color:var(--muted);margin-top:1px" id="mapa-clientes-count">Carregando...</div>
+        </div>
+        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.08em">MAPA</div>
+      </div>
+      <div id="mapa-clientes"></div>
+      <div id="mapa-clientes-footer">
+        <span style="font-size:0.52rem;color:var(--muted)">
+          <span class="mapa-legend-dot" style="background:var(--green)"></span>Em dia
+          <span class="mapa-legend-dot" style="background:var(--red);margin-left:8px"></span>Atraso
+          <span class="mapa-legend-dot" style="background:var(--muted);margin-left:8px"></span>Quitado
+        </span>
+        <span style="font-size:0.5rem;color:var(--muted2);margin-left:auto">📍 baseado no endereço cadastrado</span>
+      </div>
+    </div>
+
+    <!-- COLUNA DIREITA — 5 KPIs -->
+    <div class="visao-col">
+      <div class="kpi-sm">
+        <div class="kpi-sm-accent" style="background:var(--gold2)"></div>
+        <div class="kpi-sm-lbl">A Receber (7d)</div>
+        <div class="kpi-sm-val" id="kpi-semana" style="color:var(--gold2)">—</div>
+        <div class="kpi-sm-sub">próximos 7 dias</div>
+      </div>
+      <div class="kpi-sm">
+        <div class="kpi-sm-accent" style="background:var(--green)"></div>
+        <div class="kpi-sm-lbl">Clientes Ativos</div>
+        <div class="kpi-sm-val" id="kpi-cli-ativos" style="color:var(--green)">—</div>
+        <div class="kpi-sm-sub" id="kpi-cli-sub">—</div>
+      </div>
+      <div class="kpi-sm">
+        <div class="kpi-sm-accent" style="background:var(--blue)"></div>
+        <div class="kpi-sm-lbl">Lucro Realizado</div>
+        <div class="kpi-sm-val" id="kpi-realizado" style="color:var(--blue)">—</div>
+        <div class="kpi-sm-sub">juros recebidos</div>
+      </div>
+      <div class="kpi-sm">
+        <div class="kpi-sm-accent" style="background:var(--purple)"></div>
+        <div class="kpi-sm-lbl">Ticket Médio</div>
+        <div class="kpi-sm-val" id="kpi-ticket" style="color:var(--purple)">—</div>
+        <div class="kpi-sm-sub">por contrato ativo</div>
+      </div>
+      <div class="kpi-sm">
+        <div class="kpi-sm-accent" style="background:var(--gold)"></div>
+        <div class="kpi-sm-lbl">Prazo Médio</div>
+        <div class="kpi-sm-val" id="kpi-prazo" style="color:var(--gold)">—</div>
+        <div class="kpi-sm-sub">meses</div>
+      </div>
+    </div>
+
+  </div><!-- /.visao-hub -->
+
+  <!-- BRIEFING DO DIA -->
   <div id="briefing-dia" style="display:none;border-radius:14px;padding:18px 22px;margin-bottom:24px;animation:fadeUp 0.4s ease;border:1px solid rgba(201,146,42,0.15);background:rgba(201,146,42,0.03)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
       <div style="font-size:0.56rem;letter-spacing:0.18em;color:var(--gold);text-transform:uppercase"><span id="briefing-emoji" style="font-size:1rem">☀️</span> Ações Prioritárias Hoje</div>
@@ -3289,6 +3356,199 @@ function calcDesagio(){
 // calcDesagio e calcOportunidade são chamados quando o usuário abre a aba Simulador
 calcOportunidade(); // inicializa com valores padrão
 
+// ── MAPA DE CLIENTES — SP ─────────────────────────────────────────────────
+let _mapaLeaflet = null;
+let _mapaMarkers = [];
+
+// Coordenadas aproximadas dos principais bairros de SP
+const SP_BAIRROS = {
+  'centro': [-23.5505, -46.6333],
+  'sé': [-23.5506, -46.6340],
+  'república': [-23.5433, -46.6395],
+  'bela vista': [-23.5612, -46.6472],
+  'consolação': [-23.5531, -46.6573],
+  'cerqueira césar': [-23.5622, -46.6680],
+  'jardins': [-23.5730, -46.6687],
+  'jardim paulista': [-23.5730, -46.6687],
+  'itaim bibi': [-23.5861, -46.6836],
+  'vila olímpia': [-23.5942, -46.6882],
+  'moema': [-23.6020, -46.6641],
+  'saúde': [-23.6200, -46.6219],
+  'ipiranga': [-23.5908, -46.6068],
+  'santo andré': [-23.6568, -46.5321],
+  'são bernardo': [-23.6917, -46.5650],
+  'são caetano': [-23.6203, -46.5505],
+  'abc': [-23.6700, -46.5400],
+  'guarulhos': [-23.4640, -46.5333],
+  'osasco': [-23.5327, -46.7919],
+  'taboão': [-23.6077, -46.7920],
+  'santana': [-23.4957, -46.6275],
+  'tucuruvi': [-23.4761, -46.6009],
+  'penha': [-23.5327, -46.5449],
+  'tatuapé': [-23.5379, -46.5705],
+  'mooca': [-23.5636, -46.5986],
+  'brás': [-23.5444, -46.6113],
+  'belém': [-23.5441, -46.5877],
+  'água rasa': [-23.5552, -46.5649],
+  'vila prudente': [-23.5877, -46.5612],
+  'são mateus': [-23.6077, -46.4940],
+  'itaquera': [-23.5397, -46.4579],
+  'guaianases': [-23.5403, -46.3827],
+  'cidade tiradentes': [-23.5892, -46.4028],
+  'ermelino matarazzo': [-23.4918, -46.4580],
+  'são miguel': [-23.5064, -46.4430],
+  'vila formosa': [-23.5518, -46.5286],
+  'campo belo': [-23.6136, -46.6694],
+  'campo grande': [-23.6405, -46.6900],
+  'santo amaro': [-23.6540, -46.7110],
+  'brooklin': [-23.6100, -46.6971],
+  'morumbi': [-23.6192, -46.7212],
+  'butantã': [-23.5718, -46.7317],
+  'pinheiros': [-23.5652, -46.6928],
+  'lapa': [-23.5257, -46.7078],
+  'barra funda': [-23.5249, -46.6605],
+  'limão': [-23.4899, -46.6701],
+  'pirituba': [-23.4699, -46.7266],
+  'jaraguá': [-23.4573, -46.7663],
+  'perus': [-23.4010, -46.7599],
+  'brasilândia': [-23.4390, -46.6900],
+  'cachoeirinha': [-23.4558, -46.6476],
+  'casa verde': [-23.4889, -46.6560],
+  'vila maria': [-23.5096, -46.5972],
+  'vila guilherme': [-23.5117, -46.5805],
+  'vila medeiros': [-23.4982, -46.5605],
+  'jaçanã': [-23.4671, -46.5564],
+  'tremembé': [-23.4364, -46.5806],
+  'horto florestal': [-23.4628, -46.6163],
+  'santana': [-23.4957, -46.6275],
+  'mandaqui': [-23.4746, -46.6189],
+  'campo limpo': [-23.6355, -46.7490],
+  'capão redondo': [-23.6549, -46.7727],
+  'm\'boi mirim': [-23.6795, -46.7602],
+  'parelheiros': [-23.8027, -46.7405],
+  'cidade dutra': [-23.7056, -46.6680],
+  'grajaú': [-23.7218, -46.6795],
+  'socorro': [-23.7093, -46.6440],
+  'pedreira': [-23.7213, -46.6285],
+  'cursino': [-23.6236, -46.6188],
+  'vila mariana': [-23.5902, -46.6367],
+  'jabaquara': [-23.6520, -46.6374],
+};
+
+function extrairBairroSP(endereco) {
+  if (!endereco) return null;
+  const end = endereco.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  for (const [bairro, coords] of Object.entries(SP_BAIRROS)) {
+    const bNorm = bairro.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (end.includes(bNorm)) return coords;
+  }
+  // Fallback: se contém "sp" ou "são paulo", joga no centro com ruído
+  if (end.includes('sao paulo') || end.includes('sp')) {
+    return [-23.5505 + (Math.random() - 0.5) * 0.15, -46.6333 + (Math.random() - 0.5) * 0.15];
+  }
+  return null;
+}
+
+function iniciarMapa() {
+  if (_mapaLeaflet) return; // já iniciado
+  const el = document.getElementById('mapa-clientes');
+  if (!el || typeof L === 'undefined') return;
+
+  _mapaLeaflet = L.map('mapa-clientes', {
+    center: [-23.5505, -46.6333],
+    zoom: 11,
+    zoomControl: true,
+    attributionControl: false,
+  });
+
+  // Tile escuro compatível com o tema
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 18,
+  }).addTo(_mapaLeaflet);
+
+  // Atualiza marcadores com dados das pastas
+  setTimeout(atualizarMapaClientes, 300);
+}
+
+function atualizarMapaClientes() {
+  if (!_mapaLeaflet) return;
+
+  // Remove markers antigos
+  _mapaMarkers.forEach(m => m.remove());
+  _mapaMarkers = [];
+
+  const pastas = Object.values(_pastas || {});
+  let plotados = 0;
+  const bairroCount = {};
+
+  pastas.forEach(p => {
+    if (!p.endereco && !p.nome) return;
+    const coords = extrairBairroSP(p.endereco);
+    if (!coords) return;
+
+    // Adiciona pequeno ruído para não sobrepor exatamente
+    const bairroKey = coords.join(',');
+    bairroCount[bairroKey] = (bairroCount[bairroKey] || 0) + 1;
+    const jitter = bairroCount[bairroKey] * 0.0015;
+    const lat = coords[0] + (Math.random() - 0.5) * jitter;
+    const lng = coords[1] + (Math.random() - 0.5) * jitter;
+
+    // Cor por status
+    const comp = _comportamento[(p.nome||'').toLowerCase().trim()] || {};
+    let cor, status;
+    if (comp.temAtraso) { cor = '#ef476f'; status = 'Em atraso'; }
+    else if (comp.qtdContratos > 0 && comp.ativo) { cor = '#06d6a0'; status = 'Em dia'; }
+    else if (comp.qtdQuitados > 0 && !comp.ativo) { cor = '#5a6282'; status = 'Quitado'; }
+    else { cor = '#4895ef'; status = 'Cadastrado'; }
+
+    const marker = L.circleMarker([lat, lng], {
+      radius: 7,
+      fillColor: cor,
+      color: cor,
+      weight: 1.5,
+      opacity: 0.9,
+      fillOpacity: 0.75,
+    });
+
+    marker.bindPopup(`
+      <div style="font-family:'DM Mono',monospace;font-size:11px;min-width:140px">
+        <div style="font-weight:700;color:#c9922a;margin-bottom:4px">${p.nome || '—'}</div>
+        <div style="color:#aaa">📍 ${p.endereco || 'Endereço não informado'}</div>
+        <div style="margin-top:4px;color:${cor}">● ${status}</div>
+      </div>
+    `, { className: 'mapa-popup' });
+
+    marker.addTo(_mapaLeaflet);
+    _mapaMarkers.push(marker);
+    plotados++;
+  });
+
+  const countEl = document.getElementById('mapa-clientes-count');
+  if (countEl) {
+    countEl.textContent = plotados > 0
+      ? `${plotados} cliente(s) plotado(s) de ${pastas.length} cadastrado(s)`
+      : `${pastas.length} cliente(s) cadastrado(s) — adicione endereços para visualizar no mapa`;
+  }
+}
+
+// Inicializa mapa quando a aba visão geral estiver visível
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(iniciarMapa, 800);
+});
+
+// Re-renderiza se trocar de aba de volta pra visão geral
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    if (tab.dataset.tab === 'visao') {
+      setTimeout(() => {
+        iniciarMapa();
+        if (_mapaLeaflet) _mapaLeaflet.invalidateSize();
+        atualizarMapaClientes();
+      }, 150);
+    }
+  });
+});
+
 // ── AUTOCOMPLETE + SCORE DO CLIENTE NO SIMULADOR ──────────────────────────
 function simClienteInput() {
   const query = (document.getElementById('sim-cliente').value || '').toLowerCase().trim();
@@ -5065,7 +5325,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
 <!-- SINO DE ALERTAS FLUTUANTE -->
 <style>
-#alert-bell-wrap{position:fixed;bottom:28px;right:28px;z-index:500;}
+#mapa-clientes .leaflet-control-zoom a{background:var(--s2);border-color:var(--border);color:var(--text);}
+.mapa-popup .leaflet-popup-content-wrapper{background:var(--s1);border:1px solid var(--border2);color:var(--text);box-shadow:0 4px 20px rgba(0,0,0,0.5);border-radius:10px;}
+.mapa-popup .leaflet-popup-tip{background:var(--s1);}
+.leaflet-container{font-family:'DM Mono',monospace;}
 #alert-bell-btn{width:52px;height:52px;border-radius:50%;background:var(--s1);border:1px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:0 4px 24px rgba(0,0,0,0.4);transition:transform 0.2s,box-shadow 0.2s;position:relative;color:var(--muted);}
 #alert-bell-btn:hover{transform:scale(1.08);box-shadow:0 6px 30px rgba(0,0,0,0.5);}
 #alert-bell-count{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;font-family:'DM Mono',monospace;font-size:0.6rem;font-weight:700;color:#07090e;display:flex;align-items:center;justify-content:center;padding:0 4px;}
