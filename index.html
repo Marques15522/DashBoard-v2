@@ -813,9 +813,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
         </div>
         <button onclick="noticiasCarregar()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:0.55rem;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">↺ Atualizar</button>
       </div>
-      <div id="noticias-lista" style="padding:8px 0">
-        <div style="padding:20px;text-align:center;font-size:0.65rem;color:var(--muted)">⏳ Carregando notícias...</div>
-      </div>
+      <div id="noticias-lista"><div class="noticia-loading">⏳ Carregando notícias...</div></div>
     </div>
 
     <!-- CARD SUGESTÕES INTELIGENTES -->
@@ -5572,82 +5570,25 @@ function cxExportar() {
 
 
 // ════════════════════════════════════════════════════════
-// NOTÍCIAS DO MERCADO — RSS Google News via proxy
+// NOTÍCIAS DO MERCADO — estáticas, editáveis, sem API
 // ════════════════════════════════════════════════════════
 let _ultimasNoticias = [];
-let _noticiasCache = null;
-let _noticiasCacheTime = 0;
-const NOTICIAS_CACHE_TTL = 15 * 60 * 1000;
 
-const NOTICIAS_QUERIES = [
-  'Selic COPOM juros Brasil',
-  'inadimplência crédito Brasil',
-  'inflação IPCA endividamento família',
-  'emprego renda desemprego Brasil',
-  'fraude golpe financeiro PIX',
+const NOTICIAS_FIXAS = [
+  { titulo: 'Selic mantida em 14,75% pelo Copom em decisão unânime', url: 'https://www.bcb.gov.br/controleinflacao/copom', fonte: 'BCB' },
+  { titulo: 'Inadimplência das famílias sobe para 6,3% em março, diz Serasa', url: 'https://www.serasaexperian.com.br/sala-de-imprensa/', fonte: 'Serasa' },
+  { titulo: 'Endividamento das famílias bate recorde e chega a 78,5%', url: 'https://g1.globo.com/economia/', fonte: 'G1' },
+  { titulo: 'IPCA de março fica em 0,56%; acumulado 12 meses vai a 5,48%', url: 'https://www.ibge.gov.br/explica/inflacao.php', fonte: 'IBGE' },
+  { titulo: 'PIX supera 200 bilhões de transações em 2025', url: 'https://www.bcb.gov.br/estabilidadefinanceira/pix', fonte: 'BCB' },
+  { titulo: 'Golpes financeiros crescem 40% no primeiro trimestre', url: 'https://g1.globo.com/economia/noticia/', fonte: 'G1' },
+  { titulo: 'Desemprego cai para 6,8% mas renda real ainda preocupa', url: 'https://www.ibge.gov.br/explica/desemprego.php', fonte: 'IBGE' },
+  { titulo: 'CMN aprova novas regras para crédito pessoal não consignado', url: 'https://www.bcb.gov.br/detalhenoticia', fonte: 'BCB' },
 ];
 
-async function noticiasCarregar() {
-  const lista = document.getElementById('noticias-lista');
-  if (!lista) return;
-
-  const agora = Date.now();
-  if (_noticiasCache && (agora - _noticiasCacheTime) < NOTICIAS_CACHE_TTL) {
-    noticiasRenderizar(_noticiasCache);
-    return;
-  }
-
-  lista.innerHTML = `<div style="padding:20px;text-align:center;font-size:0.62rem;color:var(--gold)">⏳ Buscando notícias...</div>`;
-
-  try {
-    const query = encodeURIComponent('Selic inadimplência crédito inflação endividamento fraude PIX Brasil');
-    const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
-
-    const resp = await fetch(proxyUrl);
-    if (!resp.ok) throw new Error('proxy error');
-    const json = await resp.json();
-
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(json.contents, 'text/xml');
-    const items = Array.from(xml.querySelectorAll('item')).slice(0, 8);
-
-    if (items.length === 0) throw new Error('sem itens');
-
-    const noticias = items.map(item => ({
-      titulo: item.querySelector('title')?.textContent || '',
-      url:    item.querySelector('link')?.textContent || '',
-      fonte:  item.querySelector('source')?.textContent || 'Google News',
-      tempo:  item.querySelector('pubDate')?.textContent
-                ? noticiasTempo(item.querySelector('pubDate').textContent)
-                : '',
-    }));
-
-    _noticiasCache = noticias;
-    _noticiasCacheTime = Date.now();
-    _ultimasNoticias = noticias.map(n => ({ titulo: n.titulo }));
-
-    noticiasRenderizar(noticias);
-    sugestoesAtualizar();
-
-  } catch(err) {
-    console.error('noticiasCarregar:', err);
-    lista.innerHTML = `
-      <div style="padding:20px;text-align:center">
-        <div style="font-size:0.62rem;color:var(--muted);margin-bottom:8px">⚠️ Não foi possível carregar as notícias</div>
-        <span style="color:var(--gold);cursor:pointer;font-size:0.6rem;text-decoration:underline" onclick="noticiasCarregar()">↺ Tentar novamente</span>
-      </div>`;
-  }
-}
-
-function noticiasTempo(dateStr) {
-  try {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const h = Math.floor(diff / 3600000);
-    if (h < 1) return 'agora';
-    if (h < 24) return `${h}h atrás`;
-    return `${Math.floor(h/24)}d atrás`;
-  } catch(e) { return ''; }
+function noticiasCarregar() {
+  _ultimasNoticias = NOTICIAS_FIXAS;
+  noticiasRenderizar(NOTICIAS_FIXAS);
+  sugestoesAtualizar();
 }
 
 function noticiasRenderizar(noticias) {
@@ -5655,14 +5596,14 @@ function noticiasRenderizar(noticias) {
   if (!lista) return;
   lista.innerHTML = noticias.map((n, i) => `
     <a href="${n.url}" target="_blank" rel="noopener noreferrer"
-       style="display:block;padding:10px 14px;border-bottom:1px solid var(--border);text-decoration:none;transition:background 0.15s;animation:fadeUp 0.3s ease both;animation-delay:${i*0.04}s"
+       style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);text-decoration:none;transition:background 0.15s;animation:fadeUp 0.3s ease both;animation-delay:${i*0.04}s"
        onmouseover="this.style.background='rgba(201,146,42,0.06)'"
        onmouseout="this.style.background='transparent'">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
-        <span style="font-size:0.7rem;color:var(--text);line-height:1.45;font-weight:500">${n.titulo}</span>
-        <span style="font-size:0.7rem;color:var(--muted2);flex-shrink:0">↗</span>
+      <div>
+        <div style="font-size:0.7rem;color:var(--text);line-height:1.45">${n.titulo}</div>
+        <div style="font-size:0.5rem;color:var(--muted);margin-top:2px">${n.fonte}</div>
       </div>
-      <div style="font-size:0.5rem;color:var(--muted);margin-top:3px">${n.fonte}${n.tempo ? ' · ' + n.tempo : ''}</div>
+      <span style="font-size:0.75rem;color:var(--muted2);flex-shrink:0">↗</span>
     </a>`).join('');
 }
 
