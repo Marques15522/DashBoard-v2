@@ -232,33 +232,9 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .sim-form{display:flex;flex-direction:column;gap:12px;}
 .sim-field{display:flex;flex-direction:column;gap:4px;}
 .sim-label{font-size:0.58rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;}
-.sim-input{background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.68rem;padding:9px 12px;outline:none;transition:border-color 0.2s;width:100%;}
+.sim-input{background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.68rem;padding:9px 12px;outline:none;transition:border-color 0.2s;}
 .sim-input:focus{border-color:var(--gold);}
-.sim-select{background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.68rem;padding:9px 12px;outline:none;cursor:pointer;transition:border-color 0.2s;width:100%;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a6282'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
-.sim-select:focus{border-color:var(--gold);}
-.sim-select option{background:#111521;color:#dde1f0;}
 .sim-btn-pdf{margin-top:8px;padding:11px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.62rem;font-weight:700;cursor:pointer;letter-spacing:0.08em;}
-/* ── TAXA IDEAL BOX ── */
-.taxa-ideal-box{background:linear-gradient(135deg,rgba(201,146,42,0.07) 0%,rgba(232,184,75,0.04) 100%);border:1px solid rgba(201,146,42,0.3);border-radius:14px;padding:20px 22px;margin-top:16px;}
-.taxa-ideal-title{font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:0.18em;color:var(--gold2);margin-bottom:6px;}
-.taxa-ideal-desc{font-size:0.6rem;color:var(--muted);margin-bottom:16px;line-height:1.6;}
-.taxa-ideal-val{font-family:'Bebas Neue',sans-serif;font-size:3rem;line-height:1;color:var(--gold2);}
-.taxa-ideal-unit{font-size:0.9rem;color:var(--gold);margin-left:4px;}
-.taxa-ideal-sub{font-size:0.6rem;color:var(--muted);margin-top:6px;line-height:1.6;}
-.taxa-ideal-row{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:10px;}
-.taxa-ideal-compare{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px;}
-.tic-box{border-radius:10px;padding:12px 14px;text-align:center;}
-.tic-box.a{background:rgba(72,149,239,0.08);border:1px solid rgba(72,149,239,0.25);}
-.tic-box.ideal{background:rgba(201,146,42,0.1);border:1px solid rgba(201,146,42,0.35);}
-.tic-box.b{background:rgba(6,214,160,0.07);border:1px solid rgba(6,214,160,0.25);}
-.tic-lbl{font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;}
-.tic-val{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;line-height:1;}
-.tic-sub{font-size:0.5rem;margin-top:3px;opacity:0.7;}
-.taxa-slider-wrap{margin-top:14px;}
-.taxa-slider{width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;background:linear-gradient(90deg,var(--border2) 0%,var(--border2) 100%);}
-.taxa-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--gold2);cursor:pointer;border:2px solid var(--bg);}
-.taxa-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--gold2);cursor:pointer;border:2px solid var(--bg);}
-.taxa-slider-labels{display:flex;justify-content:space-between;font-size:0.5rem;color:var(--muted);margin-top:5px;}
 .sim-results{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .sim-res-item{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;}
 .sim-res-lbl{font-size:0.52rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;}
@@ -1056,27 +1032,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       </div>
     </div>
     <div id="sim-op-content"><div style="text-align:center;padding:24px;color:var(--muted);font-size:0.72rem">Preencha os parâmetros acima para calcular</div></div>
-
-    <!-- TAXA IDEAL -->
-    <div class="taxa-ideal-box" id="taxa-ideal-box" style="display:none">
-      <div class="taxa-ideal-title">🎯 Qual taxa usar para chegar perto do Cenário B?</div>
-      <div class="taxa-ideal-desc">Para aproximar o resultado do parcelamento (Cenário A) ao do reinvestimento (Cenário B), você precisa cobrar uma taxa maior por ciclo — compensando o fato de que o capital fica parado entre parcelas. Aqui está a taxa equivalente calculada:</div>
-      <div class="taxa-ideal-row">
-        <div>
-          <div class="taxa-ideal-val" id="ti-taxa-val">—</div>
-          <div style="font-size:0.62rem;color:var(--muted);margin-top:4px" id="ti-taxa-unidade">% ao mês por ciclo</div>
-        </div>
-        <div style="flex:1;min-width:180px">
-          <div class="taxa-slider-wrap">
-            <input type="range" class="taxa-slider" id="ti-slider" min="1" max="60" step="0.5" value="10" oninput="tiSliderChange(this)">
-            <div class="taxa-slider-labels"><span>1%</span><span id="ti-slider-mid">—</span><span>60%</span></div>
-          </div>
-          <div style="font-size:0.55rem;color:var(--muted);margin-top:6px">← Arraste para simular outras taxas e ver o impacto</div>
-        </div>
-      </div>
-      <div class="taxa-ideal-sub" id="ti-explicacao"></div>
-      <div class="taxa-ideal-compare" id="ti-compare"></div>
-    </div>
+  </div>
 
   <!-- CALCULADORA DE DESÁGIO MENSAL x SEMANAL -->
   <div class="card">
@@ -2704,95 +2660,9 @@ function calcOportunidade(){
       </table>
     </div>
   `;
-
-  // ── TAXA IDEAL — qual taxa usar para chegar perto do Cenário B ──
-  // Para ter o mesmo retorno do Cenário B parcelando, você precisa cobrar
-  // uma taxa por ciclo tal que: valor * taxa * prazo = totalB - valor (simples)
-  // Ou resolve para composto: taxa = (totalB/valor)^(1/prazo) - 1
-  const taxaIdealPct = tipo === 'simples'
-    ? ((totalB - valor) / (valor * prazo)) * 100
-    : (Math.pow(totalB / valor, 1 / prazo) - 1) * 100;
-
-  const boxTI = document.getElementById('taxa-ideal-box');
-  if(boxTI){
-    boxTI.style.display='block';
-    const el1=document.getElementById('ti-taxa-val');
-    const el2=document.getElementById('ti-taxa-unidade');
-    const el3=document.getElementById('ti-explicacao');
-    const el4=document.getElementById('ti-compare');
-    const sl=document.getElementById('ti-slider');
-    if(el1) el1.textContent = taxaIdealPct.toFixed(2)+'%';
-    if(el2) el2.textContent = `${prazoUnidade==='semanas'?'% por semana':'% ao mês'} (juros ${tipo}) — para ter o mesmo resultado que reinvestindo`;
-    if(el3) el3.innerHTML = `Com <strong style="color:var(--gold2)">${taxaIdealPct.toFixed(2)}% por ciclo</strong>, o parcelamento em ${prazo} ${unidadePlural} geraria o mesmo montante do reinvestimento composto. Na prática, <strong style="color:var(--text)">cobrar essa taxa é difícil de vender ao cliente</strong> — use como referência para saber o quanto você está "subsidiando" ao parcelar na taxa atual de <strong style="color:var(--muted)">${taxa}% (${taxaUnidade})</strong>.`;
-    if(sl){
-      sl.min=0.5; sl.max=Math.max(60, Math.ceil(taxaIdealPct*1.5));
-      sl.value=taxaIdealPct.toFixed(1);
-      document.getElementById('ti-slider-mid').textContent=(sl.max/2).toFixed(1)+'%';
-      const pct=(sl.value-sl.min)/(sl.max-sl.min)*100;
-      sl.style.background=`linear-gradient(90deg,var(--gold2) 0%,var(--gold2) ${pct}%,var(--border2) ${pct}%,var(--border2) 100%)`;
-    }
-    tiRenderCompare(valor, taxa, taxaOp, prazo, totalA, totalB, taxaIdealPct, tipo, fmtOp, prazoUnidade, taxaUnidade);
-  }
 }
 
-function tiSliderChange(sl){
-  // Update slider gradient
-  const pct=(sl.value-sl.min)/(sl.max-sl.min)*100;
-  sl.style.background=`linear-gradient(90deg,var(--gold2) 0%,var(--gold2) ${pct}%,var(--border2) ${pct}%,var(--border2) 100%)`;
-  const valor = parseFloat(document.getElementById('op-capital')?.value)||1000;
-  const taxa   = parseFloat(document.getElementById('op-taxa')?.value)||10;
-  const prazo  = parseInt(document.getElementById('op-prazo')?.value)||6;
-  const tipo   = document.getElementById('op-tipo')?.value||'simples';
-  const taxaUnidade = document.getElementById('op-taxa-unidade')?.value||'mensal';
-  const prazoUnidade= document.getElementById('op-prazo-unidade')?.value||'meses';
-  const SEMANAS_POR_MES=4;
-  let taxaOp;
-  if(prazoUnidade==='semanas'){
-    taxaOp=taxaUnidade==='mensal'?(tipo==='composto'?Math.pow(1+taxa/100,1/SEMANAS_POR_MES)-1:(taxa/100)/SEMANAS_POR_MES):taxa/100;
-  } else {
-    taxaOp=taxaUnidade==='semanal'?(tipo==='composto'?Math.pow(1+taxa/100,SEMANAS_POR_MES)-1:(taxa/100)*SEMANAS_POR_MES):taxa/100;
-  }
-  const jurosA=tipo==='simples'?valor*taxaOp*prazo:valor*(Math.pow(1+taxaOp,prazo)-1);
-  const totalA=valor+jurosA;
-  let cap=valor;for(let m=1;m<=prazo;m++)cap=cap+cap*taxaOp;
-  const totalB=cap;
-  const taxaIdealPct=tipo==='simples'?((totalB-valor)/(valor*prazo))*100:(Math.pow(totalB/valor,1/prazo)-1)*100;
-  const fmtOp=v=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-  tiRenderCompare(valor,taxa,taxaOp,prazo,totalA,totalB,taxaIdealPct,tipo,fmtOp,prazoUnidade,taxaUnidade,parseFloat(sl.value));
-}
-
-function tiRenderCompare(valor,taxaRef,taxaOp,prazo,totalA,totalB,taxaIdealPct,tipo,fmtOp,prazoUnidade,taxaUnidade,sliderTaxa){
-  const el=document.getElementById('ti-compare');if(!el)return;
-  const unidadePlural=prazoUnidade==='semanas'?'semanas':'meses';
-  const taxaSim = sliderTaxa!=null ? sliderTaxa : taxaIdealPct;
-  const taxaSimOp = taxaSim/100;
-  const jurosComTaxa = tipo==='simples'?valor*taxaSimOp*prazo:valor*(Math.pow(1+taxaSimOp,prazo)-1);
-  const totalComTaxa = valor+jurosComTaxa;
-  const roiComTaxa   = jurosComTaxa/valor*100;
-  const diffParaB    = totalComTaxa - totalB;
-
-  el.innerHTML=`
-    <div class="tic-box a">
-      <div class="tic-lbl" style="color:var(--blue)">📋 Cenário A</div>
-      <div class="tic-val" style="color:var(--blue)">${fmtOp(totalA)}</div>
-      <div class="tic-sub" style="color:var(--muted)">taxa atual</div>
-    </div>
-    <div class="tic-box ideal">
-      <div class="tic-lbl" style="color:var(--gold2)">🎯 Com ${taxaSim.toFixed(1)}%</div>
-      <div class="tic-val" style="color:var(--gold2)">${fmtOp(totalComTaxa)}</div>
-      <div class="tic-sub" style="color:var(--muted)">${roiComTaxa.toFixed(1)}% ROI</div>
-    </div>
-    <div class="tic-box b">
-      <div class="tic-lbl" style="color:var(--green)">🔄 Cenário B</div>
-      <div class="tic-val" style="color:var(--green)">${fmtOp(totalB)}</div>
-      <div class="tic-sub" style="color:var(--muted)">reinvestindo</div>
-    </div>
-    <div style="grid-column:1/-1;background:rgba(201,146,42,0.05);border:1px solid rgba(201,146,42,0.15);border-radius:8px;padding:10px 14px;font-size:0.6rem;color:var(--muted);line-height:1.6">
-      💡 Com <strong style="color:var(--gold2)">${taxaSim.toFixed(2)}%</strong> por ciclo no parcelamento, você recebe <strong style="color:var(--gold2)">${fmtOp(totalComTaxa)}</strong> — 
-      <strong style="color:${diffParaB>=0?'var(--green)':'var(--red)'}">${diffParaB>=0?'+':''}${fmtOp(diffParaB)}</strong> em relação ao Cenário B.
-      ${Math.abs(diffParaB) < totalB*0.01 ? '✅ Praticamente igual ao reinvestimento!' : diffParaB > 0 ? '🚀 Supera o reinvestimento!' : '⬇️ Ainda abaixo do reinvestimento.'}
-    </div>`;
-}
+// ── CALCULADORA DE DESÁGIO MENSAL x SEMANAL ──────────────
 function calcDesagio(){
   const taxaMensal = parseFloat(document.getElementById('dag-taxa-mensal')?.value) || 20;
   const capital    = parseFloat(document.getElementById('dag-capital')?.value)     || 1000;
