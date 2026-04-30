@@ -762,7 +762,20 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
           <div style="font-size:0.5rem;color:var(--gold);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:5px"><span id="briefing-emoji">☀️</span> Ações de hoje</div>
           <div id="briefing-acoes-list" style="display:flex;flex-direction:column;gap:4px"></div>
         </div>
-        <div id="sugestoes-lista" style="padding:10px 12px;display:flex;flex-direction:column;gap:7px;max-height:220px;overflow-y:auto">
+        <style>
+          #sugestoes-lista::-webkit-scrollbar{width:4px;}
+          #sugestoes-lista::-webkit-scrollbar-track{background:rgba(155,93,229,0.05);border-radius:4px;}
+          #sugestoes-lista::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(155,93,229,0.5),rgba(201,146,42,0.4));border-radius:4px;}
+          #sugestoes-lista::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,var(--purple),var(--gold));}
+          .sug-item{display:flex;flex-direction:column;gap:5px;padding:10px 12px;background:var(--s2);border-radius:10px;border:1px solid rgba(255,255,255,0.04);position:relative;overflow:hidden;transition:transform 0.15s,box-shadow 0.15s;}
+          .sug-item:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,0.3);}
+          .sug-item-top{display:flex;align-items:center;gap:7px;}
+          .sug-item-icon{font-size:1rem;flex-shrink:0;}
+          .sug-item-titulo{font-size:0.63rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;}
+          .sug-item-texto{font-size:0.6rem;color:var(--text);line-height:1.6;opacity:0.88;}
+          .sug-item-bar{position:absolute;top:0;left:0;width:100%;height:2px;}
+        </style>
+        <div id="sugestoes-lista" style="padding:10px 12px;display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto">
           <div class="noticia-loading">⏳ Analisando...</div>
         </div>
       </div>
@@ -799,32 +812,27 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <span id="briefing-cards" style="display:none"></span>
   <div id="briefing-dia" style="display:none"><div id="briefing-acoes" style="display:none"></div></div>
 
-  <!-- GRÁFICOS -->
-  <div style="font-size:0.52rem;letter-spacing:0.2em;color:var(--muted2);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;margin-top:24px">
-    <span style="display:inline-block;width:16px;height:1px;background:var(--purple);opacity:0.5"></span>
-    ANÁLISE GRÁFICA
-    <span style="flex:1;height:1px;background:var(--border)"></span>
-  </div>
-  <div class="grid-2">
-    <div class="card" style="border-color:rgba(201,146,42,0.15)">
-      <div class="card-header">
+  <!-- GRÁFICOS COMPACTOS ABAIXO DOS CARDS -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">
+    <div class="card" style="border-color:rgba(201,146,42,0.15);margin-bottom:0;padding:14px 16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div>
-          <div class="card-title" style="font-size:0.82rem">📈 Evolução Mensal da Carteira</div>
-          <div class="card-desc">Capital e lucro acumulados mês a mês</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:0.78rem;letter-spacing:0.1em;color:var(--text)">📈 Evolução Mensal da Carteira</div>
+          <div style="font-size:0.56rem;color:var(--muted);margin-top:1px">Capital e lucro acumulados mês a mês</div>
         </div>
         <div class="card-badge">CRESCIMENTO</div>
       </div>
-      <div class="chart-wrap tall"><canvas id="chartEvolMensal"></canvas></div>
+      <div style="height:160px;position:relative"><canvas id="chartEvolMensal"></canvas></div>
     </div>
-    <div class="card" style="border-color:rgba(72,149,239,0.15)">
-      <div class="card-header">
+    <div class="card" style="border-color:rgba(72,149,239,0.15);margin-bottom:0;padding:14px 16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div>
-          <div class="card-title" style="font-size:0.82rem">💼 Composição da Carteira</div>
-          <div class="card-desc">Capital saudável vs em risco vs quitado</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:0.78rem;letter-spacing:0.1em;color:var(--text)">💼 Composição da Carteira</div>
+          <div style="font-size:0.56rem;color:var(--muted);margin-top:1px">Capital saudável vs em risco vs quitado</div>
         </div>
         <div class="card-badge">SAÚDE</div>
       </div>
-      <div class="chart-wrap tall"><canvas id="chartComposicao"></canvas></div>
+      <div style="height:160px;position:relative"><canvas id="chartComposicao"></canvas></div>
     </div>
   </div>
 </div>
@@ -5658,12 +5666,13 @@ function sugestoesAtualizar() {
   const sugestoes = sugestoesGerarLocal(dados, _ultimasNoticias);
 
   lista.innerHTML = sugestoes.map(s => `
-    <div style="display:flex;gap:10px;padding:10px 12px;background:var(--s2);border-radius:8px;border-left:3px solid ${s.cor}">
-      <div style="font-size:1rem;flex-shrink:0;margin-top:1px">${s.icon}</div>
-      <div>
-        <div style="font-size:0.65rem;font-weight:600;color:${s.cor};letter-spacing:0.05em;margin-bottom:3px">${s.titulo}</div>
-        <div style="font-size:0.63rem;color:var(--text);line-height:1.5">${s.texto}</div>
+    <div class="sug-item">
+      <div class="sug-item-bar" style="background:linear-gradient(90deg,${s.cor},transparent)"></div>
+      <div class="sug-item-top">
+        <div class="sug-item-icon">${s.icon}</div>
+        <div class="sug-item-titulo" style="color:${s.cor}">${s.titulo}</div>
       </div>
+      <div class="sug-item-texto">${s.texto}</div>
     </div>`).join('');
 }
 
