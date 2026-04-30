@@ -580,8 +580,8 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       <div style="font-family:'Cinzel',serif;font-size:1.55rem;color:var(--gold);letter-spacing:0.04em;line-height:1;margin-bottom:5px">Visão Geral</div>
       <div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase" id="briefing-data-longa">—</div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <div id="briefing-saudacao" style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold);letter-spacing:0.08em">BOM DIA ☀️</div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center">
+      <div id="briefing-saudacao" style="font-family:'Bebas Neue',sans-serif;font-size:2.8rem;color:var(--gold);letter-spacing:0.1em;text-align:center">BOM DIA, SR. MARQUES</div>
     </div>
   </div>
 
@@ -2522,7 +2522,7 @@ function render(empRows,pagRows){
   const hora = hoje.getHours();
   const saudacao = hora < 12 ? 'BOM DIA' : hora < 18 ? 'BOA TARDE' : 'BOA NOITE';
   const emoji = hora < 12 ? '☀️' : hora < 18 ? '🌤️' : '🌙';
-  _s('briefing-saudacao', saudacao + ' ' + emoji + ' SR. MARQUES');
+  _s('briefing-saudacao', saudacao + ', SR. MARQUES');
   const _loadTxt = document.getElementById('load-saudacao-text');
   if (_loadTxt) _loadTxt.textContent = saudacao + ', SR. MARQUES';
   const emojiEl = document.getElementById('briefing-emoji');
