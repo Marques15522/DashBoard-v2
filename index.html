@@ -2121,7 +2121,8 @@ function render(empRows,pagRows){
     .map(r=>{
       const valor=parseNum(r[CP.valor]);
       const jurosRaw=parseNum(r[CP.juros]);
-      const juros=jurosRaw>0?jurosRaw:0;
+      const empRef=emps.find(e=>e.id===String(r[CP.id]).trim());
+      const juros=jurosRaw>0?jurosRaw:(empRef?empRef.jTotal:0);
       return{id:String(r[CP.id]).trim(),tipo:String(r[CP.tipo]||''),valor,data:parseDate(r[CP.data]),juros};
     });
 
@@ -2752,6 +2753,9 @@ function render(empRows,pagRows){
   atualizarMetaBar(lucroReal);
   renderFluxo90(abertos, hoje);
   waHistRender();
+
+  // CAIXA — alimenta entradas automáticas com pagamentos da planilha
+  cxRender(pags);
 }
 
 // ── WHATSAPP ─────────────────────────────────────────────
@@ -5342,7 +5346,7 @@ function cxRender(pagsExternas) {
     categoria: 'entrada_auto',
     descricao: 'Juros recebidos — ' + (p.id||''),
     valor: p.juros,
-    data: p.data ? p.data.toISOString().slice(0,10) : null,
+    data: p.data ? `${p.data.getFullYear()}-${String(p.data.getMonth()+1).padStart(2,'0')}-${String(p.data.getDate()).padStart(2,'0')}` : null,
     _auto: true,
   })).filter(e => e.data && e.valor > 0);
 
