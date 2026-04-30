@@ -2121,7 +2121,7 @@ function render(empRows,pagRows){
     .map(r=>{
       const valor=parseNum(r[CP.valor]);
       const jurosRaw=parseNum(r[CP.juros]);
-      const juros=jurosRaw>0?jurosRaw:valor;
+      const juros=jurosRaw>0?jurosRaw:0;
       return{id:String(r[CP.id]).trim(),tipo:String(r[CP.tipo]||''),valor,data:parseDate(r[CP.data]),juros};
     });
 
