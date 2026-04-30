@@ -991,13 +991,6 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="card"><div class="card-header"><div><div class="card-title">🧩 Perfil de Clientes</div><div class="card-desc">Agrupamento automático por comportamento: Premium · Regular Fiel · Alto Risco · Inativo</div></div><div class="card-badge">IA</div></div><div class="profile-grid" id="profileGrid"></div></div>
   <div class="card"><div class="card-header"><div><div class="card-title">📋 Histórico de Pagamentos por Cliente</div><div class="card-desc">Pontualidade e volume registrado</div></div><div class="card-badge">HISTÓRICO</div></div><div class="hist-list" id="histList"></div></div>
 
-  <!-- RENTABILIDADE POR CLIENTE -->
-  <div class="section-label">💎 RENTABILIDADE POR CLIENTE</div>
-  <div class="card">
-    <div class="card-header"><div><div class="card-title">📊 Ranking de Rentabilidade</div><div class="card-desc">Juros gerados vs capital emprestado — quem realmente vale mais para o negócio</div></div><div class="card-badge">ROI</div></div>
-    <div id="rentabilidade-list" style="display:flex;flex-direction:column;gap:8px"></div>
-  </div>
-
   <!-- PASTAS DE CLIENTES -->
   <div class="section-label" style="margin-top:28px">🗂️ PASTAS DE CLIENTES — DADOS PESSOAIS & DOCUMENTOS</div>
   <div class="card">
@@ -2469,7 +2462,7 @@ function render(empRows,pagRows){
 
   // CLUSTERIZAÇÃO
   function cluster(c){const sc=calcScore(c);if(!c.ativo)return{lbl:'Inativo',cls:'cl-inativo'};if(sc<20&&c.ticketMedio>ticket*1.2)return{lbl:'Premium',cls:'cl-premium'};if(sc>=50)return{lbl:'Alto Risco',cls:'cl-risco'};if(c.recorrente)return{lbl:'Regular Fiel',cls:'cl-regular'};return{lbl:'Regular',cls:'cl-regular'};}
-  _h('profileGrid',clientes.map(c=>{const cl=cluster(c);const ini=c.nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();const sc=calcScore(c);const corSc=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';return`<div class="profile-card"><div class="profile-top"><div class="p-avatar">${ini}</div><div class="p-name">${c.nome}</div><div class="p-cluster ${cl.cls}">${cl.lbl}</div></div><div class="p-stats"><div class="pstat"><div class="pstat-lbl">Capital Total</div><div class="pstat-val" style="color:var(--gold)">${fmt(c.totalCap)}</div></div><div class="pstat"><div class="pstat-lbl">Lucro Previsto</div><div class="pstat-val" style="color:var(--green)">${fmt(c.totalJuros)}</div></div><div class="pstat"><div class="pstat-lbl">Contratos</div><div class="pstat-val">${c.qtdContratos}</div></div><div class="pstat"><div class="pstat-lbl">Score Risco</div><div class="pstat-val" style="color:${corSc}">${sc}</div></div><div class="pstat"><div class="pstat-lbl">Relacionamento</div><div class="pstat-val" style="color:var(--blue)">${c.mesesRelac}m</div></div><div class="pstat"><div class="pstat-lbl">Status</div><div class="pstat-val" style="color:${c.ativo?'var(--green)':'var(--muted)'}">${c.ativo?'ATIVO':'INATIVO'}</div></div></div></div>`;}).join(''));
+  _h('profileGrid',clientes.map(c=>{const cl=cluster(c);const ini=c.nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();const sc=calcScore(c);const corSc=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';const capTotal=c.contratos.reduce((s,e)=>s+e.capital,0);const roi=capTotal>0?c.totalJuros/capTotal:0;const corRoi=roi>0.3?'var(--gold)':roi>0.15?'var(--green)':'var(--blue)';return`<div class="profile-card"><div class="profile-top"><div class="p-avatar">${ini}</div><div class="p-name">${c.nome}</div><div class="p-cluster ${cl.cls}">${cl.lbl}</div></div><div class="p-stats"><div class="pstat"><div class="pstat-lbl">Capital Total</div><div class="pstat-val" style="color:var(--gold)">${fmt(c.totalCap)}</div></div><div class="pstat"><div class="pstat-lbl">Lucro Previsto</div><div class="pstat-val" style="color:var(--green)">${fmt(c.totalJuros)}</div></div><div class="pstat"><div class="pstat-lbl">Contratos</div><div class="pstat-val">${c.qtdContratos}</div></div><div class="pstat"><div class="pstat-lbl">Score Risco</div><div class="pstat-val" style="color:${corSc}">${sc}</div></div><div class="pstat"><div class="pstat-lbl">Relacionamento</div><div class="pstat-val" style="color:var(--blue)">${c.mesesRelac}m</div></div><div class="pstat"><div class="pstat-lbl">Status</div><div class="pstat-val" style="color:${c.ativo?'var(--green)':'var(--muted)'}">${c.ativo?'ATIVO':'INATIVO'}</div></div></div><div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase">Rentabilidade</div><div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:${corRoi};line-height:1">${fmt(c.totalJuros)}</span><span style="font-family:'DM Mono',monospace;font-size:0.68rem;color:${corRoi};opacity:0.85">${(roi*100).toFixed(1)}%</span></div></div></div>`;}).join(''));
 
   // HISTÓRICO PAGAMENTOS
   _h('histList',[...clientes].sort((a,b)=>b.totalPago-a.totalPago).map(c=>{const isAt=c.temAtraso,isQ=c.soQuitados;const st=isQ?`<span class="badge ok">✅ QUITADO</span>`:isAt?`<span class="badge bad">⚠️ ATRASO</span>`:`<span class="badge ok">✓ EM DIA</span>`;const rec=c.recorrente?`<span class="badge blue">↩ RECORRENTE</span>`:'';return`<div class="hist-row"><span class="hist-nome">${c.nome}</span><div class="hist-badges"><span class="badge muted">${c.qtdContratos} contrato(s)</span><span class="badge muted">${fmt(c.totalPago)}</span>${rec}${st}</div></div>`;}).join(''));
@@ -2680,44 +2673,7 @@ function render(empRows,pagRows){
     }).join('');
   }
 
-  // ── FEATURE 4: RENTABILIDADE POR CLIENTE ─────────────────
-  const rentRanking = clientes.filter(c=>c.totalCap>0||c.totalJuros>0).map(c => {
-    const capTotal = c.contratos.reduce((s,e)=>s+e.capital,0);
-    const roi = capTotal > 0 ? c.totalJuros / capTotal : 0;
-    const recebido = c.totalPago;
-    const recebidoROI = capTotal > 0 ? recebido / capTotal : 0;
-    return {...c, capTotal, roi, recebido, recebidoROI};
-  }).sort((a,b)=>b.roi-a.roi);
-
-  const maxRoiRent = rentRanking.length ? rentRanking[0].roi : 1;
-  document.getElementById('rentabilidade-list').innerHTML = rentRanking.length===0
-    ? `<div style="color:var(--muted);font-size:0.68rem;padding:12px 0">Nenhum dado disponível.</div>`
-    : rentRanking.map((c,i) => {
-      const corRoi = c.roi>0.3?'var(--gold)':c.roi>0.15?'var(--green)':'var(--blue)';
-      const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
-      const barW = maxRoiRent>0 ? (c.roi/maxRoiRent*100).toFixed(1) : 0;
-      const statusBadge = c.soQuitados?`<span style="font-size:0.5rem;padding:2px 6px;border-radius:4px;background:rgba(90,98,130,0.1);border:1px solid var(--border2);color:var(--muted)">QUITADO</span>`:
-        c.temAtraso?`<span style="font-size:0.5rem;padding:2px 6px;border-radius:4px;background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.3);color:var(--red)">ATRASO</span>`:
-        `<span style="font-size:0.5rem;padding:2px 6px;border-radius:4px;background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.25);color:var(--green)">ATIVO</span>`;
-      return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
-          <div style="display:flex;align-items:center;gap:8px">
-            ${medal?`<span style="font-size:1rem">${medal}</span>`:`<span style="font-size:0.75rem;color:var(--muted);font-family:'Bebas Neue',sans-serif;min-width:18px">#${i+1}</span>`}
-            <span style="font-size:0.75rem;color:var(--text)">${c.nome}</span>
-            ${statusBadge}
-          </div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:${corRoi};line-height:1">${(c.roi*100).toFixed(1)}%<span style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--muted);margin-left:4px">ROI</span></div>
-        </div>
-        <div style="background:var(--border);border-radius:3px;height:4px;margin-bottom:10px;overflow:hidden">
-          <div style="height:100%;width:${barW}%;background:${corRoi};border-radius:3px;transition:width 1s ease"></div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
-          <div style="font-size:0.57rem"><div style="color:var(--muted);margin-bottom:1px">Capital total</div><div style="color:var(--text)">${fmt(c.capTotal)}</div></div>
-          <div style="font-size:0.57rem"><div style="color:var(--muted);margin-bottom:1px">Juros gerados</div><div style="color:var(--green)">${fmt(c.totalJuros)}</div></div>
-          <div style="font-size:0.57rem"><div style="color:var(--muted);margin-bottom:1px">Já recebido</div><div style="color:var(--gold)">${fmt(c.recebido)}</div></div>
-        </div>
-      </div>`;
-    }).join('');
+  // ── FEATURE 4: RENTABILIDADE POR CLIENTE — dados usados no profileGrid acima
 
   // CALENDÁRIO MENSAL
   const DIAS_SEMANA=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
@@ -2737,7 +2693,7 @@ function render(empRows,pagRows){
     const celulas=Array.from({length:42},(_,i)=>{
       const d=new Date(inicioCal); d.setDate(inicioCal.getDate()+i); d.setHours(0,0,0,0);
       const fim=new Date(d); fim.setHours(23,59,59,999);
-      const venc=abertosData.filter(e=>e.proxVenc&&e.proxVenc>=d&&e.proxVenc<=fim);
+      const venc=abertosData.filter(e=>{if(!e.proxVenc)return false;const pv=new Date(e.proxVenc);pv.setHours(0,0,0,0);return pv.getTime()===d.getTime();});
       const isToday=d.getFullYear()===hojeRef.getFullYear()&&d.getMonth()===hojeRef.getMonth()&&d.getDate()===hojeRef.getDate();
       return{date:d, dia:d.getDate(), mesAtual:d.getMonth()===mes, isToday, total:venc.reduce((s,e)=>s+e.jProx,0), vencimentos:venc};
     });
