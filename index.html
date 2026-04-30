@@ -3882,12 +3882,12 @@ function simClienteSelecionar(id) {
   }
 }
 
-// Fecha dropdown ao clicar fora
-document.addEventListener('click', e => {
-  if (!e.target.closest('#sim-cliente') && !e.target.closest('#sim-cliente-dropdown')) {
+// Fecha dropdown ao perder foco (com delay para deixar o clique executar primeiro)
+document.getElementById('sim-cliente').addEventListener('blur', () => {
+  setTimeout(() => {
     const dd = document.getElementById('sim-cliente-dropdown');
     if (dd) dd.style.display = 'none';
-  }
+  }, 200);
 });
 
 function simPDF(){
