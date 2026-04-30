@@ -3768,7 +3768,8 @@ function simClienteInput() {
     const { total } = calcScoreFinal(p);
     const cor = total >= 650 ? 'var(--green)' : total >= 450 ? 'var(--gold)' : 'var(--red)';
     const label = total >= 800 ? 'EXCELENTE' : total >= 650 ? 'BOM' : total >= 500 ? 'MÉDIO' : total >= 300 ? 'RISCO' : total > 0 ? 'CRÍTICO' : 'SEM DADOS';
-    return `<div onmousedown="event.preventDefault();simClienteSelecionar(${JSON.stringify(p.id)})"
+    const nomeEsc = p.nome.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `<div onmousedown="event.preventDefault();event.stopPropagation();document.getElementById('sim-cliente').value='${nomeEsc}';document.getElementById('sim-cliente-dropdown').style.display='none';simClienteSelecionar(${JSON.stringify(p.id)})"
       style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;transition:background 0.15s"
       onmouseover="this.style.background='rgba(255,255,255,0.04)'"
       onmouseout="this.style.background=''"
