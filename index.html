@@ -595,33 +595,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <span id="meta-realizado-txt" style="display:none"></span>
   <span id="meta-pct-txt" style="display:none"></span>
 
-  <!-- CARDS EXTRA — espaço antes do mapa -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
-    <div class="kpi-sm" style="border-color:rgba(155,93,229,0.15)">
-      <div class="kpi-sm-accent" style="background:var(--purple)"></div>
-      <div class="kpi-sm-lbl">📊 Total Contratos</div>
-      <div class="kpi-sm-val" id="kpi-total-contr" style="color:var(--purple)">—</div>
-      <div class="kpi-sm-sub">ativos + quitados</div>
-    </div>
-    <div class="kpi-sm" style="border-color:rgba(72,149,239,0.15)">
-      <div class="kpi-sm-accent" style="background:var(--blue)"></div>
-      <div class="kpi-sm-lbl">💹 Rentabilidade Mês</div>
-      <div class="kpi-sm-val" id="kpi-rent-mes" style="color:var(--blue)">—</div>
-      <div class="kpi-sm-sub">juros recebidos este mês</div>
-    </div>
-    <div class="kpi-sm" style="border-color:rgba(201,146,42,0.15)">
-      <div class="kpi-sm-accent" style="background:var(--gold)"></div>
-      <div class="kpi-sm-lbl">🏆 Melhor Cliente</div>
-      <div class="kpi-sm-val" id="kpi-melhor-cli" style="color:var(--gold);font-size:1rem">—</div>
-      <div class="kpi-sm-sub" id="kpi-melhor-cli-sub">maior lucro gerado</div>
-    </div>
-    <div class="kpi-sm" style="border-color:rgba(6,214,160,0.15)">
-      <div class="kpi-sm-accent" style="background:var(--green)"></div>
-      <div class="kpi-sm-lbl">✅ Contratos Quitados</div>
-      <div class="kpi-sm-val" id="kpi-quit" style="color:var(--green)">—</div>
-      <div class="kpi-sm-sub" id="kpi-quit-sub">histórico completo</div>
-    </div>
-  </div>
+
 
   <!-- KPIs + MAPA layout centralizado -->
   <style>
@@ -796,7 +770,31 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
   </div><!-- /.visao-hub -->
 
+  <!-- CARDS ABAIXO DO MAPA — Total Contratos, Rentabilidade Mês, Contratos Quitados -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;margin-bottom:0">
+    <div class="kpi-sm" style="border-color:rgba(155,93,229,0.15)">
+      <div class="kpi-sm-accent" style="background:var(--purple)"></div>
+      <div class="kpi-sm-lbl">📊 Total Contratos</div>
+      <div class="kpi-sm-val" id="kpi-total-contr" style="color:var(--purple)">—</div>
+      <div class="kpi-sm-sub">ativos + quitados</div>
+    </div>
+    <div class="kpi-sm" style="border-color:rgba(72,149,239,0.15)">
+      <div class="kpi-sm-accent" style="background:var(--blue)"></div>
+      <div class="kpi-sm-lbl">💹 Rentabilidade Mês</div>
+      <div class="kpi-sm-val" id="kpi-rent-mes" style="color:var(--blue)">—</div>
+      <div class="kpi-sm-sub">juros recebidos este mês</div>
+    </div>
+    <div class="kpi-sm" style="border-color:rgba(6,214,160,0.15)">
+      <div class="kpi-sm-accent" style="background:var(--green)"></div>
+      <div class="kpi-sm-lbl">✅ Contratos Quitados</div>
+      <div class="kpi-sm-val" id="kpi-quit" style="color:var(--green)">—</div>
+      <div class="kpi-sm-sub" id="kpi-quit-sub">histórico completo</div>
+    </div>
+  </div>
+
   <!-- IDs fantasma: mantém o JS funcionando sem quebrar nada -->
+  <span id="kpi-melhor-cli" style="display:none"></span>
+  <span id="kpi-melhor-cli-sub" style="display:none"></span>
   <span id="kpi-melhor-cli-sub-ghost" style="display:none"></span>
   <span id="briefing-cards" style="display:none"></span>
   <div id="briefing-dia" style="display:none"><div id="briefing-acoes" style="display:none"></div></div>
