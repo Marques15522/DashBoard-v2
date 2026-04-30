@@ -586,14 +586,30 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
   <div id="alertasBanner"></div>
 
-  <!-- NOTIFICAÇÃO VENCIMENTOS -->
-  <div id="notif-venc" style="display:none;background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.3);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;animation:fadeUp 0.4s ease">
-    <span style="font-size:1.2rem">🔔</span>
-    <div style="flex:1"><div id="notif-venc-texto" style="font-size:0.8rem;color:var(--red);font-weight:600"></div><div id="notif-venc-sub" style="font-size:0.58rem;color:var(--muted);margin-top:2px"></div></div>
-    <button onclick="document.getElementById('notif-venc').style.display='none'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem">✕</button>
-  </div>
+  <div id="notif-venc" style="display:none"></div>
 
   <!-- META MENSAL — premium redesign -->
+  <div id="meta-bar-wrap" style="background:linear-gradient(135deg,rgba(201,146,42,0.07) 0%,var(--s1) 60%);border:1px solid rgba(201,146,42,0.2);border-radius:16px;padding:22px 24px;margin-bottom:24px;animation:fadeUp 0.4s ease;position:relative;overflow:hidden">
+    <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(201,146,42,0.1) 0%,transparent 70%);pointer-events:none"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:0.56rem;letter-spacing:0.18em;color:var(--gold);text-transform:uppercase;margin-bottom:3px">🎯 Meta de Juros do Mês</div>
+        <div style="font-size:0.72rem;color:var(--muted2)" id="meta-desc">—</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input id="meta-input" type="number" placeholder="Ex: 1000" style="background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.62rem;padding:7px 12px;width:130px;outline:none;transition:border-color 0.2s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border2)'" onchange="salvarMeta()">
+        <button onclick="salvarMeta()" style="background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:8px;padding:7px 14px;font-family:'Bebas Neue',sans-serif;font-size:0.85rem;letter-spacing:0.1em;cursor:pointer;transition:opacity 0.2s" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">DEFINIR</button>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,0.04);border-radius:8px;height:10px;overflow:hidden;margin-bottom:8px">
+      <div id="meta-bar-fill" style="height:100%;border-radius:8px;background:linear-gradient(90deg,var(--gold),var(--gold2),#f5d080);transition:width 1.2s ease;width:0%;box-shadow:0 0 10px rgba(201,146,42,0.4)"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <span style="font-size:0.58rem;color:var(--muted)" id="meta-realizado-txt">R$ 0 realizados</span>
+      <span style="font-size:0.58rem;color:var(--gold2);font-family:'Bebas Neue',sans-serif;font-size:0.85rem" id="meta-pct-txt">0%</span>
+    </div>
+  </div>
+
   <!-- KPIs + MAPA layout centralizado -->
   <style>
   .visao-hub{display:grid;grid-template-columns:200px 1fr 200px;gap:14px;margin-bottom:0;align-items:start;}
@@ -653,7 +669,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
   <div class="visao-hub">
 
-    <!-- COLUNA ESQUERDA -->
+    <!-- COLUNA ESQUERDA: KPIs + Notícias -->
     <div class="visao-col">
       <div class="kpi-sm" style="border-color:rgba(201,146,42,0.2);background:linear-gradient(135deg,rgba(201,146,42,0.06) 0%,var(--s1) 80%)">
         <div class="kpi-sm-accent" style="background:linear-gradient(90deg,var(--gold),var(--gold2))"></div>
@@ -685,19 +701,13 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
         <div class="kpi-sm-val" id="kpi-lucro" style="color:var(--purple)">—</div>
         <div class="kpi-sm-sub">juros a receber</div>
       </div>
-      <!-- Melhor Cliente -->
-      <div class="kpi-sm" style="border-color:rgba(201,146,42,0.15)">
-        <div class="kpi-sm-accent" style="background:var(--gold)"></div>
-        <div class="kpi-sm-lbl">🏆 Melhor Cliente</div>
-        <div class="kpi-sm-val" id="kpi-melhor-cli" style="color:var(--gold);font-size:1rem">—</div>
-        <div class="kpi-sm-sub" id="kpi-melhor-cli-sub">maior lucro gerado</div>
-      </div>
-      <!-- Contratos Quitados -->
-      <div class="kpi-sm" style="border-color:rgba(6,214,160,0.15)">
-        <div class="kpi-sm-accent" style="background:var(--green)"></div>
-        <div class="kpi-sm-lbl">✅ Contratos Quitados</div>
-        <div class="kpi-sm-val" id="kpi-quit" style="color:var(--green)">—</div>
-        <div class="kpi-sm-sub" id="kpi-quit-sub">histórico completo</div>
+      <!-- Card Notícias compacto -->
+      <div id="card-noticias" style="border-radius:12px;overflow:hidden;border:1px solid var(--border);background:var(--s1)">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border)">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.1em;color:var(--text)">📰 Notícias</div>
+          <button onclick="noticiasCarregar()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:5px;padding:3px 8px;font-family:'DM Mono',monospace;font-size:0.5rem;cursor:pointer" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">↺</button>
+        </div>
+        <div id="noticias-lista" style="max-height:220px;overflow-y:auto"><div class="noticia-loading">⏳ Carregando...</div></div>
       </div>
     </div>
 
@@ -722,7 +732,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       </div>
     </div>
 
-    <!-- COLUNA DIREITA -->
+    <!-- COLUNA DIREITA: KPIs + Sugestões com ações integradas -->
     <div class="visao-col">
       <div class="kpi-sm">
         <div class="kpi-sm-accent" style="background:var(--gold2)"></div>
@@ -754,86 +764,62 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
         <div class="kpi-sm-val" id="kpi-prazo" style="color:var(--gold)">—</div>
         <div class="kpi-sm-sub">meses</div>
       </div>
-      <!-- Total Contratos -->
-      <div class="kpi-sm" style="border-color:rgba(155,93,229,0.15)">
-        <div class="kpi-sm-accent" style="background:var(--purple)"></div>
-        <div class="kpi-sm-lbl">📊 Total Contratos</div>
-        <div class="kpi-sm-val" id="kpi-total-contr" style="color:var(--purple)">—</div>
-        <div class="kpi-sm-sub">ativos + quitados</div>
-      </div>
-      <!-- Evolução — card com mini gráfico -->
-      <div class="kpi-sm" style="border-color:rgba(201,146,42,0.15);padding-bottom:10px">
-        <div class="kpi-sm-accent" style="background:linear-gradient(90deg,var(--gold),var(--gold2))"></div>
-        <div class="kpi-sm-lbl">📈 Evolução Mensal</div>
-        <div class="kpi-sm-val" id="kpi-rent-mes" style="color:var(--blue);font-size:1.1rem">—</div>
-        <div class="kpi-sm-sub">rentabilidade este mês</div>
-        <div style="height:60px;margin-top:8px;position:relative"><canvas id="chartEvolMensal"></canvas></div>
+      <!-- Sugestões com ações prioritárias integradas -->
+      <div id="card-sugestoes" style="background:var(--s1);border:1px solid rgba(155,93,229,0.25);border-radius:12px;overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid rgba(155,93,229,0.15)">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.1em;color:var(--text)">💡 Sugestões</div>
+          <button onclick="sugestoesAtualizar()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:5px;padding:3px 8px;font-family:'DM Mono',monospace;font-size:0.5rem;cursor:pointer" onmouseover="this.style.borderColor='var(--purple)';this.style.color='var(--purple)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">↺</button>
+        </div>
+        <!-- Ações prioritárias integradas -->
+        <div id="briefing-acoes-inline" style="display:none;padding:8px 12px;border-bottom:1px solid var(--border)">
+          <div style="font-size:0.5rem;color:var(--gold);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:5px"><span id="briefing-emoji">☀️</span> Ações de hoje</div>
+          <div id="briefing-acoes-list" style="display:flex;flex-direction:column;gap:4px"></div>
+        </div>
+        <div id="sugestoes-lista" style="padding:10px 12px;display:flex;flex-direction:column;gap:7px;max-height:220px;overflow-y:auto">
+          <div class="noticia-loading">⏳ Analisando...</div>
+        </div>
       </div>
     </div>
 
   </div><!-- /.visao-hub -->
 
-  <!-- BRIEFING DO DIA -->
-  <div id="briefing-dia" style="display:none;border-radius:14px;padding:18px 22px;margin-bottom:24px;animation:fadeUp 0.4s ease;border:1px solid rgba(201,146,42,0.15);background:rgba(201,146,42,0.03)">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-      <div style="font-size:0.56rem;letter-spacing:0.18em;color:var(--gold);text-transform:uppercase"><span id="briefing-emoji" style="font-size:1rem">☀️</span> Ações Prioritárias Hoje</div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px" id="briefing-cards"></div>
-    <div id="briefing-acoes" style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;display:none">
-      <div id="briefing-acoes-list" style="display:flex;flex-direction:column;gap:6px"></div>
-    </div>
-  </div>
+  <!-- IDs fantasma: mantém o JS funcionando sem quebrar nada -->
+  <span id="kpi-melhor-cli" style="display:none"></span>
+  <span id="kpi-melhor-cli-sub" style="display:none"></span>
+  <span id="kpi-quit" style="display:none"></span>
+  <span id="kpi-quit-sub" style="display:none"></span>
+  <span id="kpi-total-contr" style="display:none"></span>
+  <span id="kpi-rent-mes" style="display:none"></span>
+  <span id="briefing-cards" style="display:none"></span>
+  <div id="briefing-dia" style="display:none"><div id="briefing-acoes" style="display:none"></div></div>
 
-
-  <!-- INTELIGÊNCIA: NOTÍCIAS + SUGESTÕES -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
-
-    <!-- CARD NOTÍCIAS -->
-    <div id="card-noticias">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border)">
-        <div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:0.82rem;letter-spacing:0.1em;color:var(--text)">📰 Notícias do Mercado</div>
-          <div style="font-size:0.5rem;color:var(--muted);margin-top:1px">impacto direto no seu negócio · clique para ler</div>
-        </div>
-        <button onclick="noticiasCarregar()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:0.55rem;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">↺ Atualizar</button>
-      </div>
-      <div id="noticias-lista"><div class="noticia-loading">⏳ Carregando notícias...</div></div>
-    </div>
-
-    <!-- CARD SUGESTÕES INTELIGENTES -->
-    <div id="card-sugestoes" style="background:var(--s1);border:1px solid rgba(155,93,229,0.25);border-radius:14px;overflow:hidden;animation:fadeUp 0.5s ease both">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(155,93,229,0.15)">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:26px;height:26px;border-radius:50%;background:rgba(155,93,229,0.15);border:1px solid rgba(155,93,229,0.3);display:flex;align-items:center;justify-content:center;font-size:0.8rem">💡</div>
-          <div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:0.82rem;letter-spacing:0.1em;color:var(--text)">Sugestões Inteligentes</div>
-            <div style="font-size:0.5rem;color:var(--muted)">baseadas nos seus dados + notícias do dia</div>
-          </div>
-        </div>
-        <button onclick="sugestoesAtualizar()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:0.55rem;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='var(--purple)';this.style.color='var(--purple)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">↺ Atualizar</button>
-      </div>
-      <div id="sugestoes-lista" style="padding:14px;display:flex;flex-direction:column;gap:8px;min-height:200px">
-        <div class="noticia-loading">⏳ Analisando seus dados...</div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- GRÁFICOS — só Composição da Carteira -->
-  <div style="font-size:0.52rem;letter-spacing:0.2em;color:var(--muted2);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+  <!-- GRÁFICOS -->
+  <div style="font-size:0.52rem;letter-spacing:0.2em;color:var(--muted2);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;margin-top:24px">
     <span style="display:inline-block;width:16px;height:1px;background:var(--purple);opacity:0.5"></span>
-    COMPOSIÇÃO DA CARTEIRA
+    ANÁLISE GRÁFICA
     <span style="flex:1;height:1px;background:var(--border)"></span>
   </div>
-  <div class="card" style="border-color:rgba(72,149,239,0.15);margin-bottom:0">
-    <div class="card-header">
-      <div>
-        <div class="card-title" style="font-size:0.82rem">💼 Composição da Carteira</div>
-        <div class="card-desc">Capital saudável vs em risco vs quitado</div>
+  <div class="grid-2">
+    <div class="card" style="border-color:rgba(201,146,42,0.15)">
+      <div class="card-header">
+        <div>
+          <div class="card-title" style="font-size:0.82rem">📈 Evolução Mensal da Carteira</div>
+          <div class="card-desc">Capital e lucro acumulados mês a mês</div>
+        </div>
+        <div class="card-badge">CRESCIMENTO</div>
       </div>
-      <div class="card-badge">SAÚDE</div>
+      <div class="chart-wrap tall"><canvas id="chartEvolMensal"></canvas></div>
     </div>
-    <div class="chart-wrap tall"><canvas id="chartComposicao"></canvas></div>
+    <div class="card" style="border-color:rgba(72,149,239,0.15)">
+      <div class="card-header">
+        <div>
+          <div class="card-title" style="font-size:0.82rem">💼 Composição da Carteira</div>
+          <div class="card-desc">Capital saudável vs em risco vs quitado</div>
+        </div>
+        <div class="card-badge">SAÚDE</div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="chartComposicao"></canvas></div>
+    </div>
   </div>
 </div>
 
@@ -2265,7 +2251,7 @@ function render(empRows,pagRows){
   evolKeys.forEach(k=>{const[y,m]=k.split('-');evolLabels.push(new Date(+y,+m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));accCap+=evolMap[k].cap;accJuros+=evolMap[k].juros;evolCap.push(accCap);evolJuros.push(accJuros);});
 
   destroyChart('evolMensal');
-  charts.evolMensal=new Chart(document.getElementById('chartEvolMensal').getContext('2d'),{type:'line',data:{labels:evolLabels,datasets:[{label:'Capital',data:evolCap,borderColor:'rgba(201,146,42,0.9)',backgroundColor:'rgba(201,146,42,0.15)',borderWidth:1.5,pointRadius:0,fill:true,tension:0.4},{label:'Lucro',data:evolJuros,borderColor:'rgba(6,214,160,0.8)',backgroundColor:'rgba(6,214,160,0.08)',borderWidth:1.5,pointRadius:0,fill:true,tension:0.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false,beginAtZero:true}}}});
+  charts.evolMensal=new Chart(document.getElementById('chartEvolMensal').getContext('2d'),{type:'line',data:{labels:evolLabels,datasets:[{label:'Capital Acumulado',data:evolCap,borderColor:'rgba(201,146,42,0.9)',backgroundColor:'rgba(201,146,42,0.07)',borderWidth:2,pointRadius:4,fill:true,tension:0.3},{label:'Lucro Previsto',data:evolJuros,borderColor:'rgba(6,214,160,0.8)',backgroundColor:'rgba(6,214,160,0.04)',borderWidth:2,pointRadius:3,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
 
   // COMPOSIÇÃO
   destroyChart('comp');
@@ -2558,6 +2544,9 @@ function render(empRows,pagRows){
       </div>`).join('');
   }
   document.getElementById('briefing-dia').style.display = 'block';
+  // Mostra ações dentro do card de sugestões
+  const acoesInline = document.getElementById('briefing-acoes-inline');
+  if(acoesInline && acoesList.length > 0) acoesInline.style.display = 'block';
 
   // ── FEATURE 2: HISTÓRICO REAL DE RECEBIMENTOS (3 meses) ─
   const hoje12 = new Date(hoje);
