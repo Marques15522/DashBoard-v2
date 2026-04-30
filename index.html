@@ -3841,26 +3841,31 @@ function simClienteSelecionar(id) {
   document.getElementById('sim-score-bar').style.background = cor;
 
   // Recomendação de limite, taxa e prazo
+  const _renda = pasta.tipoRenda === 'empresario' ? (pasta.prolabore || 0) : (pasta.salario || 0);
+  const _fmtLimite = (pct) => {
+    if (_renda > 0) return 'R$ ' + Math.round(_renda * pct / 100).toLocaleString('pt-BR');
+    return pct + '% da renda cadastrada';
+  };
   let recHtml, borderCor;
   if (total >= 750) {
     borderCor = 'var(--green)';
     recHtml = `<strong style="color:var(--green)">✅ CRÉDITO RECOMENDADO</strong><br>
       Score excelente. Cliente de baixo risco.<br>
-      💰 <strong>Limite sugerido:</strong> até 50% da renda cadastrada<br>
+      💰 <strong>Limite sugerido:</strong> até ${_fmtLimite(50)}<br>
       📈 <strong>Taxa recomendada:</strong> 15% a 20% a.m.<br>
       📅 <strong>Prazo seguro:</strong> até 6 meses`;
   } else if (total >= 600) {
     borderCor = 'var(--green)';
     recHtml = `<strong style="color:var(--green)">✅ APROVADO COM ATENÇÃO</strong><br>
       Bom perfil, risco controlado.<br>
-      💰 <strong>Limite sugerido:</strong> até 35% da renda cadastrada<br>
+      💰 <strong>Limite sugerido:</strong> até ${_fmtLimite(35)}<br>
       📈 <strong>Taxa recomendada:</strong> 18% a 25% a.m.<br>
       📅 <strong>Prazo seguro:</strong> até 4 meses`;
   } else if (total >= 450) {
     borderCor = 'var(--gold2)';
     recHtml = `<strong style="color:var(--gold2)">⚠️ CRÉDITO COM RESTRIÇÕES</strong><br>
       Perfil de risco médio. Empreste com cautela.<br>
-      💰 <strong>Limite sugerido:</strong> até 20% da renda cadastrada<br>
+      💰 <strong>Limite sugerido:</strong> até ${_fmtLimite(20)}<br>
       📈 <strong>Taxa recomendada:</strong> 25% a 30% a.m.<br>
       📅 <strong>Prazo seguro:</strong> máximo 2 meses<br>
       🔐 Exija 2 referências e comprovante de renda`;
@@ -3868,7 +3873,7 @@ function simClienteSelecionar(id) {
     borderCor = 'var(--red)';
     recHtml = `<strong style="color:var(--red)">🔴 ALTO RISCO</strong><br>
       Perfil preocupante. Se decidir emprestar, proteja-se ao máximo.<br>
-      💰 <strong>Limite máximo:</strong> valor mínimo (10% da renda)<br>
+      💰 <strong>Limite máximo:</strong> até ${_fmtLimite(10)}<br>
       📈 <strong>Taxa mínima:</strong> 30%+ a.m.<br>
       📅 <strong>Prazo:</strong> máximo 1 mês<br>
       🔐 Exija avalista, garantia ou cheque caução`;
