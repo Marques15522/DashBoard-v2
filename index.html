@@ -946,6 +946,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
         <select id="cx-filtro-cat" onchange="cxRenderHistorico()" style="background:var(--s2);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.6rem;padding:5px 8px;outline:none">
           <option value="todos">Todas categorias</option>
           <option value="entrada_auto">💵 Entradas automáticas</option>
+          <option value="entrada_capital">💰 Capital recebido</option>
           <option value="entrada_manual">💵 Entradas manuais</option>
           <option value="capital">💸 Capital Emprestado</option>
           <option value="operacional">🏢 Operacional</option>
@@ -5274,6 +5275,7 @@ const CX_CAT_LABELS = {
   retirada:       { icon:'💰', label:'Retirada de Lucro',   cor:'rgba(90,98,130,0.8)'  },
   entrada_manual: { icon:'💵', label:'Entrada Manual',      cor:'rgba(6,214,160,0.8)'  },
   entrada_auto:   { icon:'🏦', label:'Juros Recebidos',     cor:'rgba(72,149,239,0.7)' },
+  entrada_capital:{ icon:'💰', label:'Capital Recebido',    cor:'rgba(155,93,229,0.7)' },
 };
 
 function cxLoad() {
@@ -5281,6 +5283,36 @@ function cxLoad() {
 }
 function cxSave(lancamentos) {
   try { localStorage.setItem(CX_KEY, JSON.stringify(lancamentos)); } catch(e) {}
+}
+
+function cxFmtData(d) {
+  return d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` : null;
+}
+
+function cxAutoEntradas(pags) {
+  const entradas = [];
+  pags.forEach(p => {
+    const data = cxFmtData(p.data);
+    if (!data) return;
+    if (p.juros > 0) {
+      entradas.push({
+        id: 'auto_juros_' + (p.id||'') + '_' + (p.data ? p.data.getTime() : 0),
+        tipo: 'entrada', categoria: 'entrada_auto',
+        descricao: 'Juros recebidos — ' + (p.id||''),
+        valor: p.juros, data, _auto: true,
+      });
+    }
+    const capital = p.valor - p.juros;
+    if (capital > 0) {
+      entradas.push({
+        id: 'auto_cap_' + (p.id||'') + '_' + (p.data ? p.data.getTime() : 0),
+        tipo: 'entrada', categoria: 'entrada_capital',
+        descricao: 'Capital recebido — ' + (p.id||''),
+        valor: capital, data, _auto: true,
+      });
+    }
+  });
+  return entradas;
 }
 
 function cxSetTipo(tipo) {
@@ -5340,15 +5372,7 @@ function cxRender(pagsExternas) {
   const hoje = new Date(); hoje.setHours(0,0,0,0);
 
   // Monta entradas automáticas dos últimos 6 meses a partir da planilha
-  const autoEntradas = pags.map(p => ({
-    id: 'auto_' + (p.id||'') + '_' + (p.data ? p.data.getTime() : Math.random()),
-    tipo: 'entrada',
-    categoria: 'entrada_auto',
-    descricao: 'Juros recebidos — ' + (p.id||''),
-    valor: p.juros,
-    data: p.data ? `${p.data.getFullYear()}-${String(p.data.getMonth()+1).padStart(2,'0')}-${String(p.data.getDate()).padStart(2,'0')}` : null,
-    _auto: true,
-  })).filter(e => e.data && e.valor > 0);
+  const autoEntradas = cxAutoEntradas(pags);
 
   const todos = [...autoEntradas, ...lancamentos].sort((a,b) => (b.data||'').localeCompare(a.data||''));
 
@@ -5455,14 +5479,7 @@ function cxRenderHistorico(todosParam) {
   const filtro = document.getElementById('cx-filtro-cat')?.value || 'todos';
   const lancamentos = cxLoad();
   const pags = window._cxPagsCache || [];
-  const autoEntradas = pags.map(p => ({
-    id:'auto_'+(p.id||'')+'_'+(p.data?p.data.getTime():0),
-    tipo:'entrada', categoria:'entrada_auto',
-    descricao:'Juros recebidos — '+(p.id||''),
-    valor:p.juros,
-    data:p.data?p.data.toISOString().slice(0,10):null,
-    _auto:true,
-  })).filter(e=>e.data&&e.valor>0);
+  const autoEntradas = cxAutoEntradas(pags);
 
   let todos = [...autoEntradas, ...lancamentos].sort((a,b)=>(b.data||'').localeCompare(a.data||''));
   if(filtro !== 'todos') todos = todos.filter(l=>l.categoria===filtro);
@@ -5504,12 +5521,7 @@ function cxDeletar(id) {
 function cxExportar() {
   const lancamentos = cxLoad();
   const pags = window._cxPagsCache || [];
-  const autoEntradas = pags.map(p => ({
-    tipo:'entrada', categoria:'entrada_auto',
-    descricao:'Juros recebidos — '+(p.id||''),
-    valor:p.juros,
-    data:p.data?p.data.toISOString().slice(0,10):'',
-  })).filter(e=>e.data&&e.valor>0);
+  const autoEntradas = cxAutoEntradas(pags);
 
   const todos = [...autoEntradas,...lancamentos].sort((a,b)=>(b.data||'').localeCompare(a.data||''));
   const header = 'Data,Tipo,Categoria,Descrição,Valor\n';
