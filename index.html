@@ -3777,23 +3777,25 @@ function simClienteInput() {
 
   // Monta dropdown de sugestões
   dropdown.style.display = 'block';
-  dropdown.innerHTML = matches.map(p => {
+  dropdown.innerHTML = '';
+  matches.forEach(p => {
     const { total } = calcScoreFinal(p);
     const cor = total >= 650 ? 'var(--green)' : total >= 450 ? 'var(--gold)' : 'var(--red)';
     const label = total >= 800 ? 'EXCELENTE' : total >= 650 ? 'BOM' : total >= 500 ? 'MÉDIO' : total >= 300 ? 'RISCO' : total > 0 ? 'CRÍTICO' : 'SEM DADOS';
-    const nomeEsc = p.nome.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    return `<div onmousedown="event.preventDefault();event.stopPropagation();document.getElementById('sim-cliente').value='${nomeEsc}';var _p=document.getElementById('sim-cliente-dropdown-portal');if(_p)_p.style.display='none';simClienteSelecionar(${JSON.stringify(p.id)})"
-      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;transition:background 0.15s"
-      onmouseover="this.style.background='rgba(255,255,255,0.04)'"
-      onmouseout="this.style.background=''"
-    >
-      <div>
-        <div style="font-size:0.7rem;color:var(--text)">${p.nome}</div>
-        <div style="font-size:0.52rem;color:var(--muted);margin-top:2px">${p.cpf || 'CPF não informado'}</div>
-      </div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:0.85rem;color:${cor};white-space:nowrap">${total > 0 ? total : '—'} <span style="font-family:'DM Mono',monospace;font-size:0.5rem">${label}</span></div>
-    </div>`;
-  }).join('');
+    const item = document.createElement('div');
+    item.style.cssText = 'padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;';
+    item.innerHTML = '<div style="pointer-events:none"><div style="font-size:0.7rem;color:var(--text)">' + p.nome + '</div><div style="font-size:0.52rem;color:var(--muted);margin-top:2px">' + (p.cpf || 'CPF não informado') + '</div></div><div style="font-family:Bebas Neue,sans-serif;font-size:0.85rem;color:' + cor + ';white-space:nowrap;pointer-events:none">' + (total > 0 ? total : '—') + ' <span style="font-family:DM Mono,monospace;font-size:0.5rem">' + label + '</span></div>';
+    item.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      document.getElementById('sim-cliente').value = p.nome;
+      dropdown.style.display = 'none';
+      simClienteSelecionar(p.id);
+    });
+    item.addEventListener('mouseover', function() { this.style.background = 'rgba(255,255,255,0.04)'; });
+    item.addEventListener('mouseout', function() { this.style.background = ''; });
+    dropdown.appendChild(item);
+  });
 
   // Se só tem 1 match exato, já exibe o score
   if (matches.length === 1 && matches[0].nome.toLowerCase() === query) {
@@ -3902,7 +3904,7 @@ document.getElementById('sim-cliente').addEventListener('blur', () => {
   setTimeout(() => {
     const dd = document.getElementById('sim-cliente-dropdown-portal');
     if (dd) dd.style.display = 'none';
-  }, 200);
+  }, 300);
 });
 
 function simPDF(){
