@@ -3744,9 +3744,17 @@ function simClienteInput() {
     return;
   }
 
-  // Busca clientes nas pastas cujo nome contém o texto digitado
+  // Busca clientes nas pastas cujo nome contém o texto digitado (sem duplicatas por nome)
   const pastas = Object.values(_pastas || {});
-  const matches = pastas.filter(p => p.nome && p.nome.toLowerCase().includes(query)).slice(0, 6);
+  const seen = new Set();
+  const matches = pastas.filter(p => {
+    if (!p.nome) return false;
+    const key = p.nome.toLowerCase().trim();
+    if (!key.includes(query)) return false;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, 6);
 
   if (matches.length === 0) {
     dropdown.style.display = 'none';
@@ -3760,7 +3768,7 @@ function simClienteInput() {
     const { total } = calcScoreFinal(p);
     const cor = total >= 650 ? 'var(--green)' : total >= 450 ? 'var(--gold)' : 'var(--red)';
     const label = total >= 800 ? 'EXCELENTE' : total >= 650 ? 'BOM' : total >= 500 ? 'MÉDIO' : total >= 300 ? 'RISCO' : total > 0 ? 'CRÍTICO' : 'SEM DADOS';
-    return `<div onclick="simClienteSelecionar(${JSON.stringify(p.id)})"
+    return `<div onmousedown="event.preventDefault();simClienteSelecionar(${JSON.stringify(p.id)})"
       style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;transition:background 0.15s"
       onmouseover="this.style.background='rgba(255,255,255,0.04)'"
       onmouseout="this.style.background=''"
