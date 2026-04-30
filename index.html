@@ -2191,45 +2191,47 @@ function render(empRows,pagRows){
 
   // KPIs
   const naRua = totalCap + totalJuros;
-  document.getElementById('kpi-na-rua').textContent=fmt(naRua);
-  document.getElementById('kpi-na-rua-sub').innerHTML='principal <b style="color:var(--gold)">'+fmt(totalCap)+'</b> + juros <b style="color:var(--green)">'+fmt(totalJuros)+'</b>';
-  document.getElementById('kpi-capital').textContent=fmt(totalCap);
-  document.getElementById('kpi-cap-sub').textContent=abertos.length+' contratos ativos';
-  document.getElementById('kpi-lucro').textContent=fmt(totalJuros);
-  document.getElementById('kpi-roi').textContent=pct(roi);
-  document.getElementById('kpi-inadim').textContent=pct(inadimPct);
-  document.getElementById('kpi-inadim-sub').textContent=atrasado.length+' contrato(s) em atraso';
-  document.getElementById('kpi-ticket').textContent=fmt(ticket);
-  document.getElementById('kpi-semana').textContent=fmt(proxSemana);
-  document.getElementById('kpi-cli-ativos').textContent=cliAtivos.length;
-  document.getElementById('kpi-cli-sub').textContent=cliInativos.length+' inativos';
-  document.getElementById('kpi-realizado').textContent=fmt(lucroReal);
-  document.getElementById('kpi-prazo').textContent=prazoMedio.toFixed(1);
-  document.getElementById('cli-ativos-n').textContent=cliAtivos.length;
+  const _s=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  const _h=(id,v)=>{const e=document.getElementById(id);if(e)e.innerHTML=v;};
+  _h('kpi-na-rua-sub','principal <b style="color:var(--gold)">'+fmt(totalCap)+'</b> + juros <b style="color:var(--green)">'+fmt(totalJuros)+'</b>');
+  _s('kpi-na-rua',fmt(naRua));
+  _s('kpi-capital',fmt(totalCap));
+  _s('kpi-cap-sub',abertos.length+' contratos ativos');
+  _s('kpi-lucro',fmt(totalJuros));
+  _s('kpi-roi',pct(roi));
+  _s('kpi-inadim',pct(inadimPct));
+  _s('kpi-inadim-sub',atrasado.length+' contrato(s) em atraso');
+  _s('kpi-ticket',fmt(ticket));
+  _s('kpi-semana',fmt(proxSemana));
+  _s('kpi-cli-ativos',cliAtivos.length);
+  _s('kpi-cli-sub',cliInativos.length+' inativos');
+  _s('kpi-realizado',fmt(lucroReal));
+  _s('kpi-prazo',prazoMedio.toFixed(1));
+  _s('cli-ativos-n',cliAtivos.length);
 
   // CARDS TOPO
   const venceHojeCount=abertos.filter(e=>e.proxVenc&&e.proxVenc.getTime()===hoje.getTime()).length;
   const entraHoje=abertos.filter(e=>e.proxVenc&&e.proxVenc.getTime()===hoje.getTime()).reduce((s,e)=>s+e.jProx,0);
-  document.getElementById('kpi-top-entra').textContent=fmt(entraHoje);
-  document.getElementById('kpi-top-entra-sub').textContent=venceHojeCount+' pagamento(s)';
-  document.getElementById('kpi-top-cobr').textContent=venceHojeCount;
-  document.getElementById('kpi-top-atraso').textContent=atrasado.length;
-  document.getElementById('kpi-top-atraso-sub').textContent=atrasado.length===0?'carteira limpa':fmt(capRisco)+' em risco';
-  document.getElementById('kpi-top-prox7').textContent=fmt(proxSemana);
+  _s('kpi-top-entra',fmt(entraHoje));
+  _s('kpi-top-entra-sub',venceHojeCount+' pagamento(s)');
+  _s('kpi-top-cobr',venceHojeCount);
+  _s('kpi-top-atraso',atrasado.length);
+  _s('kpi-top-atraso-sub',atrasado.length===0?'carteira limpa':fmt(capRisco)+' em risco');
+  _s('kpi-top-prox7',fmt(proxSemana));
 
   // CARDS RODAPÉ
   const melhorCli=[...clientes].sort((a,b)=>b.totalJuros-a.totalJuros)[0];
-  document.getElementById('kpi-melhor-cli').textContent=melhorCli?melhorCli.nome.split(' ')[0]:'—';
-  document.getElementById('kpi-melhor-cli-sub').textContent=melhorCli?fmt(melhorCli.totalJuros):'sem dados';
-  document.getElementById('kpi-quit').textContent=quitados.length;
-  document.getElementById('kpi-quit-sub').textContent=quitados.length>0?fmt(capQuit)+' quitados':'nenhum ainda';
-  document.getElementById('kpi-total-contr').textContent=emps.length;
+  _s('kpi-melhor-cli',melhorCli?melhorCli.nome.split(' ')[0]:'—');
+  _s('kpi-melhor-cli-sub',melhorCli?fmt(melhorCli.totalJuros):'sem dados');
+  _s('kpi-quit',quitados.length);
+  _s('kpi-quit-sub',quitados.length>0?fmt(capQuit)+' quitados':'nenhum ainda');
+  _s('kpi-total-contr',emps.length);
   const mesAtual2=hoje.getMonth(),anoAtual2=hoje.getFullYear();
   const rentMes=pags.filter(p=>p.data&&p.data.getMonth()===mesAtual2&&p.data.getFullYear()===anoAtual2).reduce((s,p)=>s+p.juros,0);
-  document.getElementById('kpi-rent-mes').textContent=fmt(rentMes);
-  document.getElementById('cli-inativos-n').textContent=cliInativos.length;
-  document.getElementById('cli-recorrencia').textContent=pct(recorrPct);
-  document.getElementById('cli-tempo-rel').textContent=tempoRelMed.toFixed(1);
+  _s('kpi-rent-mes',fmt(rentMes));
+  _s('cli-inativos-n',cliInativos.length);
+  _s('cli-recorrencia',pct(recorrPct));
+  _s('cli-tempo-rel',tempoRelMed.toFixed(1));
 
   // ALERTAS
   const alertas=[];
@@ -2261,9 +2263,9 @@ function render(empRows,pagRows){
       : `<div class="alert-bar ok"><span class="alert-icon">✅</span><span>Nenhum alerta no momento.</span></div>`;
   }
   // Banner da visão geral — vazio (alertas ficam só no sino)
-  document.getElementById('alertasBanner').innerHTML='';
+  _h('alertasBanner','');
   const aHtml=alertas.map(a=>`<div class="alert-bar ${a.t}"><span class="alert-icon">${a.i}</span><div style="flex:1"><strong style="display:block;margin-bottom:2px;font-size:0.78rem">${a.titulo||''}</strong><span style="opacity:0.9">${a.m}</span></div></div>`).join('');
-  document.getElementById('alertasDetalhados').innerHTML=alertas.length?aHtml:`<div class="alert-bar ok"><span class="alert-icon">✅</span><span>Nenhum alerta no momento.</span></div>`;
+  _h('alertasDetalhados',alertas.length?aHtml:`<div class="alert-bar ok"><span class="alert-icon">✅</span><span>Nenhum alerta no momento.</span></div>`);
 
   // EVOLUÇÃO MENSAL
   const evolMap={};
@@ -2339,10 +2341,10 @@ function render(empRows,pagRows){
   const inadOt=Math.max(0.02, inadimPct*0.5); // otimista = metade do atual, mín 2%
   const inadRe=inadimPct; // realista = situação atual
   const cOt=lucCen(inadOt),cRe=lucCen(inadRe),cPe=lucCen(inadPe);
-  document.getElementById('scenarioGrid').innerHTML=`
+  _h('scenarioGrid',`
     <div class="sc-card ot"><div class="sc-title" style="color:var(--green)">🟢 Otimista</div><div class="sc-val" style="color:var(--green)">${fmt(cOt.lucro)}</div><div class="sc-sub">Inadimplência: ${(inadOt*100).toFixed(1)}% · Saldo: ${fmt(cOt.saldo)}</div></div>
     <div class="sc-card re"><div class="sc-title" style="color:var(--gold2)">🟡 Realista</div><div class="sc-val" style="color:var(--gold2)">${fmt(cRe.lucro)}</div><div class="sc-sub">Inadimplência: ${pct(inadRe)} · Saldo: ${fmt(cRe.saldo)}</div></div>
-    <div class="sc-card pe"><div class="sc-title" style="color:var(--red)">🔴 Pessimista</div><div class="sc-val" style="color:var(--red)">${fmt(cPe.lucro)}</div><div class="sc-sub">Inadimplência: ${(inadPe*100).toFixed(1)}% · Saldo: ${fmt(cPe.saldo)}</div></div>`;
+    <div class="sc-card pe"><div class="sc-title" style="color:var(--red)">🔴 Pessimista</div><div class="sc-val" style="color:var(--red)">${fmt(cPe.lucro)}</div><div class="sc-sub">Inadimplência: ${(inadPe*100).toFixed(1)}% · Saldo: ${fmt(cPe.saldo)}</div></div>`);
   const mL=Array.from({length:12},(_,i)=>{const d=new Date(hoje);d.setMonth(d.getMonth()+i+1);return d.toLocaleDateString('pt-BR',{month:'short'});});
   destroyChart('cenarios');
   charts.cenarios=new Chart(document.getElementById('chartCenarios').getContext('2d'),{type:'line',data:{labels:mL,datasets:[{label:'Otimista',data:serCen(inadOt),borderColor:'rgba(6,214,160,0.8)',borderWidth:2,pointRadius:2,tension:0.3,fill:false},{label:'Realista',data:serCen(inadRe),borderColor:'rgba(240,180,41,0.8)',borderWidth:2,pointRadius:2,tension:0.3,fill:false},{label:'Pessimista',data:serCen(inadPe),borderColor:'rgba(239,71,111,0.7)',borderWidth:2,pointRadius:2,tension:0.3,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}}}}});
@@ -2361,7 +2363,7 @@ function render(empRows,pagRows){
     const totalDevido=(e.saldo||e.capital)+multa;
     return{...e,dias,multa,totalDevido};
   }).sort((a,b)=>b.dias-a.dias);
-  document.getElementById('atrasoList').innerHTML=emAt.length===0?`<div style="color:var(--green);font-size:0.68rem;padding:12px 0">✅ Nenhum contrato em atraso!</div>`:emAt.map(e=>{
+  document.getElementById('atrasoList') && (document.getElementById('atrasoList').innerHTML=emAt.length===0?`<div style="color:var(--green);font-size:0.68rem;padding:12px 0">✅ Nenhum contrato em atraso!</div>`:emAt.map(e=>{
     const cls=e.dias>30?'':e.dias>10?'medio':'baixo';
     const cor=e.dias>30?'var(--red)':e.dias>10?'var(--gold2)':'var(--muted)';
     const multaHtml=e.dias>0?`<div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px;padding:5px 8px;background:rgba(239,71,111,0.07);border:1px solid rgba(239,71,111,0.2);border-radius:6px;font-size:0.6rem">
@@ -2382,7 +2384,7 @@ function render(empRows,pagRows){
       </div>
       ${multaHtml}
     </div>`;
-  }).join('');
+  }).join(''));
 
   // CONCENTRAÇÃO — usa apenas capital ativo (abertos)
   const totalCapAtivo=abertos.reduce((s,e)=>s+e.capital,0);
@@ -2392,7 +2394,7 @@ function render(empRows,pagRows){
     if(!cliMapAtivo[k])cliMapAtivo[k]={nome:k,cap:0};
     cliMapAtivo[k].cap+=e.capital;
   });
-  document.getElementById('concList').innerHTML=Object.values(cliMapAtivo).sort((a,b)=>b.cap-a.cap).map(c=>{const p=totalCapAtivo?c.cap/totalCapAtivo:0;const cor=p>0.4?'var(--red)':p>0.25?'var(--gold2)':'var(--green)';return`<div class="conc-row"><div class="conc-top"><span class="conc-nome">${c.nome}${p>0.4?' ⚠️':''}</span><div style="text-align:right"><span class="conc-pct" style="color:${cor}">${(p*100).toFixed(1)}%</span><span style="font-size:0.55rem;color:var(--muted);margin-left:6px">${fmt(c.cap)}</span></div></div><div class="bar-bg"><div class="bar-fill" style="width:${(p*100).toFixed(1)}%;background:${cor}"></div></div></div>`;}).join('');
+  _h('concList',Object.values(cliMapAtivo).sort((a,b)=>b.cap-a.cap).map(c=>{const p=totalCapAtivo?c.cap/totalCapAtivo:0;const cor=p>0.4?'var(--red)':p>0.25?'var(--gold2)':'var(--green)';return`<div class="conc-row"><div class="conc-top"><span class="conc-nome">${c.nome}${p>0.4?' ⚠️':''}</span><div style="text-align:right"><span class="conc-pct" style="color:${cor}">${(p*100).toFixed(1)}%</span><span style="font-size:0.55rem;color:var(--muted);margin-left:6px">${fmt(c.cap)}</span></div></div><div class="bar-bg"><div class="bar-fill" style="width:${(p*100).toFixed(1)}%;background:${cor}"></div></div></div>`;}).join(''));
 
   // SCORE RISCO — apenas clientes com contratos ativos
   function calcScore(c){
@@ -2408,7 +2410,7 @@ function render(empRows,pagRows){
     const sD=qtdAtrasoAtivo>1?10:0;
     return Math.min(Math.round(sA+sT+sV+sD),100);
   }
-  document.getElementById('riskList').innerHTML=cliAtivos.sort((a,b)=>calcScore(b)-calcScore(a)).map(c=>{const sc=calcScore(c);const capAt=c.contratos.filter(e=>e.status!=='quitado').reduce((s,e)=>s+e.capital,0);const qtdAt=c.contratos.filter(e=>e.status!=='quitado').length;const cor=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';const lbl=sc<30?'BAIXO':sc<60?'MÉDIO':'ALTO';return`<div class="risk-row"><div class="risk-top"><div><span class="risk-name">${c.nome}</span><span style="font-size:0.52rem;color:var(--muted);margin-left:8px">${qtdAt} contrato(s) ativo(s) · ${fmt(capAt)}</span></div><span class="risk-score-val" style="color:${cor}">${sc} <span style="font-size:0.52rem;color:var(--muted)">${lbl}</span></span></div><div class="risk-bar-bg"><div class="risk-bar-fill" style="width:${sc}%;background:${cor}"></div></div></div>`;}).join('');
+  _h('riskList',cliAtivos.sort((a,b)=>calcScore(b)-calcScore(a)).map(c=>{const sc=calcScore(c);const capAt=c.contratos.filter(e=>e.status!=='quitado').reduce((s,e)=>s+e.capital,0);const qtdAt=c.contratos.filter(e=>e.status!=='quitado').length;const cor=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';const lbl=sc<30?'BAIXO':sc<60?'MÉDIO':'ALTO';return`<div class="risk-row"><div class="risk-top"><div><span class="risk-name">${c.nome}</span><span style="font-size:0.52rem;color:var(--muted);margin-left:8px">${qtdAt} contrato(s) ativo(s) · ${fmt(capAt)}</span></div><span class="risk-score-val" style="color:${cor}">${sc} <span style="font-size:0.52rem;color:var(--muted)">${lbl}</span></span></div><div class="risk-bar-bg"><div class="risk-bar-fill" style="width:${sc}%;background:${cor}"></div></div></div>`;}).join(''));
 
   // Fix old calcScore reference - move calcScore above cliAtivos usage
   // PREVISÃO INADIMPLÊNCIA
@@ -2416,7 +2418,7 @@ function render(empRows,pagRows){
   const scoreMed=scoresMed.length?scoresMed.reduce((s,v)=>s+v,0)/scoresMed.length:0;
   const prevInadim=Math.min(scoreMed/100*0.35,0.5);
   const risco=scoreMed<30?{lbl:'BAIXO',cor:'var(--green)'}:scoreMed<60?{lbl:'MODERADO',cor:'var(--gold2)'}:{lbl:'ALTO',cor:'var(--red)'};
-  document.getElementById('previsaoInadim').innerHTML=`<div style="text-align:center;padding:16px 0"><div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px">SCORE MÉDIO DA CARTEIRA</div><div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:${risco.cor};line-height:1">${scoreMed.toFixed(0)}</div><div class="badge ${scoreMed<30?'ok':scoreMed<60?'warn':'bad'}" style="margin:8px auto;display:inline-block">RISCO ${risco.lbl}</div></div><div style="border-top:1px solid var(--border);padding-top:12px"><div class="info-row"><span class="info-label">Inadimplência atual</span><span class="info-val" style="color:var(--red)">${pct(inadimPct)}</span></div><div class="info-row"><span class="info-label">Previsão (12 meses)</span><span class="info-val" style="color:${risco.cor}">${pct(prevInadim)}</span></div><div class="info-row"><span class="info-label">Capital em risco</span><span class="info-val" style="color:var(--red)">${fmt(capRisco)}</span></div><div class="info-row"><span class="info-label">Multa acumulada (R$30/dia)</span><span class="info-val" style="color:var(--red)">${fmt(emAt.reduce((s,e)=>s+e.multa,0))}</span></div><div class="info-row"><span class="info-label">Total a receber (c/ multa)</span><span class="info-val" style="color:var(--red);font-weight:700">${fmt(capRisco+emAt.reduce((s,e)=>s+e.multa,0))}</span></div><div class="info-row"><span class="info-label">Clientes inadimplentes</span><span class="info-val">${atrasado.length} de ${abertos.length}</span></div></div>`;
+  _h('previsaoInadim',`<div style="text-align:center;padding:16px 0"><div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px">SCORE MÉDIO DA CARTEIRA</div><div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:${risco.cor};line-height:1">${scoreMed.toFixed(0)}</div><div class="badge ${scoreMed<30?'ok':scoreMed<60?'warn':'bad'}" style="margin:8px auto;display:inline-block">RISCO ${risco.lbl}</div></div><div style="border-top:1px solid var(--border);padding-top:12px"><div class="info-row"><span class="info-label">Inadimplência atual</span><span class="info-val" style="color:var(--red)">${pct(inadimPct)}</span></div><div class="info-row"><span class="info-label">Previsão (12 meses)</span><span class="info-val" style="color:${risco.cor}">${pct(prevInadim)}</span></div><div class="info-row"><span class="info-label">Capital em risco</span><span class="info-val" style="color:var(--red)">${fmt(capRisco)}</span></div><div class="info-row"><span class="info-label">Multa acumulada (R$30/dia)</span><span class="info-val" style="color:var(--red)">${fmt(emAt.reduce((s,e)=>s+e.multa,0))}</span></div><div class="info-row"><span class="info-label">Total a receber (c/ multa)</span><span class="info-val" style="color:var(--red);font-weight:700">${fmt(capRisco+emAt.reduce((s,e)=>s+e.multa,0))}</span></div><div class="info-row"><span class="info-label">Clientes inadimplentes</span><span class="info-val">${atrasado.length} de ${abertos.length}</span></div></div>`);
 
   // EVOLUÇÃO INADIMPLÊNCIA
   // Evolução inadimplência: por mês de vencimento do contrato
@@ -2467,10 +2469,10 @@ function render(empRows,pagRows){
 
   // CLUSTERIZAÇÃO
   function cluster(c){const sc=calcScore(c);if(!c.ativo)return{lbl:'Inativo',cls:'cl-inativo'};if(sc<20&&c.ticketMedio>ticket*1.2)return{lbl:'Premium',cls:'cl-premium'};if(sc>=50)return{lbl:'Alto Risco',cls:'cl-risco'};if(c.recorrente)return{lbl:'Regular Fiel',cls:'cl-regular'};return{lbl:'Regular',cls:'cl-regular'};}
-  document.getElementById('profileGrid').innerHTML=clientes.map(c=>{const cl=cluster(c);const ini=c.nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();const sc=calcScore(c);const corSc=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';return`<div class="profile-card"><div class="profile-top"><div class="p-avatar">${ini}</div><div class="p-name">${c.nome}</div><div class="p-cluster ${cl.cls}">${cl.lbl}</div></div><div class="p-stats"><div class="pstat"><div class="pstat-lbl">Capital Total</div><div class="pstat-val" style="color:var(--gold)">${fmt(c.totalCap)}</div></div><div class="pstat"><div class="pstat-lbl">Lucro Previsto</div><div class="pstat-val" style="color:var(--green)">${fmt(c.totalJuros)}</div></div><div class="pstat"><div class="pstat-lbl">Contratos</div><div class="pstat-val">${c.qtdContratos}</div></div><div class="pstat"><div class="pstat-lbl">Score Risco</div><div class="pstat-val" style="color:${corSc}">${sc}</div></div><div class="pstat"><div class="pstat-lbl">Relacionamento</div><div class="pstat-val" style="color:var(--blue)">${c.mesesRelac}m</div></div><div class="pstat"><div class="pstat-lbl">Status</div><div class="pstat-val" style="color:${c.ativo?'var(--green)':'var(--muted)'}">${c.ativo?'ATIVO':'INATIVO'}</div></div></div></div>`;}).join('');
+  _h('profileGrid',clientes.map(c=>{const cl=cluster(c);const ini=c.nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();const sc=calcScore(c);const corSc=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';return`<div class="profile-card"><div class="profile-top"><div class="p-avatar">${ini}</div><div class="p-name">${c.nome}</div><div class="p-cluster ${cl.cls}">${cl.lbl}</div></div><div class="p-stats"><div class="pstat"><div class="pstat-lbl">Capital Total</div><div class="pstat-val" style="color:var(--gold)">${fmt(c.totalCap)}</div></div><div class="pstat"><div class="pstat-lbl">Lucro Previsto</div><div class="pstat-val" style="color:var(--green)">${fmt(c.totalJuros)}</div></div><div class="pstat"><div class="pstat-lbl">Contratos</div><div class="pstat-val">${c.qtdContratos}</div></div><div class="pstat"><div class="pstat-lbl">Score Risco</div><div class="pstat-val" style="color:${corSc}">${sc}</div></div><div class="pstat"><div class="pstat-lbl">Relacionamento</div><div class="pstat-val" style="color:var(--blue)">${c.mesesRelac}m</div></div><div class="pstat"><div class="pstat-lbl">Status</div><div class="pstat-val" style="color:${c.ativo?'var(--green)':'var(--muted)'}">${c.ativo?'ATIVO':'INATIVO'}</div></div></div></div>`;}).join(''));
 
   // HISTÓRICO PAGAMENTOS
-  document.getElementById('histList').innerHTML=[...clientes].sort((a,b)=>b.totalPago-a.totalPago).map(c=>{const isAt=c.temAtraso,isQ=c.soQuitados;const st=isQ?`<span class="badge ok">✅ QUITADO</span>`:isAt?`<span class="badge bad">⚠️ ATRASO</span>`:`<span class="badge ok">✓ EM DIA</span>`;const rec=c.recorrente?`<span class="badge blue">↩ RECORRENTE</span>`:'';return`<div class="hist-row"><span class="hist-nome">${c.nome}</span><div class="hist-badges"><span class="badge muted">${c.qtdContratos} contrato(s)</span><span class="badge muted">${fmt(c.totalPago)}</span>${rec}${st}</div></div>`;}).join('');
+  _h('histList',[...clientes].sort((a,b)=>b.totalPago-a.totalPago).map(c=>{const isAt=c.temAtraso,isQ=c.soQuitados;const st=isQ?`<span class="badge ok">✅ QUITADO</span>`:isAt?`<span class="badge bad">⚠️ ATRASO</span>`:`<span class="badge ok">✓ EM DIA</span>`;const rec=c.recorrente?`<span class="badge blue">↩ RECORRENTE</span>`:'';return`<div class="hist-row"><span class="hist-nome">${c.nome}</span><div class="hist-badges"><span class="badge muted">${c.qtdContratos} contrato(s)</span><span class="badge muted">${fmt(c.totalPago)}</span>${rec}${st}</div></div>`;}).join(''));
 
   // COMPARATIVO MENSAL
   const mesAt=hoje.getMonth(),anoAt=hoje.getFullYear();
@@ -2482,9 +2484,9 @@ function render(empRows,pagRows){
   function dH(curr,prev){if(!prev)return'<span class="comp-delta flat">—</span>';const d=(curr-prev)/prev;return`<span class="comp-delta ${d>0?'up':'down'}">${d>0?'▲':'▼'} ${Math.abs(d*100).toFixed(1)}%</span>`;}
   const nMA=new Date(anoAt,mesAt,1).toLocaleDateString('pt-BR',{month:'long'});
   const nMAn=new Date(anoAn,mesAn,1).toLocaleDateString('pt-BR',{month:'long'});
-  document.getElementById('comparativoMensal').innerHTML=`
+  _h('comparativoMensal',`
     <div style="display:flex;gap:12px;margin-bottom:10px;font-size:0.57rem;color:var(--muted)"><div style="flex:1"></div><div style="width:80px;text-align:right;color:var(--muted2)">${nMAn}</div><div style="width:80px;text-align:right;color:var(--text)">${nMA}</div><div style="width:60px;text-align:right">variação</div></div>
-    ${[['Contratos',eMAn.length,eMAt.length,v=>v+' contratos'],['Capital',cAN,cAM,fmt],['Lucro Previsto',jAN,jAM,fmt]].map(([l,p,c,f])=>`<div class="comp-row"><span class="comp-label">${l}</span><div class="comp-vals"><span class="comp-prev">${f(p)}</span><span class="comp-curr">${f(c)}</span>${dH(c,p)}</div></div>`).join('')}`;
+    ${[['Contratos',eMAn.length,eMAt.length,v=>v+' contratos'],['Capital',cAN,cAM,fmt],['Lucro Previsto',jAN,jAM,fmt]].map(([l,p,c,f])=>`<div class="comp-row"><span class="comp-label">${l}</span><div class="comp-vals"><span class="comp-prev">${f(p)}</span><span class="comp-curr">${f(c)}</span>${dH(c,p)}</div></div>`).join('')}`);
 
   // CRESCIMENTO & LUCRO CHARTS
   destroyChart('crescCart');
@@ -2500,7 +2502,7 @@ function render(empRows,pagRows){
   const proj3  = totalCap * Math.pow(1 + taxaMediaGlobal, 3);
   const proj6  = totalCap * Math.pow(1 + taxaMediaGlobal, 6);
   const proj12 = totalCap * Math.pow(1 + taxaMediaGlobal, 12);
-  document.getElementById('dobraContent').innerHTML = mesesDobra ? `
+  _h('dobraContent', mesesDobra ? `
     <div style="text-align:center;padding:14px 0 10px">
       <div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px">SEU CAPITAL DOBRA EM</div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--gold);line-height:1">${mesesDobra}</div>
@@ -2517,17 +2519,17 @@ function render(empRows,pagRows){
       <div class="info-row"><span class="info-label">Taxa média/ano</span><span class="info-val" style="color:var(--gold)">${pct(taxaAA)}</span></div>
     </div>
     <div style="font-size:0.52rem;color:var(--muted2);margin-top:8px">* Projeção assume reinvestimento total dos juros mensalmente (juros compostos)</div>
-  ` : `<div style="color:var(--muted);font-size:0.68rem;padding:20px 0;text-align:center">Dados insuficientes para projeção.</div>`;
+  ` : `<div style="color:var(--muted);font-size:0.68rem;padding:20px 0;text-align:center">Dados insuficientes para projeção.</div>`);
 
   // ── FEATURE 1: RESUMO DO DIA ─────────────────────────────
   const em3dias = new Date(hoje); em3dias.setDate(hoje.getDate()+3); em3dias.setHours(23,59,59,999);
   const hora = hoje.getHours();
   const saudacao = hora < 12 ? 'BOM DIA' : hora < 18 ? 'BOA TARDE' : 'BOA NOITE';
   const emoji = hora < 12 ? '☀️' : hora < 18 ? '🌤️' : '🌙';
-  document.getElementById('briefing-saudacao').textContent = saudacao;
+  _s('briefing-saudacao', saudacao);
   const emojiEl = document.getElementById('briefing-emoji');
   if(emojiEl) emojiEl.textContent = emoji;
-  document.getElementById('briefing-data-longa').textContent = hoje.toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+  _s('briefing-data-longa', hoje.toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long', year:'numeric'}));
 
   const venceHoje = abertos.filter(e => { if(!e.proxVenc) return false; const d=new Date(e.proxVenc); d.setHours(0,0,0,0); return d.getTime()===hoje.getTime(); });
   const totalHoje = venceHoje.reduce((s,e)=>s+e.jProx,0);
@@ -2542,13 +2544,13 @@ function render(empRows,pagRows){
     { icon:'⚠️', label:'Em Atraso', val: atrasado.length, cor: atrasado.length>0?'var(--red)':'var(--green)', sub: atrasado.length>0?fmt(capRisco)+' em risco':'carteira limpa' },
     { icon:'📅', label:'Próx. 7 Dias', val: fmt(proxSemana), cor:'var(--blue)', sub:'a receber esta semana' },
   ];
-  document.getElementById('briefing-cards').innerHTML = briefCards.map(c=>`
+  _h('briefing-cards', briefCards.map(c=>`
     <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
       <div style="font-size:1rem;margin-bottom:4px">${c.icon}</div>
       <div style="font-size:0.58rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:3px">${c.label}</div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:${c.cor};line-height:1">${c.val}</div>
       <div style="font-size:0.52rem;color:var(--muted2);margin-top:3px">${c.sub}</div>
-    </div>`).join('');
+    </div>`).join(''));
 
   const acoesList = [];
   venceHoje.forEach(e => acoesList.push({ urgencia:'green', icon:'✅', texto:`<strong>${e.nome||e.id}</strong> — vence hoje · ${fmt(e.jProx)} · enviar aviso de cobrança` }));
@@ -2563,14 +2565,16 @@ function render(empRows,pagRows){
   });
 
   if(acoesList.length > 0) {
-    document.getElementById('briefing-acoes').style.display = 'block';
-    document.getElementById('briefing-acoes-list').innerHTML = acoesList.map(a=>`
+    const baEl = document.getElementById('briefing-acoes');
+    if(baEl) baEl.style.display = 'block';
+    _h('briefing-acoes-list', acoesList.map(a=>`
       <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;background:var(--s2);border-radius:8px;border-left:3px solid var(--${a.urgencia==='red'?'red':'green'})">
         <span style="font-size:0.9rem;flex-shrink:0">${a.icon}</span>
         <span style="font-size:0.68rem;color:var(--text);line-height:1.5">${a.texto}</span>
-      </div>`).join('');
+      </div>`).join(''));
   }
-  document.getElementById('briefing-dia').style.display = 'block';
+  const bdEl = document.getElementById('briefing-dia');
+  if(bdEl) bdEl.style.display = 'block';
   // Mostra ações dentro do card de sugestões
   const acoesInline = document.getElementById('briefing-acoes-inline');
   if(acoesInline && acoesList.length > 0) acoesInline.style.display = 'block';
@@ -2621,7 +2625,7 @@ function render(empRows,pagRows){
   const recebMesAtual = hist12Map[mesAtualK]||0;
   const recebMesAnt = hist12Map[mesAnteriorK]||0;
   const varMes = recebMesAnt>0 ? ((recebMesAtual-recebMesAnt)/recebMesAnt*100).toFixed(1) : null;
-  document.getElementById('histRecebSummary').innerHTML = [
+  _h('histRecebSummary', [
     {lbl:'Total 3 Meses', val:fmt(hist12Total), cor:'var(--green)'},
     {lbl:'Melhor Mês', val:fmt(hist12Max), cor:'var(--gold)'},
     {lbl:'Média Mensal', val:fmt(hist12Med), cor:'var(--blue)'},
@@ -2630,7 +2634,7 @@ function render(empRows,pagRows){
     <div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:3px">${s.lbl}</div>
     <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:${s.cor}">${s.val}</div>
     ${s.sub?`<div style="font-size:0.5rem;color:var(--muted2);margin-top:2px">${s.sub}</div>`:''}
-  </div>`).join('');
+  </div>`).join(''));
 
   // ── FEATURE 3: RÉGUA DE COBRANÇA ─────────────────────────
   const vence3d = abertos.filter(e => {
