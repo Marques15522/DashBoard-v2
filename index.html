@@ -790,18 +790,27 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
           #sugestoes-lista::-webkit-scrollbar-track{background:rgba(155,93,229,0.05);border-radius:4px;}
           #sugestoes-lista::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(155,93,229,0.5),rgba(201,146,42,0.4));border-radius:4px;}
           #sugestoes-lista::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,var(--purple),var(--gold));}
-          .sug-item{display:flex;flex-direction:column;gap:0;background:var(--s2);border-radius:10px;border:1px solid rgba(255,255,255,0.04);position:relative;overflow:hidden;transition:border-color 0.2s,box-shadow 0.2s;cursor:pointer;}
-          .sug-item:hover{box-shadow:0 4px 16px rgba(0,0,0,0.3);}
-          .sug-item.open{border-color:rgba(255,255,255,0.1);}
-          .sug-item-header{display:flex;align-items:center;gap:8px;padding:10px 12px;}
-          .sug-item-icon{font-size:0.95rem;flex-shrink:0;}
+          .sug-item{display:flex;align-items:center;gap:9px;padding:10px 12px;background:var(--s2);border-radius:10px;border:1px solid rgba(255,255,255,0.04);position:relative;overflow:hidden;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s,border-color 0.15s;}
+          .sug-item:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(0,0,0,0.35);border-color:rgba(255,255,255,0.09);}
+          .sug-item:active{transform:scale(0.98);}
+          .sug-item-icon{font-size:1rem;flex-shrink:0;}
           .sug-item-titulo{font-size:0.62rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;flex:1;}
-          .sug-item-chevron{font-size:0.55rem;color:var(--muted);transition:transform 0.25s;flex-shrink:0;}
-          .sug-item.open .sug-item-chevron{transform:rotate(180deg);}
-          .sug-item-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease,padding 0.25s;}
-          .sug-item.open .sug-item-body{max-height:200px;padding:0 12px 10px;}
-          .sug-item-texto{font-size:0.6rem;color:var(--text);line-height:1.65;opacity:0.88;border-top:1px solid rgba(255,255,255,0.05);padding-top:8px;}
+          .sug-item-arrow{font-size:0.6rem;color:var(--muted);flex-shrink:0;transition:transform 0.2s;}
+          .sug-item:hover .sug-item-arrow{transform:translateX(2px);color:var(--text);}
           .sug-item-bar{position:absolute;top:0;left:0;width:100%;height:2px;}
+          /* MODAL SUGESTÃO */
+          #sug-modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,8,18,0.82);z-index:1200;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+          #sug-modal-overlay.open{display:flex;}
+          #sug-modal{background:var(--s1);border:1px solid var(--border2);border-radius:18px;width:min(420px,92vw);padding:0;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.6);animation:sugModalIn 0.22s ease;}
+          @keyframes sugModalIn{from{opacity:0;transform:scale(0.93) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
+          #sug-modal-top{height:4px;width:100%;}
+          #sug-modal-body{padding:24px 24px 20px;}
+          #sug-modal-icon{font-size:2rem;margin-bottom:10px;display:block;}
+          #sug-modal-titulo{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:0.08em;margin-bottom:12px;line-height:1.1;}
+          #sug-modal-texto{font-size:0.72rem;color:var(--text);line-height:1.75;opacity:0.9;}
+          #sug-modal-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;}
+          #sug-modal-close{background:linear-gradient(135deg,rgba(155,93,229,0.2),rgba(201,146,42,0.1));border:1px solid rgba(155,93,229,0.35);color:var(--text);border-radius:8px;padding:8px 22px;font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s;}
+          #sug-modal-close:hover{background:rgba(155,93,229,0.3);border-color:var(--purple);}
         </style>
         <div id="sugestoes-lista" style="padding:10px 12px;display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto">
           <div class="noticia-loading">⏳ Analisando...</div>
@@ -5670,24 +5679,31 @@ function sugestoesAtualizar() {
   const sugestoes = sugestoesGerarLocal(dados, _ultimasNoticias);
 
   lista.innerHTML = sugestoes.map((s, i) => `
-    <div class="sug-item" onclick="sugToggle(this)">
+    <div class="sug-item" onclick="sugAbrirModal('${s.icon}','${s.titulo.replace(/'/g,"\\'")}','${s.texto.replace(/'/g,"\\'")}','${s.cor}')">
       <div class="sug-item-bar" style="background:linear-gradient(90deg,${s.cor},transparent)"></div>
-      <div class="sug-item-header">
-        <div class="sug-item-icon">${s.icon}</div>
-        <div class="sug-item-titulo" style="color:${s.cor}">${s.titulo}</div>
-        <div class="sug-item-chevron">▼</div>
-      </div>
-      <div class="sug-item-body">
-        <div class="sug-item-texto">${s.texto}</div>
-      </div>
+      <div class="sug-item-icon">${s.icon}</div>
+      <div class="sug-item-titulo" style="color:${s.cor}">${s.titulo}</div>
+      <div class="sug-item-arrow">→</div>
     </div>`).join('');
 }
 
-function sugToggle(el) {
-  const isOpen = el.classList.contains('open');
-  document.querySelectorAll('.sug-item.open').forEach(x => x.classList.remove('open'));
-  if (!isOpen) el.classList.add('open');
+function sugAbrirModal(icon, titulo, texto, cor) {
+  document.getElementById('sug-modal-top').style.background = `linear-gradient(90deg,${cor},transparent)`;
+  document.getElementById('sug-modal-icon').textContent = icon;
+  document.getElementById('sug-modal-titulo').textContent = titulo;
+  document.getElementById('sug-modal-titulo').style.color = cor;
+  document.getElementById('sug-modal-texto').textContent = texto;
+  document.getElementById('sug-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
+
+function sugModalFechar() {
+  document.getElementById('sug-modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Fecha modal de sugestão com ESC
+document.addEventListener('keydown', e => { if(e.key === 'Escape') sugModalFechar(); });
 
 // Inicializa ao carregar
 window.addEventListener('DOMContentLoaded', () => {
@@ -5705,6 +5721,21 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
+
+<!-- MODAL SUGESTÃO -->
+<div id="sug-modal-overlay" onclick="if(event.target===this)sugModalFechar()">
+  <div id="sug-modal">
+    <div id="sug-modal-top"></div>
+    <div id="sug-modal-body">
+      <span id="sug-modal-icon">💡</span>
+      <div id="sug-modal-titulo"></div>
+      <div id="sug-modal-texto"></div>
+    </div>
+    <div id="sug-modal-footer">
+      <button id="sug-modal-close" onclick="sugModalFechar()">FECHAR</button>
+    </div>
+  </div>
+</div>
 
 <!-- SINO DE ALERTAS FLUTUANTE -->
 <style>
