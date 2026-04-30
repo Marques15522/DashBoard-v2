@@ -512,7 +512,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     <div><div class="load-brand">Capital Investimentos</div><div class="load-sub">Soluções Financeiras Estratégicas</div></div>
   </div>
   <div class="load-bar-wrap"><div class="load-bar"></div></div>
-  <div class="load-text">CARREGANDO DADOS DA CARTEIRA...</div>
+  <div class="load-text" id="load-saudacao-text">CARREGANDO DADOS DA CARTEIRA...</div>
 </div>
 
 <div id="error-screen">
@@ -2521,9 +2521,11 @@ function render(empRows,pagRows){
   const hora = hoje.getHours();
   const saudacao = hora < 12 ? 'BOM DIA' : hora < 18 ? 'BOA TARDE' : 'BOA NOITE';
   const emoji = hora < 12 ? '☀️' : hora < 18 ? '🌤️' : '🌙';
-  _s('briefing-saudacao', saudacao);
+  _s('briefing-saudacao', saudacao + ' ' + emoji + ' SR. MARQUES');
+  const _loadTxt = document.getElementById('load-saudacao-text');
+  if (_loadTxt) _loadTxt.textContent = saudacao + ', SR. MARQUES';
   const emojiEl = document.getElementById('briefing-emoji');
-  if(emojiEl) emojiEl.textContent = emoji;
+  if(emojiEl) emojiEl.textContent = '';
   _s('briefing-data-longa', hoje.toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long', year:'numeric'}));
 
   const venceHoje = abertos.filter(e => { if(!e.proxVenc) return false; const d=new Date(e.proxVenc); d.setHours(0,0,0,0); return d.getTime()===hoje.getTime(); });
