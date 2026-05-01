@@ -2089,12 +2089,14 @@ function parseDate(v){
   if(!v)return null; if(v instanceof Date)return v;
   const s=String(v).trim();
   const m=s.match(/Date\((\d+),(\d+),(\d+)\)/); if(m)return new Date(+m[1],+m[2],+m[3]);
+  // Formato DD/MM/YYYY (brasileiro) — único formato usado na planilha
   const br=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
   if(br){
     let y=+br[3];if(y<100)y+=y<50?2000:1900;
-    const d1=+br[1],d2=+br[2];
-    if(d2>12)return new Date(y,d1-1,d2); // MM/DD/YYYY americano (Google Sheets CSV)
-    return new Date(y,d2-1,d1); // DD/MM/YYYY brasileiro
+    const dia=+br[1],mes=+br[2];
+    // Proteção: se "dia" > 12 é definitivamente DD/MM; se "mes" > 12 é MM/DD (americano)
+    if(mes>12)return new Date(y,dia-1,mes); // invertido: era MM/DD
+    return new Date(y,mes-1,dia); // padrão BR: DD/MM/YYYY
   }
   const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(iso)return new Date(+iso[1],+iso[2]-1,+iso[3]);
   const d=new Date(s);return isNaN(d)?null:d;
@@ -2278,9 +2280,10 @@ function render(empRows,pagRows){
     evolMap[k].cap+=e.capital;evolMap[k].juros+=e.jTotal;
   });
   const evolKeys=Object.keys(evolMap).sort();
-  const mesAtualGar=new Date();mesAtualGar.setDate(1);mesAtualGar.setHours(0,0,0,0);
-  const mesAntGar=new Date(mesAtualGar);mesAntGar.setMonth(mesAntGar.getMonth()-1);
-  [mesAntGar,mesAtualGar].forEach(d=>{const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;if(!evolMap[k])evolMap[k]={cap:0,juros:0};});
+  // Garante que mês atual e anterior sempre aparecem no eixo X
+  const _mesGarAtual=new Date();_mesGarAtual.setDate(1);_mesGarAtual.setHours(0,0,0,0);
+  const _mesGarAnt=new Date(_mesGarAtual);_mesGarAnt.setMonth(_mesGarAnt.getMonth()-1);
+  [_mesGarAnt,_mesGarAtual].forEach(d=>{const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;if(!evolMap[k])evolMap[k]={cap:0,juros:0};});
   const evolKeysFinal=Object.keys(evolMap).sort();
   let accCap=0,accJuros=0;const evolLabels=[],evolCap=[],evolJuros=[];
   evolKeysFinal.forEach(k=>{const[y,m]=k.split('-');evolLabels.push(new Date(+y,+m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));accCap+=evolMap[k].cap;accJuros+=evolMap[k].juros;evolCap.push(accCap);evolJuros.push(accJuros);});
@@ -2481,19 +2484,21 @@ function render(empRows,pagRows){
   // HISTÓRICO PAGAMENTOS
   _h('histList',[...clientes].sort((a,b)=>b.totalPago-a.totalPago).map(c=>{const isAt=c.temAtraso,isQ=c.soQuitados;const st=isQ?`<span class="badge ok">✅ QUITADO</span>`:isAt?`<span class="badge bad">⚠️ ATRASO</span>`:`<span class="badge ok">✓ EM DIA</span>`;const rec=c.recorrente?`<span class="badge blue">↩ RECORRENTE</span>`:'';return`<div class="hist-row"><span class="hist-nome">${c.nome}</span><div class="hist-badges"><span class="badge muted">${c.qtdContratos} contrato(s)</span><span class="badge muted">${fmt(c.totalPago)}</span>${rec}${st}</div></div>`;}).join(''));
 
-  // COMPARATIVO MENSAL — usa carteira ATIVA em cada mês (contratos vigentes, não só os novos)
+  // COMPARATIVO MENSAL — carteira ATIVA em cada mês (contratos vigentes, não só novos)
   const mesAt=hoje.getMonth(),anoAt=hoje.getFullYear();
   const mesAn=mesAt===0?11:mesAt-1,anoAn=mesAt===0?anoAt-1:anoAt;
-  // Um contrato estava ativo num mês se: foi criado ATÉ o fim daquele mês E (ainda ativo OU quitado depois daquele mês)
-  const fimMesAt=new Date(anoAt,mesAt+1,0,23,59,59);
-  const fimMesAn=new Date(anoAn,mesAn+1,0,23,59,59);
-  function ativoNoMes(e,fimMes){
-    if(!e.data||e.data>fimMes)return false; // não havia sido criado ainda
-    if(e.status==='quitado'&&e.vencContrato&&e.vencContrato<new Date(fimMes.getFullYear(),fimMes.getMonth(),1))return false; // já havia quitado antes do mês
+  // Início e fim de cada mês (para comparação de vigência)
+  const iniMesAt=new Date(anoAt,mesAt,1);
+  const iniMesAn=new Date(anoAn,mesAn,1);
+  const fimMesAn=new Date(anoAn,mesAn+1,0,23,59,59); // último segundo do mês anterior
+  // Contrato estava ativo no mês anterior se: criado até o fim daquele mês E quitado depois (ou ainda ativo)
+  function ativoEm(e,iniMes,fimMes){
+    if(!e.data||e.data>fimMes)return false; // ainda não tinha sido criado
+    if(e.status==='quitado'&&e.vencContrato&&e.vencContrato<iniMes)return false; // já quitado antes do mês
     return true;
   }
-  const eMAt=emps.filter(e=>ativoNoMes(e,fimMesAt));
-  const eMAn=emps.filter(e=>ativoNoMes(e,fimMesAn));
+  const eMAt=emps.filter(e=>ativoEm(e,iniMesAt,new Date(anoAt,mesAt+1,0,23,59,59)));
+  const eMAn=emps.filter(e=>ativoEm(e,iniMesAn,fimMesAn));
   const cAM=eMAt.reduce((s,e)=>s+e.capital,0),cAN=eMAn.reduce((s,e)=>s+e.capital,0);
   const jAM=eMAt.reduce((s,e)=>s+e.jTotal,0),jAN=eMAn.reduce((s,e)=>s+e.jTotal,0);
   function dH(curr,prev){if(!prev)return'<span class="comp-delta flat">—</span>';const d=(curr-prev)/prev;return`<span class="comp-delta ${d>0?'up':'down'}">${d>0?'▲':'▼'} ${Math.abs(d*100).toFixed(1)}%</span>`;}
@@ -2788,7 +2793,7 @@ let _waCli=[], _waFiltro='todos', _waBusca='';
 const TPL_DEFAULT = {
   suave:       {lbl:'💬 Cobrança Suave',         txt:`Olá, {nome}! Tudo bem? 😊\n\nPassando para lembrar que temos uma parcela de *{valor}* com vencimento em *{vencimento}*.\n\nQualquer dúvida, estou à disposição! 🙏`},
   formal:      {lbl:'📋 Cobrança Formal',         txt:`Olá, {nome}.\n\nIdentificamos a parcela de *{valor}* como pendente (vencimento: *{vencimento}*).\n\nPor favor, entre em contato para regularizarmos.\n\nAtenciosamente, Capital Investimentos.`},
-  atraso_leve: {lbl:'⚠️ Atraso (até 15 dias)',   txt:`Olá, {nome}! Como vai?\n\nSua parcela de *{valor}* está em atraso há *{dias_atraso} dia(s)*.\n\n⚠️ Está sendo cobrada uma multa de *R$ 30,00 por dia* de atraso. Valor atual da multa: *{multa}*.\n\nPodemos resolver rapidinho — me avise quando puder! 😊`},
+  atraso_leve: {lbl:'⚠️ Atraso (até 15 dias)',   txt:`Olá, {nome}! Como vai?\n\nSua parcela de *{valor}* está em atraso há *{dias_atraso} dia(s)*.\n\n⚠️ Multa acumulada: *{multa}* (R$ 30,00/dia)\n💰 *Total a pagar: {total_devido}* (parcela + multa)\n\nPodemos resolver rapidinho — me avise quando puder! 😊`},
   atraso_grav: {lbl:'🔴 Atraso Grave (+15 dias)', txt:`{nome}, bom dia.\n\nSua parcela de *{valor}* está em atraso há *{dias_atraso} dias*.\n\n🔴 Multa acumulada: *{multa}* (R$ 30,00/dia)\n💰 *Total a regularizar: {total_devido}*\n\nPrecisamos resolver urgente. Aguardo seu contato.`},
   vencimento:  {lbl:'⏰ Aviso de Vencimento',     txt:`Olá, {nome}! 👋\n\nAvisando que sua parcela de *{valor}* vence em *{vencimento}*.\n\nPosso enviar os dados para pagamento agora, é só falar! 😉`},
   renovacao:   {lbl:'🔄 Proposta de Renovação',   txt:`Olá, {nome}! Espero que esteja bem 😊\n\nSeu contrato de *{capital}* está chegando ao fim. Quer renovar ou ampliar o limite?\n\nTenho condições especiais para você. Vamos conversar?`},
@@ -2830,7 +2835,9 @@ let _tpls = tplLoad();
 // Substitui variáveis {nome}, {valor}, etc. pelo valor real do cliente
 function tplApply(txt, c){
   const nome=c.nome.split(' ')[0];
-  const val=c.totalJuros>0?'R$ '+Math.round(c.totalJuros).toLocaleString('pt-BR'):'valor em aberto';
+  // {valor} = parcela devida (saldo em aberto), não o juro total do contrato
+  const val=c.saldoTotal>0?'R$ '+Math.round(c.saldoTotal).toLocaleString('pt-BR')
+            :c.totalJuros>0?'R$ '+Math.round(c.totalJuros).toLocaleString('pt-BR'):'valor em aberto';
   const cap='R$ '+Math.round(c.totalCap).toLocaleString('pt-BR');
   const venc=c.proxVenc?c.proxVenc.toLocaleDateString('pt-BR'):'—';
   return txt
@@ -2853,7 +2860,7 @@ function tplModalOpen(){
         <span class="tpl-item-name">${tpl.lbl.replace(/^[^\s]+\s/,'')}</span>
       </div>
       <textarea class="tpl-textarea" id="tpl_txt_${key}" rows="4">${tpl.txt}</textarea>
-      <div class="tpl-vars">Variáveis: <span>{nome}</span><span>{valor}</span><span>{capital}</span><span>{vencimento}</span><span>{dias_atraso}</span></div>
+      <div class="tpl-vars">Variáveis: <span>{nome}</span><span>{valor}</span><span>{capital}</span><span>{vencimento}</span><span>{dias_atraso}</span><span>{multa}</span><span>{total_devido}</span></div>
     </div>
   `).join('');
   document.getElementById('tpl-modal-overlay').classList.add('open');
