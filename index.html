@@ -2089,14 +2089,11 @@ function parseDate(v){
   if(!v)return null; if(v instanceof Date)return v;
   const s=String(v).trim();
   const m=s.match(/Date\((\d+),(\d+),(\d+)\)/); if(m)return new Date(+m[1],+m[2],+m[3]);
-  // Formato BR: DD/MM/YYYY
   const br=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
   if(br){
     let y=+br[3];if(y<100)y+=y<50?2000:1900;
     const d1=+br[1],d2=+br[2];
-    // Se d1 > 12, certamente é DD/MM (dia no primeiro campo)
-    // Se d2 > 12, certamente é MM/DD (dia no segundo campo — formato americano do Google Sheets)
-    if(d2>12)return new Date(y,d1-1,d2); // MM/DD/YYYY americano
+    if(d2>12)return new Date(y,d1-1,d2); // MM/DD/YYYY americano (Google Sheets CSV)
     return new Date(y,d2-1,d1); // DD/MM/YYYY brasileiro
   }
   const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(iso)return new Date(+iso[1],+iso[2]-1,+iso[3]);
@@ -2281,25 +2278,16 @@ function render(empRows,pagRows){
     evolMap[k].cap+=e.capital;evolMap[k].juros+=e.jTotal;
   });
   const evolKeys=Object.keys(evolMap).sort();
-
-  // DEBUG — aparece no console do navegador (F12)
-  console.log('🔍 evolMap keys:', evolKeys);
-  console.log('🔍 emps com data:', emps.filter(e=>e.data).map(e=>({id:e.id,data:e.data?.toLocaleDateString('pt-BR'),capital:e.capital,jTotal:e.jTotal})));
-  console.log('🔍 emps SEM data:', emps.filter(e=>!e.data).map(e=>({id:e.id,dataRaw:e.data})));
-
-  // Garante que mês atual e anterior sempre aparecem no gráfico
-  const mesAtual=new Date();mesAtual.setDate(1);mesAtual.setHours(0,0,0,0);
-  const mesAnterior=new Date(mesAtual);mesAnterior.setMonth(mesAnterior.getMonth()-1);
-  [mesAnterior,mesAtual].forEach(d=>{
-    const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    if(!evolMap[k])evolMap[k]={cap:0,juros:0};
-  });
+  const mesAtualGar=new Date();mesAtualGar.setDate(1);mesAtualGar.setHours(0,0,0,0);
+  const mesAntGar=new Date(mesAtualGar);mesAntGar.setMonth(mesAntGar.getMonth()-1);
+  [mesAntGar,mesAtualGar].forEach(d=>{const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;if(!evolMap[k])evolMap[k]={cap:0,juros:0};});
   const evolKeysFinal=Object.keys(evolMap).sort();
   let accCap=0,accJuros=0;const evolLabels=[],evolCap=[],evolJuros=[];
   evolKeysFinal.forEach(k=>{const[y,m]=k.split('-');evolLabels.push(new Date(+y,+m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));accCap+=evolMap[k].cap;accJuros+=evolMap[k].juros;evolCap.push(accCap);evolJuros.push(accJuros);});
 
   destroyChart('evolMensal');
   charts.evolMensal=new Chart(document.getElementById('chartEvolMensal').getContext('2d'),{type:'line',data:{labels:evolLabels,datasets:[{label:'Capital Acumulado',data:evolCap,borderColor:'rgba(201,146,42,0.9)',backgroundColor:'rgba(201,146,42,0.07)',borderWidth:2,pointRadius:4,fill:true,tension:0.3},{label:'Lucro Previsto',data:evolJuros,borderColor:'rgba(6,214,160,0.8)',backgroundColor:'rgba(6,214,160,0.04)',borderWidth:2,pointRadius:3,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
+  setTimeout(()=>{if(charts.evolMensal)charts.evolMensal.resize();},200);
 
   // COMPOSIÇÃO
   destroyChart('comp');
@@ -2493,11 +2481,19 @@ function render(empRows,pagRows){
   // HISTÓRICO PAGAMENTOS
   _h('histList',[...clientes].sort((a,b)=>b.totalPago-a.totalPago).map(c=>{const isAt=c.temAtraso,isQ=c.soQuitados;const st=isQ?`<span class="badge ok">✅ QUITADO</span>`:isAt?`<span class="badge bad">⚠️ ATRASO</span>`:`<span class="badge ok">✓ EM DIA</span>`;const rec=c.recorrente?`<span class="badge blue">↩ RECORRENTE</span>`:'';return`<div class="hist-row"><span class="hist-nome">${c.nome}</span><div class="hist-badges"><span class="badge muted">${c.qtdContratos} contrato(s)</span><span class="badge muted">${fmt(c.totalPago)}</span>${rec}${st}</div></div>`;}).join(''));
 
-  // COMPARATIVO MENSAL
+  // COMPARATIVO MENSAL — usa carteira ATIVA em cada mês (contratos vigentes, não só os novos)
   const mesAt=hoje.getMonth(),anoAt=hoje.getFullYear();
   const mesAn=mesAt===0?11:mesAt-1,anoAn=mesAt===0?anoAt-1:anoAt;
-  const eMAt=emps.filter(e=>e.data&&e.data.getMonth()===mesAt&&e.data.getFullYear()===anoAt);
-  const eMAn=emps.filter(e=>e.data&&e.data.getMonth()===mesAn&&e.data.getFullYear()===anoAn);
+  // Um contrato estava ativo num mês se: foi criado ATÉ o fim daquele mês E (ainda ativo OU quitado depois daquele mês)
+  const fimMesAt=new Date(anoAt,mesAt+1,0,23,59,59);
+  const fimMesAn=new Date(anoAn,mesAn+1,0,23,59,59);
+  function ativoNoMes(e,fimMes){
+    if(!e.data||e.data>fimMes)return false; // não havia sido criado ainda
+    if(e.status==='quitado'&&e.vencContrato&&e.vencContrato<new Date(fimMes.getFullYear(),fimMes.getMonth(),1))return false; // já havia quitado antes do mês
+    return true;
+  }
+  const eMAt=emps.filter(e=>ativoNoMes(e,fimMesAt));
+  const eMAn=emps.filter(e=>ativoNoMes(e,fimMesAn));
   const cAM=eMAt.reduce((s,e)=>s+e.capital,0),cAN=eMAn.reduce((s,e)=>s+e.capital,0);
   const jAM=eMAt.reduce((s,e)=>s+e.jTotal,0),jAN=eMAn.reduce((s,e)=>s+e.jTotal,0);
   function dH(curr,prev){if(!prev)return'<span class="comp-delta flat">—</span>';const d=(curr-prev)/prev;return`<span class="comp-delta ${d>0?'up':'down'}">${d>0?'▲':'▼'} ${Math.abs(d*100).toFixed(1)}%</span>`;}
