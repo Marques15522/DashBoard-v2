@@ -2793,8 +2793,8 @@ let _waCli=[], _waFiltro='todos', _waBusca='';
 const TPL_DEFAULT = {
   suave:       {lbl:'💬 Cobrança Suave',         txt:`Olá, {nome}! Tudo bem? 😊\n\nPassando para lembrar que temos uma parcela de *{valor}* com vencimento em *{vencimento}*.\n\nQualquer dúvida, estou à disposição! 🙏`},
   formal:      {lbl:'📋 Cobrança Formal',         txt:`Olá, {nome}.\n\nIdentificamos a parcela de *{valor}* como pendente (vencimento: *{vencimento}*).\n\nPor favor, entre em contato para regularizarmos.\n\nAtenciosamente, Capital Investimentos.`},
-  atraso_leve: {lbl:'⚠️ Atraso (até 15 dias)',   txt:`Olá, {nome}! Como vai?\n\nSua parcela de *{valor}* está em atraso há *{dias_atraso} dia(s)*.\n\n⚠️ Multa acumulada: *{multa}* (R$ 30,00/dia)\n💰 *Total a pagar: {total_devido}* (parcela + multa)\n\nPodemos resolver rapidinho — me avise quando puder! 😊`},
-  atraso_grav: {lbl:'🔴 Atraso Grave (+15 dias)', txt:`{nome}, bom dia.\n\nSua parcela de *{valor}* está em atraso há *{dias_atraso} dias*.\n\n🔴 Multa acumulada: *{multa}* (R$ 30,00/dia)\n💰 *Total a regularizar: {total_devido}*\n\nPrecisamos resolver urgente. Aguardo seu contato.`},
+  atraso_leve: {lbl:'⚠️ Atraso (até 15 dias)',   txt:`{nome}, seu pagamento de *{juros}* está em atraso há *{dias_atraso} dia(s)* e a multa já é de *{multa}* (R$ 30,00/dia).\n\nPara regularizar:\n• Juros + multa: *{juros_multa}* (contrato continua ativo)\n• Quitação total: *{total_devido}*\n\nCada dia sem pagamento aumenta a multa. Preciso do retorno hoje.`},
+  atraso_grav: {lbl:'🔴 Atraso Grave (+15 dias)', txt:`{nome}, seu débito está em atraso há *{dias_atraso} dias*. A multa acumulada é de *{multa}* e aumenta R$ 30,00 por dia.\n\nPara regularizar:\n• Juros + multa: *{juros_multa}* (contrato continua ativo)\n• Quitação total: *{total_devido}*\n\nIsso não pode ser ignorado. Preciso de uma resposta imediata.`},
   vencimento:  {lbl:'⏰ Aviso de Vencimento',     txt:`Olá, {nome}! 👋\n\nAvisando que sua parcela de *{valor}* vence em *{vencimento}*.\n\nPosso enviar os dados para pagamento agora, é só falar! 😉`},
   renovacao:   {lbl:'🔄 Proposta de Renovação',   txt:`Olá, {nome}! Espero que esteja bem 😊\n\nSeu contrato de *{capital}* está chegando ao fim. Quer renovar ou ampliar o limite?\n\nTenho condições especiais para você. Vamos conversar?`},
   quitacao:    {lbl:'🎉 Parabéns pela Quitação',  txt:`{nome}! 🎉 Parabéns pela quitação!\n\nFoi um prazer trabalhar com você. Quando precisar, estarei aqui — com condições especiais para quem já é cliente!\n\nObrigado pela confiança! 🙏`},
@@ -2802,7 +2802,7 @@ const TPL_DEFAULT = {
 };
 
 // Carrega templates salvos do localStorage (ou usa padrão)
-const TPL_VERSION='v2'; // incrementar quando mudar templates padrão
+const TPL_VERSION='v6'; // incrementar quando mudar templates padrão
 function tplLoad(){
   try{
     const saved=localStorage.getItem('wa_templates');
@@ -2851,6 +2851,8 @@ function tplApply(txt, c){
     .replace(/\{capital\}/g, cap)
     .replace(/\{vencimento\}/g, venc)
     .replace(/\{dias_atraso\}/g, c.diasAtraso||0)
+    .replace(/\{juros\}/g, fmt(c.jurosDevidos||0))
+    .replace(/\{juros_multa\}/g, fmt((c.jurosDevidos||0)+(c.multa||0)))
     .replace(/\{multa\}/g, fmt(c.multa||0))
     .replace(/\{total_devido\}/g, fmt(c.totalDevido||0));
 }
@@ -2931,8 +2933,14 @@ function waRender(clientes,abertos,atrasado,hoje){
     const saldoTotal=atrasados.reduce((s,e)=>s+(e.saldo||e.capital||0),0)||
                      (diasAtraso>0?c.totalCap:0);
     const multa=diasAtraso*30;
-    const totalDevido=saldoTotal+multa;
-    return{...c,proxVenc,diasAtraso,vence7,saldoTotal,multa,totalDevido};
+    // jurosDevidos = juros do próximo mês (jProx) dos contratos atrasados
+    const jurosDevidos=atrasados.reduce((s,e)=>s+(e.jProx||0),0)||atrasados.reduce((s,e)=>s+(e.jTotal||0),0)||(diasAtraso>0?c.totalJuros:0);
+    // capitalDevido = capital principal dos contratos atrasados
+    const capitalDevido=atrasados.reduce((s,e)=>s+(e.capital||0),0)||(diasAtraso>0?c.totalCap:0);
+    // totalDevido_juros = quitar só os juros + multa (sem devolver o capital)
+    const totalSoJuros=jurosDevidos+multa;
+    const totalDevido=capitalDevido+jurosDevidos+multa;
+    return{...c,proxVenc,diasAtraso,vence7,saldoTotal,jurosDevidos,multa,totalDevido};
   }).sort((a,b)=>{const o={atraso:0,vence:1,emdia:2,inativo:3};return(o[waSit(a).tipo]||9)-(o[waSit(b).tipo]||9);});
   const nA=_waCli.filter(c=>c.diasAtraso>0).length;
   const nV=_waCli.filter(c=>c.vence7&&!c.diasAtraso).length;
