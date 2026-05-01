@@ -2277,6 +2277,7 @@ function render(empRows,pagRows){
 
   destroyChart('evolMensal');
   charts.evolMensal=new Chart(document.getElementById('chartEvolMensal').getContext('2d'),{type:'line',data:{labels:evolLabels,datasets:[{label:'Capital Acumulado',data:evolCap,borderColor:'rgba(201,146,42,0.9)',backgroundColor:'rgba(201,146,42,0.07)',borderWidth:2,pointRadius:4,fill:true,tension:0.3},{label:'Lucro Previsto',data:evolJuros,borderColor:'rgba(6,214,160,0.8)',backgroundColor:'rgba(6,214,160,0.04)',borderWidth:2,pointRadius:3,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
+  setTimeout(()=>{if(charts.evolMensal)charts.evolMensal.resize();},200);
 
   // COMPOSIÇÃO
   destroyChart('comp');
@@ -3730,6 +3731,8 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
         iniciarMapa();
         if (_mapaLeaflet) _mapaLeaflet.invalidateSize();
         atualizarMapaClientes();
+        if(charts.evolMensal)charts.evolMensal.resize();
+        if(charts.comp)charts.comp.resize();
       }, 150);
     }
   });
