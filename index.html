@@ -2802,12 +2802,17 @@ const TPL_DEFAULT = {
 };
 
 // Carrega templates salvos do localStorage (ou usa padrão)
+const TPL_VERSION='v2'; // incrementar quando mudar templates padrão
 function tplLoad(){
   try{
     const saved=localStorage.getItem('wa_templates');
     if(saved){
       const parsed=JSON.parse(saved);
-      // Sempre preserva lbl do padrão, só sobrescreve txt
+      // Se versão diferente, descarta localStorage e usa o padrão novo
+      if(parsed.__version!==TPL_VERSION){
+        localStorage.removeItem('wa_templates');
+        return {...TPL_DEFAULT};
+      }
       const merged={};
       Object.keys(TPL_DEFAULT).forEach(k=>{
         merged[k]={...TPL_DEFAULT[k], txt: parsed[k]?.txt || TPL_DEFAULT[k].txt};
@@ -2879,7 +2884,7 @@ function tplSave(){
   try{
     // Salva só txt no localStorage (lbl sempre vem do TPL_DEFAULT)
     localStorage.setItem('wa_templates', JSON.stringify(
-      Object.fromEntries(Object.entries(updated).map(([k,v])=>[k,{txt:v.txt}]))
+      {...Object.fromEntries(Object.entries(updated).map(([k,v])=>[k,{txt:v.txt}])), __version:TPL_VERSION}
     ));
   }catch(e){}
   tplModalClose();
