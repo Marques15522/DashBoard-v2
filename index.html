@@ -5904,7 +5904,11 @@ const _EL_VOZES_RECOMENDADAS = [
 let _elAudio    = null;
 let _ttsPlaying = false;
 
-function _elApiKey()  { return localStorage.getItem(_EL_STORAGE_KEY) || ''; }
+function _elApiKey() {
+  const raw = localStorage.getItem(_EL_STORAGE_KEY) || '';
+  // Remove espaços, quebras de linha e qualquer caractere não-ASCII
+  return raw.replace(/[^\x20-\x7E]/g, '').trim();
+}
 function _elVoiceId() { return localStorage.getItem(_EL_VOICE_KEY) || _EL_VOZES_RECOMENDADAS[0].id; }
 
 function sugTtsTexto() {
@@ -6025,9 +6029,11 @@ function sugTtsAbrirConfig(forcarAberto) {
 }
 
 function sugElSalvarKey() {
-  const v = document.getElementById('sug-el-apikey').value.trim();
+  const raw = document.getElementById('sug-el-apikey').value;
+  const v = raw.replace(/[^\x20-\x7E]/g, '').trim();
   if (!v) return;
   localStorage.setItem(_EL_STORAGE_KEY, v);
+  document.getElementById('sug-el-apikey').value = v; // mostra versão limpa
   const status = document.getElementById('sug-el-status');
   status.textContent = '✓ Chave salva!';
   status.style.color = 'var(--green)';
@@ -6043,7 +6049,8 @@ function sugElSelecionarVoz(id, el) {
 function sugElTestar() {
   // Salva a key do campo antes de testar (não exige clicar em SALVAR separado)
   const keyInput = document.getElementById('sug-el-apikey');
-  const apiKey = (keyInput?.value.trim()) || _elApiKey();
+  const rawKey = keyInput?.value || _elApiKey();
+  const apiKey = rawKey.replace(/[^\x20-\x7E]/g, '').trim();
   if (!apiKey) {
     const status = document.getElementById('sug-el-status');
     status.textContent = '✗ Cole sua API Key primeiro!';
