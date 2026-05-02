@@ -816,7 +816,9 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
           #sug-modal-texto::-webkit-scrollbar{width:3px;}
           #sug-modal-texto::-webkit-scrollbar-track{background:transparent;}
           #sug-modal-texto::-webkit-scrollbar-thumb{background:rgba(155,93,229,0.4);border-radius:3px;}
-          #sug-modal-footer{padding:14px 22px 18px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;gap:10px;}
+          #sug-tts-cfg-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--muted);border-radius:10px;font-size:0.9rem;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
+          #sug-tts-cfg-btn:hover{background:rgba(155,93,229,0.15);border-color:rgba(155,93,229,0.4);color:var(--purple);}
+          #sug-modal-footer{padding:14px 22px 18px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;gap:8px;}
           #sug-tts-btn{display:flex;align-items:center;gap:7px;background:rgba(155,93,229,0.1);border:1px solid rgba(155,93,229,0.3);color:var(--purple);border-radius:10px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer;letter-spacing:0.07em;transition:all 0.2s;flex-shrink:0;}
           #sug-tts-btn:hover{background:rgba(155,93,229,0.2);border-color:var(--purple);}
           #sug-tts-btn.playing{background:rgba(239,71,111,0.12);border-color:rgba(239,71,111,0.4);color:var(--red);}
@@ -5883,9 +5885,38 @@ function sugModalFechar() {
   document.body.style.overflow = '';
 }
 
-// ── TTS (Text-to-Speech) para o modal de sugestões ──
+// ── TTS Premium — seletor inteligente de voz ──
 let _ttsUtterance = null;
-let _ttsPlaying = false;
+let _ttsPlaying   = false;
+let _ttsVozEscolhida = null; // voz selecionada manualmente pelo usuário
+let _ttsRate  = 0.92;
+let _ttsPitch = 1.0;
+
+// Palavras-chave que indicam vozes de alta qualidade (Neural / Enhanced / Premium)
+const _ttsQualidadeKw = ['neural','enhanced','premium','natural','google','microsoft','siri','eloquence','ivona'];
+
+function _ttsVozScore(v) {
+  const nm = (v.name + v.lang).toLowerCase();
+  let score = 0;
+  if (v.lang === 'pt-BR') score += 100;
+  else if (v.lang.startsWith('pt')) score += 60;
+  _ttsQualidadeKw.forEach(k => { if (nm.includes(k)) score += 30; });
+  if (!v.localService) score += 10; // vozes online tendem a ser melhores
+  return score;
+}
+
+function _ttsListarVozes() {
+  const all = window.speechSynthesis.getVoices();
+  // Filtra pt-BR / pt-PT e ordena por qualidade
+  const pt = all.filter(v => v.lang.startsWith('pt')).sort((a,b) => _ttsVozScore(b) - _ttsVozScore(a));
+  return pt.length ? pt : all.sort((a,b) => _ttsVozScore(b) - _ttsVozScore(a)).slice(0,12);
+}
+
+function _ttsVozPadrao() {
+  if (_ttsVozEscolhida) return _ttsVozEscolhida;
+  const lista = _ttsListarVozes();
+  return lista[0] || null;
+}
 
 function sugTtsTexto() {
   const titulo = document.getElementById('sug-modal-titulo').textContent || '';
@@ -5894,57 +5925,105 @@ function sugTtsTexto() {
   blocos.forEach(b => {
     const lbl = b.querySelector('.sug-bloco-label')?.textContent || '';
     const val = b.querySelector('.sug-bloco-valor')?.textContent || '';
-    // Remove HTML tags and clean up
-    const valLimpo = val.replace(/<[^>]*>/g, '').trim();
-    texto += lbl + ': ' + valLimpo + '. ';
+    texto += lbl + ': ' + val.replace(/<[^>]*>/g,'').trim() + '. ';
   });
   return texto.trim();
 }
 
 function sugTtsParar() {
-  if (_ttsUtterance || _ttsPlaying) {
-    window.speechSynthesis && window.speechSynthesis.cancel();
-    _ttsUtterance = null;
-    _ttsPlaying = false;
-    const btn = document.getElementById('sug-tts-btn');
-    if (btn) { btn.classList.remove('playing'); document.getElementById('sug-tts-label').textContent = 'OUVIR'; btn.querySelector('.tts-icon').textContent = '🔊'; }
-  }
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  _ttsUtterance = null;
+  _ttsPlaying   = false;
+  const btn = document.getElementById('sug-tts-btn');
+  if (btn) { btn.classList.remove('playing'); document.getElementById('sug-tts-label').textContent='OUVIR'; btn.querySelector('.tts-icon').textContent='🔊'; }
 }
 
 function sugTtsToggle() {
-  if (!window.speechSynthesis) {
-    alert('Seu navegador não suporta síntese de voz.');
-    return;
-  }
+  if (!window.speechSynthesis) { alert('Seu navegador não suporta síntese de voz.'); return; }
   if (_ttsPlaying) { sugTtsParar(); return; }
 
   const texto = sugTtsTexto();
   _ttsUtterance = new SpeechSynthesisUtterance(texto);
-  _ttsUtterance.lang = 'pt-BR';
-  _ttsUtterance.rate = 0.95;
-  _ttsUtterance.pitch = 1;
+  _ttsUtterance.lang  = 'pt-BR';
+  _ttsUtterance.rate  = _ttsRate;
+  _ttsUtterance.pitch = _ttsPitch;
 
-  // Tenta usar uma voz pt-BR se disponível
-  const vozes = window.speechSynthesis.getVoices();
-  const vozPT = vozes.find(v => v.lang.startsWith('pt')) || null;
-  if (vozPT) _ttsUtterance.voice = vozPT;
+  const voz = _ttsVozPadrao();
+  if (voz) _ttsUtterance.voice = voz;
 
   _ttsUtterance.onstart = () => {
     _ttsPlaying = true;
     const btn = document.getElementById('sug-tts-btn');
-    if (btn) { btn.classList.add('playing'); document.getElementById('sug-tts-label').textContent = 'PARAR'; btn.querySelector('.tts-icon').textContent = '⏹'; }
+    if (btn) { btn.classList.add('playing'); document.getElementById('sug-tts-label').textContent='PARAR'; btn.querySelector('.tts-icon').textContent='⏹'; }
   };
   _ttsUtterance.onend = _ttsUtterance.onerror = () => {
-    _ttsPlaying = false;
-    _ttsUtterance = null;
+    _ttsPlaying = false; _ttsUtterance = null;
     const btn = document.getElementById('sug-tts-btn');
-    if (btn) { btn.classList.remove('playing'); document.getElementById('sug-tts-label').textContent = 'OUVIR'; btn.querySelector('.tts-icon').textContent = '🔊'; }
+    if (btn) { btn.classList.remove('playing'); document.getElementById('sug-tts-label').textContent='OUVIR'; btn.querySelector('.tts-icon').textContent='🔊'; }
   };
-
   window.speechSynthesis.speak(_ttsUtterance);
 }
 
-document.addEventListener('keydown', e => { if(e.key === 'Escape') { sugTtsParar(); sugModalFechar(); } });
+// ── Painel de configurações de voz ──
+function sugTtsAbrirConfig() {
+  if (!window.speechSynthesis) { alert('Seu navegador não suporta síntese de voz.'); return; }
+  const painel = document.getElementById('sug-tts-config');
+  if (!painel) return;
+  const aberto = painel.style.display !== 'none';
+  painel.style.display = aberto ? 'none' : 'block';
+  if (!aberto) sugTtsPopularVozes();
+}
+
+function sugTtsPopularVozes() {
+  const sel = document.getElementById('sug-tts-voz-select');
+  if (!sel) return;
+  const lista = _ttsListarVozes();
+  const vozAtual = _ttsVozPadrao();
+  sel.innerHTML = lista.map(v => {
+    const score = _ttsVozScore(v);
+    const tag = score >= 130 ? ' ⭐' : score >= 100 ? ' ✓' : '';
+    const selected = vozAtual && vozAtual.name === v.name ? ' selected' : '';
+    return `<option value="${v.name}"${selected}>${v.name} (${v.lang})${tag}</option>`;
+  }).join('');
+  // Rate e pitch sliders
+  document.getElementById('sug-tts-rate').value  = _ttsRate;
+  document.getElementById('sug-tts-pitch').value = _ttsPitch;
+  sugTtsAtualizarLabels();
+}
+
+function sugTtsAtualizarLabels() {
+  const rateEl  = document.getElementById('sug-tts-rate-lbl');
+  const pitchEl = document.getElementById('sug-tts-pitch-lbl');
+  if (rateEl)  rateEl.textContent  = parseFloat(document.getElementById('sug-tts-rate').value).toFixed(2) + 'x';
+  if (pitchEl) pitchEl.textContent = parseFloat(document.getElementById('sug-tts-pitch').value).toFixed(1);
+}
+
+function sugTtsSalvarConfig() {
+  const sel = document.getElementById('sug-tts-voz-select');
+  const rate  = parseFloat(document.getElementById('sug-tts-rate').value);
+  const pitch = parseFloat(document.getElementById('sug-tts-pitch').value);
+  _ttsRate  = isNaN(rate)  ? 0.92 : rate;
+  _ttsPitch = isNaN(pitch) ? 1.0  : pitch;
+  const vozes = window.speechSynthesis.getVoices();
+  _ttsVozEscolhida = vozes.find(v => v.name === sel.value) || null;
+  document.getElementById('sug-tts-config').style.display = 'none';
+  // Preview imediato
+  sugTtsParar();
+  const prev = new SpeechSynthesisUtterance('Voz configurada com sucesso.');
+  prev.lang  = 'pt-BR'; prev.rate = _ttsRate; prev.pitch = _ttsPitch;
+  if (_ttsVozEscolhida) prev.voice = _ttsVozEscolhida;
+  window.speechSynthesis.speak(prev);
+}
+
+// Carrega vozes assim que ficarem disponíveis (Chrome carrega de forma assíncrona)
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    const sel = document.getElementById('sug-tts-voz-select');
+    if (sel && document.getElementById('sug-tts-config').style.display !== 'none') sugTtsPopularVozes();
+  };
+}
+
+document.addEventListener('keydown', e => { if(e.key==='Escape'){ sugTtsParar(); sugModalFechar(); } });
 
 // Inicializa ao carregar
 window.addEventListener('DOMContentLoaded', () => {
@@ -5982,7 +6061,37 @@ window.addEventListener('DOMContentLoaded', () => {
         <span class="tts-icon">🔊</span>
         <span id="sug-tts-label">OUVIR</span>
       </button>
+      <button id="sug-tts-cfg-btn" onclick="sugTtsAbrirConfig()" title="Configurar voz">⚙</button>
       <button id="sug-modal-close" onclick="sugTtsParar();sugModalFechar()">FECHAR</button>
+    </div>
+    <!-- Painel de configuração de voz -->
+    <div id="sug-tts-config" style="display:none;padding:14px 22px 18px;border-top:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.2);">
+      <div style="font-size:0.48rem;letter-spacing:0.18em;color:var(--purple);text-transform:uppercase;margin-bottom:12px;">⚙ Configurar Voz</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div>
+          <div style="font-size:0.5rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;">Voz <span style="color:var(--gold);font-size:0.44rem">— ⭐ = Alta qualidade</span></div>
+          <select id="sug-tts-voz-select" style="width:100%;background:#0c0f1c;border:1px solid rgba(155,93,229,0.3);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.6rem;padding:8px 10px;outline:none;cursor:pointer;">
+            <option>Carregando vozes...</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <div style="font-size:0.5rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;">Velocidade — <span id="sug-tts-rate-lbl" style="color:var(--gold2)">0.92x</span></div>
+            <input id="sug-tts-rate" type="range" min="0.5" max="1.8" step="0.05" value="0.92"
+              oninput="sugTtsAtualizarLabels()"
+              style="width:100%;accent-color:var(--purple);cursor:pointer;">
+          </div>
+          <div>
+            <div style="font-size:0.5rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;">Tom — <span id="sug-tts-pitch-lbl" style="color:var(--gold2)">1.0</span></div>
+            <input id="sug-tts-pitch" type="range" min="0.5" max="1.8" step="0.1" value="1.0"
+              oninput="sugTtsAtualizarLabels()"
+              style="width:100%;accent-color:var(--purple);cursor:pointer;">
+          </div>
+        </div>
+        <button onclick="sugTtsSalvarConfig()" style="align-self:flex-end;background:linear-gradient(135deg,rgba(155,93,229,0.25),rgba(201,146,42,0.12));border:1px solid rgba(155,93,229,0.4);color:var(--text);border-radius:8px;padding:8px 20px;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s;" onmouseover="this.style.background='rgba(155,93,229,0.35)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(155,93,229,0.25),rgba(201,146,42,0.12))'">
+          ▶ SALVAR E TESTAR
+        </button>
+      </div>
     </div>
   </div>
 </div>
