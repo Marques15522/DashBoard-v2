@@ -5906,8 +5906,7 @@ let _ttsPlaying = false;
 
 function _elApiKey() {
   const raw = localStorage.getItem(_EL_STORAGE_KEY) || '';
-  // Remove espaços, quebras de linha e qualquer caractere não-ASCII
-  return raw.replace(/[^\x20-\x7E]/g, '').trim();
+  return raw.replace(/[^a-zA-Z0-9\-_]/g, '').trim();
 }
 function _elVoiceId() { return localStorage.getItem(_EL_VOICE_KEY) || _EL_VOZES_RECOMENDADAS[0].id; }
 
@@ -6047,26 +6046,33 @@ function sugElSelecionarVoz(id, el) {
 }
 
 function sugElTestar() {
-  // Salva a key do campo antes de testar (não exige clicar em SALVAR separado)
   const keyInput = document.getElementById('sug-el-apikey');
-  const rawKey = keyInput?.value || _elApiKey();
-  const apiKey = rawKey.replace(/[^\x20-\x7E]/g, '').trim();
-  if (!apiKey) {
-    const status = document.getElementById('sug-el-status');
-    status.textContent = '✗ Cole sua API Key primeiro!';
+  const rawKey   = (keyInput?.value || '') || _elApiKey();
+  // Remove TUDO que não seja letra, número ou hífen (chars típicos de API keys)
+  const apiKey   = rawKey.replace(/[^a-zA-Z0-9\-_]/g, '').trim();
+  const status   = document.getElementById('sug-el-status');
+
+  if (!apiKey || apiKey.length < 20) {
+    status.textContent = '✗ Key inválida — copie direto do site da ElevenLabs';
     status.style.color = 'var(--red)';
     return;
   }
+
+  // Salva versão limpa e mostra no campo
   localStorage.setItem(_EL_STORAGE_KEY, apiKey);
+  if (keyInput) keyInput.value = apiKey;
 
   const voiceId = _elVoiceId();
-  const status  = document.getElementById('sug-el-status');
-  status.textContent = '⏳ Gerando áudio...';
+  status.textContent = '⏳ Conectando à ElevenLabs...';
   status.style.color = 'var(--muted)';
 
   fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
     method: 'POST',
-    headers: { 'xi-api-key': apiKey, 'Content-Type': 'application/json', 'Accept': 'audio/mpeg' },
+    headers: {
+      'xi-api-key': apiKey,
+      'Content-Type': 'application/json',
+      'Accept': 'audio/mpeg'
+    },
     body: JSON.stringify({
       text: 'Olá, sou o seu consultor financeiro. Esta é a voz selecionada.',
       model_id: 'eleven_multilingual_v2',
@@ -6074,24 +6080,25 @@ function sugElTestar() {
     })
   })
   .then(r => {
-    if (!r.ok) return r.json().then(e => Promise.reject(e.detail?.message || 'Erro ' + r.status));
+    if (r.status === 401) return Promise.reject('API Key inválida (401) — gere uma nova no site');
+    if (r.status === 422) return Promise.reject('Parâmetros inválidos (422) — tente outra voz');
+    if (r.status === 429) return Promise.reject('Limite de créditos atingido (429)');
+    if (!r.ok)            return Promise.reject('Erro do servidor: ' + r.status);
     return r.blob();
   })
   .then(blob => {
     status.textContent = '✓ Tocando preview...';
     status.style.color = 'var(--green)';
-    if (_elAudio) { _elAudio.pause(); }
+    if (_elAudio) _elAudio.pause();
     _elAudio = new Audio(URL.createObjectURL(blob));
-    _elAudio.onended = () => {
-      _elAudio = null;
-      status.textContent = '✓ Pronto! Feche e clique em OUVIR.';
-      status.style.color = 'var(--green)';
-    };
+    _elAudio.onended = () => { _elAudio = null; status.textContent = '✓ Pronto! Feche e clique em OUVIR.'; status.style.color = 'var(--green)'; };
+    _elAudio.onerror = () => { status.textContent = '✗ Erro ao reproduzir áudio'; status.style.color = 'var(--red)'; };
     _elAudio.play();
   })
   .catch(e => {
-    status.textContent = '✗ ' + e;
+    status.textContent = '✗ ' + (typeof e === 'string' ? e : e.message || 'Falha na conexão');
     status.style.color = 'var(--red)';
+    console.error('ElevenLabs erro:', e);
   });
 }
 
