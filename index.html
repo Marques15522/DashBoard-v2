@@ -5945,8 +5945,8 @@ async function sugTtsToggle() {
 
   const apiKey = _elApiKey();
   if (!apiKey) {
-    // Sem key → abre painel de config automaticamente
-    sugTtsAbrirConfig();
+    // Sem key → abre painel de config com aviso
+    sugTtsAbrirConfig(true);
     return;
   }
 
@@ -5985,38 +5985,42 @@ async function sugTtsToggle() {
 
   } catch(e) {
     _ttsSetBtn(false);
-    // Se falhar (sem internet, key inválida etc.) cai para voz do navegador
-    console.warn('ElevenLabs TTS falhou, usando fallback:', e.message);
-    _ttsFallback(texto);
+    console.warn('ElevenLabs TTS falhou:', e.message);
+    // Mostra erro visível em vez de cair silenciosamente no fallback
+    const status = document.getElementById('sug-el-status');
+    sugTtsAbrirConfig(false);
+    if (status) { status.textContent = '✗ Erro: ' + e.message; status.style.color = 'var(--red)'; }
   }
 }
 
-function _ttsFallback(texto) {
-  if (!window.speechSynthesis) return;
-  const u = new SpeechSynthesisUtterance(texto);
-  u.lang = 'pt-BR'; u.rate = 0.93; u.pitch = 1;
-  const vozes = window.speechSynthesis.getVoices();
-  const voz = vozes.find(v => v.lang === 'pt-BR') || vozes.find(v => v.lang.startsWith('pt')) || null;
-  if (voz) u.voice = voz;
-  u.onstart = () => _ttsSetBtn(true);
-  u.onend = u.onerror = () => _ttsSetBtn(false);
-  window.speechSynthesis.speak(u);
-}
+// fallback removido — sem key a ElevenLabs abre o painel de configuração
 
 // ── Painel de configuração ──
-function sugTtsAbrirConfig() {
+function sugTtsAbrirConfig(forcarAberto) {
   const painel = document.getElementById('sug-tts-config');
   if (!painel) return;
   const aberto = painel.style.display !== 'none';
-  painel.style.display = aberto ? 'none' : 'block';
-  if (!aberto) {
-    // Preenche com valores salvos
+  if (forcarAberto === true) {
+    painel.style.display = 'block';
+  } else if (forcarAberto === false) {
+    painel.style.display = 'block'; // já aberto, não fecha
+  } else {
+    painel.style.display = aberto ? 'none' : 'block';
+  }
+  // Preenche campos sempre que abrir
+  if (painel.style.display !== 'none') {
     const keyInput = document.getElementById('sug-el-apikey');
     if (keyInput && _elApiKey()) keyInput.value = _elApiKey();
-    // Marca a voz atual
+    // Marca voz salva
     document.querySelectorAll('.el-voz-card').forEach(c => {
       c.classList.toggle('sel', c.dataset.vid === _elVoiceId());
     });
+    // Aviso se não tem key
+    const status = document.getElementById('sug-el-status');
+    if (status && !_elApiKey()) {
+      status.textContent = '⬆ Cole sua API Key acima para ativar a voz IA';
+      status.style.color = 'var(--gold2)';
+    }
   }
 }
 
@@ -6024,9 +6028,10 @@ function sugElSalvarKey() {
   const v = document.getElementById('sug-el-apikey').value.trim();
   if (!v) return;
   localStorage.setItem(_EL_STORAGE_KEY, v);
-  document.getElementById('sug-el-status').textContent = '✓ Chave salva!';
-  document.getElementById('sug-el-status').style.color = 'var(--green)';
-  setTimeout(() => { document.getElementById('sug-el-status').textContent = ''; }, 2500);
+  const status = document.getElementById('sug-el-status');
+  status.textContent = '✓ Chave salva!';
+  status.style.color = 'var(--green)';
+  setTimeout(() => { if (status.textContent === '✓ Chave salva!') status.textContent = ''; }, 2500);
 }
 
 function sugElSelecionarVoz(id, el) {
@@ -6036,28 +6041,51 @@ function sugElSelecionarVoz(id, el) {
 }
 
 function sugElTestar() {
-  const apiKey = document.getElementById('sug-el-apikey').value.trim() || _elApiKey();
-  if (!apiKey) { alert('Cole sua API Key primeiro.'); return; }
+  // Salva a key do campo antes de testar (não exige clicar em SALVAR separado)
+  const keyInput = document.getElementById('sug-el-apikey');
+  const apiKey = (keyInput?.value.trim()) || _elApiKey();
+  if (!apiKey) {
+    const status = document.getElementById('sug-el-status');
+    status.textContent = '✗ Cole sua API Key primeiro!';
+    status.style.color = 'var(--red)';
+    return;
+  }
   localStorage.setItem(_EL_STORAGE_KEY, apiKey);
-  document.getElementById('sug-tts-config').style.display = 'none';
-  // Força texto de teste
-  const u = document.getElementById('sug-modal-titulo');
-  const textoOrig = u.textContent;
-  // Dispara leitura com texto curto de teste
+
   const voiceId = _elVoiceId();
-  const btn = document.getElementById('sug-tts-btn');
-  if (btn) { btn.querySelector('.tts-icon').textContent = '⏳'; document.getElementById('sug-tts-label').textContent = 'GERANDO...'; }
+  const status  = document.getElementById('sug-el-status');
+  status.textContent = '⏳ Gerando áudio...';
+  status.style.color = 'var(--muted)';
+
   fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-    method:'POST',
-    headers:{'xi-api-key':apiKey,'Content-Type':'application/json','Accept':'audio/mpeg'},
-    body: JSON.stringify({ text:'Olá, sou o seu consultor financeiro. Voz configurada com sucesso!', model_id:'eleven_multilingual_v2', voice_settings:{stability:0.5,similarity_boost:0.75,style:0.3,use_speaker_boost:true} })
-  }).then(r => r.ok ? r.blob() : Promise.reject(r.status))
-    .then(blob => {
-      _elAudio = new Audio(URL.createObjectURL(blob));
-      _elAudio.onplay  = () => _ttsSetBtn(true);
-      _elAudio.onended = _elAudio.onerror = () => { _elAudio=null; _ttsSetBtn(false); };
-      _elAudio.play();
-    }).catch(e => { _ttsSetBtn(false); alert('Erro ao conectar à ElevenLabs. Verifique sua API Key.\n'+e); });
+    method: 'POST',
+    headers: { 'xi-api-key': apiKey, 'Content-Type': 'application/json', 'Accept': 'audio/mpeg' },
+    body: JSON.stringify({
+      text: 'Olá, sou o seu consultor financeiro. Esta é a voz selecionada.',
+      model_id: 'eleven_multilingual_v2',
+      voice_settings: { stability: 0.5, similarity_boost: 0.75, style: 0.3, use_speaker_boost: true }
+    })
+  })
+  .then(r => {
+    if (!r.ok) return r.json().then(e => Promise.reject(e.detail?.message || 'Erro ' + r.status));
+    return r.blob();
+  })
+  .then(blob => {
+    status.textContent = '✓ Tocando preview...';
+    status.style.color = 'var(--green)';
+    if (_elAudio) { _elAudio.pause(); }
+    _elAudio = new Audio(URL.createObjectURL(blob));
+    _elAudio.onended = () => {
+      _elAudio = null;
+      status.textContent = '✓ Pronto! Feche e clique em OUVIR.';
+      status.style.color = 'var(--green)';
+    };
+    _elAudio.play();
+  })
+  .catch(e => {
+    status.textContent = '✗ ' + e;
+    status.style.color = 'var(--red)';
+  });
 }
 
 document.addEventListener('keydown', e => { if(e.key==='Escape'){ sugTtsParar(); sugModalFechar(); } });
