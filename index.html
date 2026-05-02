@@ -512,9 +512,10 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     <div><div class="load-brand">Capital Investimentos</div><div class="load-sub">Soluções Financeiras Estratégicas</div></div>
   </div>
   <div class="load-bar-wrap"><div class="load-bar"></div></div>
-  <div id="load-saudacao-text" style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold);letter-spacing:0.12em;margin-top:8px">BOM DIA, SR. MARQUES</div>
+  <div id="load-saudacao-text" style="font-family:'Cinzel',serif;font-size:1.6rem;color:var(--gold);letter-spacing:0.12em;margin-top:8px">BOM DIA, SR. MARQUES</div>
   <div class="load-text">CARREGANDO DADOS DA CARTEIRA...</div>
 </div>
+<script>(function(){var h=new Date().getHours();var s=h<12?'BOM DIA':h<18?'BOA TARDE':'BOA NOITE';var el=document.getElementById('load-saudacao-text');if(el)el.textContent=s+', SR. MARQUES';})();</script>
 
 <div id="error-screen">
   <div class="error-box">
@@ -581,7 +582,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       <div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase" id="briefing-data-longa">—</div>
     </div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center">
-      <div id="briefing-saudacao" style="font-family:'Bebas Neue',sans-serif;font-size:2.8rem;color:var(--gold);letter-spacing:0.1em;text-align:center">BOM DIA, SR. MARQUES</div>
+      <div id="briefing-saudacao" style="font-family:'Cinzel',serif;font-size:2.8rem;color:var(--gold);letter-spacing:0.1em;text-align:center">BOM DIA, SR. MARQUES</div>
     </div>
   </div>
 
@@ -799,38 +800,34 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
           .sug-item-arrow{font-size:0.6rem;color:var(--muted);flex-shrink:0;transition:transform 0.2s;}
           .sug-item:hover .sug-item-arrow{transform:translateX(2px);color:var(--text);}
           .sug-item-bar{position:absolute;top:0;left:0;width:100%;height:2px;}
-          /* MODAL SUGESTÃO */
+          /* MODAL SUGESTÃO — REDESIGN */
           #sug-modal-overlay{display:none;position:fixed;inset:0;background:rgba(3,5,12,0.88);z-index:1200;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
           #sug-modal-overlay.open{display:flex;}
-          #sug-modal{background:linear-gradient(160deg,#0e1220 0%,#0a0d18 100%);border:1px solid rgba(155,93,229,0.3);border-radius:22px;width:min(500px,94vw);padding:0;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.04) inset;animation:sugModalIn 0.28s cubic-bezier(0.34,1.56,0.64,1);}
-          @keyframes sugModalIn{from{opacity:0;transform:scale(0.88) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
-          #sug-modal-hero{position:relative;padding:28px 28px 20px;overflow:hidden;}
-          #sug-modal-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 100% at 50% 0%,var(--sug-cor-alpha,rgba(155,93,229,0.12)) 0%,transparent 70%);pointer-events:none;}
-          #sug-modal-hero-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
-          #sug-modal-icon-wrap{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);font-size:1.7rem;}
-          #sug-modal-badge{font-size:0.44rem;letter-spacing:0.16em;color:var(--purple);border:1px solid rgba(155,93,229,0.35);background:rgba(155,93,229,0.08);border-radius:5px;padding:4px 9px;margin-top:4px;}
-          #sug-modal-titulo{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.08em;line-height:1.1;margin-bottom:6px;}
-          #sug-modal-subtitulo{font-size:0.58rem;color:var(--muted);letter-spacing:0.08em;}
-          #sug-modal-corpo{padding:0 28px 8px;max-height:320px;overflow-y:auto;}
-          #sug-modal-corpo::-webkit-scrollbar{width:3px;}
-          #sug-modal-corpo::-webkit-scrollbar-track{background:transparent;}
-          #sug-modal-corpo::-webkit-scrollbar-thumb{background:rgba(155,93,229,0.4);border-radius:3px;}
-          .sug-bloco{display:flex;flex-direction:column;gap:3px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
-          .sug-bloco:last-child{border-bottom:none;}
-          .sug-bloco-label{font-size:0.48rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted2);}
-          .sug-bloco-valor{font-size:0.76rem;line-height:1.65;color:var(--text);}
-          .sug-bloco-valor.destaque-red{color:#ef476f;font-weight:700;}
-          .sug-bloco-valor.destaque-gold{color:#e8b84b;font-weight:700;}
-          .sug-bloco-valor.destaque-green{color:#06d6a0;font-weight:700;}
-          #sug-modal-footer{padding:16px 28px;border-top:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:space-between;gap:10px;}
-          #sug-btn-voz{display:flex;align-items:center;gap:7px;background:rgba(155,93,229,0.1);border:1px solid rgba(155,93,229,0.3);color:var(--purple);border-radius:9px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer;letter-spacing:0.06em;transition:all 0.2s;flex-shrink:0;}
-          #sug-btn-voz:hover{background:rgba(155,93,229,0.2);border-color:var(--purple);}
-          #sug-btn-voz.falando{background:rgba(155,93,229,0.2);border-color:var(--purple);color:#fff;}
-          #sug-btn-voz .voz-icon{font-size:1rem;transition:transform 0.2s;}
-          #sug-btn-voz.falando .voz-icon{animation:vozPulse 0.6s ease infinite alternate;}
-          @keyframes vozPulse{from{transform:scale(1);}to{transform:scale(1.25);}}
-          #sug-modal-close{background:linear-gradient(135deg,rgba(201,146,42,0.15),rgba(201,146,42,0.05));border:1px solid rgba(201,146,42,0.3);color:var(--gold2);border-radius:9px;padding:9px 22px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer;letter-spacing:0.1em;transition:all 0.2s;}
-          #sug-modal-close:hover{background:rgba(201,146,42,0.2);border-color:var(--gold);color:var(--gold);}
+          #sug-modal{background:linear-gradient(160deg,#0f1224 0%,#0c0f1c 100%);border:1px solid rgba(155,93,229,0.3);border-radius:22px;width:min(460px,94vw);padding:0;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.04) inset,0 0 60px rgba(155,93,229,0.08);animation:sugModalIn 0.25s cubic-bezier(0.34,1.56,0.64,1);}
+          @keyframes sugModalIn{from{opacity:0;transform:scale(0.88) translateY(16px);}to{opacity:1;transform:scale(1) translateY(0);}}
+          #sug-modal-top{height:3px;width:100%;background:linear-gradient(90deg,transparent 0%,var(--purple) 30%,var(--gold) 70%,transparent 100%);}
+          #sug-modal-header{padding:20px 22px 0;display:flex;align-items:center;gap:14px;}
+          #sug-modal-icon-wrap{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;background:rgba(155,93,229,0.12);border:1px solid rgba(155,93,229,0.25);}
+          #sug-modal-header-info{flex:1;}
+          #sug-modal-badge{font-size:0.42rem;letter-spacing:0.16em;color:var(--purple);border:1px solid rgba(155,93,229,0.35);background:rgba(155,93,229,0.08);border-radius:4px;padding:3px 8px;display:inline-block;margin-bottom:5px;}
+          #sug-modal-titulo{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.08em;line-height:1.1;color:var(--text);}
+          #sug-modal-body{padding:16px 22px 18px;}
+          #sug-modal-texto{font-size:0.72rem;color:var(--text);line-height:1.8;max-height:320px;overflow-y:auto;padding-right:4px;}
+          #sug-modal-texto::-webkit-scrollbar{width:3px;}
+          #sug-modal-texto::-webkit-scrollbar-track{background:transparent;}
+          #sug-modal-texto::-webkit-scrollbar-thumb{background:rgba(155,93,229,0.4);border-radius:3px;}
+          #sug-modal-footer{padding:14px 22px 18px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;gap:10px;}
+          #sug-tts-btn{display:flex;align-items:center;gap:7px;background:rgba(155,93,229,0.1);border:1px solid rgba(155,93,229,0.3);color:var(--purple);border-radius:10px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:0.62rem;cursor:pointer;letter-spacing:0.07em;transition:all 0.2s;flex-shrink:0;}
+          #sug-tts-btn:hover{background:rgba(155,93,229,0.2);border-color:var(--purple);}
+          #sug-tts-btn.playing{background:rgba(239,71,111,0.12);border-color:rgba(239,71,111,0.4);color:var(--red);}
+          #sug-tts-btn .tts-icon{font-size:1rem;}
+          #sug-modal-close{background:linear-gradient(135deg,rgba(155,93,229,0.18),rgba(201,146,42,0.08));border:1px solid rgba(155,93,229,0.3);color:var(--text);border-radius:10px;padding:9px 24px;font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer;letter-spacing:0.1em;transition:all 0.2s;}
+          #sug-modal-close:hover{background:rgba(155,93,229,0.28);border-color:var(--purple);color:var(--purple);}
+          /* Blocos de conteúdo dentro do modal */
+          .sug-bloco{display:flex;flex-direction:column;gap:3px;padding:11px 14px;border-radius:10px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.05);margin-bottom:8px;}
+          .sug-bloco:last-child{margin-bottom:0;}
+          .sug-bloco-label{font-size:0.48rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);}
+          .sug-bloco-valor{font-size:0.75rem;line-height:1.6;}
         </style>
         <div id="sugestoes-lista" style="padding:10px 12px;display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto">
           <div class="noticia-loading">⏳ Analisando...</div>
@@ -5663,90 +5660,184 @@ function noticiasRenderizar(noticias) {
 }
 
 // ════════════════════════════════════════════════════════
-// SUGESTÕES INTELIGENTES (sem input do usuário)
+// SUGESTÕES INTELIGENTES — CONSULTOR FINANCEIRO LOCAL
 // ════════════════════════════════════════════════════════
+
 function sugestoesDadosDashboard() {
+  const txt = id => document.getElementById(id)?.textContent?.trim() || '—';
+  const num = str => parseInt((str||'0').replace(/[^\d]/g,'')) || 0;
+  const capital     = txt('kpi-capital');
+  const clientes    = txt('kpi-cli-ativos');
+  const lucro       = txt('kpi-realizado');
+  const ticket      = txt('kpi-ticket');
+  const semana      = txt('kpi-semana');
+  const atraso      = txt('kpi-atraso') !== '—' ? txt('kpi-atraso') : (document.querySelector('[data-kpi="atraso"]')?.textContent?.trim() || '—');
   return {
-    capitalCarteira: document.getElementById('kpi-capital')?.textContent?.trim() || '—',
-    clientesAtivos:  document.getElementById('kpi-cli-ativos')?.textContent?.trim() || '—',
-    lucroRealizado:  document.getElementById('kpi-realizado')?.textContent?.trim() || '—',
-    ticketMedio:     document.getElementById('kpi-ticket')?.textContent?.trim() || '—',
-    aReceber7d:      document.getElementById('kpi-semana')?.textContent?.trim() || '—',
-    emAtraso:        document.getElementById('kpi-atraso')?.textContent?.trim() || document.querySelector('[data-kpi="atraso"]')?.textContent?.trim() || '—',
+    capitalCarteira: capital,  capitalNum: num(capital),
+    clientesAtivos:  clientes, clientesNum: num(clientes),
+    lucroRealizado:  lucro,    lucroNum: num(lucro),
+    ticketMedio:     ticket,   ticketNum: num(ticket),
+    aReceber7d:      semana,   semanaNum: num(semana),
+    emAtraso:        atraso,   atrasosNum: num(atraso),
   };
 }
 
+// Cache global de análises por título (evita recalcular)
+const _sugCache = {};
+
+function sugGerarAnalise(titulo, dados, noticias) {
+  // Retorna do cache se já gerou
+  if (_sugCache[titulo]) return _sugCache[titulo];
+
+  const not = noticias.map(n=>(n.titulo||'').toLowerCase());
+  const temInadimplencia = not.some(t=>t.includes('inadimpl')||t.includes('calote'));
+  const temDesemprego    = not.some(t=>t.includes('desemprego')||t.includes('demissão')||t.includes('demissao'));
+  const temSelicAlta     = not.some(t=>t.includes('selic')&&(t.includes('alta')||t.includes('sobe')||t.includes('aumento')));
+  const temSelicBaixa    = not.some(t=>t.includes('selic')&&(t.includes('queda')||t.includes('reduz')||t.includes('corte')));
+  const temInflacao      = not.some(t=>t.includes('inflação')||t.includes('inflacao')||t.includes('ipca'));
+  const noticiasResumidas = noticias.slice(0,3).map(n=>n.titulo).filter(Boolean).join(' | ') || 'Nenhuma carregada';
+
+  const { capitalCarteira, capitalNum, clientesAtivos, clientesNum, lucroRealizado,
+          ticketMedio, ticketNum, aReceber7d, semanaNum, emAtraso, atrasosNum } = dados;
+
+  // Calcula métricas derivadas
+  const ticketPorCliente = clientesNum > 0 && capitalNum > 0 ? Math.round(capitalNum / clientesNum) : ticketNum;
+  const pctAtraso = capitalNum > 0 && atrasosNum > 0 ? ((atrasosNum / capitalNum)*100).toFixed(1) : null;
+  const fmtBRL = v => v > 0 ? 'R$ ' + v.toLocaleString('pt-BR') : '—';
+
+  let blocos = [];
+
+  if (titulo.includes('Cobrança') || titulo.includes('prioritária') || titulo.includes('atraso')) {
+    const urgencia = atrasosNum > capitalNum * 0.2 ? 'CRÍTICO' : atrasosNum > capitalNum * 0.1 ? 'ALTO' : 'MODERADO';
+    blocos = [
+      { label:'Situação atual', valor: `${emAtraso} em aberto${pctAtraso ? ` (${pctAtraso}% do capital)` : ''}`, destaque: urgencia === 'CRÍTICO' ? 'red' : urgencia === 'ALTO' ? 'gold' : 'green' },
+      { label:'Nível de risco', valor: urgencia, destaque: urgencia === 'CRÍTICO' ? 'red' : 'gold' },
+      { label:'Ação imediata', valor: atrasosNum > 0 ? 'Contato direto hoje — ligação supera mensagem em taxa de recuperação' : 'Nenhuma cobrança urgente no momento' },
+      { label:'Estratégia', valor: atrasosNum > capitalNum * 0.15 ? 'Ofereça desconto de 10–15% para quitar à vista — recuperar parcial é melhor que perder tudo' : 'Envie lembrete com link de pagamento antes de acionar cobrança formal' },
+      { label:'Próxima semana', valor: `${aReceber7d} a entrar — monitore de perto os que já atrasaram antes` },
+      { label:'Mercado', valor: temInadimplencia ? '⚠️ Alta inadimplência geral no mercado — reforce cobranças agora' : 'Sem alertas de inadimplência nas notícias recentes' },
+    ];
+  } else if (titulo.includes('Cautela') || titulo.includes('concessão') || titulo.includes('Concessão')) {
+    blocos = [
+      { label:'Sinal de alerta', valor: temInadimplencia ? '🔴 Notícias apontam alta inadimplência no mercado' : '🟡 Monitoramento preventivo recomendado' },
+      { label:'Exposição atual', valor: `${capitalCarteira} emprestado em ${clientesAtivos} clientes (ticket médio ${ticketMedio})` },
+      { label:'Recomendação', valor: 'Para novos contratos: exija comprovante de renda + 1 referência verificável' },
+      { label:'Limite por cliente', valor: ticketPorCliente > 0 ? `Não ultrapasse ${fmtBRL(Math.round(ticketPorCliente * 1.3))} por tomador novo — 30% acima do ticket médio atual` : 'Defina um teto máximo por cliente antes do próximo empréstimo' },
+      { label:'Garantias', valor: 'Para valores acima de ' + fmtBRL(ticketNum * 2) + ': exija bem como garantia ou avalista com renda comprovada' },
+      { label:'Mercado', valor: temDesemprego ? '⚠️ Desemprego em alta — priorize clientes com emprego formal' : 'Cenário estável — mantenha critérios normais de análise' },
+    ];
+  } else if (titulo.includes('renda') || titulo.includes('Renda') || titulo.includes('clientes')) {
+    blocos = [
+      { label:'Contexto', valor: temDesemprego ? '🔴 Notícias indicam aumento de desemprego — risco de calote sobe' : '🟢 Mercado de trabalho estável no momento' },
+      { label:'Sua carteira', valor: `${clientesAtivos} clientes com ${capitalCarteira} em aberto` },
+      { label:'Ponto de atenção', valor: ticketNum > 0 ? `Ticket médio de ${ticketMedio} — clientes desempregados com esse nível de dívida levam em média 2–3x mais para quitar` : 'Mapeie quais clientes dependem de renda variável ou autônoma' },
+      { label:'Ação preventiva', valor: 'Contate os 3 maiores devedores esta semana — confirme se ainda têm renda estável' },
+      { label:'Novos contratos', valor: 'Exija holerite ou extrato bancário dos últimos 2 meses. Renda informal: peça 3 meses de movimentação' },
+      { label:'Sinal positivo', valor: temSelicBaixa ? 'Juros caindo pode melhorar capacidade de pagamento dos clientes no médio prazo' : 'Monitore mensalmente — renda do cliente muda rápido' },
+    ];
+  } else if (titulo.includes('prazo') || titulo.includes('Prazo') || titulo.includes('Inflação') || titulo.includes('inflação')) {
+    blocos = [
+      { label:'Risco', valor: temInflacao ? '🔴 Inflação corroendo renda real dos clientes — prazos longos = mais risco' : '🟡 Atenção ao prazo mesmo sem inflação alta' },
+      { label:'Regra prática', valor: 'Prazo máximo recomendado: 3 meses para novos clientes, 6 meses apenas para pagadores históricos' },
+      { label:'Impacto na carteira', valor: capitalNum > 0 ? `Com ${capitalCarteira} emprestado, cada mês extra de prazo = mais ~${fmtBRL(Math.round(capitalNum * 0.08))} de risco adicional (estimativa de 8% a.m.)` : 'Calcule o custo de oportunidade de prazos longos' },
+      { label:'Estratégia', valor: 'Prefira parcelas menores e mais frequentes (semanais) — reduz inadimplência em até 35%' },
+      { label:'Para contratos em aberto', valor: atrasosNum > 0 ? `Negocie antecipação dos ${emAtraso} em atraso com desconto — recupera o caixa agora` : 'Ofereça desconto de 5% para quem quitar antecipado — aumenta giro do capital' },
+      { label:'Mercado', valor: temInflacao ? '⚠️ IPCA pressionado — clientes com dívida longa terão cada vez menos sobra de renda' : 'Cenário controlado — mantenha prazos dentro do padrão' },
+    ];
+  } else if (titulo.includes('taxa') || titulo.includes('Taxa') || titulo.includes('Ajuste')) {
+    blocos = [
+      { label:'Sinal de mercado', valor: temSelicAlta ? '📈 Selic em alta — custo do capital sobe, sua margem comprime' : temSelicBaixa ? '📉 Selic caindo — boa hora para ser competitivo e crescer volume' : 'Taxa estável — revise seus spreads anualmente' },
+      { label:'Sua operação', valor: `${capitalCarteira} rodando em ${clientesAtivos} clientes — lucro realizado: ${lucroRealizado}` },
+      { label:'Referência', valor: 'Mercado informal pratica 10–30% a.m. — você compete com facilidade e agilidade, não só com taxa' },
+      { label:'Recomendação', valor: temSelicAlta ? 'Aumente 1–2 p.p. nos contratos novos. Clientes existentes: mantenha para não gerar calote por pressão financeira' : 'Mantenha a taxa atual — reduzir agora só vale se quiser dobrar volume' },
+      { label:'Alavancagem', valor: `Se reinvestir os ${aReceber7d} da semana integralmente, capital cresce sem precisar ajustar taxa` },
+      { label:'Atenção', valor: 'Taxa muito alta em cliente endividado = calote certo. Avalie a capacidade antes do spread' },
+    ];
+  } else if (titulo.includes('Diversific') || titulo.includes('carteira') || titulo.includes('Carteira')) {
+    const concentracao = clientesNum > 0 && capitalNum > 0 ? Math.round(capitalNum / clientesNum) : 0;
+    blocos = [
+      { label:'Concentração atual', valor: clientesNum > 0 ? `${capitalCarteira} ÷ ${clientesAtivos} clientes = ${fmtBRL(concentracao)} por cliente em média` : 'Dados insuficientes — verifique o cadastro' },
+      { label:'Risco de concentração', valor: concentracao > 5000 ? '🔴 Alto — se 1 cliente grande calota, impacto severo no caixa' : concentracao > 2000 ? '🟡 Médio — diversifique gradualmente' : '🟢 Baixo — carteira bem distribuída' },
+      { label:'Meta ideal', valor: `Nenhum cliente deve representar mais de ${clientesNum > 0 ? Math.round(100/clientesNum) : '—'}% do capital. Hoje o teto saudável é ${fmtBRL(Math.round(capitalNum * 0.15))}` },
+      { label:'Ação', valor: 'Nos próximos 2 contratos, priorize valores menores para 2 clientes novos — reduz exposição por cabeça' },
+      { label:'Semana', valor: `${aReceber7d} entrando — boa hora para redistribuir em 2–3 novos tomadores menores` },
+      { label:'Mercado', valor: temInadimplencia ? '⚠️ Inadimplência alta no mercado — diversificar agora é proteção, não opção' : 'Cenário favorável para crescer a base com segurança' },
+    ];
+  } else if (titulo.includes('Cobranças') || titulo.includes('semana') || titulo.includes('Semana')) {
+    blocos = [
+      { label:'A receber esta semana', valor: aReceber7d, destaque: 'green' },
+      { label:'Situação dos atrasos', valor: atrasosNum > 0 ? `${emAtraso} ainda em aberto — priorize esses antes dos novos vencimentos` : '✅ Nenhum atraso registrado — ótimo momento' },
+      { label:'Estratégia de cobrança', valor: 'Segunda e terça: melhores dias para cobrar — taxa de resposta 40% maior que sexta' },
+      { label:'Script eficaz', valor: '"Olá [nome], seu vencimento é [data]. Posso te ajudar a confirmar o pagamento?"  — tom colaborativo recupera mais' },
+      { label:'Lembrete antecipado', valor: 'Envie hoje para quem vence em 3 dias — reduz atrasos em até 35% sem pressão' },
+      { label:'Meta da semana', valor: semanaNum > 0 ? `Fechar a semana com 100% do ${aReceber7d} recebido + ${atrasosNum > 0 ? 'acionar os ' + emAtraso + ' em atraso' : 'zero inadimplência'}` : 'Monitore os vencimentos diariamente pelo dashboard' },
+    ];
+  } else if (titulo.includes('saudável') || titulo.includes('Saudável')) {
+    blocos = [
+      { label:'Status geral', valor: '✅ Nenhum alerta crítico identificado no momento', destaque: 'green' },
+      { label:'Sua carteira', valor: `${capitalCarteira} em ${clientesAtivos} clientes — lucro realizado: ${lucroRealizado}` },
+      { label:'A receber', valor: `${aReceber7d} nos próximos 7 dias — mantenha o acompanhamento diário` },
+      { label:'Sugestão proativa', valor: 'Momento ideal para prospectar 1–2 novos clientes e crescer o capital sem pressão' },
+      { label:'Fidelização', valor: 'Clientes que pagam em dia merecem prioridade no próximo empréstimo — cria lealdade e reduz risco' },
+      { label:'Mercado', valor: (temSelicBaixa ? '📉 Selic caindo — boa janela para crescer volume.' : temInadimplencia ? '⚠️ Mercado com inadimplência — aproveite sua carteira saudável como vantagem.' : 'Cenário estável — mantenha o ritmo atual.') },
+    ];
+  } else {
+    // Fallback genérico com dados reais
+    blocos = [
+      { label:'Carteira atual', valor: `${capitalCarteira} em ${clientesAtivos} clientes ativos` },
+      { label:'Desempenho', valor: `Lucro realizado: ${lucroRealizado} | Ticket médio: ${ticketMedio}` },
+      { label:'Semana', valor: `${aReceber7d} a receber | ${atrasosNum > 0 ? emAtraso + ' em atraso' : 'Sem atrasos'}` },
+      { label:'Contexto de mercado', valor: noticiasResumidas },
+      { label:'Recomendação', valor: 'Mantenha a régua de cobrança ativa e revise contratos longos mensalmente' },
+    ];
+  }
+
+  _sugCache[titulo] = blocos;
+  return blocos;
+}
+
 function sugestoesGerarLocal(dados, noticias) {
-  // Gera sugestões inteligentes sem API, baseadas nos dados reais
   const sugestoes = [];
-  const notTitulos = noticias.map(n => (n.titulo||'').toLowerCase());
+  const not = noticias.map(n=>(n.titulo||'').toLowerCase());
+  const temInadimplencia = not.some(t=>t.includes('inadimpl')||t.includes('calote'));
+  const temDesemprego    = not.some(t=>t.includes('desemprego')||t.includes('demissão')||t.includes('demissao'));
+  const temSelicAlta     = not.some(t=>t.includes('selic')&&(t.includes('alta')||t.includes('sobe')||t.includes('aumento')));
+  const temSelicBaixa    = not.some(t=>t.includes('selic')&&(t.includes('queda')||t.includes('reduz')||t.includes('corte')));
+  const temInflacao      = not.some(t=>t.includes('inflação')||t.includes('inflacao')||t.includes('ipca'));
 
-  // Analisa inadimplência nas notícias
-  const temInadimplencia = notTitulos.some(t => t.includes('inadimpl') || t.includes('calote') || t.includes('atraso'));
-  const temDesemprego = notTitulos.some(t => t.includes('desemprego') || t.includes('demissão'));
-  const temJurosAltos = notTitulos.some(t => t.includes('selic') && (t.includes('alta') || t.includes('sobe') || t.includes('aumento')));
-  const temJurosBaixos = notTitulos.some(t => t.includes('selic') && (t.includes('queda') || t.includes('reduz') || t.includes('corte')));
-  const temInflacao = notTitulos.some(t => t.includes('inflação') || t.includes('ipca'));
+  if (dados.atrasosNum > 0)
+    sugestoes.push({ icon:'⚠️', cor:'#ef476f', titulo:'Cobrança prioritária' });
+  if (temInadimplencia)
+    sugestoes.push({ icon:'🔒', cor:'#e8b84b', titulo:'Cautela na concessão' });
+  if (temDesemprego)
+    sugestoes.push({ icon:'👥', cor:'#e8b84b', titulo:'Cheque a renda dos clientes' });
+  if (temSelicAlta)
+    sugestoes.push({ icon:'📈', cor:'#06d6a0', titulo:'Ajuste sua taxa' });
+  if (temSelicBaixa)
+    sugestoes.push({ icon:'🚀', cor:'#4895ef', titulo:'Momento de crescer' });
+  if (temInflacao)
+    sugestoes.push({ icon:'💰', cor:'#9b5de5', titulo:'Cuidado com o prazo' });
+  if (dados.capitalNum > 0 && dados.clientesNum > 0)
+    sugestoes.push({ icon:'💡', cor:'#c9922a', titulo:'Diversifique a carteira' });
+  if (dados.semanaNum > 0)
+    sugestoes.push({ icon:'📅', cor:'#06d6a0', titulo:'Cobranças da semana' });
+  if (sugestoes.length === 0)
+    sugestoes.push({ icon:'✅', cor:'#06d6a0', titulo:'Carteira saudável' });
 
-  // Sugestão baseada em atraso atual
-  const atrasosNum = parseInt((dados.emAtraso||'0').replace(/\D/g,'')) || 0;
-  if (atrasosNum > 0) {
-    sugestoes.push({ icon:'⚠️', cor:'#ef476f', titulo:'Cobrança prioritária', texto:`Você tem ${dados.emAtraso} em atraso. Entre em contato hoje com os devedores — quanto mais tempo passa, menor a chance de receber.` });
-  }
-
-  // Notícia de inadimplência → cautela
-  if (temInadimplencia) {
-    sugestoes.push({ icon:'🔒', cor:'#e8b84b', titulo:'Cautela na concessão', texto:'Notícias de alta inadimplência no mercado. Considere exigir garantias ou reduzir o valor dos próximos empréstimos para novos clientes.' });
-  }
-
-  // Desemprego → risco de calote
-  if (temDesemprego) {
-    sugestoes.push({ icon:'👥', cor:'#e8b84b', titulo:'Cheque a renda dos clientes', texto:'Aumento de desemprego pode afetar a capacidade de pagamento. Priorize clientes com emprego fixo ou renda comprovável nos novos contratos.' });
-  }
-
-  // Selic alta → oportunidade de spreads maiores
-  if (temJurosAltos) {
-    sugestoes.push({ icon:'📈', cor:'#06d6a0', titulo:'Ajuste sua taxa', texto:'Com a Selic subindo, o custo do dinheiro no mercado aumenta. Você pode revisar levemente sua taxa para cima sem perder competitividade.' });
-  }
-
-  // Selic caindo → oportunidade de volume
-  if (temJurosBaixos) {
-    sugestoes.push({ icon:'🚀', cor:'#4895ef', titulo:'Momento de crescer', texto:'Queda da Selic reduz concorrência dos bancos tradicionais no crédito pessoal. Bom momento para aumentar volume e prospectar novos clientes.' });
-  }
-
-  // Inflação alta → clientes com menos renda disponível
-  if (temInflacao) {
-    sugestoes.push({ icon:'💰', cor:'#9b5de5', titulo:'Cuidado com o prazo', texto:'Inflação corrói a renda dos clientes. Prefira prazos mais curtos nos novos contratos para reduzir exposição ao risco de inadimplência.' });
-  }
-
-  // Ticket médio baixo → oportunidade
-  const capital = dados.capitalCarteira?.replace(/[^\d]/g,'') || 0;
-  if (parseInt(capital) > 0 && dados.clientesAtivos !== '—') {
-    sugestoes.push({ icon:'💡', cor:'#c9922a', titulo:'Diversifique a carteira', texto:`Capital em carteira: ${dados.capitalCarteira}. Se concentrado em poucos clientes, considere distribuir entre mais tomadores para reduzir risco de inadimplência total.` });
-  }
-
-  // Sugestão a receber em 7 dias
-  if (dados.aReceber7d && dados.aReceber7d !== 'R$ 0' && dados.aReceber7d !== '—') {
-    sugestoes.push({ icon:'📅', cor:'#06d6a0', titulo:'Cobranças da semana', texto:`${dados.aReceber7d} a receber nos próximos 7 dias. Envie um lembrete antecipado aos clientes — reduz atrasos em até 40%.` });
-  }
-
-  // Fallback se não gerou nada
-  if (sugestoes.length === 0) {
-    sugestoes.push({ icon:'✅', cor:'#06d6a0', titulo:'Carteira saudável', texto:'Nenhum alerta crítico identificado. Continue monitorando os vencimentos e mantenha contato regular com os clientes para fidelização.' });
-  }
-
-  return sugestoes.slice(0, 4);
+  return sugestoes.slice(0, 5);
 }
 
 function sugestoesAtualizar() {
   const lista = document.getElementById('sugestoes-lista');
   if (!lista) return;
-
   const dados = sugestoesDadosDashboard();
-  const sugestoes = sugestoesGerarLocal(dados, _ultimasNoticias);
+  const sugestoes = sugestoesGerarLocal(dados, _ultimasNoticias || []);
+  // Limpa cache ao atualizar
+  Object.keys(_sugCache).forEach(k => delete _sugCache[k]);
 
-  lista.innerHTML = sugestoes.map((s, i) => `
-    <div class="sug-item" onclick="sugAbrirModal('${s.icon}','${s.titulo.replace(/'/g,"\\'")}','${s.texto.replace(/'/g,"\\'")}','${s.cor}')">
+  lista.innerHTML = sugestoes.map(s => `
+    <div class="sug-item" data-sug-titulo="${s.titulo.replace(/"/g,'&quot;')}" data-sug-icon="${s.icon}" data-sug-cor="${s.cor}"
+         onclick="sugAbrirModal(this)">
       <div class="sug-item-bar" style="background:linear-gradient(90deg,${s.cor},transparent)"></div>
       <div class="sug-item-icon">${s.icon}</div>
       <div class="sug-item-titulo" style="color:${s.cor}">${s.titulo}</div>
@@ -5754,12 +5845,35 @@ function sugestoesAtualizar() {
     </div>`).join('');
 }
 
-function sugAbrirModal(icon, titulo, texto, cor) {
-  document.getElementById('sug-modal-top').style.background = `linear-gradient(90deg,${cor},transparent)`;
-  document.getElementById('sug-modal-icon').textContent = icon;
+function sugAbrirModal(el) {
+  const icon   = el.dataset.sugIcon;
+  const titulo = el.dataset.sugTitulo;
+  const cor    = el.dataset.sugCor;
+
+  document.getElementById('sug-modal-top').style.background = `linear-gradient(90deg,transparent,${cor},transparent)`;
   document.getElementById('sug-modal-titulo').textContent = titulo;
   document.getElementById('sug-modal-titulo').style.color = cor;
-  document.getElementById('sug-modal-texto').textContent = texto;
+
+  const dados = sugestoesDadosDashboard();
+  const blocos = sugGerarAnalise(titulo, dados, _ultimasNoticias || []);
+
+  const corMap = { red:'#ef476f', gold:'#e8b84b', green:'#06d6a0', blue:'#4895ef', purple:'#9b5de5' };
+  document.getElementById('sug-modal-texto').innerHTML = blocos.map(b => {
+    const destCor = b.destaque ? (corMap[b.destaque] || cor) : null;
+    return `<div class="sug-bloco">
+      <div class="sug-bloco-label">${b.label}</div>
+      <div class="sug-bloco-valor" style="${destCor?`color:${destCor};font-weight:700`:''}">${b.valor}</div>
+    </div>`;
+  }).join('');
+
+  // Atualiza ícone e cores do wrapper
+  document.getElementById('sug-modal-icon').textContent = icon;
+  document.getElementById('sug-modal-icon-wrap').style.background = `${cor}18`;
+  document.getElementById('sug-modal-icon-wrap').style.borderColor = `${cor}35`;
+
+  // Reset TTS
+  sugTtsParar();
+
   document.getElementById('sug-modal-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -5769,8 +5883,68 @@ function sugModalFechar() {
   document.body.style.overflow = '';
 }
 
-// Fecha modal de sugestão com ESC
-document.addEventListener('keydown', e => { if(e.key === 'Escape') sugModalFechar(); });
+// ── TTS (Text-to-Speech) para o modal de sugestões ──
+let _ttsUtterance = null;
+let _ttsPlaying = false;
+
+function sugTtsTexto() {
+  const titulo = document.getElementById('sug-modal-titulo').textContent || '';
+  const blocos = document.querySelectorAll('#sug-modal-texto .sug-bloco');
+  let texto = titulo + '. ';
+  blocos.forEach(b => {
+    const lbl = b.querySelector('.sug-bloco-label')?.textContent || '';
+    const val = b.querySelector('.sug-bloco-valor')?.textContent || '';
+    // Remove HTML tags and clean up
+    const valLimpo = val.replace(/<[^>]*>/g, '').trim();
+    texto += lbl + ': ' + valLimpo + '. ';
+  });
+  return texto.trim();
+}
+
+function sugTtsParar() {
+  if (_ttsUtterance || _ttsPlaying) {
+    window.speechSynthesis && window.speechSynthesis.cancel();
+    _ttsUtterance = null;
+    _ttsPlaying = false;
+    const btn = document.getElementById('sug-tts-btn');
+    if (btn) { btn.classList.remove('playing'); document.getElementById('sug-tts-label').textContent = 'OUVIR'; btn.querySelector('.tts-icon').textContent = '🔊'; }
+  }
+}
+
+function sugTtsToggle() {
+  if (!window.speechSynthesis) {
+    alert('Seu navegador não suporta síntese de voz.');
+    return;
+  }
+  if (_ttsPlaying) { sugTtsParar(); return; }
+
+  const texto = sugTtsTexto();
+  _ttsUtterance = new SpeechSynthesisUtterance(texto);
+  _ttsUtterance.lang = 'pt-BR';
+  _ttsUtterance.rate = 0.95;
+  _ttsUtterance.pitch = 1;
+
+  // Tenta usar uma voz pt-BR se disponível
+  const vozes = window.speechSynthesis.getVoices();
+  const vozPT = vozes.find(v => v.lang.startsWith('pt')) || null;
+  if (vozPT) _ttsUtterance.voice = vozPT;
+
+  _ttsUtterance.onstart = () => {
+    _ttsPlaying = true;
+    const btn = document.getElementById('sug-tts-btn');
+    if (btn) { btn.classList.add('playing'); document.getElementById('sug-tts-label').textContent = 'PARAR'; btn.querySelector('.tts-icon').textContent = '⏹'; }
+  };
+  _ttsUtterance.onend = _ttsUtterance.onerror = () => {
+    _ttsPlaying = false;
+    _ttsUtterance = null;
+    const btn = document.getElementById('sug-tts-btn');
+    if (btn) { btn.classList.remove('playing'); document.getElementById('sug-tts-label').textContent = 'OUVIR'; btn.querySelector('.tts-icon').textContent = '🔊'; }
+  };
+
+  window.speechSynthesis.speak(_ttsUtterance);
+}
+
+document.addEventListener('keydown', e => { if(e.key === 'Escape') { sugTtsParar(); sugModalFechar(); } });
 
 // Inicializa ao carregar
 window.addEventListener('DOMContentLoaded', () => {
@@ -5790,23 +5964,25 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <!-- MODAL SUGESTÃO -->
-<div id="sug-modal-overlay" onclick="if(event.target===this)sugModalFechar()">
+<div id="sug-modal-overlay" onclick="if(event.target===this){sugTtsParar();sugModalFechar();}">
   <div id="sug-modal">
-    <div id="sug-modal-hero">
-      <div id="sug-modal-hero-top">
-        <div id="sug-modal-icon-wrap">💡</div>
+    <div id="sug-modal-top"></div>
+    <div id="sug-modal-header">
+      <div id="sug-modal-icon-wrap"><span id="sug-modal-icon">💡</span></div>
+      <div id="sug-modal-header-info">
         <div id="sug-modal-badge">✦ CONSULTOR FINANCEIRO</div>
+        <div id="sug-modal-titulo"></div>
       </div>
-      <div id="sug-modal-titulo"></div>
-      <div id="sug-modal-subtitulo"></div>
     </div>
-    <div id="sug-modal-corpo"></div>
+    <div id="sug-modal-body">
+      <div id="sug-modal-texto"></div>
+    </div>
     <div id="sug-modal-footer">
-      <button id="sug-btn-voz" onclick="sugToggleVoz()">
-        <span class="voz-icon">🔊</span>
-        <span class="voz-txt">OUVIR ANÁLISE</span>
+      <button id="sug-tts-btn" onclick="sugTtsToggle()" title="Ouvir sugestões em voz alta">
+        <span class="tts-icon">🔊</span>
+        <span id="sug-tts-label">OUVIR</span>
       </button>
-      <button id="sug-modal-close" onclick="sugModalFechar()">FECHAR</button>
+      <button id="sug-modal-close" onclick="sugTtsParar();sugModalFechar()">FECHAR</button>
     </div>
   </div>
 </div>
