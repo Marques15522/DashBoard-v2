@@ -512,9 +512,17 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     <div><div class="load-brand">Capital Investimentos</div><div class="load-sub">Soluções Financeiras Estratégicas</div></div>
   </div>
   <div class="load-bar-wrap"><div class="load-bar"></div></div>
-  <div id="load-saudacao-text" style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold);letter-spacing:0.12em;margin-top:8px">BOM DIA, SR. MARQUES</div>
+  <div id="load-saudacao-text" style="font-family:'Cinzel',serif;font-size:1.6rem;color:var(--gold);letter-spacing:0.12em;margin-top:8px">BOM DIA, SR. MARQUES</div>
   <div class="load-text">CARREGANDO DADOS DA CARTEIRA...</div>
 </div>
+<script>
+(function(){
+  var h=new Date().getHours();
+  var s=h<12?'BOM DIA':h<18?'BOA TARDE':'BOA NOITE';
+  var el=document.getElementById('load-saudacao-text');
+  if(el) el.textContent=s+', SR. MARQUES';
+})();
+</script>
 
 <div id="error-screen">
   <div class="error-box">
@@ -581,7 +589,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       <div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase" id="briefing-data-longa">—</div>
     </div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center">
-      <div id="briefing-saudacao" style="font-family:'Bebas Neue',sans-serif;font-size:2.8rem;color:var(--gold);letter-spacing:0.1em;text-align:center">BOM DIA, SR. MARQUES</div>
+      <div id="briefing-saudacao" style="font-family:'Cinzel',serif;font-size:2.8rem;color:var(--gold);letter-spacing:0.1em;text-align:center">BOM DIA, SR. MARQUES</div>
     </div>
   </div>
 
@@ -808,6 +816,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
           #sug-modal-body{padding:24px 24px 20px;}
           #sug-modal-icon{font-size:2rem;margin-bottom:10px;display:block;}
           #sug-modal-titulo{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:0.08em;margin-bottom:12px;line-height:1.1;}
+          #sug-modal-texto{font-size:0.72rem;color:var(--text);line-height:1.8;opacity:0.9;max-height:280px;overflow-y:auto;padding-right:4px;}
           #sug-modal-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;}
           #sug-modal-close{background:linear-gradient(135deg,rgba(155,93,229,0.2),rgba(201,146,42,0.1));border:1px solid rgba(155,93,229,0.35);color:var(--text);border-radius:8px;padding:8px 22px;font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s;}
           #sug-modal-close:hover{background:rgba(155,93,229,0.3);border-color:var(--purple);}
@@ -5735,26 +5744,22 @@ function sugestoesAtualizar() {
 }
 
 async function sugAbrirModal(icon, titulo, textoBase, cor) {
-  // Abre o modal imediatamente com loading
   const overlay = document.getElementById('sug-modal-overlay');
   document.getElementById('sug-modal-top').style.background = `linear-gradient(90deg,${cor},transparent)`;
   document.getElementById('sug-modal-icon').textContent = icon;
   document.getElementById('sug-modal-titulo').textContent = titulo;
   document.getElementById('sug-modal-titulo').style.color = cor;
   const textoEl = document.getElementById('sug-modal-texto');
-  textoEl.innerHTML = '<span style="color:var(--muted);font-size:0.68rem;letter-spacing:0.06em">⏳ Consultando IA...</span>';
+  textoEl.innerHTML = '<span style="color:var(--muted);font-size:0.68rem;letter-spacing:0.06em;animation:pulse 1.5s infinite">⏳ Consultando IA...</span>';
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
 
-  // Coleta dados reais do dashboard
   const dados = sugestoesDadosDashboard();
   const noticias = (_ultimasNoticias||[]).slice(0,5).map(n=>n.titulo).filter(Boolean).join('; ');
-  const hora = new Date().getHours();
-  const periodo = hora < 12 ? 'manhã' : hora < 18 ? 'tarde' : 'noite';
 
-  const prompt = `Você é um consultor financeiro especialista em crédito pessoal e empréstimos a juros (agiotagem regulada). Analise os dados abaixo e dê uma análise detalhada e acionável sobre o tema "${titulo}" para o dono desse negócio.
+  const prompt = `Você é um consultor financeiro especialista em crédito pessoal e empréstimos a juros. Analise os dados abaixo e dê uma análise detalhada e acionável sobre o tema "${titulo}".
 
-DADOS ATUAIS DO NEGÓCIO:
+DADOS DO NEGÓCIO:
 - Capital em carteira: ${dados.capitalCarteira}
 - Clientes ativos: ${dados.clientesAtivos}
 - Lucro realizado: ${dados.lucroRealizado}
@@ -5763,12 +5768,9 @@ DADOS ATUAIS DO NEGÓCIO:
 - Em atraso: ${dados.emAtraso}
 
 CONTEXTO DO ALERTA: ${textoBase}
+NOTÍCIAS RECENTES: ${noticias || 'Sem notícias'}
 
-NOTÍCIAS ECONÔMICAS RECENTES: ${noticias || 'Nenhuma disponível'}
-
-HORÁRIO: ${periodo}
-
-Responda em português brasileiro, de forma direta, prática e personalizada para ESSE negócio específico. Use os números reais acima. Máximo 5 linhas curtas. Sem rodeios, sem introdução — vá direto à análise e à ação recomendada. Use bullet points (•) quando listar mais de um ponto.`;
+Responda em português brasileiro, de forma direta e personalizada para ESSE negócio. Use os números reais acima na análise. Máximo 6 linhas. Sem introdução — vá direto à análise e ação recomendada. Use bullet • para listar pontos.`;
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -5776,17 +5778,15 @@ Responda em português brasileiro, de forma direta, prática e personalizada par
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 350,
+        max_tokens: 400,
         messages: [{ role: 'user', content: prompt }]
       })
     });
     const data = await res.json();
-    const resposta = data?.content?.[0]?.text || textoBase;
-    // Formata: converte bullet points em HTML
+    const resposta = (data?.content?.[0]?.text || textoBase).trim();
     textoEl.innerHTML = resposta
-      .split('\n')
-      .filter(l => l.trim())
-      .map(l => `<div style="margin-bottom:6px">${l.replace(/^•\s*/,'<span style="color:var(--gold);margin-right:5px">•</span>')}</div>`)
+      .split('\n').filter(l => l.trim())
+      .map(l => `<div style="margin-bottom:7px">${l.replace(/^[•\-]\s*/,'<span style="color:var(--gold);margin-right:6px">•</span>')}</div>`)
       .join('');
   } catch(e) {
     textoEl.textContent = textoBase;
@@ -5824,11 +5824,11 @@ window.addEventListener('DOMContentLoaded', () => {
     <div id="sug-modal-top"></div>
     <div id="sug-modal-body">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <span id="sug-modal-icon" style="font-size:2rem">💡</span>
+        <span id="sug-modal-icon">💡</span>
         <span style="font-size:0.48rem;letter-spacing:0.14em;color:var(--purple);border:1px solid rgba(155,93,229,0.4);background:rgba(155,93,229,0.08);border-radius:4px;padding:3px 8px">✦ ANÁLISE IA</span>
       </div>
       <div id="sug-modal-titulo"></div>
-      <div id="sug-modal-texto" style="font-size:0.72rem;color:var(--text);line-height:1.8;opacity:0.9;max-height:280px;overflow-y:auto;padding-right:4px"></div>
+      <div id="sug-modal-texto"></div>
     </div>
     <div id="sug-modal-footer">
       <button id="sug-modal-close" onclick="sugModalFechar()">FECHAR</button>
