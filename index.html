@@ -2089,7 +2089,7 @@ function doGet(e) {
   document.body.appendChild(modal);
 }
 const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18};
-const CP={id:0,tipo:2,valor:3,data:4,juros:5};
+const CP={id:0,tipo:2,valor:3,data:4,juros:5,amort:6};
 const GID_EMP=147333899, GID_PAG=647642652, GID_CLI=213648997;
 const fmt=v=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
 const pct=v=>(Number(v)*100).toFixed(1)+'%';
@@ -2221,10 +2221,9 @@ function render(empRows,pagRows){
     .filter(r=>r[CP.id]&&String(r[CP.id]).startsWith('EMP'))
     .map(r=>{
       const valor=parseNum(r[CP.valor]);
-      const jurosRaw=parseNum(r[CP.juros]);
-      const empRef=emps.find(e=>e.id===String(r[CP.id]).trim());
-      const juros=jurosRaw>0?jurosRaw:(empRef?empRef.jTotal:0);
-      return{id:String(r[CP.id]).trim(),tipo:String(r[CP.tipo]||''),valor,data:parseDate(r[CP.data]),juros};
+      const juros=parseNum(r[CP.juros]);
+      const amort=parseNum(r[CP.amort]);
+      return{id:String(r[CP.id]).trim(),tipo:String(r[CP.tipo]||''),valor,data:parseDate(r[CP.data]),juros,amort};
     });
 
   const ativos=emps.filter(e=>e.status==='ativo');
@@ -5620,7 +5619,7 @@ function cxAutoEntradas(pags) {
         valor: p.juros, data, _auto: true,
       });
     }
-    const capital = p.valor - p.juros;
+    const capital = p.amort > 0 ? p.amort : (p.valor - p.juros > 0 ? p.valor - p.juros : 0);
     if (capital > 0) {
       entradas.push({
         id: 'auto_cap_' + (p.id||'') + '_' + (p.data ? p.data.getTime() : 0),
