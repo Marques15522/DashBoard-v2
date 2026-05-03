@@ -2162,6 +2162,10 @@ document.querySelectorAll('.nav-tab').forEach(tab=>{
     } else {
       pararSyncPolling();
     }
+    // Garante que o áudio NÃO para ao mudar de aba
+    if(_ttsPlaying && _elAudio && _elAudio.paused){
+      _elAudio.play().catch(()=>{});
+    }
   });
 });
 
@@ -6099,6 +6103,8 @@ function sugestoesAtualizar() {
 }
 
 function sugAbrirModal(el) {
+  // Não para o áudio se está tocando via player flutuante
+  const deveParar = !_ttsPlaying;
   const icon   = el.dataset.sugIcon;
   const titulo = el.dataset.sugTitulo;
   const cor    = el.dataset.sugCor;
@@ -6124,8 +6130,8 @@ function sugAbrirModal(el) {
   document.getElementById('sug-modal-icon-wrap').style.background = `${cor}18`;
   document.getElementById('sug-modal-icon-wrap').style.borderColor = `${cor}35`;
 
-  // Reset TTS
-  sugTtsParar();
+  // Reset TTS apenas se não estava tocando
+  if(deveParar) sugTtsParar();
 
   document.getElementById('sug-modal-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -6254,6 +6260,12 @@ async function sugTtsToggle() {
 
     const blob = URL.createObjectURL(await resp.blob());
     _elAudio = new Audio(blob);
+    // Conecta ao AudioContext para continuar tocando em background
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const src = ctx.createMediaElementSource(_elAudio);
+      src.connect(ctx.destination);
+    } catch(e) {}
     _elAudio.onplay  = () => _ttsSetBtn(true);
     _elAudio.onended = _elAudio.onerror = () => { _elAudio = null; _ttsSetBtn(false); };
     _elAudio.play();
@@ -6375,6 +6387,13 @@ function sugElTestar() {
 }
 
 document.addEventListener('keydown', e => { if(e.key==='Escape'){ sugTtsParar(); sugModalFechar(); } });
+
+// Retoma áudio se o navegador pausar ao mudar de aba
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && _elAudio && _elAudio.paused && _ttsPlaying) {
+    _elAudio.play().catch(() => {});
+  }
+});
 
 // Inicializa ao carregar
 window.addEventListener('DOMContentLoaded', () => {
