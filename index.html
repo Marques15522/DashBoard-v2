@@ -1568,19 +1568,89 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 </div>
 
 <!-- MODAL REGISTRAR PAGAMENTO -->
+<!-- ── MODAL REGISTRAR PAGAMENTO ── -->
 <div class="pag-modal-overlay" id="pag-modal-overlay" onclick="if(event.target===this)pagModalClose()">
   <div class="pag-modal">
-    <div class="pag-modal-title">✅ Registrar Pagamento</div>
+    <div class="pag-modal-title">💳 Registrar Pagamento</div>
     <div class="pag-modal-sub" id="pag-modal-cliente">—</div>
-    <div class="pag-field"><label class="pag-label">💰 Valor Recebido (R$)</label><input class="pag-input" id="pag-valor" type="number" placeholder="0"></div>
-    <div class="pag-field"><label class="pag-label">📅 Data do Pagamento</label><input class="pag-input" id="pag-data" type="date"></div>
-    <div class="pag-field"><label class="pag-label">📝 Observação (opcional)</label><input class="pag-input" id="pag-obs" type="text" placeholder="Ex: Pix recebido"></div>
-    <div style="margin-top:12px;padding:10px;background:rgba(6,214,160,0.05);border:1px solid rgba(6,214,160,0.15);border-radius:8px;font-size:0.55rem;color:var(--muted);line-height:1.6">
-      ℹ️ O registro é salvo localmente no navegador como lembrete. Para atualizar a planilha, insira o pagamento manualmente na aba Pagamentos.
+
+    <div class="pag-field">
+      <label class="pag-label">Tipo de Pagamento</label>
+      <select class="pag-input" id="pag-tipo" onchange="pagAtualizarCampos()">
+        <option value="Total">Total — Quita juros + abate capital</option>
+        <option value="Juros">Juros — Só paga juros (venc. avança 1 mês)</option>
+        <option value="Amortização">Amortização — Abate o capital</option>
+      </select>
     </div>
+    <div class="pag-field">
+      <label class="pag-label">💰 Valor Total Recebido (R$)</label>
+      <input class="pag-input" id="pag-valor" type="number" step="0.01" placeholder="0,00" oninput="pagAtualizarCampos()">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="pag-field">
+        <label class="pag-label">Juros Pagos (R$)</label>
+        <input class="pag-input" id="pag-juros" type="number" step="0.01" placeholder="0,00">
+      </div>
+      <div class="pag-field">
+        <label class="pag-label">Amort. Principal (R$)</label>
+        <input class="pag-input" id="pag-amort" type="number" step="0.01" placeholder="0,00">
+      </div>
+    </div>
+    <div class="pag-field">
+      <label class="pag-label">📅 Data do Pagamento</label>
+      <input class="pag-input" id="pag-data" type="date">
+    </div>
+    <div class="pag-field">
+      <label class="pag-label">📝 Observação (opcional)</label>
+      <input class="pag-input" id="pag-obs" type="text" placeholder="Ex: Pix recebido às 14h">
+    </div>
+
+    <!-- Status do envio -->
+    <div id="pag-status" style="display:none;margin-top:10px;padding:9px 12px;border-radius:8px;font-size:0.6rem;"></div>
+
     <div class="pag-modal-footer">
       <button class="pag-btn-cancel" onclick="pagModalClose()">Cancelar</button>
-      <button class="pag-btn-ok" onclick="pagSalvar()">✅ REGISTRAR</button>
+      <button class="pag-btn-ok" id="pag-btn-ok" onclick="pagSalvar()">✅ REGISTRAR NA PLANILHA</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL REGISTRAR RENEGOCIAÇÃO ── -->
+<div id="reneg-modal-overlay" onclick="if(event.target===this)renegModalClose()"
+  style="display:none;position:fixed;inset:0;background:rgba(5,8,18,0.88);z-index:1002;align-items:center;justify-content:center;">
+  <div class="pag-modal" style="border-color:rgba(240,180,41,0.4);">
+    <div class="pag-modal-title" style="color:var(--gold2);">🔄 Registrar Renegociação</div>
+    <div class="pag-modal-sub" id="reneg-modal-cliente">—</div>
+
+    <div class="pag-field">
+      <label class="pag-label">Tipo de Renegociação</label>
+      <select class="pag-input" id="reneg-tipo">
+        <option value="Prorrogação de prazo">Prorrogação de prazo</option>
+        <option value="Desconto de juros">Desconto de juros</option>
+        <option value="Parcelamento do atraso">Parcelamento do atraso</option>
+        <option value="Outro">Outro</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="pag-field">
+        <label class="pag-label">📅 Vencimento Anterior</label>
+        <input class="pag-input" id="reneg-venc-ant" type="date">
+      </div>
+      <div class="pag-field">
+        <label class="pag-label">📅 Novo Vencimento</label>
+        <input class="pag-input" id="reneg-venc-novo" type="date">
+      </div>
+    </div>
+    <div class="pag-field">
+      <label class="pag-label">💬 Motivo / Observação</label>
+      <input class="pag-input" id="reneg-motivo" type="text" placeholder="Ex: Cliente com dificuldade financeira">
+    </div>
+
+    <div id="reneg-status" style="display:none;margin-top:10px;padding:9px 12px;border-radius:8px;font-size:0.6rem;"></div>
+
+    <div class="pag-modal-footer">
+      <button class="pag-btn-cancel" onclick="renegModalClose()">Cancelar</button>
+      <button class="pag-btn-ok" id="reneg-btn-ok" style="background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;" onclick="renegSalvar()">🔄 REGISTRAR</button>
     </div>
   </div>
 </div>
@@ -2141,7 +2211,7 @@ function render(empRows,pagRows){
 
   const emps=empRows
     .filter(r=>r[CE.id]&&String(r[CE.id]).trim().toUpperCase().startsWith('EMP'))
-    .map(r=>({id:String(r[CE.id]).trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital:parseNum(r[CE.cap]),data:parseDate(r[CE.data]),taxa:parseTaxa(r[CE.taxa]),prazo:parseNum(r[CE.prazo]),tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal:parseNum(r[CE.jTotal]),saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status:parseStatus(r[CE.status]),proxVenc:parseDate(r[CE.proxVenc]),vencContrato:parseDate(r[CE.vencContrato])}))
+    .map(r=>({id:String(r[CE.id]).trim(),idCliente:String(r[CE.clienteId]||'').trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital:parseNum(r[CE.cap]),data:parseDate(r[CE.data]),taxa:parseTaxa(r[CE.taxa]),prazo:parseNum(r[CE.prazo]),tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal:parseNum(r[CE.jTotal]),saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status:parseStatus(r[CE.status]),proxVenc:parseDate(r[CE.proxVenc]),vencContrato:parseDate(r[CE.vencContrato])}))
     .filter(e=>e.status!==null&&e.capital>0);
 
   const pags=pagRows
@@ -2176,8 +2246,10 @@ function render(empRows,pagRows){
   const cliMap={};
   emps.forEach(e=>{
     const k=e.nome||e.id;
-    if(!cliMap[k])cliMap[k]={nome:k,contratos:[],totalCap:0,totalJuros:0,totalPago:0,temAtraso:false,soQuitados:true,tel:''};
+    if(!cliMap[k])cliMap[k]={nome:k,contratos:[],totalCap:0,totalJuros:0,totalPago:0,temAtraso:false,soQuitados:true,tel:'',empIds:[],idCliente:''};
     cliMap[k].contratos.push(e);
+    cliMap[k].empIds.push(e.id);
+    if(e.idCliente&&!cliMap[k].idCliente)cliMap[k].idCliente=e.idCliente;
     if(e.status!=='quitado') cliMap[k].totalCap+=e.capital; // só contratos abertos
     cliMap[k].totalJuros+=e.jTotal;
     if(e.status==='atraso')cliMap[k].temAtraso=true;
@@ -3024,7 +3096,8 @@ function waCard(c){
     <textarea class="wa-textarea" id="${tid}_prev">${tplApply(tpls[def].txt, c)}</textarea>
     <div class="wa-btns">
       <a class="wa-btn-send" href="#" onclick="waEnviar('${tid}');return false;"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> ABRIR WHATSAPP</a>
-      <button class="wa-btn-pago" onclick="pagModalOpen('${nomeSafe}')">✅ Pago</button>
+      <button class="wa-btn-pago" onclick="pagModalOpen(c.empIds&&c.empIds[0]||'',c.idCliente||'','${nomeSafe}',c.saldoTotal||0,c.jurosDevidos||0)">💳 Pago</button>
+      <button onclick="renegModalOpen(c.empIds&&c.empIds[0]||'',c.idCliente||'','${nomeSafe}','')" style="background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.3);color:var(--gold2);border-radius:8px;padding:9px 10px;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;white-space:nowrap;">🔄 Reneg.</button>
       <button class="wa-btn-copy" id="${tid}_copy" onclick="waCopy('${tid}')">📋</button>
     </div>
   </div>
@@ -4406,37 +4479,165 @@ function pagCarregar(){try{const s=localStorage.getItem('pag_reg');if(s)_pagRegi
 function pagSalvarLocal(){try{localStorage.setItem('pag_reg',JSON.stringify(_pagRegistros));}catch(e){}}
 pagCarregar();
 
-function pagModalOpen(nome){
-  _pagClienteAtual=nome;
-  const sub=document.getElementById('pag-modal-cliente');
-  if(sub)sub.textContent='Cliente: '+nome;
-  const dataEl=document.getElementById('pag-data');
-  if(dataEl)dataEl.value=new Date().toISOString().slice(0,10);
+// ════════════════════════════════════════════════════════
+// URL DO APPS SCRIPT — Cole aqui após implantar
+// Extensions → Apps Script → Deploy → New deployment
+// Execute as: Me | Who has access: Anyone
+// ════════════════════════════════════════════════════════
+const PAG_SCRIPT_URL = localStorage.getItem('pag_script_url') || '';
+
+// Dados do empréstimo atual aberto no modal
+let _pagEmpAtual = { idEmprestimo:'', idCliente:'', nome:'', saldo:0, juros:0 };
+let _renegEmpAtual = { idEmprestimo:'', idCliente:'', nome:'', proxVenc:'' };
+
+// Abre modal de pagamento com dados do empréstimo
+function pagModalOpen(idEmp, idCli, nome, saldo, juros) {
+  _pagEmpAtual = { idEmprestimo: idEmp||'', idCliente: idCli||'', nome: nome||idEmp||'', saldo: saldo||0, juros: juros||0 };
+  document.getElementById('pag-modal-cliente').textContent = (nome||idEmp) + ' — Saldo: R$ ' + Number(saldo||0).toFixed(2).replace('.',',');
+  document.getElementById('pag-data').value = new Date().toISOString().slice(0,10);
+  document.getElementById('pag-valor').value = '';
+  document.getElementById('pag-juros').value = juros ? Number(juros).toFixed(2) : '';
+  document.getElementById('pag-amort').value = '';
+  document.getElementById('pag-obs').value = '';
+  document.getElementById('pag-tipo').value = 'Total';
+  const st = document.getElementById('pag-status');
+  st.style.display = 'none'; st.textContent = '';
   document.getElementById('pag-modal-overlay').classList.add('open');
-}
-function pagModalClose(){document.getElementById('pag-modal-overlay').classList.remove('open');}
-function pagSalvar(){
-  const valor=parseFloat(document.getElementById('pag-valor')?.value)||0;
-  const data=document.getElementById('pag-data')?.value||'';
-  const obs=document.getElementById('pag-obs')?.value||'';
-  if(!valor){alert('Informe o valor recebido.');return;}
-  if(!_pagRegistros[_pagClienteAtual])_pagRegistros[_pagClienteAtual]=[];
-  _pagRegistros[_pagClienteAtual].push({valor,data,obs,ts:Date.now()});
-  pagSalvarLocal();
-  pagModalClose();
-  document.getElementById('pag-valor').value='';
-  document.getElementById('pag-obs').value='';
-  // Feedback
-  const cards=document.querySelectorAll('.wa-card');
-  cards.forEach(card=>{
-    const nome=card.querySelector('.wa-client-name')?.textContent;
-    if(nome===_pagClienteAtual){
-      const orig=card.style.border;
-      card.style.border='1px solid var(--green)';
-      setTimeout(()=>card.style.border=orig,2000);
+
+  // Configura URL do script se ainda não configurado
+  if (!localStorage.getItem('pag_script_url')) {
+    const url = prompt('⚙️ Primeira vez: cole aqui a URL do seu Apps Script:\n(Deploy → Web App → Copy URL)');
+    if (url && url.includes('script.google.com')) {
+      localStorage.setItem('pag_script_url', url);
+      location.reload();
     }
-  });
-  alert(`✅ Pagamento de ${fmt(valor)} registrado para ${_pagClienteAtual}!`);
+  }
+}
+
+function pagModalClose() {
+  document.getElementById('pag-modal-overlay').classList.remove('open');
+}
+
+function pagAtualizarCampos() {
+  const tipo = document.getElementById('pag-tipo').value;
+  const total = parseFloat(document.getElementById('pag-valor').value) || 0;
+  const juros = _pagEmpAtual.juros || 0;
+  if (tipo === 'Total') {
+    document.getElementById('pag-juros').value = juros ? juros.toFixed(2) : '';
+    document.getElementById('pag-amort').value = total > juros ? (total - juros).toFixed(2) : '0.00';
+  } else if (tipo === 'Juros') {
+    document.getElementById('pag-juros').value = total.toFixed(2);
+    document.getElementById('pag-amort').value = '0.00';
+  } else {
+    document.getElementById('pag-juros').value = '0.00';
+    document.getElementById('pag-amort').value = total.toFixed(2);
+  }
+}
+
+async function pagSalvar() {
+  const valor = parseFloat(document.getElementById('pag-valor').value) || 0;
+  if (!valor) { alert('Informe o valor recebido.'); return; }
+
+  const scriptUrl = localStorage.getItem('pag_script_url') || '';
+  if (!scriptUrl) { alert('Configure a URL do Apps Script primeiro.'); return; }
+
+  const payload = {
+    action: 'registrarPagamento',
+    idEmprestimo: _pagEmpAtual.idEmprestimo,
+    idCliente: _pagEmpAtual.idCliente,
+    tipoPagamento: document.getElementById('pag-tipo').value,
+    valorPago: valor,
+    dataPagamento: document.getElementById('pag-data').value.split('-').reverse().join('/'),
+    jurosPagos: parseFloat(document.getElementById('pag-juros').value) || 0,
+    amortPrincipal: parseFloat(document.getElementById('pag-amort').value) || 0,
+    observacoes: document.getElementById('pag-obs').value
+  };
+
+  const btn = document.getElementById('pag-btn-ok');
+  const st = document.getElementById('pag-status');
+  btn.disabled = true; btn.textContent = '⏳ Enviando...';
+  st.style.display = 'block';
+  st.style.cssText = 'display:block;margin-top:10px;padding:9px 12px;border-radius:8px;font-size:0.6rem;background:rgba(72,149,239,0.1);border:1px solid rgba(72,149,239,0.3);color:var(--blue)';
+  st.textContent = '⏳ Registrando na planilha...';
+
+  try {
+    const res = await fetch(scriptUrl, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if (json.ok) {
+      st.style.cssText = 'display:block;margin-top:10px;padding:9px 12px;border-radius:8px;font-size:0.6rem;background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.3);color:var(--green)';
+      st.textContent = '✅ ' + json.mensagem;
+      setTimeout(() => { pagModalClose(); carregarDados(); }, 1800);
+    } else {
+      throw new Error(json.erro || 'Erro desconhecido');
+    }
+  } catch(err) {
+    st.style.cssText = 'display:block;margin-top:10px;padding:9px 12px;border-radius:8px;font-size:0.6rem;background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.3);color:var(--red)';
+    st.textContent = '❌ Erro: ' + err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = '✅ REGISTRAR NA PLANILHA';
+  }
+}
+
+// ── RENEGOCIAÇÃO ─────────────────────────────────────────────
+function renegModalOpen(idEmp, idCli, nome, proxVenc) {
+  _renegEmpAtual = { idEmprestimo: idEmp||'', idCliente: idCli||'', nome: nome||idEmp||'', proxVenc: proxVenc||'' };
+  document.getElementById('reneg-modal-cliente').textContent = (nome||idEmp) + ' — ' + (idEmp||'');
+  const hoje = new Date().toISOString().slice(0,10);
+  document.getElementById('reneg-venc-ant').value = proxVenc || hoje;
+  document.getElementById('reneg-venc-novo').value = '';
+  document.getElementById('reneg-motivo').value = '';
+  document.getElementById('reneg-tipo').value = 'Prorrogação de prazo';
+  const st = document.getElementById('reneg-status');
+  st.style.display = 'none';
+  const overlay = document.getElementById('reneg-modal-overlay');
+  overlay.style.display = 'flex';
+}
+
+function renegModalClose() {
+  document.getElementById('reneg-modal-overlay').style.display = 'none';
+}
+
+async function renegSalvar() {
+  const vencNovo = document.getElementById('reneg-venc-novo').value;
+  if (!vencNovo) { alert('Informe o novo vencimento.'); return; }
+
+  const scriptUrl = localStorage.getItem('pag_script_url') || '';
+  if (!scriptUrl) { alert('Configure a URL do Apps Script primeiro (registre um pagamento antes).'); return; }
+
+  const payload = {
+    action: 'registrarRenegociacao',
+    idEmprestimo: _renegEmpAtual.idEmprestimo,
+    idCliente: _renegEmpAtual.idCliente,
+    dataRenegociacao: new Date().toLocaleDateString('pt-BR'),
+    tipoRenegociacao: document.getElementById('reneg-tipo').value,
+    vencAnterior: document.getElementById('reneg-venc-ant').value.split('-').reverse().join('/'),
+    vencNovo: vencNovo.split('-').reverse().join('/'),
+    motivo: document.getElementById('reneg-motivo').value
+  };
+
+  const btn = document.getElementById('reneg-btn-ok');
+  const st = document.getElementById('reneg-status');
+  btn.disabled = true; btn.textContent = '⏳ Enviando...';
+  st.style.cssText = 'display:block;margin-top:10px;padding:9px 12px;border-radius:8px;font-size:0.6rem;background:rgba(72,149,239,0.1);border:1px solid rgba(72,149,239,0.3);color:var(--blue)';
+  st.textContent = '⏳ Registrando renegociação...';
+
+  try {
+    const res = await fetch(scriptUrl, { method:'POST', body: JSON.stringify(payload) });
+    const json = await res.json();
+    if (json.ok) {
+      st.style.cssText = 'display:block;margin-top:10px;padding:9px 12px;border-radius:8px;font-size:0.6rem;background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.3);color:var(--green)';
+      st.textContent = '✅ ' + json.mensagem;
+      setTimeout(() => { renegModalClose(); carregarDados(); }, 1800);
+    } else { throw new Error(json.erro||'Erro desconhecido'); }
+  } catch(err) {
+    st.style.cssText = 'display:block;margin-top:10px;padding:9px 12px;border-radius:8px;font-size:0.6rem;background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.3);color:var(--red)';
+    st.textContent = '❌ Erro: ' + err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = '🔄 REGISTRAR';
+  }
 }
 
 
