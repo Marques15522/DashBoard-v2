@@ -434,7 +434,20 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .pasta-stat-box{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center;}
 .pasta-stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;}
 .pasta-stat-lbl{font-size:0.48rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-top:2px;}
-/* ── SCORE BADGE NOS CARDS ── */
+/* ── FLOATING PLAYER ── */
+#floating-player{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--s1);border:1px solid rgba(155,93,229,0.4);border-radius:16px;padding:12px 20px;display:none;align-items:center;gap:14px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.5);min-width:320px;max-width:90vw;animation:slideUp 0.3s ease;}
+#floating-player.visible{display:flex;}
+@keyframes slideUp{from{transform:translateX(-50%) translateY(20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.fp-icon{font-size:1.2rem;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.fp-info{flex:1;min-width:0;}
+.fp-title{font-size:0.6rem;color:var(--purple);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px;}
+.fp-text{font-size:0.62rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px;}
+.fp-stop{background:rgba(239,71,111,0.12);border:1px solid rgba(239,71,111,0.3);color:var(--red);border-radius:8px;padding:6px 14px;font-family:'DM Mono',monospace;font-size:0.58rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap;}
+.fp-stop:hover{background:rgba(239,71,111,0.25);}
+.fp-goto{background:rgba(155,93,229,0.1);border:1px solid rgba(155,93,229,0.3);color:var(--purple);border-radius:8px;padding:6px 14px;font-family:'DM Mono',monospace;font-size:0.58rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap;}
+.fp-goto:hover{background:rgba(155,93,229,0.2);}
+
 .score-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-family:'Bebas Neue',sans-serif;font-size:0.75rem;letter-spacing:0.06em;border:1px solid transparent;white-space:nowrap;}
 .score-badge.excelente{background:rgba(6,214,160,0.12);border-color:rgba(6,214,160,0.35);color:#06d6a0;}
 .score-badge.bom{background:rgba(6,214,160,0.07);border-color:rgba(6,214,160,0.2);color:#06d6a0;}
@@ -1656,6 +1669,17 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       <button class="pag-btn-ok" id="reneg-btn-ok" style="background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;" onclick="renegSalvar()">🔄 REGISTRAR</button>
     </div>
   </div>
+</div>
+
+<!-- FLOATING PLAYER -->
+<div id="floating-player">
+  <span class="fp-icon">🎙️</span>
+  <div class="fp-info">
+    <div class="fp-title">▶ REPRODUZINDO SUGESTÕES</div>
+    <div class="fp-text" id="fp-text">Análise da carteira em andamento...</div>
+  </div>
+  <button class="fp-goto" onclick="floatingPlayerIrParaVisao()">Ver</button>
+  <button class="fp-stop" onclick="sugTtsParar()">■ Parar</button>
 </div>
 
 <footer>
@@ -6152,16 +6176,37 @@ function sugTtsTexto() {
 function _ttsSetBtn(playing) {
   _ttsPlaying = playing;
   const btn = document.getElementById('sug-tts-btn');
-  if (!btn) return;
+  const fp  = document.getElementById('floating-player');
   if (playing) {
-    btn.classList.add('playing');
-    document.getElementById('sug-tts-label').textContent = 'PARAR';
-    btn.querySelector('.tts-icon').textContent = '⏹';
+    if (btn) {
+      btn.classList.add('playing');
+      document.getElementById('sug-tts-label').textContent = 'PARAR';
+      btn.querySelector('.tts-icon').textContent = '⏹';
+    }
+    // Mostra player flutuante
+    if (fp) {
+      fp.classList.add('visible');
+      try {
+        const t = sugTtsTexto();
+        const fpText = document.getElementById('fp-text');
+        if (fpText) fpText.textContent = t.slice(0, 80) + (t.length > 80 ? '...' : '');
+      } catch(e) {}
+    }
   } else {
-    btn.classList.remove('playing');
-    document.getElementById('sug-tts-label').textContent = 'OUVIR';
-    btn.querySelector('.tts-icon').textContent = '🔊';
+    if (btn) {
+      btn.classList.remove('playing');
+      document.getElementById('sug-tts-label').textContent = 'OUVIR';
+      btn.querySelector('.tts-icon').textContent = '🔊';
+    }
+    // Esconde player flutuante
+    if (fp) fp.classList.remove('visible');
   }
+}
+
+function floatingPlayerIrParaVisao() {
+  const tab = document.querySelector('[data-tab="visao"]') ||
+              document.querySelector('[data-section="visao"]');
+  if (tab) tab.click();
 }
 
 function sugTtsParar() {
