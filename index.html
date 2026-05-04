@@ -72,6 +72,11 @@ header{position:sticky;top:0;z-index:50;background:rgba(7,9,14,0.93);backdrop-fi
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(6,214,160,0.4);}50%{opacity:0.7;box-shadow:0 0 0 4px rgba(6,214,160,0);}}
 .refresh-btn{padding:6px 16px;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;font-family:'DM Mono',monospace;font-size:0.68rem;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s;}
 .refresh-btn:hover{border-color:var(--gold);color:var(--gold);}
+.fullscreen-btn{padding:6px 10px;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;font-size:0.85rem;cursor:pointer;transition:all 0.2s;line-height:1;display:flex;align-items:center;justify-content:center;}
+.fullscreen-btn:hover{border-color:var(--gold);color:var(--gold);}
+:fullscreen body,:fullscreen #main{background:var(--bg);}
+:fullscreen .sidebar{position:fixed;top:58px;left:0;height:calc(100vh - 58px);z-index:40;}
+:fullscreen header{position:fixed;top:0;left:0;right:0;z-index:50;}
 /* ── SIDEBAR NAV ── */
 .dashboard-layout{display:flex;min-height:calc(100vh - 58px);gap:0;}
 .sidebar{width:220px;min-width:220px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:18px 0 24px;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;flex-shrink:0;}
@@ -574,6 +579,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       <div class="live-pill"><div class="live-dot"></div>AO VIVO</div>
       <span id="today-date">—</span>
       <button class="refresh-btn" onclick="loadData(true)">↻ ATUALIZAR</button>
+      <button class="fullscreen-btn" id="fs-btn" onclick="toggleFullscreen()" title="Tela cheia">⛶</button>
       <button class="refresh-btn" onclick="loginSair()" style="border-color:rgba(239,71,111,0.3);color:var(--red)" title="Sair">🔒 SAIR</button>
     </div>
   </div>
@@ -6705,6 +6711,34 @@ window.addEventListener('DOMContentLoaded', () => {
 
 </div><!-- /.tab-content-area -->
 </div><!-- /.dashboard-layout -->
+
+<script>
+function toggleFullscreen(){
+  const el=document.documentElement;
+  const isFs=!!(document.fullscreenElement||document.webkitFullscreenElement||document.mozFullScreenElement);
+  if(isFs){
+    (document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen||document.msExitFullscreen).call(document);
+  } else {
+    const req=el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen||el.msRequestFullscreen;
+    if(req) req.call(el);
+  }
+}
+function _fsUpdateBtn(){
+  const btn=document.getElementById('fs-btn');
+  if(!btn) return;
+  const isFs=!!(document.fullscreenElement||document.webkitFullscreenElement||document.mozFullScreenElement);
+  btn.textContent=isFs?'⊡':'⛶';
+  btn.title=isFs?'Sair da tela cheia':'Tela cheia';
+  btn.style.borderColor=isFs?'rgba(201,146,42,0.5)':'';
+  btn.style.color=isFs?'var(--gold2)':'';
+}
+document.addEventListener('fullscreenchange',_fsUpdateBtn);
+document.addEventListener('webkitfullscreenchange',_fsUpdateBtn);
+document.addEventListener('mozfullscreenchange',_fsUpdateBtn);
+document.addEventListener('keydown',e=>{
+  if(e.key==='F'&&!e.ctrlKey&&!e.metaKey&&!e.shiftKey&&document.activeElement.tagName!=='INPUT'&&document.activeElement.tagName!=='TEXTAREA')toggleFullscreen();
+});
+</script>
 
 </body>
 </html>
