@@ -76,10 +76,10 @@ header{position:sticky;top:0;z-index:50;background:rgba(7,9,14,0.93);backdrop-fi
 .fullscreen-btn:hover{border-color:var(--gold);color:var(--gold);}
 /* Fullscreen via classe — sem conflito com sticky/layout */
 body.fs-mode{overflow:hidden;}
-body.fs-mode #main{position:fixed;inset:0;z-index:200;overflow-y:auto;background:var(--bg);}
-body.fs-mode header{position:sticky;top:0;z-index:210;}
-body.fs-mode .dashboard-layout{min-height:calc(100vh - 58px);}
-body.fs-mode .sidebar{position:sticky;top:58px;height:calc(100vh - 58px);}
+#fs-wrapper{display:flex;flex-direction:column;}
+body.fs-mode #fs-wrapper{position:fixed;inset:0;z-index:200;overflow-y:auto;background:var(--bg);display:flex;flex-direction:column;}
+body.fs-mode #fs-wrapper header{position:sticky;top:0;flex-shrink:0;}
+body.fs-mode #fs-wrapper #main{flex:1;overflow-y:auto;}
 .fullscreen-btn.fs-active{border-color:rgba(201,146,42,0.5);color:var(--gold2);}
 /* ── SIDEBAR NAV ── */
 .dashboard-layout{display:flex;min-height:calc(100vh - 58px);gap:0;}
@@ -567,6 +567,8 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   </div>
 </div>
 
+
+<div id="fs-wrapper">
 <header>
   <div class="header-inner">
     <div class="logo-wrap">
@@ -6715,6 +6717,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 </div><!-- /.tab-content-area -->
 </div><!-- /.dashboard-layout -->
+</div><!-- /.wrap -->
+</div><!-- /#main -->
+</div><!-- /#fs-wrapper -->
 
 <script>
 function toggleFullscreen(){
@@ -6723,7 +6728,6 @@ function toggleFullscreen(){
   btn.textContent=isFs?'⊡':'⛶';
   btn.title=isFs?'Sair da tela cheia':'Tela cheia';
   btn.classList.toggle('fs-active',isFs);
-  if(isFs) document.getElementById('main').scrollTop=0;
 }
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&document.body.classList.contains('fs-mode')) toggleFullscreen();
