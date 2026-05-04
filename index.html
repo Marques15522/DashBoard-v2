@@ -289,9 +289,29 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .sim-table tr:hover td{background:var(--s2);}
 .table-wrap{overflow-x:auto;}
 /* ── FLUXO 90d ── */
-.f90-venc-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.62rem;}
-.f90-venc-item:last-child{border-bottom:none;}
-.f90-semana-risco{background:var(--s2);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.f90-venc-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;margin-bottom:4px;background:var(--s2);border:1px solid var(--border);transition:border-color 0.2s;}
+.f90-venc-item:hover{border-color:var(--border2);}
+.f90-semana-risco{background:var(--s2);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);}
+/* timeline meses */
+.f90-mes-header{display:flex;align-items:center;justify-content:space-between;padding:6px 0 10px;}
+.f90-mes-title{font-family:'Bebas Neue',sans-serif;font-size:0.85rem;letter-spacing:0.15em;color:var(--text);}
+.f90-mes-total{font-size:0.6rem;color:var(--muted);}
+.f90-week-bars{display:flex;gap:4px;align-items:flex-end;height:60px;margin-bottom:8px;}
+.f90-week-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.f90-week-bar-bg{width:100%;background:var(--border);border-radius:4px 4px 0 0;position:relative;overflow:hidden;cursor:pointer;}
+.f90-week-bar-bg:hover .f90-week-bar-fill{opacity:1!important;}
+.f90-week-bar-fill{position:absolute;bottom:0;left:0;right:0;border-radius:4px 4px 0 0;transition:height 0.8s ease,opacity 0.2s;}
+.f90-week-bar-lbl{font-size:0.44rem;color:var(--muted);text-align:center;line-height:1.2;}
+/* filtros da lista */
+.f90-filter-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.f90-filter-tab{padding:4px 12px;border-radius:20px;border:1px solid var(--border2);color:var(--muted);font-size:0.58rem;cursor:pointer;letter-spacing:0.07em;transition:all 0.18s;background:transparent;}
+.f90-filter-tab:hover{border-color:var(--gold);color:var(--gold);}
+.f90-filter-tab.active{background:rgba(201,146,42,0.12);border-color:var(--gold);color:var(--gold2);}
+/* saldo projetado */
+.f90-saldo-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.6rem;}
+.f90-saldo-row:last-child{border-bottom:none;}
+.f90-saldo-bar-bg{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.f90-saldo-bar-fill{height:100%;border-radius:2px;transition:width 0.8s ease;}
 /* ── HISTORICO COBRANÇA WA ── */
 .wa-hist-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.6rem;}
 .wa-hist-item:last-child{border-bottom:none;}
@@ -1503,18 +1523,51 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 <!-- FLUXO 90 DIAS -->
 <div id="tab-fluxo90" class="tab-panel">
   <div class="section-label">PREVISÃO DE FLUXO — PRÓXIMOS 90 DIAS</div>
-  <div class="grid-3" id="fluxo90-kpis"></div>
+
+  <!-- KPIs principais -->
+  <div class="grid-4" id="fluxo90-kpis"></div>
+
+  <!-- KPIs secundários -->
+  <div class="grid-3" id="fluxo90-kpis2" style="margin-top:-4px"></div>
+
+  <!-- Gráfico principal -->
   <div class="card">
-    <div class="card-header"><div><div class="card-title">📈 Linha do Tempo — Entradas Previstas</div><div class="card-desc">Juros a receber semana a semana nos próximos 90 dias</div></div><div class="card-badge">FLUXO</div></div>
+    <div class="card-header">
+      <div>
+        <div class="card-title">📈 Entradas Previstas — Semana a Semana</div>
+        <div class="card-desc">Juros + capital a receber por semana nos próximos 90 dias</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div id="f90-chart-toggle" style="display:flex;gap:4px">
+          <button onclick="f90SetChart('bar')" id="f90-btn-bar" class="f90-filter-tab active" style="padding:3px 10px">Barras</button>
+          <button onclick="f90SetChart('line')" id="f90-btn-line" class="f90-filter-tab" style="padding:3px 10px">Acum.</button>
+        </div>
+        <div class="card-badge">FLUXO</div>
+      </div>
+    </div>
     <div class="chart-wrap xtall"><canvas id="chartFluxo90"></canvas></div>
   </div>
+
+  <!-- Timeline visual por mês -->
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">🗓️ Timeline — Distribuição por Mês</div><div class="card-desc">Visão mensal do fluxo esperado com semanas em destaque</div></div><div class="card-badge">MESES</div></div>
+    <div id="fluxo90-timeline"></div>
+  </div>
+
+  <!-- Concentração + Lista -->
   <div class="grid-2">
     <div class="card">
-      <div class="card-header"><div><div class="card-title">⚠️ Concentração de Risco nos 90d</div><div class="card-desc">Semanas com maior exposição</div></div><div class="card-badge">RISCO</div></div>
+      <div class="card-header"><div><div class="card-title">⚠️ Picos de Concentração</div><div class="card-desc">Semanas com maior entrada — risco de inadimplência concentrada</div></div><div class="card-badge">RISCO</div></div>
       <div id="fluxo90-risco"></div>
     </div>
     <div class="card">
-      <div class="card-header"><div><div class="card-title">📋 Vencimentos Detalhados</div><div class="card-desc">Todos os vencimentos nos próximos 90 dias</div></div><div class="card-badge">AGENDA</div></div>
+      <div class="card-header"><div><div class="card-title">📋 Agenda de Vencimentos</div><div class="card-desc">Todos os contratos no período</div></div><div class="card-badge">AGENDA</div></div>
+      <div class="f90-filter-tabs">
+        <button class="f90-filter-tab active" onclick="f90FiltrarLista(0,this)">Todos</button>
+        <button class="f90-filter-tab" onclick="f90FiltrarLista(7,this)">7 dias</button>
+        <button class="f90-filter-tab" onclick="f90FiltrarLista(30,this)">30 dias</button>
+        <button class="f90-filter-tab" onclick="f90FiltrarLista(60,this)">60 dias</button>
+      </div>
       <div id="fluxo90-lista"></div>
     </div>
   </div>
@@ -4394,13 +4447,93 @@ function simPDF(){
 // ════════════════════════════════════════════════════════
 // FLUXO 90 DIAS
 // ════════════════════════════════════════════════════════
+let _f90Vencimentos=[], _f90Semanas=[], _f90ChartMode='bar', _f90Hoje=null;
+
+function f90SetChart(mode){
+  _f90ChartMode=mode;
+  document.getElementById('f90-btn-bar').classList.toggle('active',mode==='bar');
+  document.getElementById('f90-btn-line').classList.toggle('active',mode==='line');
+  f90RenderChart();
+}
+
+function f90RenderChart(){
+  const semanas=_f90Semanas;
+  const totalPrev=_f90Vencimentos.reduce((s,e)=>s+e.jProx,0);
+  destroyChart('fluxo90');
+  const labels=semanas.map((s,i)=>`S${i+1} ${s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}`);
+  if(_f90ChartMode==='bar'){
+    charts.fluxo90=new Chart(document.getElementById('chartFluxo90').getContext('2d'),{
+      type:'bar',
+      data:{
+        labels,
+        datasets:[
+          {label:'Juros',data:semanas.map(s=>s.total),backgroundColor:semanas.map(s=>s.total===Math.max(...semanas.map(x=>x.total),1)?'rgba(239,71,111,0.8)':'rgba(201,146,42,0.75)'),borderRadius:5,borderSkipped:false},
+          {label:'Capital',data:semanas.map(s=>s.cap),backgroundColor:'rgba(72,149,239,0.35)',borderRadius:5,borderSkipped:false}
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#5a6282',font:{family:'DM Mono',size:10}}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw),afterLabel:ctx=>{const s=semanas[ctx.dataIndex];return ctx.datasetIndex===0?` Total entrada: ${fmt(s.total+s.cap)}`:''}}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}
+    });
+  } else {
+    // Acumulado
+    let acum=0;
+    const acumData=semanas.map(s=>{acum+=s.total+s.cap;return acum;});
+    charts.fluxo90=new Chart(document.getElementById('chartFluxo90').getContext('2d'),{
+      type:'line',
+      data:{
+        labels,
+        datasets:[{
+          label:'Caixa Acumulado (Juros+Capital)',
+          data:acumData,
+          borderColor:'rgba(201,146,42,0.9)',
+          backgroundColor:'rgba(201,146,42,0.08)',
+          pointBackgroundColor:'rgba(201,146,42,0.9)',
+          fill:true,tension:0.4,pointRadius:4,pointHoverRadius:6
+        }]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#5a6282',font:{family:'DM Mono',size:10}}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw)+' acumulado'}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}
+    });
+  }
+}
+
+function f90FiltrarLista(dias, btn){
+  document.querySelectorAll('.f90-filter-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const hoje=_f90Hoje;
+  const lista=dias===0?_f90Vencimentos:_f90Vencimentos.filter(e=>{
+    const d=Math.floor((e.proxVenc-hoje)/86400000);
+    return d<=dias;
+  });
+  _f90RenderLista(lista,hoje);
+}
+
+function _f90RenderLista(lista,hoje){
+  document.getElementById('fluxo90-lista').innerHTML=lista.length?lista.map(e=>{
+    const diasRestantes=Math.floor((e.proxVenc-hoje)/86400000);
+    const cor=diasRestantes<=7?'var(--red)':diasRestantes<=30?'var(--gold2)':'var(--green)';
+    const urgBg=diasRestantes<=7?'rgba(239,71,111,0.06)':diasRestantes<=30?'rgba(201,146,42,0.04)':'';
+    const unidBadge=e.unidade==='quinzenal'?'<span style="color:var(--purple);font-size:0.46rem;margin-left:4px;padding:1px 5px;border:1px solid rgba(155,93,229,0.3);border-radius:3px">QUINZENAL</span>':e.unidade==='semanal'?'<span style="color:var(--blue);font-size:0.46rem;margin-left:4px;padding:1px 5px;border:1px solid rgba(72,149,239,0.3);border-radius:3px">SEMANAL</span>':'';
+    return`<div class="f90-venc-item" style="${urgBg?'border-color:'+cor.replace('var(--red)','rgba(239,71,111,0.3)').replace('var(--gold2)','rgba(201,146,42,0.25)')+'!important;background:'+urgBg:''}">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:0.65rem;color:var(--text);font-weight:500;display:flex;align-items:center;flex-wrap:wrap">${e.nome}${unidBadge}</div>
+        <div style="font-size:0.52rem;color:var(--muted);margin-top:3px">${e.proxVenc.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})} · ${e.id}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:12px">
+        <div style="font-size:0.72rem;color:${cor};font-family:'Bebas Neue',sans-serif">${fmt(e.jProx)}</div>
+        <div style="font-size:0.52rem;color:var(--muted)">+${fmt(e.capital)} cap · <span style="color:${cor}">${diasRestantes}d</span></div>
+      </div>
+    </div>`;
+  }).join(''):`<div style="color:var(--muted);font-size:0.65rem;padding:24px 0;text-align:center">Nenhum vencimento nesse período.</div>`;
+}
+
 function renderFluxo90(abertos, hoje){
+  _f90Hoje=hoje;
   const fim90=new Date(hoje);fim90.setDate(hoje.getDate()+90);
   const vencimentos=abertos
     .filter(e=>e.proxVenc&&e.proxVenc>=hoje&&e.proxVenc<=fim90)
     .sort((a,b)=>a.proxVenc-b.proxVenc);
+  _f90Vencimentos=vencimentos;
 
-  // Agrupa por semana
+  // Agrupa por semana (13 semanas = ~91 dias)
   const semanas=[];
   for(let i=0;i<13;i++){
     const ini=new Date(hoje);ini.setDate(hoje.getDate()+i*7);
@@ -4408,56 +4541,94 @@ function renderFluxo90(abertos, hoje){
     const itens=vencimentos.filter(e=>e.proxVenc>=ini&&e.proxVenc<=fim);
     semanas.push({ini,fim,itens,total:itens.reduce((s,e)=>s+e.jProx,0),cap:itens.reduce((s,e)=>s+e.capital,0)});
   }
+  _f90Semanas=semanas;
+
   const totalPrev=vencimentos.reduce((s,e)=>s+e.jProx,0);
   const totalCap=vencimentos.reduce((s,e)=>s+e.capital,0);
-  const maxSem=Math.max(...semanas.map(s=>s.total),1);
+  const totalEntrada=totalPrev+totalCap;
+  const maxSem=Math.max(...semanas.map(s=>s.total+s.cap),1);
+  const maxSemJuros=Math.max(...semanas.map(s=>s.total),1);
+  const semsVazias=semanas.filter(s=>s.total===0).length;
+  const v7=vencimentos.filter(e=>Math.floor((e.proxVenc-hoje)/86400000)<=7).length;
+  const v30=vencimentos.filter(e=>Math.floor((e.proxVenc-hoje)/86400000)<=30).length;
+  const recDia=totalEntrada>0?(totalEntrada/90):0;
 
-  // KPIs
+  // KPIs principais (4)
   document.getElementById('fluxo90-kpis').innerHTML=`
-    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Juros a Receber (90d)</div><div class="kpi-val" style="color:var(--gold)">${fmt(totalPrev)}</div><div class="kpi-sub">${vencimentos.length} contrato(s)</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Capital a Retornar (90d)</div><div class="kpi-val" style="color:var(--blue)">${fmt(totalCap)}</div><div class="kpi-sub">principal + juros: ${fmt(totalCap+totalPrev)}</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--purple)"></div><div class="kpi-lbl">Semana de Pico</div><div class="kpi-val" style="color:var(--purple)">${fmt(maxSem)}</div><div class="kpi-sub">maior entrada semanal</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Juros a Receber (90d)</div><div class="kpi-val" style="color:var(--gold)">${fmt(totalPrev)}</div><div class="kpi-sub">${vencimentos.length} contrato(s) ativos</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Capital a Retornar (90d)</div><div class="kpi-val" style="color:var(--blue)">${fmt(totalCap)}</div><div class="kpi-sub">do principal emprestado</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Entrada Total Prevista</div><div class="kpi-val" style="color:var(--green)">${fmt(totalEntrada)}</div><div class="kpi-sub">juros + capital no período</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--purple)"></div><div class="kpi-lbl">Pico Semanal</div><div class="kpi-val" style="color:var(--purple)">${fmt(maxSem)}</div><div class="kpi-sub">maior semana (juros+cap)</div></div>
+  `;
+
+  // KPIs secundários (3)
+  const saudeFluxo=semsVazias>=8?{txt:'Fluxo Irregular',cor:'var(--red)',icon:'🔴'}:semsVazias>=4?{txt:'Fluxo Moderado',cor:'var(--gold2)',icon:'🟡'}:{txt:'Fluxo Saudável',cor:'var(--green)',icon:'🟢'};
+  document.getElementById('fluxo90-kpis2').innerHTML=`
+    <div class="kpi" style="padding:14px 18px"><div class="kpi-accent" style="background:var(--gold2)"></div><div class="kpi-lbl">Receita/Dia (Média)</div><div class="kpi-val" style="font-size:1.4rem;color:var(--gold2)">${fmt(recDia)}</div><div class="kpi-sub">média diária esperada</div></div>
+    <div class="kpi" style="padding:14px 18px"><div class="kpi-accent" style="background:${v7>0?'var(--red)':'var(--border)'}"></div><div class="kpi-lbl">Vencendo em 7 dias</div><div class="kpi-val" style="font-size:1.4rem;color:${v7>0?'var(--red)':'var(--muted)'}">${v7}</div><div class="kpi-sub">${v30} vencendo em 30 dias</div></div>
+    <div class="kpi" style="padding:14px 18px"><div class="kpi-accent" style="background:${saudeFluxo.cor}"></div><div class="kpi-lbl">Saúde do Fluxo</div><div class="kpi-val" style="font-size:1.1rem;color:${saudeFluxo.cor}">${saudeFluxo.icon} ${saudeFluxo.txt}</div><div class="kpi-sub">${semsVazias} semana(s) sem entrada</div></div>
   `;
 
   // Gráfico
-  destroyChart('fluxo90');
-  charts.fluxo90=new Chart(document.getElementById('chartFluxo90').getContext('2d'),{
-    type:'bar',
-    data:{
-      labels:semanas.map((s,i)=>`Sem ${i+1}\n${s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}`),
-      datasets:[
-        {label:'Juros',data:semanas.map(s=>s.total),backgroundColor:'rgba(201,146,42,0.75)',borderRadius:5,borderSkipped:false},
-        {label:'Capital',data:semanas.map(s=>s.cap),backgroundColor:'rgba(72,149,239,0.4)',borderRadius:5,borderSkipped:false}
-      ]
-    },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#5a6282',font:{family:'DM Mono',size:10}}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}
-  });
+  f90RenderChart();
+
+  // Timeline por mês
+  const meses=[];
+  for(let m=0;m<3;m++){
+    const mesIni=new Date(hoje);mesIni.setDate(mesIni.getDate()+m*30);
+    const mesFim=new Date(mesIni);mesFim.setDate(mesIni.getDate()+29);
+    const semsMes=semanas.filter(s=>s.ini>=mesIni&&s.ini<=mesFim);
+    const totalMes=semsMes.reduce((a,s)=>a+s.total+s.cap,0);
+    const maxMes=Math.max(...semsMes.map(s=>s.total+s.cap),1);
+    meses.push({mesIni,mesFim,semsMes,totalMes,maxMes});
+  }
+  document.getElementById('fluxo90-timeline').innerHTML=meses.map(m=>{
+    const nomeMes=m.mesIni.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    const bars=m.semsMes.map((s,si)=>{
+      const pct=m.maxMes>0?((s.total+s.cap)/m.maxMes*100):0;
+      const hasItems=s.itens.length>0;
+      const barCor=hasItems?(s.total+s.cap===m.maxMes?'var(--red)':'var(--gold)'):'var(--border2)';
+      return`<div class="f90-week-bar-wrap" title="${s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${fmt(s.total+s.cap)} | ${s.itens.length} vcto(s)">
+        <div class="f90-week-bar-bg" style="height:50px">
+          <div class="f90-week-bar-fill" style="height:${pct}%;background:${barCor};opacity:0.8"></div>
+        </div>
+        <div class="f90-week-bar-lbl">${s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}<br>${hasItems?fmt(s.total+s.cap):'-'}</div>
+      </div>`;
+    }).join('');
+    return`<div style="margin-bottom:${meses.indexOf(m)<2?'20px':'0'}">
+      <div class="f90-mes-header">
+        <div class="f90-mes-title">${nomeMes.toUpperCase()}</div>
+        <div class="f90-mes-total" style="color:var(--gold2)">${fmt(m.totalMes)} esperado · ${m.semsMes.reduce((a,s)=>a+s.itens.length,0)} contrato(s)</div>
+      </div>
+      <div class="f90-week-bars">${bars||'<div style="color:var(--muted);font-size:0.6rem">Sem dados neste mês</div>'}</div>
+      <div style="height:1px;background:var(--border);margin-top:4px"></div>
+    </div>`;
+  }).join('');
 
   // Semanas de risco (concentração)
   const semOrdenadas=[...semanas].sort((a,b)=>b.total-a.total).slice(0,5);
-  document.getElementById('fluxo90-risco').innerHTML=semOrdenadas.length?semOrdenadas.map((s,i)=>{
+  document.getElementById('fluxo90-risco').innerHTML=semOrdenadas.filter(s=>s.total>0).length?semOrdenadas.filter(s=>s.total>0).map((s,i)=>{
     const pct=totalPrev>0?(s.total/totalPrev*100).toFixed(0):0;
     const cor=i===0?'var(--red)':i===1?'var(--gold2)':'var(--muted)';
+    const nivel=i===0?'🔴 PICO':i===1?'🟡 ALTO':'🔵 MÉDIO';
     return`<div class="f90-semana-risco">
-      <div><div style="font-size:0.65rem;color:var(--text)">${s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${s.fim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</div>
-      <div style="font-size:0.55rem;color:var(--muted);margin-top:2px">${s.itens.length} vencimento(s)</div></div>
-      <div style="text-align:right"><div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:${cor}">${fmt(s.total)}</div>
-      <div style="font-size:0.52rem;color:var(--muted)">${pct}% do total</div></div>
+      <div>
+        <div style="font-size:0.58rem;color:${cor};letter-spacing:0.08em;margin-bottom:3px">${nivel}</div>
+        <div style="font-size:0.65rem;color:var(--text)">${s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${s.fim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</div>
+        <div style="font-size:0.52rem;color:var(--muted);margin-top:3px">${s.itens.length} vencimento(s) · ${pct}% dos juros</div>
+        <div style="margin-top:8px;height:3px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${cor};border-radius:2px;transition:width 0.8s ease"></div></div>
+      </div>
+      <div style="text-align:right;margin-left:12px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:${cor}">${fmt(s.total)}</div>
+        <div style="font-size:0.5rem;color:var(--muted)">juros</div>
+        <div style="font-size:0.65rem;color:var(--blue);margin-top:3px">${fmt(s.cap)}</div>
+        <div style="font-size:0.5rem;color:var(--muted)">capital</div>
+      </div>
     </div>`;
-  }).join(''):`<div style="color:var(--muted);font-size:0.65rem;padding:16px 0">Sem vencimentos nos próximos 90 dias.</div>`;
+  }).join(''):`<div style="color:var(--muted);font-size:0.65rem;padding:24px 0;text-align:center">Sem vencimentos nos próximos 90 dias.</div>`;
 
   // Lista detalhada
-  document.getElementById('fluxo90-lista').innerHTML=vencimentos.length?vencimentos.slice(0,20).map(e=>{
-    const diasRestantes=Math.floor((e.proxVenc-hoje)/86400000);
-    const cor=diasRestantes<=7?'var(--red)':diasRestantes<=30?'var(--gold2)':'var(--green)';
-    const unidBadge=e.unidade==='quinzenal'?'<span style="color:var(--purple);font-size:0.48rem"> · QUINZENAL</span>':e.unidade==='semanal'?'<span style="color:var(--blue);font-size:0.48rem"> · SEMANAL</span>':'';
-    return`<div class="f90-venc-item">
-      <div><div style="font-size:0.65rem;color:var(--text);font-weight:500">${e.nome}${unidBadge}</div>
-      <div style="font-size:0.52rem;color:var(--muted);margin-top:2px">${e.proxVenc.toLocaleDateString('pt-BR')} · ${e.id}</div></div>
-      <div style="text-align:right"><div style="font-size:0.68rem;color:${cor};font-family:'Bebas Neue',sans-serif">${fmt(e.jProx)}</div>
-      <div style="font-size:0.5rem;color:var(--muted)">${diasRestantes}d</div></div>
-    </div>`;
-  }).join(''):`<div style="color:var(--muted);font-size:0.65rem;padding:16px 0">Nenhum vencimento encontrado.</div>`;
+  _f90RenderLista(vencimentos,hoje);
 }
 
 // ════════════════════════════════════════════════════════
