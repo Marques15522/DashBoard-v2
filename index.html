@@ -2302,6 +2302,12 @@ function parseStatus(v){
 
 function render(empRows,pagRows){
   const hoje=new Date();hoje.setHours(0,0,0,0);
+  // Corrige status: se proxVenc já passou e não está quitado → atraso
+  function corrigirStatus(status, proxVenc){
+    if(status==='quitado') return 'quitado';
+    if(proxVenc && proxVenc < hoje) return 'atraso';
+    return status || 'ativo';
+  }
   function parseNum(v){
     if(v===null||v===undefined||v==='')return 0;
     let s=String(v).trim();const isPct=s.includes('%');
@@ -2314,7 +2320,13 @@ function render(empRows,pagRows){
 
   const emps=empRows
     .filter(r=>r[CE.id]&&String(r[CE.id]).trim().toUpperCase().startsWith('EMP'))
-    .map(r=>({id:String(r[CE.id]).trim(),idCliente:String(r[CE.clienteId]||'').trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital:parseNum(r[CE.cap]),data:parseDate(r[CE.data]),taxa:parseTaxa(r[CE.taxa]),prazo:parseNum(r[CE.prazo]),tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal:parseNum(r[CE.jTotal]),saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status:parseStatus(r[CE.status]),proxVenc:parseDate(r[CE.proxVenc]),vencContrato:parseDate(r[CE.vencContrato]),unidade:getUnidade(r)}))
+    .map(r=>{
+      const proxVenc=parseDate(r[CE.proxVenc]);
+      const vencContrato=parseDate(r[CE.vencContrato]);
+      const statusRaw=parseStatus(r[CE.status]);
+      const status=corrigirStatus(statusRaw, proxVenc);
+      return {id:String(r[CE.id]).trim(),idCliente:String(r[CE.clienteId]||'').trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital:parseNum(r[CE.cap]),data:parseDate(r[CE.data]),taxa:parseTaxa(r[CE.taxa]),prazo:parseNum(r[CE.prazo]),tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal:parseNum(r[CE.jTotal]),saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status,proxVenc,vencContrato,unidade:getUnidade(r)};
+    })
     .filter(e=>e.status!==null&&e.capital>0);
 
   const pags=pagRows
