@@ -598,8 +598,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 <!-- SIDEBAR -->
 <nav class="sidebar">
   <div class="sidebar-section-lbl">Principal</div>
-  <div class="nav-tab" data-tab="comando"><span class="tab-icon">🎯</span><span class="tab-label">Central de Comando</span></div>
-  <div class="nav-tab active" data-tab="visao"><span class="tab-icon">📊</span><span class="tab-label">Visão Geral</span></div>
+  <div class="nav-tab active" data-tab="visao"><span class="tab-icon">🎯</span><span class="tab-label">Central de Comando</span></div>
   <div class="nav-tab" data-tab="financeiro"><span class="tab-icon">💰</span><span class="tab-label">Financeiro</span></div>
   <div class="nav-tab" data-tab="caixa"><span class="tab-icon">🏦</span><span class="tab-label">Caixa</span></div>
   <div class="sidebar-divider"></div>
@@ -875,94 +874,239 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
 </div><!-- /tab-comando -->
 
-<!-- VISÃO GERAL -->
+<!-- VISÃO GERAL — CENTRAL DE COMANDO FUSION -->
 <div id="tab-visao" class="tab-panel active">
 
-  <!-- PAGE TITLE -->
-  <div style="margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px">
-    <div>
-      <div style="font-family:'Cinzel',serif;font-size:1.55rem;color:var(--gold);letter-spacing:0.04em;line-height:1;margin-bottom:5px">Visão Geral</div>
-      <div style="font-size:0.6rem;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase" id="briefing-data-longa">—</div>
-    </div>
-    <div style="flex:1;display:flex;align-items:center;justify-content:center">
-      <div id="briefing-saudacao" style="font-family:'Cinzel',serif;font-size:2.8rem;color:var(--gold);letter-spacing:0.1em;text-align:center">BOM DIA, SR. MARQUES</div>
-    </div>
-  </div>
+<style>
+/* ═══════════════════════════════════════════════
+   CENTRAL DE COMANDO — FUSION STYLES
+═══════════════════════════════════════════════ */
 
+/* Scanline overlay sutil */
+#tab-visao::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(201,146,42,0.008) 2px,rgba(201,146,42,0.008) 4px);pointer-events:none;z-index:0;}
+
+/* PAGE HEADER */
+.cmd2-header{position:relative;z-index:1;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.cmd2-header-left{display:flex;flex-direction:column;gap:4px;}
+.cmd2-page-title{font-family:'Cinzel',serif;font-size:1.4rem;color:var(--gold);letter-spacing:0.06em;line-height:1;display:flex;align-items:center;gap:10px;}
+.cmd2-page-title::before{content:'';display:inline-block;width:3px;height:22px;background:linear-gradient(180deg,var(--gold),var(--gold2));border-radius:2px;}
+.cmd2-page-sub{font-size:0.52rem;color:var(--muted);letter-spacing:0.18em;text-transform:uppercase;padding-left:13px;}
+.cmd2-header-center{flex:1;display:flex;align-items:center;justify-content:center;}
+.cmd2-saudacao{font-family:'Cinzel',serif;font-size:2.2rem;color:var(--gold);letter-spacing:0.1em;text-align:center;text-shadow:0 0 40px rgba(201,146,42,0.25);}
+.cmd2-header-right{display:flex;align-items:center;gap:8px;}
+.cmd2-meta-input{background:var(--s2);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.68rem;padding:7px 11px;outline:none;width:130px;transition:border-color 0.2s;}
+.cmd2-meta-input:focus{border-color:var(--gold);}
+.cmd2-meta-lbl{font-size:0.52rem;color:var(--muted);}
+.cmd2-meta-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:7px;padding:7px 14px;font-family:'Bebas Neue',sans-serif;font-size:0.78rem;letter-spacing:0.1em;cursor:pointer;transition:opacity 0.2s;}
+.cmd2-meta-btn:hover{opacity:0.85;}
+
+/* SECTION DIVIDER */
+.cmd2-section{font-size:0.48rem;letter-spacing:0.22em;color:var(--muted2);text-transform:uppercase;margin:14px 0 10px;display:flex;align-items:center;gap:8px;position:relative;z-index:1;}
+.cmd2-section .line{flex:1;height:1px;background:var(--border);}
+.cmd2-section .dot{display:inline-block;width:18px;height:1px;background:var(--gold);opacity:0.6;}
+
+/* META PROGRESS BAR */
+.cmd2-meta-bar-wrap{position:relative;z-index:1;background:var(--s1);border:1px solid rgba(201,146,42,0.2);border-radius:12px;padding:14px 18px;margin-bottom:14px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;}
+.cmd2-meta-bar-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold3));border-radius:12px 12px 0 0;}
+.cmd2-meta-info{display:flex;flex-direction:column;gap:5px;}
+.cmd2-meta-title-sm{font-family:'Bebas Neue',sans-serif;font-size:0.62rem;letter-spacing:0.18em;color:var(--muted);}
+.cmd2-meta-valor-sm{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold);line-height:1;}
+.cmd2-meta-sub-sm{font-size:0.52rem;color:var(--muted);}
+.cmd2-bar-track{background:var(--border);border-radius:99px;height:8px;overflow:hidden;margin-top:4px;}
+.cmd2-bar-fill{height:100%;border-radius:99px;transition:width 1s cubic-bezier(.34,1.56,.64,1);background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.cmd2-bar-fill.danger{background:linear-gradient(90deg,var(--red),#ff6b8a);}
+.cmd2-bar-fill.success{background:linear-gradient(90deg,var(--green),#0fffc7);}
+.cmd2-bar-labels{display:flex;justify-content:space-between;font-size:0.5rem;color:var(--muted);margin-top:3px;}
+.cmd2-meta-pct-block{text-align:right;}
+.cmd2-meta-pct-val{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold2);line-height:1;}
+.cmd2-meta-pct-sub{font-size:0.5rem;color:var(--muted);margin-top:2px;}
+
+/* KPI STRIP TOPO */
+.cmd2-kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;position:relative;z-index:1;}
+.cmd2-kpi{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:13px 15px;position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
+.cmd2-kpi:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,0.4);}
+.cmd2-kpi-accent{position:absolute;top:0;left:0;right:0;height:2px;}
+.cmd2-kpi-lbl{font-size:0.52rem;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:5px;}
+.cmd2-kpi-val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;line-height:1;margin-bottom:2px;}
+.cmd2-kpi-sub{font-size:0.52rem;color:var(--muted);}
+.cmd2-kpi-delta{font-size:0.52rem;margin-top:4px;padding:2px 7px;border-radius:4px;display:inline-block;}
+.cmd2-kpi-delta.up{background:rgba(6,214,160,0.1);color:var(--green);}
+.cmd2-kpi-delta.down{background:rgba(239,71,111,0.1);color:var(--red);}
+.cmd2-kpi-delta.neutral{background:rgba(90,98,130,0.1);color:var(--muted);}
+
+/* FORECAST ROW */
+.cmd2-forecast{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;position:relative;z-index:1;}
+.cmd2-fc-card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:12px 14px;text-align:center;position:relative;overflow:hidden;}
+.cmd2-fc-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;opacity:0.35;}
+.cmd2-fc-card:nth-child(1)::after{background:var(--gold);}
+.cmd2-fc-card:nth-child(2)::after{background:var(--blue);}
+.cmd2-fc-card:nth-child(3)::after{background:var(--purple);}
+.cmd2-fc-lbl{font-size:0.5rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;}
+.cmd2-fc-val{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;line-height:1;margin-bottom:2px;}
+.cmd2-fc-sub{font-size:0.5rem;color:var(--muted);}
+
+/* HUB CENTRAL — MAPA + COLUNAS */
+.cmd2-hub{display:grid;grid-template-columns:210px 1fr 210px;gap:14px;align-items:start;position:relative;z-index:1;}
+.cmd2-col{display:flex;flex-direction:column;gap:10px;}
+
+/* KPI LATERAL CARDS */
+.kpi-sm{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:11px 13px;position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;animation:fadeUp 0.4s ease both;}
+.kpi-sm:hover{transform:translateY(-2px);box-shadow:0 5px 18px rgba(0,0,0,0.35);}
+.kpi-sm-accent{position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi-sm-lbl{font-size:0.54rem;letter-spacing:0.09em;color:var(--muted);text-transform:uppercase;margin-bottom:3px;}
+.kpi-sm-val{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;line-height:1;margin-bottom:2px;}
+.kpi-sm-sub{font-size:0.52rem;color:var(--muted);}
+
+/* MAPA CENTRAL */
+#mapa-clientes-wrap{background:var(--s1);border:1px solid rgba(201,146,42,0.15);border-radius:14px;overflow:hidden;animation:fadeUp 0.4s ease both;position:relative;box-shadow:0 0 0 1px rgba(201,146,42,0.05),0 8px 40px rgba(0,0,0,0.4);}
+#mapa-clientes-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold2),transparent);z-index:2;pointer-events:none;}
+#mapa-clientes-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.mapa-header-title{font-family:'Bebas Neue',sans-serif;font-size:0.82rem;letter-spacing:0.12em;color:var(--text);}
+.mapa-header-badge{font-size:0.44rem;letter-spacing:0.14em;background:rgba(201,146,42,0.08);border:1px solid rgba(201,146,42,0.2);color:var(--gold2);border-radius:4px;padding:3px 9px;display:flex;align-items:center;gap:5px;}
+.mapa-live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+#mapa-clientes{height:400px;width:100%;}
+#mapa-clientes-footer{padding:8px 14px;border-top:1px solid var(--border);display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:rgba(7,9,14,0.6);}
+.mapa-legend-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:3px;}
+
+/* BOTTOM CARDS — GRÁFICOS + OPERAÇÃO */
+.cmd2-bottom{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px;position:relative;z-index:1;}
+.cmd2-bottom-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.cmd2-bottom-card-header{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.cmd2-bottom-card-title{font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.1em;color:var(--text);}
+.cmd2-bottom-card-badge{font-size:0.42rem;letter-spacing:0.12em;background:rgba(201,146,42,0.08);border:1px solid rgba(201,146,42,0.2);color:var(--gold2);border-radius:4px;padding:2px 7px;}
+.cmd2-bottom-card-body{padding:12px 14px;}
+
+/* ALOCAÇÃO CAPITAL INLINE */
+.cmd2-capital-ring{display:flex;align-items:center;gap:14px;}
+.cmd2-capital-chart-wrap{width:90px;height:90px;position:relative;flex-shrink:0;}
+.cmd2-capital-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+.cmd2-capital-pct{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gold);line-height:1;}
+.cmd2-capital-lbl-c{font-size:0.4rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;}
+.cmd2-capital-legend{display:flex;flex-direction:column;gap:6px;flex:1;}
+.cmd2-capital-legend-item{display:flex;align-items:center;gap:6px;}
+.cmd2-capital-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.cmd2-capital-legend-lbl{font-size:0.5rem;color:var(--muted);flex:1;}
+.cmd2-capital-legend-val{font-size:0.58rem;color:var(--text);}
+
+/* RENOVAÇÕES */
+.cmd2-renov-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);}
+.cmd2-renov-item:last-child{border-bottom:none;}
+.cmd2-renov-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:0.75rem;flex-shrink:0;}
+.cmd2-renov-nome{font-size:0.6rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cmd2-renov-sub{font-size:0.5rem;color:var(--muted);}
+.cmd2-renov-tag{font-size:0.48rem;padding:2px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0;}
+.cmd2-renov-tag.urgente{background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.3);color:var(--red);}
+.cmd2-renov-tag.quase{background:rgba(240,180,41,0.1);border:1px solid rgba(240,180,41,0.3);color:#f0b429;}
+.cmd2-renov-tag.agora{background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.25);color:var(--green);}
+.cmd2-empty{text-align:center;padding:18px;font-size:0.6rem;color:var(--muted);}
+
+@media(max-width:1100px){.cmd2-hub{grid-template-columns:180px 1fr 180px;}.cmd2-bottom{grid-template-columns:1fr 1fr;}}
+@media(max-width:900px){.cmd2-hub{grid-template-columns:1fr;}.cmd2-kpi-strip{grid-template-columns:repeat(2,1fr);}.cmd2-bottom{grid-template-columns:1fr;}}
+@media(max-width:600px){.cmd2-forecast{grid-template-columns:1fr 1fr;}.cmd2-kpi-strip{grid-template-columns:1fr 1fr;}}
+</style>
+
+  <!-- IDs fantasma (JS referencia) -->
   <div id="alertasBanner"></div>
-
   <div id="notif-venc" style="display:none"><span id="notif-venc-texto"></span><span id="notif-venc-sub"></span></div>
-
-  <!-- IDs fantasma da meta (JS ainda os referencia) -->
   <span id="meta-desc" style="display:none"></span>
   <span id="meta-input" style="display:none"></span>
   <span id="meta-bar-fill" style="display:none"></span>
   <span id="meta-realizado-txt" style="display:none"></span>
   <span id="meta-pct-txt" style="display:none"></span>
 
-
-
-  <!-- KPIs + MAPA layout centralizado -->
-  <style>
-  .visao-hub{display:grid;grid-template-columns:200px 1fr 200px;gap:14px;margin-bottom:0;align-items:start;}
-  .visao-col{display:flex;flex-direction:column;gap:10px;}
-  .visao-right{display:flex;flex-direction:column;gap:14px;}
-  .kpi-sm{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:12px 14px;position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;animation:fadeUp 0.4s ease both;}
-  .kpi-sm:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.3);}
-  .kpi-sm-accent{position:absolute;top:0;left:0;right:0;height:2px;}
-  .kpi-sm-lbl{font-size:0.56rem;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
-  .kpi-sm-val{font-family:'Bebas Neue',sans-serif;font-size:1.45rem;line-height:1;margin-bottom:2px;}
-  .kpi-sm-sub{font-size:0.54rem;color:var(--muted);}
-  #mapa-clientes-wrap{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;animation:fadeUp 0.4s ease both;}
-  #mapa-clientes-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-  #mapa-clientes{height:520px;width:100%;}
-  #mapa-clientes-footer{padding:8px 14px;border-top:1px solid var(--border);display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
-  .mapa-legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;}
-  .kpis-row-bottom{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
-  @media(max-width:1100px){.visao-hub{grid-template-columns:180px 1fr 180px;}}
-  @media(max-width:900px){.visao-hub{grid-template-columns:1fr;}.kpis-row-bottom{grid-template-columns:repeat(3,1fr);}}
-  @media(max-width:600px){.kpis-row-bottom{grid-template-columns:1fr 1fr;}}
-  </style>
-
-  <!-- seção label -->
-  <div style="font-size:0.52rem;letter-spacing:0.2em;color:var(--muted2);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px">
-    <span style="display:inline-block;width:16px;height:1px;background:var(--gold);opacity:0.5"></span>
-    PAINEL DE CONTROLE
-    <span style="flex:1;height:1px;background:var(--border)"></span>
-  </div>
-
-  <!-- CARDS TOPO -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
-    <div class="kpi-sm" style="border-color:rgba(201,146,42,0.2);background:linear-gradient(135deg,rgba(201,146,42,0.06) 0%,var(--s1) 80%)">
-      <div class="kpi-sm-accent" style="background:linear-gradient(90deg,var(--gold),var(--gold2))"></div>
-      <div class="kpi-sm-lbl">💰 Entra Hoje</div>
-      <div class="kpi-sm-val" id="kpi-top-entra" style="color:var(--gold)">R$ 0</div>
-      <div class="kpi-sm-sub" id="kpi-top-entra-sub">0 pagamento(s)</div>
+  <!-- ══ HEADER COMANDO ══ -->
+  <div class="cmd2-header">
+    <div class="cmd2-header-left">
+      <div class="cmd2-page-title">Central de Comando</div>
+      <div class="cmd2-page-sub" id="briefing-data-longa">—</div>
     </div>
-    <div class="kpi-sm" style="border-color:rgba(6,214,160,0.2);background:linear-gradient(135deg,rgba(6,214,160,0.05) 0%,var(--s1) 80%)">
-      <div class="kpi-sm-accent" style="background:var(--green)"></div>
-      <div class="kpi-sm-lbl">📋 Cobranças Hoje</div>
-      <div class="kpi-sm-val" id="kpi-top-cobr" style="color:var(--green)">0</div>
-      <div class="kpi-sm-sub">vencimentos do dia</div>
+    <div class="cmd2-header-center">
+      <div class="cmd2-saudacao" id="briefing-saudacao">BOM DIA, SR. MARQUES</div>
     </div>
-    <div class="kpi-sm" style="border-color:rgba(239,71,111,0.2);background:linear-gradient(135deg,rgba(239,71,111,0.05) 0%,var(--s1) 80%)">
-      <div class="kpi-sm-accent" style="background:var(--red)"></div>
-      <div class="kpi-sm-lbl">⚠️ Em Atraso</div>
-      <div class="kpi-sm-val" id="kpi-top-atraso" style="color:var(--red)">0</div>
-      <div class="kpi-sm-sub" id="kpi-top-atraso-sub">carteira limpa</div>
-    </div>
-    <div class="kpi-sm" style="border-color:rgba(72,149,239,0.2);background:linear-gradient(135deg,rgba(72,149,239,0.05) 0%,var(--s1) 80%)">
-      <div class="kpi-sm-accent" style="background:var(--blue)"></div>
-      <div class="kpi-sm-lbl">📅 Próx. 7 Dias</div>
-      <div class="kpi-sm-val" id="kpi-top-prox7" style="color:var(--blue)">R$ 0</div>
-      <div class="kpi-sm-sub">a receber esta semana</div>
+    <div class="cmd2-header-right">
+      <div class="cmd2-meta-lbl">Meta mensal (R$):</div>
+      <input class="cmd2-meta-input" id="cmd-meta-input" type="number" placeholder="Ex: 2000" min="0">
+      <button class="cmd2-meta-btn" onclick="cmdSalvarMeta()">SALVAR</button>
     </div>
   </div>
 
-  <div class="visao-hub">
+  <!-- ══ META DO MÊS ══ -->
+  <div class="cmd2-meta-bar-wrap">
+    <div>
+      <div class="cmd2-meta-info">
+        <div class="cmd2-meta-title-sm">META DO MÊS — LUCRO REALIZADO</div>
+        <div class="cmd2-meta-valor-sm" id="cmd-lucro-mes">R$ 0</div>
+        <div class="cmd2-meta-sub-sm" id="cmd-meta-sub">Configure sua meta acima para acompanhar o progresso</div>
+      </div>
+      <div style="margin-top:8px;">
+        <div class="cmd2-bar-track">
+          <div class="cmd2-bar-fill" id="cmd-bar-fill" style="width:0%"></div>
+        </div>
+        <div class="cmd2-bar-labels"><span>R$ 0</span><span id="cmd-bar-meta-label">Meta: —</span></div>
+      </div>
+    </div>
+    <div class="cmd2-meta-pct-block">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:0.58rem;letter-spacing:0.16em;color:var(--muted);margin-bottom:4px;">PROGRESSO</div>
+      <div class="cmd2-meta-pct-val" id="cmd-meta-pct">—</div>
+      <div class="cmd2-meta-pct-sub" id="cmd-meta-falta">—</div>
+    </div>
+  </div>
 
-    <!-- COLUNA ESQUERDA: KPIs + Notícias -->
-    <div class="visao-col">
+  <!-- ══ KPIs SITUAÇÃO ATUAL ══ -->
+  <div class="cmd2-section"><span class="dot"></span> SITUAÇÃO ATUAL <span class="line"></span></div>
+  <div class="cmd2-kpi-strip">
+    <div class="cmd2-kpi" style="border-color:rgba(201,146,42,0.2)">
+      <div class="cmd2-kpi-accent" style="background:linear-gradient(90deg,var(--gold),var(--gold2))"></div>
+      <div class="cmd2-kpi-lbl">💰 Capital na Rua</div>
+      <div class="cmd2-kpi-val" id="cmd-kpi-rua" style="color:var(--gold)">—</div>
+      <div class="cmd2-kpi-sub" id="cmd-kpi-rua-sub">—</div>
+    </div>
+    <div class="cmd2-kpi" style="border-color:rgba(6,214,160,0.2)">
+      <div class="cmd2-kpi-accent" style="background:var(--green)"></div>
+      <div class="cmd2-kpi-lbl">💵 Juros a Receber</div>
+      <div class="cmd2-kpi-val" id="cmd-kpi-juros" style="color:var(--green)">—</div>
+      <div class="cmd2-kpi-sub" id="cmd-kpi-juros-sub">—</div>
+    </div>
+    <div class="cmd2-kpi" style="border-color:rgba(72,149,239,0.2)">
+      <div class="cmd2-kpi-accent" style="background:var(--blue)"></div>
+      <div class="cmd2-kpi-lbl">🔄 Taxa de Renovação</div>
+      <div class="cmd2-kpi-val" id="cmd-kpi-renov" style="color:var(--blue)">—</div>
+      <div class="cmd2-kpi-sub">clientes recorrentes</div>
+    </div>
+    <div class="cmd2-kpi" style="border-color:rgba(239,71,111,0.2)">
+      <div class="cmd2-kpi-accent" style="background:var(--red)"></div>
+      <div class="cmd2-kpi-lbl">⚠️ Inadimplência</div>
+      <div class="cmd2-kpi-val" id="cmd-kpi-inadim2" style="color:var(--red)">—</div>
+      <div class="cmd2-kpi-sub" id="cmd-kpi-inadim2-sub">—</div>
+    </div>
+  </div>
+
+  <!-- ══ PREVISÃO DE ENTRADA ══ -->
+  <div class="cmd2-section"><span class="dot"></span> PREVISÃO DE ENTRADA <span class="line"></span></div>
+  <div class="cmd2-forecast">
+    <div class="cmd2-fc-card" style="border-color:rgba(201,146,42,0.2)">
+      <div class="cmd2-fc-lbl">⚡ Hoje</div>
+      <div class="cmd2-fc-val" id="cmd-fc-hoje" style="color:var(--gold)">—</div>
+      <div class="cmd2-fc-sub" id="cmd-fc-hoje-sub">—</div>
+    </div>
+    <div class="cmd2-fc-card" style="border-color:rgba(72,149,239,0.2)">
+      <div class="cmd2-fc-lbl">📅 Próximos 7 dias</div>
+      <div class="cmd2-fc-val" id="cmd-fc-7d" style="color:var(--blue)">—</div>
+      <div class="cmd2-fc-sub" id="cmd-fc-7d-sub">—</div>
+    </div>
+    <div class="cmd2-fc-card" style="border-color:rgba(155,93,229,0.2)">
+      <div class="cmd2-fc-lbl">🔮 Este Mês (total)</div>
+      <div class="cmd2-fc-val" id="cmd-fc-mes" style="color:var(--purple)">—</div>
+      <div class="cmd2-fc-sub" id="cmd-fc-mes-sub">—</div>
+    </div>
+  </div>
+
+  <!-- ══ HUB CENTRAL: COLUNAS + MAPA ══ -->
+  <div class="cmd2-section"><span class="dot"></span> TEATRO DE OPERAÇÕES <span class="line"></span></div>
+  <div class="cmd2-hub">
+
+    <!-- COLUNA ESQUERDA -->
+    <div class="cmd2-col">
       <div class="kpi-sm" style="border-color:rgba(201,146,42,0.2);background:linear-gradient(135deg,rgba(201,146,42,0.06) 0%,var(--s1) 80%)">
         <div class="kpi-sm-accent" style="background:linear-gradient(90deg,var(--gold),var(--gold2))"></div>
         <div class="kpi-sm-lbl">Exposição Total</div>
@@ -993,62 +1137,62 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
         <div class="kpi-sm-val" id="kpi-lucro" style="color:var(--purple)">—</div>
         <div class="kpi-sm-sub">juros a receber</div>
       </div>
-      <!-- Card Notícias compacto -->
-      <div id="card-noticias" style="border-radius:12px;overflow:hidden;border:1px solid var(--border);background:var(--s1)">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border)">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.1em;color:var(--text)">📰 Notícias</div>
+      <!-- Notícias compacto -->
+      <div id="card-noticias" style="border-radius:11px;overflow:hidden;border:1px solid var(--border);background:var(--s1)">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--border)">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:0.7rem;letter-spacing:0.1em;color:var(--text)">📰 Notícias</div>
           <button onclick="noticiasCarregar()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:5px;padding:3px 8px;font-family:'DM Mono',monospace;font-size:0.5rem;cursor:pointer" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">↺</button>
         </div>
-        <div id="noticias-lista" style="max-height:220px;overflow-y:auto"><div class="noticia-loading">⏳ Carregando...</div></div>
+        <div id="noticias-lista" style="max-height:200px;overflow-y:auto"><div class="noticia-loading">⏳ Carregando...</div></div>
       </div>
     </div>
 
-    <!-- CENTRO — MAPA SP -->
+    <!-- CENTRO — MAPA TÁTICO -->
     <div id="mapa-clientes-wrap">
       <div id="mapa-clientes-header">
         <div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:0.82rem;letter-spacing:0.1em;color:var(--text)">📍 Distribuição de Clientes — SP</div>
-          <div style="font-size:0.52rem;color:var(--muted);margin-top:1px" id="mapa-clientes-count">Carregando...</div>
+          <div class="mapa-header-title">📍 Distribuição de Clientes — SP</div>
+          <div style="font-size:0.5rem;color:var(--muted);margin-top:1px" id="mapa-clientes-count">Carregando...</div>
         </div>
-        <div style="font-size:0.55rem;color:var(--muted2);letter-spacing:0.08em">MAPA</div>
+        <div class="mapa-header-badge"><div class="mapa-live-dot"></div> MAPA AO VIVO</div>
       </div>
       <div id="mapa-clientes"></div>
       <div id="mapa-clientes-footer">
-        <span style="font-size:0.52rem;color:var(--muted)">
+        <span style="font-size:0.5rem;color:var(--muted)">
           <span class="mapa-legend-dot" style="background:var(--green)"></span>Em dia
           <span class="mapa-legend-dot" style="background:var(--red);margin-left:8px"></span>Atraso
           <span class="mapa-legend-dot" style="background:var(--gold);margin-left:8px"></span>Cadastrado
           <span class="mapa-legend-dot" style="background:var(--muted);margin-left:8px"></span>Quitado
         </span>
-        <span style="font-size:0.5rem;color:var(--muted2);margin-left:auto">📍 baseado no endereço cadastrado</span>
+        <span style="font-size:0.48rem;color:var(--muted2);margin-left:auto">📍 baseado no endereço cadastrado</span>
       </div>
-      <!-- GRÁFICOS DENTRO DO CARD DO MAPA -->
+      <!-- GRÁFICOS DENTRO DO MAPA -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--border)">
-        <div style="padding:14px 16px;border-right:1px solid var(--border)">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="padding:12px 14px;border-right:1px solid var(--border)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
             <div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:0.75rem;letter-spacing:0.1em;color:var(--text)">📈 Evolução Mensal da Carteira</div>
-              <div style="font-size:0.52rem;color:var(--muted);margin-top:1px">Capital e lucro acumulados mês a mês</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.1em;color:var(--text)">📈 Evolução Mensal da Carteira</div>
+              <div style="font-size:0.5rem;color:var(--muted);margin-top:1px">Capital e lucro acumulados mês a mês</div>
             </div>
             <div class="card-badge">CRESCIMENTO</div>
           </div>
-          <div style="height:150px;position:relative"><canvas id="chartEvolMensal"></canvas></div>
+          <div style="height:130px;position:relative"><canvas id="chartEvolMensal"></canvas></div>
         </div>
-        <div style="padding:14px 16px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="padding:12px 14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
             <div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:0.75rem;letter-spacing:0.1em;color:var(--text)">💼 Composição da Carteira</div>
-              <div style="font-size:0.52rem;color:var(--muted);margin-top:1px">Capital saudável vs em risco vs quitado</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.1em;color:var(--text)">💼 Composição da Carteira</div>
+              <div style="font-size:0.5rem;color:var(--muted);margin-top:1px">Capital saudável vs em risco vs quitado</div>
             </div>
             <div class="card-badge">SAÚDE</div>
           </div>
-          <div style="height:150px;position:relative"><canvas id="chartComposicao"></canvas></div>
+          <div style="height:130px;position:relative"><canvas id="chartComposicao"></canvas></div>
         </div>
       </div>
     </div>
 
-    <!-- COLUNA DIREITA: KPIs + Sugestões com ações integradas -->
-    <div class="visao-col">
+    <!-- COLUNA DIREITA -->
+    <div class="cmd2-col">
       <div class="kpi-sm">
         <div class="kpi-sm-accent" style="background:var(--gold2)"></div>
         <div class="kpi-sm-lbl">A Receber (7d)</div>
@@ -1079,13 +1223,12 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
         <div class="kpi-sm-val" id="kpi-prazo" style="color:var(--gold)">—</div>
         <div class="kpi-sm-sub">meses</div>
       </div>
-      <!-- Sugestões com ações prioritárias integradas -->
-      <div id="card-sugestoes" style="background:var(--s1);border:1px solid rgba(155,93,229,0.25);border-radius:12px;overflow:hidden">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid rgba(155,93,229,0.15)">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:0.72rem;letter-spacing:0.1em;color:var(--text)">💡 Sugestões</div>
+      <!-- Sugestões -->
+      <div id="card-sugestoes" style="background:var(--s1);border:1px solid rgba(155,93,229,0.25);border-radius:11px;overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid rgba(155,93,229,0.15)">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:0.7rem;letter-spacing:0.1em;color:var(--text)">💡 Sugestões</div>
           <button onclick="sugestoesAtualizar()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:5px;padding:3px 8px;font-family:'DM Mono',monospace;font-size:0.5rem;cursor:pointer" onmouseover="this.style.borderColor='var(--purple)';this.style.color='var(--purple)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">↺</button>
         </div>
-        <!-- Ações prioritárias integradas -->
         <div id="briefing-acoes-inline" style="display:none;padding:8px 12px;border-bottom:1px solid var(--border)">
           <div style="font-size:0.5rem;color:var(--gold);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:5px"><span id="briefing-emoji">☀️</span> Ações de hoje</div>
           <div id="briefing-acoes-list" style="display:flex;flex-direction:column;gap:4px"></div>
@@ -1140,31 +1283,96 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
       </div>
     </div>
 
-  </div><!-- /.visao-hub -->
+  </div><!-- /.cmd2-hub -->
 
-  <!-- CARDS ABAIXO DO MAPA — Total Contratos, Rentabilidade Mês, Contratos Quitados -->
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;margin-bottom:0">
-    <div class="kpi-sm" style="border-color:rgba(155,93,229,0.15)">
-      <div class="kpi-sm-accent" style="background:var(--purple)"></div>
-      <div class="kpi-sm-lbl">📊 Total Contratos</div>
-      <div class="kpi-sm-val" id="kpi-total-contr" style="color:var(--purple)">—</div>
-      <div class="kpi-sm-sub">ativos + quitados</div>
+  <!-- ══ OPERAÇÃO DO DIA ══ -->
+  <div class="cmd2-section"><span class="dot"></span> OPERAÇÃO DO DIA <span class="line"></span></div>
+  <div class="cmd2-bottom">
+
+    <!-- VENCIMENTOS 7 DIAS -->
+    <div class="cmd2-bottom-card">
+      <div class="cmd2-bottom-card-header">
+        <div class="cmd2-bottom-card-title">📅 Vencimentos — Próximos 7 Dias</div>
+        <div class="cmd2-bottom-card-badge">AGENDA</div>
+      </div>
+      <div class="cmd2-bottom-card-body" id="cmd-agenda-body">
+        <div class="cmd2-empty">Carregando...</div>
+      </div>
     </div>
-    <div class="kpi-sm" style="border-color:rgba(72,149,239,0.15)">
-      <div class="kpi-sm-accent" style="background:var(--blue)"></div>
-      <div class="kpi-sm-lbl">💹 Rentabilidade Mês</div>
-      <div class="kpi-sm-val" id="kpi-rent-mes" style="color:var(--blue)">—</div>
-      <div class="kpi-sm-sub">juros recebidos este mês</div>
+
+    <!-- RENOVAÇÕES -->
+    <div class="cmd2-bottom-card">
+      <div class="cmd2-bottom-card-header">
+        <div class="cmd2-bottom-card-title">🔄 Oportunidades de Renovação</div>
+        <div class="cmd2-bottom-card-badge">PROATIVO</div>
+      </div>
+      <div class="cmd2-bottom-card-body" id="cmd-renov-body">
+        <div class="cmd2-empty">Carregando...</div>
+      </div>
     </div>
-    <div class="kpi-sm" style="border-color:rgba(6,214,160,0.15)">
-      <div class="kpi-sm-accent" style="background:var(--green)"></div>
-      <div class="kpi-sm-lbl">✅ Contratos Quitados</div>
-      <div class="kpi-sm-val" id="kpi-quit" style="color:var(--green)">—</div>
-      <div class="kpi-sm-sub" id="kpi-quit-sub">histórico completo</div>
+
+    <!-- ALOCAÇÃO DE CAPITAL + ESTATÍSTICAS -->
+    <div class="cmd2-bottom-card">
+      <div class="cmd2-bottom-card-header">
+        <div class="cmd2-bottom-card-title">🏦 Alocação de Capital</div>
+        <div class="cmd2-bottom-card-badge">CAIXA</div>
+      </div>
+      <div class="cmd2-bottom-card-body">
+        <div class="cmd2-capital-ring">
+          <div class="cmd2-capital-chart-wrap">
+            <canvas id="cmd-donut-capital" width="90" height="90"></canvas>
+            <div class="cmd2-capital-center">
+              <div class="cmd2-capital-pct" id="cmd-cap-pct-txt">—%</div>
+              <div class="cmd2-capital-lbl-c">alocado</div>
+            </div>
+          </div>
+          <div class="cmd2-capital-legend">
+            <div class="cmd2-capital-legend-item">
+              <div class="cmd2-capital-dot" style="background:var(--gold)"></div>
+              <div class="cmd2-capital-legend-lbl">Na rua (principal)</div>
+              <div class="cmd2-capital-legend-val" id="cmd-cap-rua-leg">—</div>
+            </div>
+            <div class="cmd2-capital-legend-item">
+              <div class="cmd2-capital-dot" style="background:var(--green)"></div>
+              <div class="cmd2-capital-legend-lbl">Disponível (caixa)</div>
+              <div class="cmd2-capital-legend-val" id="cmd-cap-disp-leg">—</div>
+            </div>
+            <div class="cmd2-capital-legend-item">
+              <div class="cmd2-capital-dot" style="background:var(--red)"></div>
+              <div class="cmd2-capital-legend-lbl">Em risco (atraso)</div>
+              <div class="cmd2-capital-legend-val" id="cmd-cap-risco-leg">—</div>
+            </div>
+          </div>
+        </div>
+        <div style="background:var(--s2);border-radius:7px;padding:9px 12px;font-size:0.58rem;color:var(--muted);line-height:1.7;margin-top:8px" id="cmd-cap-analise">Aguardando dados...</div>
+        <!-- KPIs extra abaixo -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px">
+          <div style="text-align:center">
+            <div style="font-size:0.48rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px">📊 Total Contr.</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--purple)" id="kpi-total-contr">—</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:0.48rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px">💹 Rent. Mês</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--blue)" id="kpi-rent-mes">—</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:0.48rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px">✅ Quitados</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--green)" id="kpi-quit">—</div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+
+  </div><!-- /.cmd2-bottom -->
 
   <!-- IDs fantasma: mantém o JS funcionando sem quebrar nada -->
+  <span id="kpi-top-entra" style="display:none"></span>
+  <span id="kpi-top-entra-sub" style="display:none"></span>
+  <span id="kpi-top-cobr" style="display:none"></span>
+  <span id="kpi-top-atraso" style="display:none"></span>
+  <span id="kpi-top-atraso-sub" style="display:none"></span>
+  <span id="kpi-top-prox7" style="display:none"></span>
+  <span id="kpi-quit-sub" style="display:none"></span>
   <span id="kpi-melhor-cli" style="display:none"></span>
   <span id="kpi-melhor-cli-sub" style="display:none"></span>
   <span id="kpi-melhor-cli-sub-ghost" style="display:none"></span>
