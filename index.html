@@ -4098,9 +4098,45 @@ function tplApply(txt, c){
 }
 
 // ── MODAL EDITOR ─────────────────────────────────────────
-function tplModalOpen(){
-  const list=document.getElementById('tpl-editor-list');
-  list.innerHTML=Object.entries(_tpls).map(([key,tpl])=>`
+let _tplActiveTab = 'padrao';
+
+function tplLoadCustom(){
+  try{
+    const saved = localStorage.getItem('wa_custom_templates');
+    if(saved) return JSON.parse(saved);
+  }catch(e){}
+  return [];
+}
+function tplSaveCustom(arr){
+  try{ localStorage.setItem('wa_custom_templates', JSON.stringify(arr)); }catch(e){}
+}
+let _customTpls = tplLoadCustom();
+
+function tplSwitchTab(tab){
+  _tplActiveTab = tab;
+  const btnPadrao = document.getElementById('tpl-tab-padrao');
+  const btnCustom = document.getElementById('tpl-tab-custom');
+  const addWrap = document.getElementById('tpl-add-btn-wrap');
+  if(tab === 'padrao'){
+    btnPadrao.style.borderBottomColor = 'var(--gold)';
+    btnPadrao.style.color = 'var(--gold2)';
+    btnCustom.style.borderBottomColor = 'transparent';
+    btnCustom.style.color = 'var(--muted)';
+    if(addWrap) addWrap.style.display = 'none';
+    tplRenderPadrao();
+  } else {
+    btnCustom.style.borderBottomColor = 'var(--purple)';
+    btnCustom.style.color = 'var(--purple)';
+    btnPadrao.style.borderBottomColor = 'transparent';
+    btnPadrao.style.color = 'var(--muted)';
+    if(addWrap) addWrap.style.display = 'block';
+    tplRenderCustom();
+  }
+}
+
+function tplRenderPadrao(){
+  const list = document.getElementById('tpl-editor-list');
+  list.innerHTML = Object.entries(_tpls).map(([key,tpl])=>`
     <div class="tpl-item">
       <div class="tpl-item-label">
         <span class="tpl-item-emoji">${tpl.lbl.split(' ')[0]}</span>
@@ -4110,35 +4146,111 @@ function tplModalOpen(){
       <div class="tpl-vars">Variáveis: <span>{nome}</span><span>{valor}</span><span>{capital}</span><span>{vencimento}</span><span>{dias_atraso}</span><span>{multa}</span><span>{total_devido}</span></div>
     </div>
   `).join('');
+}
+
+function tplRenderCustom(){
+  const list = document.getElementById('tpl-editor-list');
+  const count = document.getElementById('tpl-custom-count');
+  if(count) count.textContent = _customTpls.length;
+  if(_customTpls.length === 0){
+    list.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:0.7rem;line-height:1.8">
+      Nenhum template personalizado criado ainda.<br>
+      <span style="color:var(--purple);opacity:0.7">Clique em "＋ Adicionar Novo Template" para começar.</span>
+    </div>`;
+    return;
+  }
+  list.innerHTML = _customTpls.map((tpl, idx)=>`
+    <div class="tpl-item" style="position:relative">
+      <div class="tpl-item-label" style="justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px">
+          <input id="ctpl_emoji_${idx}" value="${tpl.emoji||'💬'}" style="width:36px;background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:1rem;text-align:center;padding:3px;font-family:inherit">
+          <input id="ctpl_name_${idx}" value="${tpl.name||'Meu Template'}" placeholder="Nome do template" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.68rem;padding:5px 8px;outline:none">
+        </div>
+        <button onclick="tplDeleteCustom(${idx})" style="background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.25);border-radius:6px;color:var(--red);font-size:0.65rem;padding:4px 10px;cursor:pointer;font-family:'DM Mono',monospace;white-space:nowrap" onmouseover="this.style.background='rgba(239,71,111,0.2)'" onmouseout="this.style.background='rgba(239,71,111,0.1)'">🗑 Excluir</button>
+      </div>
+      <textarea class="tpl-textarea" id="ctpl_txt_${idx}" rows="4" placeholder="Digite sua mensagem aqui...">${tpl.txt||''}</textarea>
+      <div class="tpl-vars">Variáveis: <span>{nome}</span><span>{valor}</span><span>{capital}</span><span>{vencimento}</span><span>{dias_atraso}</span><span>{multa}</span><span>{total_devido}</span></div>
+    </div>
+  `).join('');
+}
+
+function tplAddNew(){
+  _customTpls.push({ emoji:'💬', name:'Novo Template', txt:'' });
+  tplRenderCustom();
+  // Scroll para o novo item
+  const list = document.getElementById('tpl-editor-list');
+  if(list) list.scrollTop = list.scrollHeight;
+  const count = document.getElementById('tpl-custom-count');
+  if(count) count.textContent = _customTpls.length;
+}
+
+function tplDeleteCustom(idx){
+  if(!confirm('Excluir este template?')) return;
+  _customTpls.splice(idx, 1);
+  tplRenderCustom();
+  const count = document.getElementById('tpl-custom-count');
+  if(count) count.textContent = _customTpls.length;
+}
+
+function tplModalOpen(){
+  _tplActiveTab = 'padrao';
   document.getElementById('tpl-modal-overlay').classList.add('open');
+  // reset tab visual
+  const btnPadrao = document.getElementById('tpl-tab-padrao');
+  const btnCustom = document.getElementById('tpl-tab-custom');
+  const addWrap = document.getElementById('tpl-add-btn-wrap');
+  if(btnPadrao){ btnPadrao.style.borderBottomColor='var(--gold)'; btnPadrao.style.color='var(--gold2)'; }
+  if(btnCustom){ btnCustom.style.borderBottomColor='transparent'; btnCustom.style.color='var(--muted)'; }
+  if(addWrap) addWrap.style.display='none';
+  tplRenderPadrao();
+  const count = document.getElementById('tpl-custom-count');
+  if(count) count.textContent = _customTpls.length;
 }
 function tplModalClose(){
   document.getElementById('tpl-modal-overlay').classList.remove('open');
 }
 function tplSave(){
-  const updated={};
-  Object.keys(TPL_DEFAULT).forEach(key=>{
-    const el=document.getElementById('tpl_txt_'+key);
-    // Sempre preserva lbl do padrão, só atualiza txt
-    updated[key]={ lbl: TPL_DEFAULT[key].lbl, txt: el ? el.value : _tpls[key].txt };
-  });
-  _tpls=updated;
-  try{
-    // Salva só txt no localStorage (lbl sempre vem do TPL_DEFAULT)
-    localStorage.setItem('wa_templates', JSON.stringify(
-      {...Object.fromEntries(Object.entries(updated).map(([k,v])=>[k,{txt:v.txt}])), __version:TPL_VERSION}
-    ));
-  }catch(e){}
+  if(_tplActiveTab === 'padrao'){
+    const updated={};
+    Object.keys(TPL_DEFAULT).forEach(key=>{
+      const el=document.getElementById('tpl_txt_'+key);
+      updated[key]={ lbl: TPL_DEFAULT[key].lbl, txt: el ? el.value : _tpls[key].txt };
+    });
+    _tpls=updated;
+    try{
+      localStorage.setItem('wa_templates', JSON.stringify(
+        {...Object.fromEntries(Object.entries(updated).map(([k,v])=>[k,{txt:v.txt}])), __version:TPL_VERSION}
+      ));
+    }catch(e){}
+  } else {
+    // Salva templates customizados
+    const saved = _customTpls.map((tpl, idx)=>({
+      emoji: (document.getElementById('ctpl_emoji_'+idx)||{}).value || tpl.emoji || '💬',
+      name: (document.getElementById('ctpl_name_'+idx)||{}).value || tpl.name || 'Meu Template',
+      txt: (document.getElementById('ctpl_txt_'+idx)||{}).value || tpl.txt || ''
+    }));
+    _customTpls = saved;
+    tplSaveCustom(_customTpls);
+    const count = document.getElementById('tpl-custom-count');
+    if(count) count.textContent = _customTpls.length;
+  }
   tplModalClose();
   waRenderCards();
   const btn=document.querySelector('.tpl-btn-save');
   if(btn){ const orig=btn.textContent; btn.textContent='✅ SALVO!'; setTimeout(()=>btn.textContent=orig,1800); }
 }
 function tplReset(){
-  if(!confirm('Restaurar todos os templates para o padrão original?'))return;
-  _tpls={...TPL_DEFAULT};
-  try{ localStorage.removeItem('wa_templates'); }catch(e){}
-  tplModalOpen(); // re-abre com valores padrão
+  if(_tplActiveTab === 'padrao'){
+    if(!confirm('Restaurar todos os templates padrão para o original?'))return;
+    _tpls={...TPL_DEFAULT};
+    try{ localStorage.removeItem('wa_templates'); }catch(e){}
+    tplRenderPadrao();
+  } else {
+    if(!confirm('Excluir todos os seus templates personalizados?'))return;
+    _customTpls=[];
+    tplSaveCustom([]);
+    tplRenderCustom();
+  }
 }
 
 // ── BUSCA ────────────────────────────────────────────────
