@@ -252,32 +252,88 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .wa-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
 .wa-filter-btn{font-size:0.68rem;padding:5px 14px;border-radius:20px;border:1px solid var(--border2);color:var(--muted);background:transparent;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s;font-family:'DM Mono',monospace;}
 .wa-filter-btn.active{background:rgba(201,146,42,0.12);border-color:var(--gold);color:var(--gold2);}
-.wa-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;}
-.wa-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-.wa-card-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);}
-.wa-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1rem;color:#07090e;flex-shrink:0;}
-.wa-client-name{font-size:0.72rem;color:var(--text);}
-.wa-client-meta{font-size:0.63rem;color:var(--muted);margin-top:2px;}
-.wa-pill{font-size:0.5rem;padding:3px 9px;border-radius:12px;white-space:nowrap;margin-left:auto;flex-shrink:0;}
+/* ═══ WHATSAPP — REDESIGN PREMIUM ═══ */
+.wa-hero-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;background:linear-gradient(135deg,rgba(37,211,102,0.06) 0%,rgba(18,140,126,0.04) 100%);border:1px solid rgba(37,211,102,0.15);border-radius:16px;margin-bottom:20px;}
+.wa-hero-left{display:flex;align-items:center;gap:14px;}
+.wa-hero-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#25d366,#128c7e);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;box-shadow:0 4px 16px rgba(37,211,102,0.3);}
+.wa-hero-title{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:0.1em;color:var(--text);}
+.wa-hero-sub{font-size:0.58rem;color:var(--muted);letter-spacing:0.06em;margin-top:2px;}
+.wa-tpl-manage-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,rgba(155,93,229,0.2),rgba(201,146,42,0.1));border:1px solid rgba(155,93,229,0.4);color:var(--purple);border-radius:10px;font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s;white-space:nowrap;}
+.wa-tpl-manage-btn:hover{background:linear-gradient(135deg,rgba(155,93,229,0.3),rgba(201,146,42,0.15));border-color:rgba(155,93,229,0.6);box-shadow:0 4px 16px rgba(155,93,229,0.2);}
+.wa-kpi-strip{display:flex;align-items:stretch;background:var(--s1);border:1px solid var(--border);border-radius:14px;margin-bottom:22px;overflow:hidden;}
+.wa-kpi-item{flex:1;display:flex;align-items:center;gap:12px;padding:16px 20px;transition:background 0.2s;}
+.wa-kpi-item:hover{background:rgba(255,255,255,0.02);}
+.wa-kpi-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.95rem;flex-shrink:0;}
+.wa-kpi-val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;line-height:1;}
+.wa-kpi-lbl{font-size:0.56rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:1px;}
+.wa-kpi-divider{width:1px;background:var(--border);flex-shrink:0;}
+.wa-section-row{display:flex;align-items:center;gap:8px;margin:0 0 12px;}
+.wa-section-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.wa-section-title{font-size:0.6rem;letter-spacing:0.22em;color:var(--muted);text-transform:uppercase;font-family:'Bebas Neue',sans-serif;}
+.wa-controls-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.wa-filter-group{display:flex;gap:6px;flex-wrap:wrap;}
+.wa-filter-btn{font-size:0.65rem;padding:6px 14px;border-radius:20px;border:1px solid var(--border2);color:var(--muted);background:transparent;cursor:pointer;letter-spacing:0.06em;transition:all 0.18s;font-family:'DM Mono',monospace;}
+.wa-filter-btn:hover{border-color:var(--gold2);color:var(--gold2);}
+.wa-filter-btn.active{background:rgba(37,211,102,0.1);border-color:rgba(37,211,102,0.4);color:#25d366;}
+.wa-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:16px;}
+/* Card redesign */
+.wa-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform 0.2s,border-color 0.2s,box-shadow 0.2s;}
+.wa-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,0.3);}
+.wa-card[data-sit="atraso"]{border-color:rgba(239,71,111,0.25);}
+.wa-card[data-sit="vence"]{border-color:rgba(201,146,42,0.2);}
+.wa-card[data-sit="emdia"]{border-color:rgba(6,214,160,0.15);}
+.wa-card-head{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--border);}
+.wa-card[data-sit="atraso"] .wa-card-head{background:rgba(239,71,111,0.04);}
+.wa-card[data-sit="vence"] .wa-card-head{background:rgba(201,146,42,0.03);}
+.wa-avatar{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:#07090e;flex-shrink:0;}
+.wa-client-name{font-size:0.75rem;color:var(--text);font-weight:600;}
+.wa-client-meta{font-size:0.6rem;color:var(--muted);margin-top:2px;line-height:1.5;}
+.wa-pill{font-size:0.52rem;padding:4px 10px;border-radius:20px;white-space:nowrap;margin-left:auto;flex-shrink:0;font-weight:600;letter-spacing:0.04em;}
 .wa-pill.atraso{background:rgba(239,71,111,0.15);color:var(--red);border:1px solid rgba(239,71,111,0.3);}
 .wa-pill.vence{background:rgba(201,146,42,0.12);color:var(--gold2);border:1px solid rgba(201,146,42,0.3);}
 .wa-pill.emdia{background:rgba(6,214,160,0.1);color:var(--green);border:1px solid rgba(6,214,160,0.2);}
 .wa-pill.inativo{background:rgba(90,98,130,0.1);color:var(--muted);border:1px solid var(--border2);}
-.wa-body{padding:14px 16px;}
-.wa-phone{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.62rem;padding:7px 10px;margin-bottom:8px;outline:none;}
+.wa-body{padding:14px 16px;display:flex;flex-direction:column;gap:9px;}
+.wa-phone-row{display:flex;align-items:center;gap:8px;}
+.wa-phone-label{font-size:0.52rem;color:var(--muted);letter-spacing:0.06em;white-space:nowrap;}
+.wa-phone{flex:1;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.62rem;padding:7px 10px;outline:none;transition:border-color 0.2s;}
 .wa-phone:focus{border-color:var(--gold);}
 .wa-phone.has-number{border-color:rgba(6,214,160,0.4);color:var(--green);}
-.wa-select{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.62rem;padding:7px 10px;margin-bottom:8px;cursor:pointer;outline:none;}
-.wa-select:focus{border-color:var(--gold);}
-.wa-textarea{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;border-top-left-radius:2px;padding:12px;font-size:0.62rem;color:var(--text);line-height:1.7;min-height:110px;margin-bottom:10px;font-family:'DM Mono',monospace;resize:vertical;outline:none;box-sizing:border-box;}
-.wa-textarea:focus{border-color:var(--gold);}
-.wa-edit-hint{font-size:0.52rem;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:4px;}
-.wa-btns{display:flex;gap:8px;}
-.wa-btn-send{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:8px;padding:9px;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;text-decoration:none;letter-spacing:0.06em;}
-.wa-btn-copy{background:var(--s2);border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:9px 12px;font-size:0.62rem;cursor:pointer;font-family:'DM Mono',monospace;transition:all 0.2s;}
+.wa-select{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.62rem;padding:8px 10px;cursor:pointer;outline:none;transition:border-color 0.2s;}
+.wa-select:focus{border-color:var(--purple);}
+.wa-textarea{width:100%;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:0.62rem;color:var(--text);line-height:1.75;min-height:108px;font-family:'DM Mono',monospace;resize:vertical;outline:none;box-sizing:border-box;transition:border-color 0.2s;}
+.wa-textarea:focus{border-color:rgba(37,211,102,0.4);}
+.wa-edit-hint{font-size:0.5rem;color:var(--muted2);display:flex;align-items:center;gap:4px;margin:-4px 0;}
+.wa-btns{display:grid;grid-template-columns:1fr auto auto auto;gap:7px;}
+.wa-btn-send{display:flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:9px;padding:10px;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;text-decoration:none;letter-spacing:0.06em;transition:opacity 0.2s;font-weight:600;}
+.wa-btn-send:hover{opacity:0.88;}
+.wa-btn-copy{background:var(--s2);border:1px solid var(--border2);color:var(--muted);border-radius:9px;padding:9px 12px;font-size:0.65rem;cursor:pointer;transition:all 0.2s;}
 .wa-btn-copy:hover{border-color:var(--gold);color:var(--gold);}
 .wa-btn-copy.copied{border-color:var(--green);color:var(--green);}
-.wa-empty{text-align:center;padding:40px;color:var(--muted);font-size:0.68rem;}
+.wa-btn-pago{display:flex;align-items:center;justify-content:center;gap:5px;background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.25);color:var(--green);border-radius:9px;padding:9px 10px;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.wa-btn-pago:hover{background:rgba(6,214,160,0.18);}
+.wa-btn-reneg{background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.25);color:var(--gold2);border-radius:9px;padding:9px 10px;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;transition:all 0.2s;}
+.wa-btn-reneg:hover{background:rgba(240,180,41,0.18);}
+.wa-empty{text-align:center;padding:50px;color:var(--muted);font-size:0.68rem;grid-column:1/-1;}
+/* Hist */
+.wa-hist-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:0.62rem;}
+.wa-hist-item:last-child{border-bottom:none;}
+.wa-hist-badge{font-size:0.48rem;padding:3px 8px;border-radius:10px;background:rgba(6,214,160,0.1);color:var(--green);border:1px solid rgba(6,214,160,0.2);white-space:nowrap;}
+/* Template modal items */
+.tpl-item{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:14px;transition:border-color 0.2s;}
+.tpl-item:hover{border-color:var(--border2);}
+.tpl-item-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.tpl-item-emoji-badge{width:30px;height:30px;border-radius:8px;background:rgba(201,146,42,0.12);display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;}
+.tpl-item-name{font-size:0.68rem;color:var(--text);flex:1;font-weight:600;}
+.tpl-item-key{font-size:0.5rem;color:var(--muted2);letter-spacing:0.08em;font-family:'DM Mono',monospace;}
+.tpl-del-btn{background:transparent;border:1px solid rgba(239,71,111,0.2);color:rgba(239,71,111,0.5);border-radius:6px;padding:4px 9px;font-size:0.55rem;cursor:pointer;transition:all 0.2s;font-family:'DM Mono',monospace;}
+.tpl-del-btn:hover{background:rgba(239,71,111,0.1);border-color:var(--red);color:var(--red);}
+.tpl-name-input{width:100%;background:var(--s1);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.65rem;padding:8px 10px;outline:none;margin-bottom:8px;box-sizing:border-box;}
+.tpl-name-input:focus{border-color:var(--purple);}
+.tpl-textarea{width:100%;background:var(--s1);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.6rem;padding:10px;line-height:1.7;min-height:78px;resize:vertical;outline:none;box-sizing:border-box;transition:border-color 0.2s;}
+.tpl-textarea:focus{border-color:var(--gold);}
+.tpl-is-default-badge{font-size:0.48rem;padding:2px 7px;border-radius:8px;background:rgba(201,146,42,0.1);color:var(--gold2);border:1px solid rgba(201,146,42,0.2);white-space:nowrap;}
+/* ═══════════════════════════════════════════════════════ */
 
 /* ── SIMULADOR ── */
 .sim-form{display:flex;flex-direction:column;gap:12px;}
@@ -1981,61 +2037,138 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
 <!-- WHATSAPP -->
 <div id="tab-whatsapp" class="tab-panel">
-  <div class="section-label">📋 RÉGUA DE COBRANÇA — AÇÕES DO DIA</div>
-  <div class="card" style="margin-bottom:16px">
-    <div class="card-header"><div><div class="card-title">🎯 Quem Acionar Hoje</div><div class="card-desc">Vencimentos de hoje e nos próximos 3 dias — template já sugerido por perfil</div></div><div class="card-badge">PRIORIDADE</div></div>
-    <div id="regua-cobranca-list"><div style="color:var(--muted);font-size:0.68rem;padding:12px 0">Carregando...</div></div>
+
+  <!-- HEADER HERO -->
+  <div class="wa-hero-bar">
+    <div class="wa-hero-left">
+      <div class="wa-hero-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      </div>
+      <div>
+        <div class="wa-hero-title">Central de Mensagens</div>
+        <div class="wa-hero-sub">Régua de cobrança inteligente · Templates personalizáveis</div>
+      </div>
+    </div>
+    <button class="wa-tpl-manage-btn" onclick="tplModalOpen()">
+      <span>✦</span> Gerenciar Templates
+    </button>
   </div>
-  <div class="section-label">MENSAGENS WHATSAPP — ENVIO RÁPIDO</div>
-  <div class="wa-summary">
-    <div class="wa-sum"><div class="wa-sum-val" id="wa-n-total" style="color:var(--gold)">—</div><div class="wa-sum-lbl">Total Clientes</div></div>
-    <div class="wa-sum"><div class="wa-sum-val" id="wa-n-atraso" style="color:var(--red)">—</div><div class="wa-sum-lbl">Em Atraso</div></div>
-    <div class="wa-sum"><div class="wa-sum-val" id="wa-n-vence" style="color:var(--gold2)">—</div><div class="wa-sum-lbl">Vence em 7 dias</div></div>
-    <div class="wa-sum"><div class="wa-sum-val" id="wa-n-emdia" style="color:var(--green)">—</div><div class="wa-sum-lbl">Em Dia</div></div>
+
+  <!-- KPI STRIP -->
+  <div class="wa-kpi-strip">
+    <div class="wa-kpi-item" onclick="waFiltrar('todos',null)" style="cursor:pointer">
+      <div class="wa-kpi-icon" style="background:rgba(201,146,42,0.12);color:var(--gold)">👥</div>
+      <div><div class="wa-kpi-val" id="wa-n-total" style="color:var(--gold)">—</div><div class="wa-kpi-lbl">Total</div></div>
+    </div>
+    <div class="wa-kpi-divider"></div>
+    <div class="wa-kpi-item" onclick="waFiltrar('atraso',null)" style="cursor:pointer">
+      <div class="wa-kpi-icon" style="background:rgba(239,71,111,0.12);color:var(--red)">⚠️</div>
+      <div><div class="wa-kpi-val" id="wa-n-atraso" style="color:var(--red)">—</div><div class="wa-kpi-lbl">Em Atraso</div></div>
+    </div>
+    <div class="wa-kpi-divider"></div>
+    <div class="wa-kpi-item" onclick="waFiltrar('vence',null)" style="cursor:pointer">
+      <div class="wa-kpi-icon" style="background:rgba(232,184,75,0.12);color:var(--gold2)">⏰</div>
+      <div><div class="wa-kpi-val" id="wa-n-vence" style="color:var(--gold2)">—</div><div class="wa-kpi-lbl">Vence em 7d</div></div>
+    </div>
+    <div class="wa-kpi-divider"></div>
+    <div class="wa-kpi-item" onclick="waFiltrar('emdia',null)" style="cursor:pointer">
+      <div class="wa-kpi-icon" style="background:rgba(6,214,160,0.1);color:var(--green)">✅</div>
+      <div><div class="wa-kpi-val" id="wa-n-emdia" style="color:var(--green)">—</div><div class="wa-kpi-lbl">Em Dia</div></div>
+    </div>
   </div>
-  <div class="wa-filter-bar">
-    <button class="wa-filter-btn active" onclick="waFiltrar('todos',this)">Todos</button>
-    <button class="wa-filter-btn" onclick="waFiltrar('atraso',this)">⚠️ Em Atraso</button>
-    <button class="wa-filter-btn" onclick="waFiltrar('vence',this)">⏰ Vence em 7 dias</button>
-    <button class="wa-filter-btn" onclick="waFiltrar('emdia',this)">✅ Em Dia</button>
-    <button class="wa-filter-btn" onclick="waFiltrar('inativo',this)">💤 Inativos</button>
-    <button class="wa-tpl-edit-btn" onclick="tplModalOpen()">✏️ Personalizar Mensagens</button>
+
+  <!-- RÉGUA DO DIA -->
+  <div class="wa-section-row">
+    <div class="wa-section-dot" style="background:var(--red)"></div>
+    <div class="wa-section-title">AÇÕES DO DIA</div>
   </div>
-  <div class="wa-search-wrap">
-    <span class="wa-search-icon">🔍</span>
-    <input class="wa-search-input" id="wa-search" type="text" placeholder="Pesquisar cliente pelo nome..." oninput="waSearchChange(this)">
-    <button class="wa-search-clear" id="wa-search-clear" onclick="waSearchClear()">✕</button>
+  <div class="card" style="margin-bottom:20px;border-color:rgba(239,71,111,0.2);">
+    <div class="card-header" style="padding-bottom:12px">
+      <div><div class="card-title">🎯 Quem Acionar Hoje</div><div class="card-desc">Vencimentos de hoje e nos próximos 3 dias — template sugerido por perfil</div></div>
+      <div class="card-badge" style="background:rgba(239,71,111,0.1);border-color:rgba(239,71,111,0.3);color:var(--red)">PRIORIDADE</div>
+    </div>
+    <div id="regua-cobranca-list"><div style="color:var(--muted);font-size:0.68rem;padding:4px 0">Carregando...</div></div>
   </div>
+
+  <!-- BARRA DE FILTROS + BUSCA -->
+  <div class="wa-section-row">
+    <div class="wa-section-dot" style="background:var(--green)"></div>
+    <div class="wa-section-title">CONTATOS</div>
+  </div>
+  <div class="wa-controls-bar">
+    <div class="wa-filter-group">
+      <button class="wa-filter-btn active" data-filtro="todos" onclick="waFiltrar('todos',this)">Todos</button>
+      <button class="wa-filter-btn" data-filtro="atraso" onclick="waFiltrar('atraso',this)">⚠️ Atraso</button>
+      <button class="wa-filter-btn" data-filtro="vence" onclick="waFiltrar('vence',this)">⏰ Vence</button>
+      <button class="wa-filter-btn" data-filtro="emdia" onclick="waFiltrar('emdia',this)">✅ Em Dia</button>
+      <button class="wa-filter-btn" data-filtro="inativo" onclick="waFiltrar('inativo',this)">💤 Inativos</button>
+    </div>
+    <div class="wa-search-wrap" style="margin-bottom:0;flex:1;max-width:280px">
+      <span class="wa-search-icon">🔍</span>
+      <input class="wa-search-input" id="wa-search" type="text" placeholder="Buscar cliente..." oninput="waSearchChange(this)">
+      <button class="wa-search-clear" id="wa-search-clear" onclick="waSearchClear()">✕</button>
+    </div>
+  </div>
+
+  <!-- CARDS -->
   <div class="wa-cards" id="wa-cards">
     <div class="wa-empty">Aguardando dados...</div>
   </div>
-  <!-- HISTÓRICO DE COBRANÇAS -->
-  <div class="section-label" style="margin-top:28px">📋 HISTÓRICO DE COBRANÇAS ENVIADAS</div>
-  <div class="card">
-    <div class="card-header"><div><div class="card-title">📋 Registro de Contatos</div><div class="card-desc">Última vez que cada cliente foi contatado via WhatsApp</div></div>
-    <button onclick="waHistLimpar()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:0.55rem;cursor:pointer">🗑️ Limpar</button></div>
-    <div id="wa-hist-list"><div style="color:var(--muted);font-size:0.65rem;padding:12px 0">Nenhum contato registrado ainda. Após enviar uma mensagem, o registro aparece aqui.</div></div>
+
+  <!-- HISTÓRICO -->
+  <div class="wa-section-row" style="margin-top:28px">
+    <div class="wa-section-dot" style="background:var(--blue)"></div>
+    <div class="wa-section-title">HISTÓRICO DE CONTATOS</div>
+    <button onclick="waHistLimpar()" style="margin-left:auto;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:0.55rem;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">🗑️ Limpar</button>
   </div>
+  <div class="card">
+    <div id="wa-hist-list"><div style="color:var(--muted);font-size:0.65rem;padding:12px 0">Nenhum contato registrado ainda.</div></div>
+  </div>
+
 </div>
 
 <div style="text-align:right;margin-top:8px;font-size:0.57rem;color:var(--muted)">última atualização: <span id="last-update">—</span> · auto-refresh 15 min</div>
 </div></div>
 
-<!-- MODAL PERSONALIZAR MENSAGENS -->
+<!-- MODAL GERENCIAR TEMPLATES -->
 <div class="tpl-modal-overlay" id="tpl-modal-overlay" onclick="if(event.target===this)tplModalClose()">
-  <div class="tpl-modal">
-    <div class="tpl-modal-title">✏️ Personalizar Mensagens</div>
-    <div class="tpl-modal-sub">Edite os textos dos templates. Use as variáveis destacadas para inserir dados do cliente automaticamente.</div>
-    <div class="tpl-vars" style="margin-bottom:20px;padding:10px;background:rgba(201,146,42,0.05);border:1px solid rgba(201,146,42,0.15);border-radius:8px;">
-      <div style="color:var(--gold2);font-size:0.58rem;margin-bottom:8px;font-weight:600">VARIÁVEIS DISPONÍVEIS:</div>
-      <span>{nome}</span> <span>{valor}</span> <span>{capital}</span> <span>{vencimento}</span> <span>{dias_atraso}</span>
-      <div style="color:var(--muted);font-size:0.5rem;margin-top:6px">Ex: "Olá, {nome}! Sua parcela de {valor} vence em {vencimento}."</div>
+  <div class="tpl-modal" style="width:min(720px,95vw);max-height:92vh">
+
+    <!-- HEADER DO MODAL -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div>
+        <div class="tpl-modal-title">✦ Gerenciar Templates</div>
+        <div class="tpl-modal-sub" style="margin-bottom:0">Crie, edite e exclua mensagens pré-definidas. Use variáveis para personalizar automaticamente.</div>
+      </div>
+      <button onclick="tplModalClose()" style="background:transparent;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:4px;line-height:1;transition:color 0.2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">✕</button>
     </div>
-    <div id="tpl-editor-list"></div>
-    <div class="tpl-modal-footer">
-      <button class="tpl-btn-reset" onclick="tplReset()">🔄 Restaurar Padrão</button>
+
+    <!-- VARS CHIPS -->
+    <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:12px;background:rgba(201,146,42,0.05);border:1px solid rgba(201,146,42,0.15);border-radius:10px;margin:14px 0">
+      <span style="font-size:0.56rem;color:var(--gold2);letter-spacing:0.1em;text-transform:uppercase;margin-right:4px">Variáveis:</span>
+      ${['{nome}','{valor}','{capital}','{vencimento}','{dias_atraso}','{multa}','{total_devido}','{juros}'].map(v=>`<span onclick="tplInsertVar('${v}')" style="background:rgba(201,146,42,0.1);border:1px solid rgba(201,146,42,0.25);border-radius:5px;padding:3px 9px;font-size:0.6rem;color:var(--gold2);font-family:'DM Mono',monospace;cursor:pointer;transition:all 0.15s" onmouseover="this.style.background='rgba(201,146,42,0.2)'" onmouseout="this.style.background='rgba(201,146,42,0.1)'">${v}</span>`).join('')}
+      <span style="font-size:0.52rem;color:var(--muted);margin-left:4px">↑ clique para copiar</span>
+    </div>
+
+    <!-- TABS: Padrão / Personalizados -->
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px">
+      <button id="tpl-tab-padrao" onclick="tplSwitchTab('padrao')" style="padding:8px 18px;border:none;border-bottom:2px solid var(--gold);background:transparent;color:var(--gold2);font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.06em;cursor:pointer;transition:all 0.2s">Templates Padrão</button>
+      <button id="tpl-tab-custom" onclick="tplSwitchTab('custom')" style="padding:8px 18px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.06em;cursor:pointer;transition:all 0.2s">Meus Templates <span id="tpl-custom-count" style="background:rgba(155,93,229,0.2);color:var(--purple);border-radius:10px;padding:1px 7px;font-size:0.55rem;margin-left:4px">0</span></button>
+    </div>
+
+    <!-- LISTA DE TEMPLATES -->
+    <div id="tpl-editor-list" style="max-height:52vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px"></div>
+
+    <!-- BOTÃO ADICIONAR (só na aba custom) -->
+    <div id="tpl-add-btn-wrap" style="display:none;margin-top:14px">
+      <button onclick="tplAddNew()" style="width:100%;padding:11px;border:2px dashed rgba(155,93,229,0.4);border-radius:10px;background:rgba(155,93,229,0.05);color:var(--purple);font-family:'DM Mono',monospace;font-size:0.68rem;cursor:pointer;letter-spacing:0.06em;transition:all 0.2s" onmouseover="this.style.background='rgba(155,93,229,0.12)';this.style.borderColor='rgba(155,93,229,0.6)'" onmouseout="this.style.background='rgba(155,93,229,0.05)';this.style.borderColor='rgba(155,93,229,0.4)'">＋ Adicionar Novo Template</button>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="tpl-modal-footer" style="margin-top:16px">
+      <button class="tpl-btn-reset" onclick="tplReset()">🔄 Restaurar Padrões</button>
       <button class="tpl-btn-cancel" onclick="tplModalClose()">Cancelar</button>
-      <button class="tpl-btn-save" onclick="tplSave()">💾 SALVAR MENSAGENS</button>
+      <button class="tpl-btn-save" onclick="tplSave()">💾 SALVAR TUDO</button>
     </div>
   </div>
 </div>
@@ -4091,7 +4224,7 @@ function waCard(c){
   const ini=c.nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   const tid='wa_'+c.nome.replace(/[^a-zA-Z0-9]/g,'_');
   const opts=Object.entries(tpls).map(([k,v])=>`<option value="${k}"${k===def?' selected':''}>${v.lbl}</option>`).join('');
-  const extra=c.diasAtraso>0?` · <span style="color:var(--red)">${c.diasAtraso}d atraso · multa: ${fmt(c.multa||0)}</span>`:'';
+  const extra=c.diasAtraso>0?`<span style="color:var(--red)">⚠ ${c.diasAtraso}d · multa ${fmt(c.multa||0)}</span>`:'';
   const nomeSafe=c.nome.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
   const empIdSafe=c.empIds&&c.empIds[0]||'';
   const cliIdSafe=c.idCliente||'';
@@ -4100,27 +4233,38 @@ function waCard(c){
   const multaNum=c.multa||0;
   const diasNum=c.diasAtraso||0;
   const telLimpo=(c.tel||'').replace(/\D/g,'');
-  const telClass=telLimpo?'has-number':'';
-  const telIcon=telLimpo?'📞':'📵';
-  const telHint=telLimpo
-    ? `<span style="font-size:0.5rem;color:var(--green);margin-left:6px">✓ número da planilha</span>`
-    : `<span style="font-size:0.5rem;color:var(--muted);margin-left:6px">sem número na planilha</span>`;
+  const telStatus=telLimpo
+    ?`<span style="font-size:0.5rem;color:var(--green)">✓ número ok</span>`
+    :`<span style="font-size:0.5rem;color:var(--muted)">sem número</span>`;
+  const avatarBg=waColor(c.nome);
+  const freqBadge=c.contratos.some(e=>e.unidade==='quinzenal')
+    ?`<span style="background:rgba(155,93,229,0.12);color:var(--purple);border-radius:4px;padding:1px 6px;font-size:0.48rem;letter-spacing:0.06em">⚡ QUINZENAL</span>`
+    :c.contratos.some(e=>e.unidade==='semanal')
+    ?`<span style="background:rgba(72,149,239,0.12);color:var(--blue);border-radius:4px;padding:1px 6px;font-size:0.48rem;letter-spacing:0.06em">⚡ SEMANAL</span>`:'';
+
   return`<div class="wa-card" data-sit="${sit.tipo}">
   <div class="wa-card-head">
-    <div class="wa-avatar" style="background:${waColor(c.nome)}">${ini}</div>
-    <div style="flex:1;min-width:0"><div class="wa-client-name">${c.nome}</div><div class="wa-client-meta">${c.qtdContratos} contrato(s) · R$ ${Math.round(c.totalCap).toLocaleString('pt-BR')}${extra}${c.contratos.some(e=>e.unidade==='quinzenal')?` · <span style="color:var(--purple);font-size:0.5rem">⚡ QUINZENAL</span>`:c.contratos.some(e=>e.unidade==='semanal')?` · <span style="color:var(--blue);font-size:0.5rem">⚡ SEMANAL</span>`:''}</div></div>
+    <div class="wa-avatar" style="background:${avatarBg}">${ini}</div>
+    <div style="flex:1;min-width:0">
+      <div class="wa-client-name">${c.nome}</div>
+      <div class="wa-client-meta">${c.qtdContratos} contrato(s) · R$ ${Math.round(c.totalCap).toLocaleString('pt-BR')} ${freqBadge}</div>
+      ${extra?`<div style="font-size:0.58rem;margin-top:2px">${extra}</div>`:''}
+    </div>
     <span class="wa-pill ${sit.cls}">${sit.label}</span>
   </div>
   <div class="wa-body">
-    <div style="display:flex;align-items:center;margin-bottom:4px">${telIcon}${telHint}</div>
-    <input class="wa-phone ${telClass}" id="${tid}_tel" type="tel" value="${telLimpo}" placeholder="Digite o DDD + número">
+    <div class="wa-phone-row">
+      <span class="wa-phone-label">📞 Número</span>
+      <input class="wa-phone ${telLimpo?'has-number':''}" id="${tid}_tel" type="tel" value="${telLimpo}" placeholder="DDD + número">
+      ${telStatus}
+    </div>
     <select class="wa-select" id="${tid}_sel" onchange="waPreview('${tid}','${nomeSafe}')">${opts}</select>
-    <div class="wa-edit-hint">✏️ Edite a mensagem abaixo antes de enviar</div>
+    <div class="wa-edit-hint">✏️ Edite antes de enviar</div>
     <textarea class="wa-textarea" id="${tid}_prev">${tplApply(tpls[def].txt, c)}</textarea>
     <div class="wa-btns">
       <a class="wa-btn-send" href="#" onclick="waEnviar('${tid}');return false;"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> ABRIR WHATSAPP</a>
-      <button class="wa-btn-pago" onclick="pagModalOpen('${empIdSafe}','${cliIdSafe}','${nomeSafe}',${saldoNum},${jurosNum},${multaNum},${diasNum})">💳 Pago</button>
-      <button onclick="renegModalOpen('${empIdSafe}','${cliIdSafe}','${nomeSafe}','')" style="background:rgba(240,180,41,0.08);border:1px solid rgba(240,180,41,0.3);color:var(--gold2);border-radius:8px;padding:9px 10px;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;white-space:nowrap;">🔄 Reneg.</button>
+      <button class="wa-btn-pago" onclick="pagModalOpen('${empIdSafe}','${cliIdSafe}','${nomeSafe}',${saldoNum},${jurosNum},${multaNum},${diasNum})">💳</button>
+      <button class="wa-btn-reneg" onclick="renegModalOpen('${empIdSafe}','${cliIdSafe}','${nomeSafe}','')">🔄</button>
       <button class="wa-btn-copy" id="${tid}_copy" onclick="waCopy('${tid}')">📋</button>
     </div>
   </div>
