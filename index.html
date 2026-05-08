@@ -2903,24 +2903,197 @@ function render(empRows,pagRows){
   const totProj=dadosProj.reduce((s,v)=>s+v,0);
   const dFin=totProj>0?dadosProj:semRanges.map((_,i)=>jBase/4.33*(1-i*0.01));
   const bgSem=semRanges.map(r=>abertos.some(e=>e.proxVenc&&e.proxVenc>=r.ini&&e.proxVenc<=r.fim)?'rgba(6,214,160,0.85)':'rgba(6,214,160,0.3)');
+  // ── CHART 1: PROJEÇÃO 8 SEMANAS — line + area com ponto de destaque ──
   destroyChart('proj');
-  charts.proj=new Chart(document.getElementById('chartProjecao').getContext('2d'),{type:'bar',data:{labels:semLabels,datasets:[{label:'Juros a Receber',data:dFin,backgroundColor:bgSem,borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{title:items=>{const r=semRanges[items[0].dataIndex];return`Semana ${items[0].dataIndex+1} (${r.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}–${r.fim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})})`;},label:ctx=>' Juros: '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
+  (()=>{
+    const canvas=document.getElementById('chartProjecao');
+    const ctx2=canvas.getContext('2d');
+    // gradiente verde-teal
+    const grd=ctx2.createLinearGradient(0,0,0,240);
+    grd.addColorStop(0,'rgba(6,214,160,0.35)');
+    grd.addColorStop(1,'rgba(6,214,160,0.01)');
+    // linha média
+    const media=dFin.reduce((s,v)=>s+v,0)/dFin.length;
+    charts.proj=new Chart(ctx2,{
+      type:'line',
+      data:{
+        labels:semLabels,
+        datasets:[
+          {label:'Juros a Receber',data:dFin,borderColor:'rgba(6,214,160,1)',backgroundColor:grd,
+           borderWidth:2.5,pointRadius:dFin.map(v=>v>0?5:3),pointHoverRadius:8,
+           pointBackgroundColor:dFin.map((v,i)=>bgSem[i]==='rgba(6,214,160,0.85)'?'#06d6a0':'rgba(6,214,160,0.4)'),
+           pointBorderColor:'#07090e',pointBorderWidth:2,
+           fill:true,tension:0.4},
+          {label:'Média',data:dFin.map(()=>media),borderColor:'rgba(201,146,42,0.5)',
+           borderWidth:1.5,borderDash:[5,5],pointRadius:0,fill:false,tension:0},
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{...TOOLTIP,callbacks:{
+            title:items=>{const r=semRanges[items[0].dataIndex];return`Sem. ${items[0].dataIndex+1}  ·  ${r.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}–${r.fim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}`;},
+            label:ctx=>{if(ctx.datasetIndex===1)return` Média: ${fmt(ctx.raw)}`;return` Juros: ${fmt(ctx.raw)}`;}
+          }},
+        },
+        scales:{
+          x:{grid:{color:'rgba(26,32,53,0.8)'},border:{dash:[3,3]},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},maxRotation:0}},
+          y:{grid:{color:'rgba(26,32,53,0.8)'},border:{dash:[3,3]},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},callback:v=>fmt(v)},beginAtZero:true}
+        }
+      }
+    });
+  })();
 
-  // LUCRO REAL vs PREVISTO
+  // ── CHART 2: LUCRO REALIZADO VS PREVISTO — doughnut + cards internos ──
   destroyChart('lucro');
   const lucroRealShow=lucroReal>0?lucroReal:0.01;
-  charts.lucro=new Chart(document.getElementById('chartLucro').getContext('2d'),{type:'bar',data:{labels:['Juros Recebidos','Juros a Receber'],datasets:[{data:[lucroRealShow,totalJuros],backgroundColor:['rgba(6,214,160,0.8)','rgba(240,180,41,0.6)'],borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>{const v=ctx.dataIndex===0?lucroReal:ctx.raw;return' '+fmt(v);}}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}},y:{grid:{display:false},ticks:{color:'#dde1f0',font:{family:'DM Mono',size:10}}}}}});
+  (()=>{
+    // Substituir por doughnut mais elegante com % de realização
+    const pct=totalJuros>0?Math.min(100,(lucroReal/totalJuros)*100):0;
+    const restante=Math.max(0,totalJuros-lucroReal);
+    const canvas=document.getElementById('chartLucro');
+    const ctx2=canvas.getContext('2d');
+    charts.lucro=new Chart(ctx2,{
+      type:'doughnut',
+      data:{
+        labels:['Recebido','A Receber'],
+        datasets:[{
+          data:[lucroReal>0?lucroReal:0.01, restante>0?restante:0.01],
+          backgroundColor:['rgba(6,214,160,0.85)','rgba(240,180,41,0.5)'],
+          borderColor:['rgba(6,214,160,1)','rgba(240,180,41,0.8)'],
+          borderWidth:2,hoverOffset:10,
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,cutout:'72%',
+        plugins:{
+          legend:{position:'bottom',labels:{color:'#5a6282',font:{family:'DM Mono',size:9},padding:16,boxWidth:10,boxHeight:10}},
+          tooltip:{...TOOLTIP,callbacks:{label:ctx=>{const pct2=(ctx.raw/(lucroReal+restante)*100).toFixed(1);return` ${ctx.label}: ${fmt(ctx.raw)}  (${pct2}%)`;}}}
+        }
+      },
+      plugins:[{
+        id:'centerText',
+        afterDraw(chart){
+          const{ctx:c,chartArea:{top,bottom,left,right}}=chart;
+          const cx=(left+right)/2, cy=(top+bottom)/2;
+          c.save();
+          c.textAlign='center'; c.textBaseline='middle';
+          c.fillStyle='rgba(6,214,160,1)'; c.font="bold 22px 'Bebas Neue', sans-serif";
+          c.fillText(pct.toFixed(0)+'%', cx, cy-8);
+          c.fillStyle='#5a6282'; c.font="10px 'DM Mono', monospace";
+          c.fillText('realizado', cx, cy+10);
+          c.restore();
+        }
+      }]
+    });
+  })();
 
-  // RECEITA vs PERDA
+  // ── CHART 3: RECEITA vs PERDA — horizontal grouped com ícones e gradiente ──
   destroyChart('recPerd');
-  charts.recPerd=new Chart(document.getElementById('chartReceitaPerda').getContext('2d'),{type:'bar',data:{labels:['Receita de Juros','Capital em Risco','Juros Recuperados'],datasets:[{data:[totalJuros,capRisco,lucroReal],backgroundColor:['rgba(6,214,160,0.75)','rgba(239,71,111,0.75)','rgba(72,149,239,0.75)'],borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{display:false},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
+  (()=>{
+    const canvas=document.getElementById('chartReceitaPerda');
+    const ctx2=canvas.getContext('2d');
+    const gG=ctx2.createLinearGradient(0,0,500,0);gG.addColorStop(0,'rgba(6,214,160,0.9)');gG.addColorStop(1,'rgba(6,214,160,0.4)');
+    const gR=ctx2.createLinearGradient(0,0,500,0);gR.addColorStop(0,'rgba(239,71,111,0.9)');gR.addColorStop(1,'rgba(239,71,111,0.4)');
+    const gB=ctx2.createLinearGradient(0,0,500,0);gB.addColorStop(0,'rgba(72,149,239,0.9)');gB.addColorStop(1,'rgba(72,149,239,0.4)');
+    charts.recPerd=new Chart(ctx2,{
+      type:'bar',
+      data:{
+        labels:['Receita de Juros','Capital em Risco','Juros Recuperados'],
+        datasets:[{
+          data:[totalJuros,capRisco,lucroReal],
+          backgroundColor:[gG,gR,gB],
+          borderRadius:{topRight:8,bottomRight:8},
+          borderSkipped:false,
+          barThickness:28,
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,indexAxis:'y',
+        plugins:{
+          legend:{display:false},
+          tooltip:{...TOOLTIP,callbacks:{
+            label:ctx=>{
+              const pcts=[100,totalJuros>0?(capRisco/totalJuros*100):0,totalJuros>0?(lucroReal/totalJuros*100):0];
+              return` ${fmt(ctx.raw)}  (${pcts[ctx.dataIndex].toFixed(1)}% da receita)`;
+            }
+          }}
+        },
+        scales:{
+          x:{grid:{color:'rgba(26,32,53,0.6)'},border:{dash:[3,3]},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},callback:v=>fmt(v)}},
+          y:{grid:{display:false},ticks:{color:'#dde1f0',font:{family:'DM Mono',size:10},padding:8}}
+        }
+      },
+      plugins:[{
+        id:'barLabels',
+        afterDatasetsDraw(chart){
+          const{ctx:c,data,scales:{x,y}}=chart;
+          data.datasets[0].data.forEach((val,i)=>{
+            if(!val)return;
+            const xPos=x.getPixelForValue(val);
+            const yPos=y.getPixelForValue(i);
+            c.save();c.fillStyle='rgba(255,255,255,0.75)';c.font="bold 10px 'DM Mono',monospace";c.textAlign='left';c.textBaseline='middle';
+            c.fillText(fmt(val), xPos+8, yPos);c.restore();
+          });
+        }
+      }]
+    });
+  })();
 
-  // SAÍDAS
+  // ── CHART 4: SAÍDAS POR MÊS — area/line com gradiente roxo + barras finas ──
   const saidasMap={};
   emps.forEach(e=>{if(!e.data)return;const k=`${e.data.getFullYear()}-${String(e.data.getMonth()+1).padStart(2,'0')}`;if(!saidasMap[k])saidasMap[k]=0;saidasMap[k]+=e.capital;});
   const sK=Object.keys(saidasMap).sort();
   destroyChart('saidas');
-  charts.saidas=new Chart(document.getElementById('chartSaidas').getContext('2d'),{type:'bar',data:{labels:sK.map(k=>{const[y,m]=k.split('-');return new Date(+y,+m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});}),datasets:[{label:'Capital Emprestado',data:sK.map(k=>saidasMap[k]),backgroundColor:'rgba(155,93,229,0.7)',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
+  (()=>{
+    const canvas=document.getElementById('chartSaidas');
+    const ctx2=canvas.getContext('2d');
+    const grdS=ctx2.createLinearGradient(0,0,0,260);
+    grdS.addColorStop(0,'rgba(155,93,229,0.45)');
+    grdS.addColorStop(1,'rgba(155,93,229,0.01)');
+    const vals=sK.map(k=>saidasMap[k]);
+    const maxV=Math.max(...vals,1);
+    charts.saidas=new Chart(ctx2,{
+      type:'bar',
+      data:{
+        labels:sK.map(k=>{const[y,m]=k.split('-');return new Date(+y,+m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});}),
+        datasets:[
+          {type:'line',label:'Tendência',data:vals,borderColor:'rgba(201,146,42,0.7)',backgroundColor:'transparent',
+           borderWidth:2,borderDash:[6,3],pointRadius:0,tension:0.4,order:0},
+          {type:'bar',label:'Capital Emprestado',data:vals,
+           backgroundColor:vals.map(v=>{const i=v/maxV;return `rgba(155,93,229,${0.4+i*0.5})`;}),
+           borderColor:vals.map(v=>{const i=v/maxV;return `rgba(155,93,229,${0.6+i*0.4})`;}),
+           borderWidth:1,borderRadius:8,borderSkipped:false,order:1},
+        ]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{...TOOLTIP,callbacks:{label:ctx=>{if(ctx.datasetIndex===0)return'';return` Capital: ${fmt(ctx.raw)}`;}}}
+        },
+        scales:{
+          x:{grid:{display:false},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},maxRotation:0}},
+          y:{grid:{color:'rgba(26,32,53,0.7)'},border:{dash:[3,3]},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},callback:v=>fmt(v)},beginAtZero:true}
+        }
+      },
+      plugins:[{
+        id:'topLabels',
+        afterDatasetsDraw(chart){
+          const{ctx:c,data,scales:{x,y}}=chart;
+          // só o dataset bar (index 1)
+          const ds=chart.getDatasetMeta(1);
+          ds.data.forEach((bar,i)=>{
+            const val=data.datasets[1].data[i];
+            if(!val)return;
+            c.save();c.fillStyle='rgba(200,180,255,0.85)';c.font="9px 'DM Mono',monospace";
+            c.textAlign='center';c.textBaseline='bottom';
+            c.fillText(fmt(val),bar.x,bar.y-4);c.restore();
+          });
+        }
+      }]
+    });
+  })();
 
   // CENÁRIOS — baseado nos contratos atuais e juros reais
   // lucro = soma dos juros que serão recebidos, descontando perdas por inadimplência estimada
