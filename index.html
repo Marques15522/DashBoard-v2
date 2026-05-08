@@ -4098,123 +4098,146 @@ function tplApply(txt, c){
 }
 
 // ── MODAL EDITOR ─────────────────────────────────────────
-let _tplActiveTab = 'padrao';
 
-function tplLoadCustom(){
-  try{
-    const saved = localStorage.getItem('wa_custom_templates');
-    if(saved) return JSON.parse(saved);
-  }catch(e){}
+// --- Templates customizados: persistência ---
+function _ctplLoad(){
+  try{ const s=localStorage.getItem('wa_custom_tpls'); if(s) return JSON.parse(s); }catch(e){}
   return [];
 }
-function tplSaveCustom(arr){
-  try{ localStorage.setItem('wa_custom_templates', JSON.stringify(arr)); }catch(e){}
+function _ctplPersist(){
+  try{ localStorage.setItem('wa_custom_tpls', JSON.stringify(_customTpls)); }catch(e){}
 }
-let _customTpls = tplLoadCustom();
+let _customTpls = _ctplLoad();
+let _tplActiveTab = 'padrao';
 
+// --- Atualiza badge de contagem ---
+function _tplUpdateCount(){
+  const el=document.getElementById('tpl-custom-count');
+  if(el) el.textContent=_customTpls.length;
+}
+
+// --- Troca de aba ---
 function tplSwitchTab(tab){
   _tplActiveTab = tab;
-  const btnPadrao = document.getElementById('tpl-tab-padrao');
-  const btnCustom = document.getElementById('tpl-tab-custom');
-  const addWrap = document.getElementById('tpl-add-btn-wrap');
-  if(tab === 'padrao'){
-    btnPadrao.style.borderBottomColor = 'var(--gold)';
-    btnPadrao.style.color = 'var(--gold2)';
-    btnCustom.style.borderBottomColor = 'transparent';
-    btnCustom.style.color = 'var(--muted)';
-    if(addWrap) addWrap.style.display = 'none';
-    tplRenderPadrao();
+  const bP=document.getElementById('tpl-tab-padrao');
+  const bC=document.getElementById('tpl-tab-custom');
+  const addW=document.getElementById('tpl-add-btn-wrap');
+  const resetBtn=document.querySelector('.tpl-btn-reset');
+  if(tab==='padrao'){
+    bP.style.cssText+='border-bottom-color:var(--gold);color:var(--gold2);';
+    bC.style.cssText+='border-bottom-color:transparent;color:var(--muted);';
+    if(addW) addW.style.display='none';
+    if(resetBtn){ resetBtn.textContent='🔄 Restaurar Padrões'; resetBtn.title='Restaurar textos originais'; }
+    _tplRenderPadrao();
   } else {
-    btnCustom.style.borderBottomColor = 'var(--purple)';
-    btnCustom.style.color = 'var(--purple)';
-    btnPadrao.style.borderBottomColor = 'transparent';
-    btnPadrao.style.color = 'var(--muted)';
-    if(addWrap) addWrap.style.display = 'block';
-    tplRenderCustom();
+    bC.style.cssText+='border-bottom-color:var(--purple);color:var(--purple);';
+    bP.style.cssText+='border-bottom-color:transparent;color:var(--muted);';
+    if(addW) addW.style.display='block';
+    if(resetBtn){ resetBtn.textContent='🗑 Limpar Todos'; resetBtn.title='Excluir todos os templates personalizados'; }
+    _tplRenderCustom();
   }
 }
 
-function tplRenderPadrao(){
-  const list = document.getElementById('tpl-editor-list');
-  list.innerHTML = Object.entries(_tpls).map(([key,tpl])=>`
-    <div class="tpl-item">
-      <div class="tpl-item-label">
-        <span class="tpl-item-emoji">${tpl.lbl.split(' ')[0]}</span>
-        <span class="tpl-item-name">${tpl.lbl.replace(/^[^\s]+\s/,'')}</span>
-      </div>
-      <textarea class="tpl-textarea" id="tpl_txt_${key}" rows="4">${tpl.txt}</textarea>
-      <div class="tpl-vars">Variáveis: <span>{nome}</span><span>{valor}</span><span>{capital}</span><span>{vencimento}</span><span>{dias_atraso}</span><span>{multa}</span><span>{total_devido}</span></div>
-    </div>
-  `).join('');
+// --- Renderiza aba Padrão ---
+function _tplRenderPadrao(){
+  document.getElementById('tpl-editor-list').innerHTML =
+    Object.entries(_tpls).map(([key,tpl])=>`
+      <div class="tpl-item">
+        <div class="tpl-item-label">
+          <span class="tpl-item-emoji">${tpl.lbl.split(' ')[0]}</span>
+          <span class="tpl-item-name">${tpl.lbl.replace(/^[^\s]+\s/,'')}</span>
+        </div>
+        <textarea class="tpl-textarea" id="tpl_txt_${key}" rows="4">${tpl.txt}</textarea>
+        <div class="tpl-vars">Variáveis: <span>{nome}</span><span>{valor}</span><span>{capital}</span><span>{vencimento}</span><span>{dias_atraso}</span><span>{multa}</span><span>{total_devido}</span></div>
+      </div>`).join('');
 }
 
-function tplRenderCustom(){
+// --- Renderiza aba Meus Templates ---
+function _tplRenderCustom(){
+  _tplUpdateCount();
   const list = document.getElementById('tpl-editor-list');
-  const count = document.getElementById('tpl-custom-count');
-  if(count) count.textContent = _customTpls.length;
-  if(_customTpls.length === 0){
-    list.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:0.7rem;line-height:1.8">
-      Nenhum template personalizado criado ainda.<br>
-      <span style="color:var(--purple);opacity:0.7">Clique em "＋ Adicionar Novo Template" para começar.</span>
+  if(_customTpls.length===0){
+    list.innerHTML=`<div style="text-align:center;padding:48px 20px;color:var(--muted);font-size:0.7rem;line-height:2">
+      <div style="font-size:2rem;margin-bottom:10px;opacity:0.4">💬</div>
+      Nenhum template personalizado ainda.<br>
+      <span style="color:var(--purple);opacity:0.8">Clique em <b>＋ Adicionar Novo Template</b> para criar o primeiro.</span>
     </div>`;
     return;
   }
-  list.innerHTML = _customTpls.map((tpl, idx)=>`
-    <div class="tpl-item" style="position:relative">
-      <div class="tpl-item-label" style="justify-content:space-between">
-        <div style="display:flex;align-items:center;gap:8px">
-          <input id="ctpl_emoji_${idx}" value="${tpl.emoji||'💬'}" style="width:36px;background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:1rem;text-align:center;padding:3px;font-family:inherit">
-          <input id="ctpl_name_${idx}" value="${tpl.name||'Meu Template'}" placeholder="Nome do template" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.68rem;padding:5px 8px;outline:none">
-        </div>
-        <button onclick="tplDeleteCustom(${idx})" style="background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.25);border-radius:6px;color:var(--red);font-size:0.65rem;padding:4px 10px;cursor:pointer;font-family:'DM Mono',monospace;white-space:nowrap" onmouseover="this.style.background='rgba(239,71,111,0.2)'" onmouseout="this.style.background='rgba(239,71,111,0.1)'">🗑 Excluir</button>
+  list.innerHTML = _customTpls.map((tpl,idx)=>`
+    <div class="tpl-item" style="border:1px solid rgba(155,93,229,0.2);border-radius:10px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <input id="ctpl_emoji_${idx}" value="${(tpl.emoji||'💬').replace(/"/g,'&quot;')}"
+          title="Emoji (1 caractere)"
+          style="width:38px;background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:6px;
+                 color:var(--text);font-size:1.1rem;text-align:center;padding:4px;font-family:inherit;cursor:text;">
+        <input id="ctpl_name_${idx}" value="${(tpl.name||'Meu Template').replace(/"/g,'&quot;')}"
+          placeholder="Nome do template (ex: Cobrança Amigável)"
+          style="flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:6px;
+                 color:var(--text);font-family:'DM Mono',monospace;font-size:0.7rem;padding:6px 10px;outline:none;">
+        <button onclick="tplDeleteCustom(${idx})"
+          style="background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.2);border-radius:6px;
+                 color:var(--red);font-size:0.62rem;padding:5px 11px;cursor:pointer;white-space:nowrap;
+                 font-family:'DM Mono',monospace;transition:all 0.15s;"
+          onmouseover="this.style.background='rgba(239,71,111,0.18)'"
+          onmouseout="this.style.background='rgba(239,71,111,0.08)'">🗑 Excluir</button>
       </div>
-      <textarea class="tpl-textarea" id="ctpl_txt_${idx}" rows="4" placeholder="Digite sua mensagem aqui...">${tpl.txt||''}</textarea>
+      <textarea class="tpl-textarea" id="ctpl_txt_${idx}" rows="5"
+        placeholder="Digite sua mensagem aqui. Use as variáveis abaixo para personalizar automaticamente."
+        style="border-color:rgba(155,93,229,0.25);">${(tpl.txt||'').replace(/</g,'&lt;')}</textarea>
       <div class="tpl-vars">Variáveis: <span>{nome}</span><span>{valor}</span><span>{capital}</span><span>{vencimento}</span><span>{dias_atraso}</span><span>{multa}</span><span>{total_devido}</span></div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
+// --- Adicionar novo ---
 function tplAddNew(){
   _customTpls.push({ emoji:'💬', name:'Novo Template', txt:'' });
-  tplRenderCustom();
-  // Scroll para o novo item
-  const list = document.getElementById('tpl-editor-list');
-  if(list) list.scrollTop = list.scrollHeight;
-  const count = document.getElementById('tpl-custom-count');
-  if(count) count.textContent = _customTpls.length;
+  _tplRenderCustom();
+  _tplUpdateCount();
+  const list=document.getElementById('tpl-editor-list');
+  if(list) setTimeout(()=>{ list.scrollTop=list.scrollHeight; document.getElementById('ctpl_name_'+(_customTpls.length-1))?.focus(); },50);
 }
 
+// --- Excluir um template customizado ---
 function tplDeleteCustom(idx){
-  if(!confirm('Excluir este template?')) return;
-  _customTpls.splice(idx, 1);
-  tplRenderCustom();
-  const count = document.getElementById('tpl-custom-count');
-  if(count) count.textContent = _customTpls.length;
+  if(!confirm('Excluir este template personalizado?')) return;
+  _customTpls.splice(idx,1);
+  _ctplPersist();
+  waRenderCards();
+  _tplRenderCustom();
+  _tplUpdateCount();
 }
 
+// --- Abre o modal ---
 function tplModalOpen(){
-  _tplActiveTab = 'padrao';
-  document.getElementById('tpl-modal-overlay').classList.add('open');
-  // reset tab visual
-  const btnPadrao = document.getElementById('tpl-tab-padrao');
-  const btnCustom = document.getElementById('tpl-tab-custom');
-  const addWrap = document.getElementById('tpl-add-btn-wrap');
-  if(btnPadrao){ btnPadrao.style.borderBottomColor='var(--gold)'; btnPadrao.style.color='var(--gold2)'; }
-  if(btnCustom){ btnCustom.style.borderBottomColor='transparent'; btnCustom.style.color='var(--muted)'; }
-  if(addWrap) addWrap.style.display='none';
-  tplRenderPadrao();
-  const count = document.getElementById('tpl-custom-count');
-  if(count) count.textContent = _customTpls.length;
+  _tplActiveTab='padrao';
+  const overlay=document.getElementById('tpl-modal-overlay');
+  overlay.classList.add('open');
+  // reset visual das tabs
+  const bP=document.getElementById('tpl-tab-padrao');
+  const bC=document.getElementById('tpl-tab-custom');
+  const addW=document.getElementById('tpl-add-btn-wrap');
+  const resetBtn=document.querySelector('.tpl-btn-reset');
+  if(bP){ bP.style.borderBottomColor='var(--gold)'; bP.style.color='var(--gold2)'; }
+  if(bC){ bC.style.borderBottomColor='transparent'; bC.style.color='var(--muted)'; }
+  if(addW) addW.style.display='none';
+  if(resetBtn){ resetBtn.textContent='🔄 Restaurar Padrões'; }
+  _tplUpdateCount();
+  _tplRenderPadrao();
 }
+
 function tplModalClose(){
   document.getElementById('tpl-modal-overlay').classList.remove('open');
 }
+
+// --- Salva tudo (aba ativa) ---
 function tplSave(){
-  if(_tplActiveTab === 'padrao'){
+  if(_tplActiveTab==='padrao'){
+    // Salva edições dos templates padrão
     const updated={};
     Object.keys(TPL_DEFAULT).forEach(key=>{
       const el=document.getElementById('tpl_txt_'+key);
-      updated[key]={ lbl: TPL_DEFAULT[key].lbl, txt: el ? el.value : _tpls[key].txt };
+      updated[key]={ lbl:TPL_DEFAULT[key].lbl, txt:el?el.value:_tpls[key].txt };
     });
     _tpls=updated;
     try{
@@ -4223,33 +4246,35 @@ function tplSave(){
       ));
     }catch(e){}
   } else {
-    // Salva templates customizados
-    const saved = _customTpls.map((tpl, idx)=>({
-      emoji: (document.getElementById('ctpl_emoji_'+idx)||{}).value || tpl.emoji || '💬',
-      name: (document.getElementById('ctpl_name_'+idx)||{}).value || tpl.name || 'Meu Template',
-      txt: (document.getElementById('ctpl_txt_'+idx)||{}).value || tpl.txt || ''
+    // Salva edições dos templates customizados (lê os inputs do DOM)
+    _customTpls = _customTpls.map((tpl,idx)=>({
+      emoji: document.getElementById('ctpl_emoji_'+idx)?.value || tpl.emoji || '💬',
+      name:  document.getElementById('ctpl_name_'+idx)?.value  || tpl.name  || 'Meu Template',
+      txt:   document.getElementById('ctpl_txt_'+idx)?.value   ?? tpl.txt   ?? ''
     }));
-    _customTpls = saved;
-    tplSaveCustom(_customTpls);
-    const count = document.getElementById('tpl-custom-count');
-    if(count) count.textContent = _customTpls.length;
+    _ctplPersist();
+    _tplUpdateCount();
   }
   tplModalClose();
-  waRenderCards();
+  waRenderCards(); // atualiza selects dos cards com os novos templates
   const btn=document.querySelector('.tpl-btn-save');
   if(btn){ const orig=btn.textContent; btn.textContent='✅ SALVO!'; setTimeout(()=>btn.textContent=orig,1800); }
 }
+
+// --- Reset / limpar ---
 function tplReset(){
-  if(_tplActiveTab === 'padrao'){
-    if(!confirm('Restaurar todos os templates padrão para o original?'))return;
+  if(_tplActiveTab==='padrao'){
+    if(!confirm('Restaurar todos os templates padrão para o texto original?')) return;
     _tpls={...TPL_DEFAULT};
     try{ localStorage.removeItem('wa_templates'); }catch(e){}
-    tplRenderPadrao();
+    _tplRenderPadrao();
   } else {
-    if(!confirm('Excluir todos os seus templates personalizados?'))return;
+    if(!confirm('Excluir TODOS os seus templates personalizados?')) return;
     _customTpls=[];
-    tplSaveCustom([]);
-    tplRenderCustom();
+    _ctplPersist();
+    waRenderCards();
+    _tplRenderCustom();
+    _tplUpdateCount();
   }
 }
 
@@ -4312,9 +4337,13 @@ function waSit(c){
 }
 
 function waTpls(c){
-  return Object.fromEntries(
+  const base=Object.fromEntries(
     Object.entries(_tpls).map(([k,tpl])=>[k,{lbl:tpl.lbl, txt:tplApply(tpl.txt,c)}])
   );
+  _customTpls.forEach((tpl,idx)=>{
+    base['custom_'+idx]={lbl:(tpl.emoji||'💬')+' '+(tpl.name||'Meu Template'), txt:tplApply(tpl.txt||'',c)};
+  });
+  return base;
 }
 
 function waDefTpl(c){
