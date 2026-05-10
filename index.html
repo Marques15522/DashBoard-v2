@@ -8551,53 +8551,25 @@ const _origRender=window._cmdHookReady;
 .rel-btn-invest:hover{background:rgba(201,146,42,0.35);}
 .rel-btn-ia{background:linear-gradient(135deg,rgba(155,93,229,0.25),rgba(155,93,229,0.1));color:var(--purple);border:1px solid rgba(155,93,229,0.35);}
 .rel-btn-ia:hover{background:rgba(155,93,229,0.35);}
+.rel-preview-area{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:20px;min-height:120px;display:flex;align-items:center;justify-content:center;}
+.rel-preview-empty{text-align:center;color:var(--muted);font-size:0.65rem;line-height:2;}
 .rel-spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,0.15);border-top-color:currentColor;border-radius:50%;animation:relSpin 0.7s linear infinite;}
 @keyframes relSpin{to{transform:rotate(360deg);}}
-
-/* Modal de seleção de bairro */
-#bairro-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
-#bairro-modal-overlay.open{display:flex;}
-#bairro-modal{background:var(--s1);border:1px solid rgba(239,71,111,0.3);border-radius:18px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.6);}
-#bairro-modal-header{padding:20px 22px 16px;border-bottom:1px solid var(--border);background:rgba(239,71,111,0.05);}
-#bairro-modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.1em;color:var(--red);margin-bottom:3px;}
-#bairro-modal-sub{font-size:0.58rem;color:var(--muted);}
-#bairro-list{padding:14px;display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto;}
-.bairro-opt{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--s2);border:1px solid var(--border2);border-radius:10px;cursor:pointer;transition:all 0.15s;}
-.bairro-opt:hover{border-color:rgba(239,71,111,0.4);background:rgba(239,71,111,0.06);}
-.bairro-opt-left{display:flex;flex-direction:column;gap:3px;}
-.bairro-opt-nome{font-size:0.75rem;color:var(--text);font-weight:600;}
-.bairro-opt-sub{font-size:0.55rem;color:var(--muted);}
-.bairro-opt-count{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--red);line-height:1;}
-#bairro-modal-footer{padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:8px;}
-.bairro-modal-btn{flex:1;padding:11px;border-radius:8px;border:none;font-family:'Bebas Neue',sans-serif;font-size:0.85rem;letter-spacing:0.1em;cursor:pointer;}
-.bairro-modal-btn-cancel{background:var(--s2);color:var(--muted);border:1px solid var(--border2);}
-.bairro-modal-btn-cancel:hover{color:var(--text);}
-.bairro-modal-btn-all{background:rgba(239,71,111,0.15);color:var(--red);border:1px solid rgba(239,71,111,0.3);}
-.bairro-modal-btn-all:hover{background:rgba(239,71,111,0.25);}
 </style>
 
-<!-- Modal de seleção de bairro -->
-<div id="bairro-modal-overlay">
-  <div id="bairro-modal">
-    <div id="bairro-modal-header">
-      <div id="bairro-modal-title">📍 Selecione o Bairro</div>
-      <div id="bairro-modal-sub">Escolha o bairro para gerar o relatório do cobrador daquela região</div>
-    </div>
-    <div id="bairro-list"></div>
-    <div id="bairro-modal-footer">
-      <button class="bairro-modal-btn bairro-modal-btn-cancel" onclick="document.getElementById('bairro-modal-overlay').classList.remove('open')">Cancelar</button>
-      <button class="bairro-modal-btn bairro-modal-btn-all" onclick="_gerarCobrTodos()">⬇ Todos os Bairros</button>
-    </div>
-  </div>
-</div>
-
-<div class="comp-section-hdr" style="margin-top:0"><div class="comp-section-lbl">📑 GERADOR DE RELATÓRIOS</div><div class="comp-section-line"></div></div>
+<div class="comp-section-hdr"><div class="comp-section-lbl">📑 GERADOR DE RELATÓRIOS</div><div class="comp-section-line"></div></div>
 <div class="rel-grid">
 
   <!-- COBRANÇA -->
   <div class="rel-card rel-card-cobr">
-    <div class="rel-icon">🔴</div>
-    <div class="rel-title">Relatório de Cobrança</div>
+    <button class="rel-btn rel-btn-cobr" onclick="gerarRelatorioCobr()">
+      <span id="spinner-cobr" class="rel-spinner" style="display:none"></span>
+      ⬇ Baixar PDF — Cobrança
+    </button>
+    <div style="margin-top:14px;margin-bottom:8px;display:flex;align-items:center;gap:10px">
+      <div class="rel-icon" style="margin:0;font-size:1.5rem">🔴</div>
+      <div class="rel-title" style="margin:0">Relatório de Cobrança</div>
+    </div>
     <div class="rel-desc">Lista completa dos clientes inadimplentes, separados por bairro, com endereço, telefone, valor em atraso e dias de atraso. Pronto para entregar aos cobradores de campo.</div>
     <div class="rel-tags">
       <span class="rel-tag rel-tag-cobr">Inadimplentes</span>
@@ -8605,16 +8577,18 @@ const _origRender=window._cmdHookReady;
       <span class="rel-tag rel-tag-cobr">Dados de contato</span>
       <span class="rel-tag rel-tag-cobr">Valor em atraso</span>
     </div>
-    <button class="rel-btn rel-btn-cobr" onclick="abrirModalBairro()">
-      <span id="spinner-cobr" class="rel-spinner" style="display:none"></span>
-      📍 Escolher Bairro e Gerar PDF
-    </button>
   </div>
 
   <!-- INVESTIDORES -->
   <div class="rel-card rel-card-invest">
-    <div class="rel-icon">📊</div>
-    <div class="rel-title">Relatório para Investidores</div>
+    <button class="rel-btn rel-btn-invest" onclick="gerarRelatorioInvest()">
+      <span id="spinner-invest" class="rel-spinner" style="display:none"></span>
+      ⬇ Baixar PDF — Investidores
+    </button>
+    <div style="margin-top:14px;margin-bottom:8px;display:flex;align-items:center;gap:10px">
+      <div class="rel-icon" style="margin:0;font-size:1.5rem">📊</div>
+      <div class="rel-title" style="margin:0">Relatório para Investidores</div>
+    </div>
     <div class="rel-desc">Visão executiva do negócio: capital deployado, ROI, histórico de crescimento, taxa de inadimplência, projeções e indicadores estratégicos. Ideal para atrair sócios ou investidores.</div>
     <div class="rel-tags">
       <span class="rel-tag rel-tag-invest">ROI & Retorno</span>
@@ -8622,33 +8596,31 @@ const _origRender=window._cmdHookReady;
       <span class="rel-tag rel-tag-invest">Crescimento</span>
       <span class="rel-tag rel-tag-invest">Projeções</span>
     </div>
-    <button class="rel-btn rel-btn-invest" onclick="gerarRelatorioInvest()">
-      <span id="spinner-invest" class="rel-spinner" style="display:none"></span>
-      ⬇ Baixar PDF — Investidores
-    </button>
   </div>
 
   <!-- IA / DECISÃO -->
   <div class="rel-card rel-card-ia">
-    <div class="rel-icon">🤖</div>
-    <div class="rel-title">Briefing para IA</div>
+    <button class="rel-btn rel-btn-ia" onclick="gerarRelatorioIA()">
+      <span id="spinner-ia" class="rel-spinner" style="display:none"></span>
+      ⬇ Baixar PDF — Briefing IA
+    </button>
+    <div style="margin-top:14px;margin-bottom:8px;display:flex;align-items:center;gap:10px">
+      <div class="rel-icon" style="margin:0;font-size:1.5rem">🤖</div>
+      <div class="rel-title" style="margin:0">Briefing para IA</div>
+    </div>
     <div class="rel-desc">Exporta todos os dados relevantes do negócio em formato otimizado para colar no Claude e receber análise estratégica, identificação de riscos e recomendações de tomada de decisão.</div>
     <div class="rel-tags">
       <span class="rel-tag rel-tag-ia">Análise estratégica</span>
       <span class="rel-tag rel-tag-ia">Todos os dados</span>
       <span class="rel-tag rel-tag-ia">Formato Claude</span>
     </div>
-    <button class="rel-btn rel-btn-ia" onclick="gerarRelatorioIA()">
-      <span id="spinner-ia" class="rel-spinner" style="display:none"></span>
-      ⬇ Baixar PDF — Briefing IA
-    </button>
   </div>
 
 </div>
 
 <div class="comp-section-hdr"><div class="comp-section-lbl">ℹ️ INFORMAÇÕES</div><div class="comp-section-line"></div></div>
 <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px 20px;font-size:0.58rem;color:var(--muted);line-height:2;display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
-  <div><div style="color:var(--red);font-size:0.62rem;margin-bottom:6px;font-weight:600">🔴 Relatório de Cobrança</div>Selecione o bairro específico para cada cobrador. O relatório gerado contém apenas os clientes daquela região. Se o bairro não estiver cadastrado nas observações do contrato, o cliente aparece em "Sem Bairro".</div>
+  <div><div style="color:var(--red);font-size:0.62rem;margin-bottom:6px;font-weight:600">🔴 Relatório de Cobrança</div>Separa automaticamente os clientes inadimplentes por bairro. O campo "Bairro" é extraído das observações do contrato. Se não cadastrado, agrupa como "Sem Bairro".</div>
   <div><div style="color:var(--gold2);font-size:0.62rem;margin-bottom:6px;font-weight:600">📊 Relatório de Investidores</div>Dados sigilosos — compartilhe apenas com potenciais sócios em contexto de negociação formal. Inclui taxa real de retorno e estrutura da carteira.</div>
   <div><div style="color:var(--purple);font-size:0.62rem;margin-bottom:6px;font-weight:600">🤖 Briefing para IA</div>Cole o conteúdo diretamente no chat do Claude e peça: <em style="color:var(--text)">"Analise esses dados e me dê recomendações estratégicas"</em>.</div>
 </div>
@@ -8736,7 +8708,7 @@ function _pdfBase(title, accentColor){
 }
 
 // ════════════════════════════════════════════════════════
-// 1. RELATÓRIO DE COBRANÇA
+// 1. RELATÓRIO DE COBRANÇA — um PDF por bairro
 // ════════════════════════════════════════════════════════
 function gerarRelatorioCobr(){
   const d=_relGetData(); if(!d)return;
@@ -8746,12 +8718,11 @@ function gerarRelatorioCobr(){
       const {emps,hoje} = d;
       const atrasados = emps.filter(e=>e.status==='atraso');
 
-      // Agrupa por bairro (extrai do campo obs ou tel — fallback "Sem Bairro")
       function extrairBairro(e){
-        // Tenta extrair de obs (campo livre) ou idCliente — sem campo dedicado usa fallback
         if(e.bairro && e.bairro.trim()) return e.bairro.trim();
         return 'Sem Bairro Cadastrado';
       }
+
       const porBairro={};
       atrasados.forEach(e=>{
         const b=extrairBairro(e);
@@ -8759,91 +8730,149 @@ function gerarRelatorioCobr(){
         porBairro[b].push(e);
       });
 
-      const totalEmAtraso=atrasados.reduce((s,e)=>s+(e.saldo||e.capital),0);
-      const totalJurosAtraso=atrasados.reduce((s,e)=>s+e.jProx,0);
+      const bairros=Object.keys(porBairro).sort();
 
-      let html=_pdfBase('Relatório de Cobrança — Capital Investimentos','#c0392b');
-      html+=`
-      <div class="header">
-        <div class="header-left">
-          <h1>🔴 Relatório de Cobrança</h1>
-          <p>Capital Investimentos · Uso Interno — Cobradores de Campo</p>
-        </div>
-        <div class="header-right">
-          <div><strong>Data:</strong> ${_relDate()}</div>
-          <div><strong>Total inadimplentes:</strong> ${atrasados.length}</div>
-          <div><strong>Bairros com pendências:</strong> ${Object.keys(porBairro).length}</div>
-          <div style="margin-top:6px"><span class="badge badge-red">CONFIDENCIAL</span></div>
-        </div>
-      </div>
+      if(bairros.length===0){
+        alert('Nenhum cliente inadimplente encontrado.');
+        _relSpinner('cobr',false);
+        return;
+      }
 
-      <div class="kpi-grid">
-        <div class="kpi-box">
-          <div class="kpi-label">Clientes em Atraso</div>
-          <div class="kpi-val" style="color:#c0392b">${atrasados.length}</div>
-          <div class="kpi-sub">contratos inadimplentes</div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-label">Capital em Risco</div>
-          <div class="kpi-val" style="color:#c0392b">${_relFmt(totalEmAtraso)}</div>
-          <div class="kpi-sub">saldo devedor total</div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-label">Juros Pendentes</div>
-          <div class="kpi-val" style="color:#e67e22">${_relFmt(totalJurosAtraso)}</div>
-          <div class="kpi-sub">próximas parcelas</div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-label">Bairros</div>
-          <div class="kpi-val" style="color:#c0392b">${Object.keys(porBairro).length}</div>
-          <div class="kpi-sub">regiões com pendências</div>
-        </div>
-      </div>
-
-      <div class="highlight-box">
-        <p><strong>Instruções para o cobrador:</strong> Visite cada cliente pessoalmente no endereço cadastrado. Apresente este documento, informe o valor em atraso e solicite regularização imediata ou acordo de parcelamento. Em caso de acordo, registre no sistema.</p>
-      </div>`;
-
-      // Por bairro
-      Object.keys(porBairro).sort().forEach(bairro=>{
+      // Gera um PDF por bairro, abrindo cada um em nova aba
+      bairros.forEach((bairro,idx)=>{
         const lista=porBairro[bairro].sort((a,b)=>{
           const dA=a.proxVenc?Math.floor((hoje-a.proxVenc)/(86400000)):0;
           const dB=b.proxVenc?Math.floor((hoje-b.proxVenc)/(86400000)):0;
           return dB-dA;
         });
         const totalBairro=lista.reduce((s,e)=>s+(e.saldo||e.capital),0);
+        const totalJurosBairro=lista.reduce((s,e)=>s+e.jProx,0);
 
-        html+=`<div class="section">
-          <div class="bairro-header">📍 ${bairro} — ${lista.length} cliente(s) · Total: ${_relFmt(totalBairro)}</div>
-          <table>
-            <thead><tr>
-              <th>Cliente</th><th>Telefone</th><th>Contrato</th>
-              <th>Dias Atraso</th><th>Parcela</th><th>Saldo Devedor</th>
-            </tr></thead>
-            <tbody>
-              ${lista.map(e=>{
-                const dias=e.proxVenc?Math.max(0,Math.floor((hoje-e.proxVenc)/(86400000))):0;
-                const urgencia=dias>30?'badge-red':dias>15?'badge-orange':'badge-blue';
-                return`<tr>
-                  <td><strong>${e.nome||e.id}</strong><br><span style="color:#888;font-size:9px">${e.id} · Capital: ${_relFmt(e.capital)}</span></td>
-                  <td>${e.tel||'—'}</td>
-                  <td>${e.id}<br><span style="color:#888;font-size:9px">Venc: ${e.proxVenc?e.proxVenc.toLocaleDateString('pt-BR'):'—'}</span></td>
-                  <td><span class="badge ${urgencia}">${dias} dias</span></td>
-                  <td style="color:#e67e22;font-weight:700">${_relFmt(e.jProx)}</td>
-                  <td style="color:#c0392b;font-weight:700">${_relFmt(e.saldo||e.capital)}</td>
-                </tr>`;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>`;
+        let html=_pdfBase(`Cobrança — ${bairro} — Capital Investimentos`,'#c0392b');
+        html+=`
+        <div class="header">
+          <div class="header-left">
+            <h1>🔴 Relatório de Cobrança</h1>
+            <p>Capital Investimentos · Cobrador de Campo — Uso Interno</p>
+          </div>
+          <div class="header-right">
+            <div><strong>Data:</strong> ${_relDate()}</div>
+            <div><strong>Bairro:</strong> ${bairro}</div>
+            <div><strong>Clientes:</strong> ${lista.length}</div>
+            <div style="margin-top:6px"><span class="badge badge-red">CONFIDENCIAL</span></div>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-box">
+            <div class="kpi-label">Clientes em Atraso</div>
+            <div class="kpi-val" style="color:#c0392b">${lista.length}</div>
+            <div class="kpi-sub">neste bairro</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Saldo Devedor Total</div>
+            <div class="kpi-val" style="color:#c0392b">${_relFmt(totalBairro)}</div>
+            <div class="kpi-sub">capital em risco</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Juros Pendentes</div>
+            <div class="kpi-val" style="color:#e67e22">${_relFmt(totalJurosBairro)}</div>
+            <div class="kpi-sub">próximas parcelas</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Média por Cliente</div>
+            <div class="kpi-val" style="color:#c0392b">${_relFmt(totalBairro/lista.length)}</div>
+            <div class="kpi-sub">saldo médio</div>
+          </div>
+        </div>
+
+        <div class="highlight-box">
+          <p><strong>Instruções:</strong> Visite cada cliente pessoalmente no endereço cadastrado. Informe o valor em atraso e solicite regularização ou acordo de parcelamento. Registre qualquer contato realizado no sistema.</p>
+        </div>
+
+        <div class="section">
+          <div class="section-title">📍 ${bairro} — Lista de Cobrança</div>`;
+
+        // Cada cliente: ficha completa
+        lista.forEach((e,i)=>{
+          const dias=e.proxVenc?Math.max(0,Math.floor((hoje-e.proxVenc)/(86400000))):0;
+          const urgencia=dias>30?'badge-red':dias>15?'badge-orange':'badge-blue';
+          const urgenciaText=dias>30?'CRÍTICO':dias>15?'URGENTE':'EM ATRASO';
+          const totalDev=e.saldo||e.capital;
+
+          // Busca dados completos do cliente nas pastas se disponível
+          const pasta=window._pastas?Object.values(window._pastas).find(p=>p.nome&&e.nome&&p.nome.toLowerCase().trim()===e.nome.toLowerCase().trim()):null;
+
+          html+=`
+          <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:14px 16px;margin-bottom:12px;page-break-inside:avoid;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #c0392b;">
+              <div>
+                <div style="font-size:14px;font-weight:700;color:#1a1a2e">${i+1}. ${e.nome||e.id}</div>
+                <div style="font-size:9px;color:#888;margin-top:2px">Contrato: ${e.id} · Taxa: ${((e.taxa||0)*100).toFixed(1)}% a.m.</div>
+              </div>
+              <div style="text-align:right">
+                <span class="badge ${urgencia}" style="font-size:10px;padding:4px 12px">${urgenciaText} — ${dias} dias</span>
+                <div style="font-size:16px;font-weight:700;color:#c0392b;margin-top:4px">${_relFmt(totalDev)}</div>
+                <div style="font-size:9px;color:#888">saldo devedor</div>
+              </div>
+            </div>
+            <table style="margin:0">
+              <tbody>
+                <tr>
+                  <td style="width:50%;vertical-align:top;border-bottom:none;padding:4px 6px">
+                    <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">📞 Telefone</div>
+                    <div style="font-size:11px;font-weight:600">${e.tel||pasta&&pasta.telefone||'Não cadastrado'}</div>
+                  </td>
+                  <td style="width:50%;vertical-align:top;border-bottom:none;padding:4px 6px">
+                    <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">📋 CPF</div>
+                    <div style="font-size:11px;font-weight:600">${pasta&&pasta.cpf||e.cpf||'Não cadastrado'}</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2" style="border-bottom:none;padding:4px 6px">
+                    <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">📍 Endereço</div>
+                    <div style="font-size:11px;font-weight:600">${pasta&&pasta.endereco||e.endereco||'Endereço não cadastrado'}</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border-bottom:none;padding:4px 6px">
+                    <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">💰 Capital Emprestado</div>
+                    <div style="font-size:11px;font-weight:600">${_relFmt(e.capital)}</div>
+                  </td>
+                  <td style="border-bottom:none;padding:4px 6px">
+                    <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">📅 Parcela do Mês</div>
+                    <div style="font-size:11px;font-weight:600;color:#e67e22">${_relFmt(e.jProx)}</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border-bottom:none;padding:4px 6px">
+                    <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">📆 Vencimento</div>
+                    <div style="font-size:11px;font-weight:600">${e.proxVenc?e.proxVenc.toLocaleDateString('pt-BR'):'—'}</div>
+                  </td>
+                  <td style="border-bottom:none;padding:4px 6px">
+                    <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">🏘️ Bairro</div>
+                    <div style="font-size:11px;font-weight:600">${bairro}</div>
+                  </td>
+                </tr>
+                ${pasta&&pasta.obs?`<tr><td colspan="2" style="border-bottom:none;padding:4px 6px"><div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">📝 Observações</div><div style="font-size:10px;color:#555">${pasta.obs}</div></td></tr>`:''}
+              </tbody>
+            </table>
+            <div style="margin-top:10px;background:#fff8f8;border:1px dashed #f5c6c6;border-radius:6px;padding:8px 10px;font-size:9px;color:#888">
+              <strong>Registro de visita:</strong> Data: ___/___/______ &nbsp;&nbsp; Situação: ______________________________________________ &nbsp;&nbsp; Assinatura: _________________
+            </div>
+          </div>`;
+        });
+
+        html+=`</div>
+        <div class="footer">
+          <span>Capital Investimentos — Cobrança: ${bairro} — ${_relDate()}</span>
+          <span>CONFIDENCIAL · Uso exclusivo do cobrador autorizado</span>
+        </div></div></body></html>`;
+
+        // Abre cada bairro com pequeno delay para não bloquear popups
+        setTimeout(()=>_relOpenPDF(html,`cobranca-${bairro.replace(/\s+/g,'-').toLowerCase()}.pdf`), idx*400);
       });
 
-      html+=`<div class="footer">
-        <span>Capital Investimentos — Relatório de Cobrança — ${_relDate()}</span>
-        <span>DOCUMENTO CONFIDENCIAL · Uso exclusivo dos cobradores autorizados</span>
-      </div></div></body></html>`;
-
-      _relOpenPDF(html,'cobranca.pdf');
     }catch(err){alert('Erro ao gerar relatório: '+err.message);}
     _relSpinner('cobr',false);
   },300);
