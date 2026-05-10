@@ -519,6 +519,19 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 .pasta-stat-box{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center;}
 .pasta-stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;}
 .pasta-stat-lbl{font-size:0.48rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-top:2px;}
+/* ── CONTRATOS ── */
+.ct-filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border2);color:var(--muted);background:transparent;font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;letter-spacing:0.06em;transition:all 0.18s;}
+.ct-filter-btn:hover{border-color:var(--gold);color:var(--gold);}
+.ct-filter-btn.active{background:rgba(201,146,42,0.12);border-color:rgba(201,146,42,0.4);color:var(--gold);}
+.ct-th{padding:10px 12px;text-align:left;color:var(--muted);font-size:0.52rem;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);}
+.ct-th:hover{color:var(--text);}
+.ct-td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap;font-family:'DM Mono',monospace;}
+.ct-tr:hover .ct-td{background:rgba(255,255,255,0.02);}
+.ct-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.5rem;font-weight:600;letter-spacing:0.06em;}
+.ct-badge.ativo{background:rgba(6,214,160,0.12);color:#06d6a0;border:1px solid rgba(6,214,160,0.25);}
+.ct-badge.atraso{background:rgba(239,71,111,0.12);color:#ef476f;border:1px solid rgba(239,71,111,0.25);}
+.ct-badge.quitado{background:rgba(90,98,130,0.12);color:var(--muted);border:1px solid var(--border2);}
+
 /* ── FLOATING PLAYER ── */
 #floating-player{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--s1);border:1px solid rgba(155,93,229,0.4);border-radius:16px;padding:12px 20px;display:none;align-items:center;gap:14px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.5);min-width:320px;max-width:90vw;animation:slideUp 0.3s ease;}
 #floating-player.visible{display:flex;}
@@ -667,6 +680,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="nav-tab" data-tab="agenda"><span class="tab-icon">📅</span><span class="tab-label">Agenda</span></div>
   <div class="nav-tab" data-tab="simulador"><span class="tab-icon">🧮</span><span class="tab-label">Simulador</span></div>
   <div class="nav-tab" data-tab="fluxo90"><span class="tab-icon">🔮</span><span class="tab-label">Fluxo 90d</span></div>
+  <div class="nav-tab" data-tab="contratos"><span class="tab-icon">📄</span><span class="tab-label">Contratos</span></div>
   <div class="nav-tab" data-tab="whatsapp"><span class="tab-icon">📱</span><span class="tab-label">WhatsApp</span></div>
 </nav>
 
@@ -2036,6 +2050,54 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 </div>
 
 <!-- WHATSAPP -->
+<div id="tab-contratos" class="tab-panel">
+  <div class="section-label">CONTRATOS</div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid" id="ct-kpis" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px"></div>
+
+  <!-- Filtros + Busca -->
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+    <div style="display:flex;gap:6px;flex-wrap:wrap" id="ct-filtros">
+      <button class="ct-filter-btn active" data-f="ativos" onclick="ctFiltrar('ativos',this)">✅ Ativos</button>
+      <button class="ct-filter-btn" data-f="atrasados" onclick="ctFiltrar('atrasados',this)">⚠️ Atrasados</button>
+      <button class="ct-filter-btn" data-f="todos" onclick="ctFiltrar('todos',this)">📋 Todos</button>
+      <button class="ct-filter-btn" data-f="quitados" onclick="ctFiltrar('quitados',this)" style="opacity:0.6">📁 Inativos</button>
+    </div>
+    <input id="ct-busca" type="text" placeholder="🔍 Buscar por nome ou ID..." oninput="ctBuscar(this.value)"
+      style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.62rem;padding:7px 12px;outline:none;flex:1;min-width:180px;max-width:320px">
+  </div>
+
+  <!-- Tabela -->
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:0.62rem">
+        <thead>
+          <tr style="background:var(--s2)">
+            <th class="ct-th" onclick="ctOrdenar('id')" title="Ordenar">ID ↕</th>
+            <th class="ct-th" onclick="ctOrdenar('nome')">Cliente ↕</th>
+            <th class="ct-th" onclick="ctOrdenar('capital')">Capital ↕</th>
+            <th class="ct-th" onclick="ctOrdenar('taxa')">Taxa ↕</th>
+            <th class="ct-th">Prazo</th>
+            <th class="ct-th">Tipo Juros</th>
+            <th class="ct-th">Unidade</th>
+            <th class="ct-th" onclick="ctOrdenar('jTotal')">Juros Total ↕</th>
+            <th class="ct-th">Saldo Restante</th>
+            <th class="ct-th">Juros Próx.</th>
+            <th class="ct-th" onclick="ctOrdenar('proxVenc')">Próx. Venc. ↕</th>
+            <th class="ct-th" onclick="ctOrdenar('vencContrato')">Venc. Contrato ↕</th>
+            <th class="ct-th" onclick="ctOrdenar('data')">Data Início ↕</th>
+            <th class="ct-th" onclick="ctOrdenar('status')">Status ↕</th>
+          </tr>
+        </thead>
+        <tbody id="ct-tbody"></tbody>
+      </table>
+    </div>
+    <div id="ct-empty" style="display:none;text-align:center;padding:32px;color:var(--muted);font-size:0.65rem">Nenhum contrato encontrado.</div>
+    <div id="ct-count" style="padding:10px 16px;font-size:0.55rem;color:var(--muted);border-top:1px solid var(--border)">— contratos</div>
+  </div>
+</div>
+
 <div id="tab-whatsapp" class="tab-panel">
 
   <!-- HEADER HERO -->
@@ -2759,6 +2821,9 @@ document.querySelectorAll('.nav-tab').forEach(tab=>{
     if(tab.dataset.tab === 'comando' && _cmdChart){ setTimeout(()=>{ if(_cmdChart) _cmdChart.resize(); },100); }
     if(tab.dataset.tab === 'clientes') {
       iniciarSyncPolling();
+    } else if(tab.dataset.tab === 'contratos') {
+      ctRender();
+      pararSyncPolling();
     } else {
       pararSyncPolling();
     }
@@ -4012,6 +4077,7 @@ function render(empRows,pagRows){
 
   // WhatsApp
   waRender(clientes, abertos, atrasado, hoje);
+  renderContratos(emps); // passa todos os contratos incluindo quitados
 
   // NOVAS FEATURES
   verificarVencimentos(abertos, hoje);
@@ -4292,6 +4358,115 @@ function waSearchClear(){
   const clearBtn=document.getElementById('wa-search-clear');
   if(clearBtn) clearBtn.classList.remove('visible');
   waRenderCards();
+}
+
+// ── CONTRATOS ────────────────────────────────────────────
+let _ctEmps = [];
+let _ctFiltro = 'ativos';
+let _ctBusca = '';
+let _ctOrdem = { campo: 'proxVenc', asc: true };
+
+function renderContratos(emps) {
+  _ctEmps = emps;
+  ctRender();
+}
+
+function ctFiltrar(f, btn) {
+  _ctFiltro = f;
+  document.querySelectorAll('.ct-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  ctRender();
+}
+
+function ctBuscar(v) {
+  _ctBusca = v.toLowerCase().trim();
+  ctRender();
+}
+
+function ctOrdenar(campo) {
+  if (_ctOrdem.campo === campo) _ctOrdem.asc = !_ctOrdem.asc;
+  else _ctOrdem = { campo, asc: true };
+  ctRender();
+}
+
+function ctRender() {
+  const tbody = document.getElementById('ct-tbody');
+  const empty = document.getElementById('ct-empty');
+  const count = document.getElementById('ct-count');
+  const kpis  = document.getElementById('ct-kpis');
+  if (!tbody) return;
+
+  // Filtra
+  let lista = _ctEmps.filter(e => {
+    if (_ctFiltro === 'ativos')    return e.status === 'ativo';
+    if (_ctFiltro === 'atrasados') return e.status === 'atraso';
+    if (_ctFiltro === 'quitados')  return e.status === 'quitado';
+    return true; // todos
+  });
+  if (_ctBusca) lista = lista.filter(e =>
+    e.nome.toLowerCase().includes(_ctBusca) || e.id.toLowerCase().includes(_ctBusca) || e.idCliente.toLowerCase().includes(_ctBusca)
+  );
+
+  // Ordena
+  const { campo, asc } = _ctOrdem;
+  lista.sort((a, b) => {
+    let va = a[campo], vb = b[campo];
+    if (va instanceof Date) va = va?.getTime() || 0;
+    if (vb instanceof Date) vb = vb?.getTime() || 0;
+    if (typeof va === 'string') return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+    return asc ? (va||0) - (vb||0) : (vb||0) - (va||0);
+  });
+
+  // KPIs da seleção atual
+  const totalK  = lista.length;
+  const capK    = lista.reduce((s,e) => s + e.capital, 0);
+  const jurosK  = lista.reduce((s,e) => s + e.jTotal, 0);
+  const saldoK  = lista.reduce((s,e) => s + e.saldo, 0);
+  const atrasK  = lista.filter(e => e.status === 'atraso').length;
+  if (kpis) kpis.innerHTML = `
+    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Contratos</div><div class="kpi-val" style="color:var(--gold)">${totalK}</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Capital</div><div class="kpi-val" style="color:var(--blue)">${fmt(capK)}</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Juros Total</div><div class="kpi-val" style="color:var(--green)">${fmt(jurosK)}</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--purple)"></div><div class="kpi-lbl">Saldo Restante</div><div class="kpi-val" style="color:var(--purple)">${fmt(saldoK)}</div></div>
+    ${atrasK > 0 ? `<div class="kpi"><div class="kpi-accent" style="background:var(--red)"></div><div class="kpi-lbl">Em Atraso</div><div class="kpi-val" style="color:var(--red)">${atrasK}</div></div>` : ''}
+  `;
+
+  if (!lista.length) {
+    tbody.innerHTML = '';
+    if (empty) empty.style.display = '';
+    if (count) count.textContent = 'Nenhum contrato encontrado.';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  if (count) count.textContent = `${lista.length} contrato(s) exibido(s)`;
+
+  const fmtDate = d => d instanceof Date && !isNaN(d) ? d.toLocaleDateString('pt-BR') : '—';
+  const unidLabel = u => u === 'semanal' ? '⚡ Semanal' : u === 'quinzenal' ? '⚡ Quinzenal' : 'Mensal';
+  const statusBadge = s => {
+    if (s === 'ativo')   return '<span class="ct-badge ativo">● Em Dia</span>';
+    if (s === 'atraso')  return '<span class="ct-badge atraso">⚠ Atraso</span>';
+    if (s === 'quitado') return '<span class="ct-badge quitado">✓ Quitado</span>';
+    return '—';
+  };
+
+  tbody.innerHTML = lista.map(e => `
+    <tr class="ct-tr">
+      <td class="ct-td" style="color:var(--muted);font-size:0.55rem">${e.id}</td>
+      <td class="ct-td nome">${e.nome || '—'}</td>
+      <td class="ct-td" style="color:var(--gold)">${fmt(e.capital)}</td>
+      <td class="ct-td">${(e.taxa*100).toFixed(1)}% a.m.</td>
+      <td class="ct-td">${e.prazo || '—'} ${e.unidade==='semanal'?'sem':e.unidade==='quinzenal'?'quin':'meses'}</td>
+      <td class="ct-td">${e.tipoJuros || '—'}</td>
+      <td class="ct-td">${unidLabel(e.unidade)}</td>
+      <td class="ct-td" style="color:var(--green)">${fmt(e.jTotal)}</td>
+      <td class="ct-td" style="color:${e.saldo>0?'var(--red)':'var(--muted)'}">${fmt(e.saldo)}</td>
+      <td class="ct-td" style="color:var(--gold2)">${fmt(e.jProx)}</td>
+      <td class="ct-td" style="color:${e.status==='atraso'?'var(--red)':e.status==='quitado'?'var(--muted)':'var(--text)'}">${fmtDate(e.proxVenc)}</td>
+      <td class="ct-td">${fmtDate(e.vencContrato)}</td>
+      <td class="ct-td" style="color:var(--muted)">${fmtDate(e.data)}</td>
+      <td class="ct-td">${statusBadge(e.status)}</td>
+    </tr>
+  `).join('');
 }
 
 function waRender(clientes,abertos,atrasado,hoje){
