@@ -1796,7 +1796,14 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
 <style>
 /* ── COMPARATIVOS REDESIGN ── */
-.comp-hero{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
+.comp-hero{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.comp-sparkline{position:absolute;bottom:0;right:0;opacity:0.35;pointer-events:none;}
+.comp-kpi-card:hover .comp-sparkline{opacity:0.55;transition:opacity 0.2s;}
+.comp-forecast-card{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(201,146,42,0.08),rgba(201,146,42,0.03));border:1px solid rgba(201,146,42,0.25);border-radius:16px;padding:20px 20px 16px;display:flex;flex-direction:column;gap:0;transition:border-color 0.2s,transform 0.2s;}
+.comp-forecast-card:hover{border-color:rgba(201,146,42,0.5);transform:translateY(-2px);}
+.comp-forecast-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,var(--gold),var(--gold2),transparent);}
+.comp-forecast-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(26,32,53,0.6);}
+.comp-forecast-row:last-child{border-bottom:none;}
 .comp-kpi-card{position:relative;overflow:hidden;background:var(--s2);border:1px solid var(--border2);border-radius:16px;padding:20px 20px 16px;display:flex;flex-direction:column;gap:0;transition:border-color 0.2s,transform 0.2s;}
 .comp-kpi-card:hover{border-color:rgba(201,146,42,0.35);transform:translateY(-2px);}
 .comp-kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:16px 16px 0 0;}
@@ -3785,17 +3792,70 @@ function render(empRows,pagRows){
     {icon:'💰',label:'Capital Ativo',ant:cAN,at:cAM,fmt},
     {icon:'💹',label:'Lucro Previsto',ant:jAN,at:jAM,fmt},
   ];
+  // ── SPARKLINE helper ──────────────────────────────────────────────
+  function buildSparkline(dataArr, color, w=90, h=40){
+    if(!dataArr||dataArr.length<2)return'';
+    const mn=Math.min(...dataArr),mx=Math.max(...dataArr);
+    const range=mx-mn||1;
+    const pts=dataArr.map((v,i)=>{
+      const x=(i/(dataArr.length-1))*w;
+      const y=h-((v-mn)/range)*(h-4)-2;
+      return`${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    return`<svg class="comp-sparkline" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+      <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${(dataArr.length-1)/(dataArr.length-1)*w}" cy="${(h-((dataArr[dataArr.length-1]-mn)/range)*(h-4)-2).toFixed(1)}" r="2.5" fill="${color}"/>
+    </svg>`;
+  }
+
+  // ── Histórico mensal para sparklines (últimos 6 meses) ───────────
+  const hoje6=new Date(anoAt,mesAt,1);
+  const histMeses=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(anoAt,mesAt-i,1);
+    const y=d.getFullYear(),m=d.getMonth();
+    const ini=new Date(y,m,1);
+    const fim=new Date(y,m+1,0,23,59,59);
+    const ativos=emps.filter(e=>e.status!=='quitado'&&e.data&&e.data<=fim&&new Date(y,m,1)<=fim);
+    // Para meses passados usa ativoEm; para atual usa ativos diretos
+    const isCurrent=(y===anoAt&&m===mesAt);
+    const set=isCurrent?eMAt:emps.filter(e=>ativoEm(e,ini,fim));
+    histMeses.push({
+      contratos:set.length,
+      capital:set.reduce((s,e)=>s+e.capital,0),
+      lucro:set.reduce((s,e)=>s+e.jTotal,0)
+    });
+  }
+  const hCont =histMeses.map(h=>h.contratos);
+  const hCap  =histMeses.map(h=>h.capital);
+  const hLucro=histMeses.map(h=>h.lucro);
+
+  // ── Previsão: média ponderada dos últimos 3 meses (excluindo atual) ──
+  const prevMeses=histMeses.slice(2,5); // 3 meses antes do atual
+  const wt=[3,2,1]; // mais peso no mais recente
+  const wtSum=wt.reduce((s,w)=>s+w,0);
+  function wavg(arr){return arr.length?arr.reduce((s,v,i)=>s+v*(wt[i]||1),0)/wtSum:0;}
+  const prevCont =Math.round(wavg(prevMeses.map(h=>h.contratos)));
+  const prevCap  =wavg(prevMeses.map(h=>h.capital));
+  const prevLucro=wavg(prevMeses.map(h=>h.lucro));
+  const prevCapDiff=prevCap>cAM?(prevCap-cAM)/cAM:cAM>0?(prevCap-cAM)/cAM:null;
+  const prevTendencia=prevCapDiff===null?'flat':prevCapDiff>0.01?'up':prevCapDiff<-0.01?'down':'flat';
+
+  // ── Render KPI cards ──────────────────────────────────────────────
   const compKpiWrap=document.getElementById('comp-kpis-wrap');
   if(compKpiWrap){
-    compKpiWrap.innerHTML=compKpiData.map(k=>{
+    const cards=compKpiData.map((k,ki)=>{
       const diff=k.ant>0?(k.at-k.ant)/k.ant:null;
       const dir=diff===null?'flat':diff>0.001?'up':diff<-0.001?'down':'flat';
-      const cor=dir==='up'?'var(--green)':dir==='down'?'var(--red)':'var(--muted)';
       const glowCor=dir==='up'?'#06d6a0':dir==='down'?'#ef476f':'#5a6282';
+      const sparkColor=dir==='up'?'#06d6a0':dir==='down'?'#ef476f':'#5a6282';
       const seta=dir==='up'?'▲ +':dir==='down'?'▼ ':'';
       const pctStr=diff===null?'sem histórico anterior':`${seta}${Math.abs((diff*100)).toFixed(1)}% vs ${nMAn}`;
+      const sparkData=[hCont,hCap,hLucro][ki];
+      const spark=buildSparkline(sparkData,sparkColor,88,42);
       return`<div class="comp-kpi-card kpi-${dir}">
         <div class="comp-kpi-glow" style="background:${glowCor}"></div>
+        ${spark}
         <div class="comp-kpi-icon">${k.icon} ${k.label}</div>
         <div class="comp-kpi-val">${k.fmt(k.at)}</div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
@@ -3804,6 +3864,32 @@ function render(empRows,pagRows){
         <div class="comp-kpi-prev">Anterior: ${k.fmt(k.ant)}</div>
       </div>`;
     }).join('');
+
+    // Card de Previsão
+    const forecastCard=`<div class="comp-forecast-card">
+      <div style="position:absolute;top:-24px;right:-16px;width:90px;height:90px;border-radius:50%;background:rgba(201,146,42,0.06);pointer-events:none"></div>
+      <div class="comp-kpi-icon">🔮 Previsão</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--gold2);line-height:1;margin-bottom:10px;letter-spacing:0.02em">Próx. mês</div>
+      <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+        <div class="comp-forecast-row">
+          <span style="font-size:0.58rem;color:var(--muted)">📋 Contratos</span>
+          <span style="font-size:0.68rem;color:var(--text);font-weight:600">~${prevCont}</span>
+        </div>
+        <div class="comp-forecast-row">
+          <span style="font-size:0.58rem;color:var(--muted)">💰 Capital</span>
+          <span style="font-size:0.68rem;color:var(--gold2);font-weight:600">${fmt(prevCap)}</span>
+        </div>
+        <div class="comp-forecast-row">
+          <span style="font-size:0.58rem;color:var(--muted)">💹 Lucro</span>
+          <span style="font-size:0.68rem;color:var(--green);font-weight:600">${fmt(prevLucro)}</span>
+        </div>
+      </div>
+      <div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(201,146,42,0.15)">
+        <div style="font-size:0.47rem;color:var(--muted2);line-height:1.6">Média ponderada dos últimos 3 meses</div>
+      </div>
+    </div>`;
+
+    compKpiWrap.innerHTML=cards+forecastCard;
   }
 
   // Tabela comparativa com barras visuais
