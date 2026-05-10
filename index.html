@@ -2986,7 +2986,7 @@ function render(empRows,pagRows){
   const tempoRelMed=clientes.length?clientes.reduce((s,c)=>s+c.mesesRelac,0)/clientes.length:0;
 
   // Atualiza mapa comportamental para uso no score das pastas
-  atualizarComportamento(clientes);
+  atualizarComportamento(clientes, pags);
 
   // SCORE RISCO — definido após concentração (usa totalCapAtivo)
 
@@ -6648,6 +6648,9 @@ function pastaViewOpen(id){
       <span style="color:var(--muted)">Quitados: <strong style="color:var(--green)">${comp.qtdQuitados||0}</strong></span>
       <span style="color:var(--muted)">Atrasos: <strong style="color:${comp.qtdAtraso>0?'var(--red)':'var(--green)'}">${comp.qtdAtraso}</strong></span>
       <span style="color:var(--muted)">Relacionamento: <strong style="color:var(--text)">${comp.mesesRelac} meses</strong></span>
+      ${(comp.qtdPagEmDia||0)>0?`<span style="color:var(--green)">✅ ${comp.qtdPagEmDia} pagto(s) em dia</span>`:''}
+      ${(comp.qtdAntecip||0)>0?`<span style="color:var(--green)">⚡ ${comp.qtdAntecip} antecipado(s) <span style="font-size:0.5rem;opacity:0.7">(+${comp.qtdAntecip*25}pts bônus)</span></span>`:''}
+      ${(comp.qtdAtrasados||0)>0?`<span style="color:var(--red)">⚠ ${comp.qtdAtrasados} pagto(s) atrasado(s)</span>`:''}
       ${comp.recorrente?`<span style="color:var(--green)">✓ Cliente recorrente</span>`:''}
       ${comp.temAtraso?`<span style="color:var(--red)">⚠ Em atraso atualmente</span>`:''}
     </div>` : ''}
@@ -6888,9 +6891,33 @@ function pastaScoreAuto(){
 // nome → { qtdContratos, qtdAtraso, qtdQuitados, mesesRelac, recorrente }
 let _comportamento = {};
 
-function atualizarComportamento(clientes) {
+function atualizarComportamento(clientes, pags) {
   _comportamento = {};
+
+  // Monta mapa de pagamentos por contrato: id → [pags]
+  const pagsPorContrato = {};
+  (pags||[]).forEach(p => {
+    if (!p.id) return;
+    if (!pagsPorContrato[p.id]) pagsPorContrato[p.id] = [];
+    pagsPorContrato[p.id].push(p);
+  });
+
   clientes.forEach(c => {
+    let qtdPagEmDia  = 0; // pagou na data ou antes
+    let qtdAntecip   = 0; // pagou antes do vencimento com folga (>3 dias)
+    let qtdAtrasados = 0; // pagou depois do vencimento
+
+    c.contratos.forEach(e => {
+      const pagsDoContrato = pagsPorContrato[e.id] || [];
+      pagsDoContrato.forEach(p => {
+        if (!p.data || !e.proxVenc) return;
+        const diffDias = Math.floor((e.proxVenc - p.data) / 86400000);
+        if (diffDias > 3)       { qtdAntecip++;   qtdPagEmDia++; } // antecipado
+        else if (diffDias >= 0) { qtdPagEmDia++; }                  // em dia
+        else                    { qtdAtrasados++; }                  // atrasado
+      });
+    });
+
     _comportamento[c.nome.toLowerCase().trim()] = {
       qtdContratos: c.qtdContratos || 0,
       qtdAtraso:    c.qtdAtraso    || 0,
@@ -6902,9 +6929,11 @@ function atualizarComportamento(clientes) {
       capitalTotal: c.totalCap     || 0,
       jurosTotal:   c.totalJuros   || 0,
       lucroReal:    c.totalPago    || 0,
+      qtdPagEmDia,   // pagamentos pontuais
+      qtdAntecip,    // pagamentos antecipados
+      qtdAtrasados,  // pagamentos atrasados
     };
   });
-  // NÃO chama pastaRender() aqui — é chamado no finally do loadData
 }
 
 // ── CALCULA SCORE FINAL: ficha (60%) + comportamento (40%) ──
@@ -6925,10 +6954,18 @@ function calcScoreFinal(pasta) {
   // Score comportamental (0–1000)
   let scoreComp = 500; // base neutra
 
-  // Pontualidade: cada contrato quitado sem atraso = +60, cada atraso = -120
+  // Pontualidade histórica: quitados sem atraso = +60 cada, atrasos = -120 cada
   const quitSemAtraso = Math.max(0, comp.qtdQuitados - comp.qtdAtraso);
   scoreComp += quitSemAtraso * 60;
   scoreComp -= comp.qtdAtraso * 120;
+
+  // ── PAGAMENTOS INDIVIDUAIS (novidade) ──────────────────
+  // Pagamento em dia: +15 pontos cada (até +150 no total)
+  scoreComp += Math.min(comp.qtdPagEmDia || 0, 10) * 15;
+  // Pagamento antecipado (+3 dias antes): bônus extra de +25 cada (até +125)
+  scoreComp += Math.min(comp.qtdAntecip  || 0,  5) * 25;
+  // Pagamento atrasado: -30 cada (além da penalidade dos contratos)
+  scoreComp -= (comp.qtdAtrasados || 0) * 30;
 
   // Recorrência: cliente que volta é sinal positivo
   if (comp.recorrente) scoreComp += 80;
