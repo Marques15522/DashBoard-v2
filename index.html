@@ -4104,6 +4104,8 @@ const TPL_DEFAULT = {
   vencimento:  {lbl:'⏰ Aviso de Vencimento',     txt:`Olá, {nome}! 👋\n\nAvisando que sua parcela de *{valor}* vence em *{vencimento}*.\n\nPosso enviar os dados para pagamento agora, é só falar! 😉`},
   renovacao:   {lbl:'🔄 Proposta de Renovação',   txt:`Olá, {nome}! Espero que esteja bem 😊\n\nSeu contrato de *{capital}* está chegando ao fim. Quer renovar ou ampliar o limite?\n\nTenho condições especiais para você. Vamos conversar?`},
   quitacao:    {lbl:'🎉 Parabéns pela Quitação',  txt:`{nome}! 🎉 Parabéns pela quitação!\n\nFoi um prazer trabalhar com você. Quando precisar, estarei aqui — com condições especiais para quem já é cliente!\n\nObrigado pela confiança! 🙏`},
+  quitEmDia:   {lbl:'⭐ Quitação em Dia — Renovação',txt:`Olá, {nome}! 🌟\n\nPassei aqui para parabenizar — você quitou o contrato de *{capital}* em dia, e isso faz toda a diferença!\n\nClientes pontuais como você têm acesso a condições exclusivas:\n✅ *Taxa reduzida* no próximo contrato\n✅ *Limite maior* disponível imediatamente\n✅ *Aprovação rápida* sem burocracia\n\nSe quiser renovar ou precisar de um novo valor, é só me chamar — tenho uma proposta preparada especialmente para você! 💼\n\nObrigado pela confiança! 🤝`},
+  quitAntecip: {lbl:'🚀 Quitação Antecipada — Oferta VIP',txt:`{nome}! 🚀 Que surpresa boa!\n\nVocê quitou seu contrato de *{capital}* antes do prazo — isso te coloca em um grupo muito seleto de clientes!\n\nComo reconhecimento, você desbloqueou condições VIP:\n🏆 *A melhor taxa que posso oferecer*\n🏆 *Limite ampliado* no próximo contrato\n🏆 *Prioridade total* no atendimento\n🏆 *Sem análise* — aprovação na hora\n\nEsse tipo de parceria é exatamente o que eu busco. Se quiser aproveitar agora ou guardar para quando precisar, o benefício é seu! 🎯\n\nFico à disposição! 🙏`},
   reativacao:  {lbl:'💤 Reativar Cliente',         txt:`Olá, {nome}! Sumiu hein? 😄\n\nSentimos sua falta! Se precisar de crédito rápido com taxas especiais, me chama — tenho uma oferta exclusiva para você!\n\nAté mais! 👋`},
 };
 
@@ -4525,7 +4527,13 @@ function waDefTpl(c){
   const s=waSit(c).tipo;
   if(s==='atraso')return c.diasAtraso>15?'atraso_grav':'atraso_leve';
   if(s==='vence') return'vencimento';
-  if(s==='inativo')return'reativacao';
+  if(s==='inativo'){
+    // Verifica comportamento de pagamento para escolher template certo
+    const comp = _comportamento[(c.nome||'').toLowerCase().trim()] || {};
+    if((comp.qtdAntecip||0) > 0) return 'quitAntecip';
+    if((comp.qtdPagEmDia||0) > 0) return 'quitEmDia';
+    return 'reativacao';
+  }
   return'suave';
 }
 
