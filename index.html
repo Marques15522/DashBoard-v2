@@ -682,6 +682,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
   <div class="nav-tab" data-tab="fluxo90"><span class="tab-icon">🔮</span><span class="tab-label">Fluxo 90d</span></div>
   <div class="nav-tab" data-tab="contratos"><span class="tab-icon">📄</span><span class="tab-label">Contratos</span></div>
   <div class="nav-tab" data-tab="whatsapp"><span class="tab-icon">📱</span><span class="tab-label">WhatsApp</span></div>
+  <div class="nav-tab" data-tab="relatorios"><span class="tab-icon">📑</span><span class="tab-label">Relatórios</span></div>
 </nav>
 
 <!-- CONTENT AREA -->
@@ -4228,6 +4229,12 @@ function render(empRows,pagRows){
 
   // CENTRAL DE COMANDO — atualiza com os dados já processados
   try { cmdRender(emps, pags); } catch(e){ console.warn('cmdRender:', e); }
+
+  // CACHE GLOBAL para Relatórios
+  window._relCache = { emps, clientes, abertos, atrasado, hoje, totalCap,
+    taxaMediaGlobal, lucroReal, quitados,
+    fmt, pct: v=>(v*100).toFixed(1)+'%',
+    fmtDate: d=>d?d.toLocaleDateString('pt-BR'):'—' };
 }
 
 // ── WHATSAPP ─────────────────────────────────────────────
@@ -8513,6 +8520,541 @@ const _origRender=window._cmdHookReady;
     <span id="alert-bell-count" style="display:none">0</span>
   </button>
 </div><!-- /.alert-bell-wrap -->
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- ABA RELATÓRIOS                                         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="tab-relatorios" class="tab-panel">
+<style>
+.rel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:28px;}
+.rel-card{position:relative;overflow:hidden;background:var(--s2);border:1px solid var(--border2);border-radius:18px;padding:26px 22px 20px;display:flex;flex-direction:column;gap:0;transition:border-color 0.2s,transform 0.2s;}
+.rel-card:hover{transform:translateY(-3px);}
+.rel-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:18px 18px 0 0;}
+.rel-card-cobr::before{background:linear-gradient(90deg,var(--red),rgba(239,71,111,0));}
+.rel-card-cobr{border-color:rgba(239,71,111,0.2);}
+.rel-card-invest::before{background:linear-gradient(90deg,var(--gold),rgba(201,146,42,0));}
+.rel-card-invest{border-color:rgba(201,146,42,0.2);}
+.rel-card-ia::before{background:linear-gradient(90deg,var(--purple),rgba(155,93,229,0));}
+.rel-card-ia{border-color:rgba(155,93,229,0.2);}
+.rel-icon{font-size:2rem;margin-bottom:12px;line-height:1;}
+.rel-title{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:0.08em;color:var(--text);margin-bottom:5px;}
+.rel-desc{font-size:0.6rem;color:var(--muted);line-height:1.7;margin-bottom:16px;flex:1;}
+.rel-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:18px;}
+.rel-tag{font-size:0.48rem;padding:3px 8px;border-radius:20px;letter-spacing:0.08em;text-transform:uppercase;}
+.rel-tag-cobr{background:rgba(239,71,111,0.12);color:var(--red);border:1px solid rgba(239,71,111,0.2);}
+.rel-tag-invest{background:rgba(201,146,42,0.12);color:var(--gold2);border:1px solid rgba(201,146,42,0.2);}
+.rel-tag-ia{background:rgba(155,93,229,0.12);color:var(--purple);border:1px solid rgba(155,93,229,0.2);}
+.rel-btn{width:100%;padding:13px;border-radius:10px;border:none;font-family:'Bebas Neue',sans-serif;font-size:0.9rem;letter-spacing:0.14em;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.rel-btn-cobr{background:linear-gradient(135deg,rgba(239,71,111,0.25),rgba(239,71,111,0.1));color:var(--red);border:1px solid rgba(239,71,111,0.35);}
+.rel-btn-cobr:hover{background:rgba(239,71,111,0.35);}
+.rel-btn-invest{background:linear-gradient(135deg,rgba(201,146,42,0.25),rgba(201,146,42,0.1));color:var(--gold2);border:1px solid rgba(201,146,42,0.35);}
+.rel-btn-invest:hover{background:rgba(201,146,42,0.35);}
+.rel-btn-ia{background:linear-gradient(135deg,rgba(155,93,229,0.25),rgba(155,93,229,0.1));color:var(--purple);border:1px solid rgba(155,93,229,0.35);}
+.rel-btn-ia:hover{background:rgba(155,93,229,0.35);}
+.rel-preview-area{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:20px;min-height:120px;display:flex;align-items:center;justify-content:center;}
+.rel-preview-empty{text-align:center;color:var(--muted);font-size:0.65rem;line-height:2;}
+.rel-spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,0.15);border-top-color:currentColor;border-radius:50%;animation:relSpin 0.7s linear infinite;}
+@keyframes relSpin{to{transform:rotate(360deg);}}
+</style>
+
+<div class="comp-section-hdr"><div class="comp-section-lbl">📑 GERADOR DE RELATÓRIOS</div><div class="comp-section-line"></div></div>
+<div class="rel-grid">
+
+  <!-- COBRANÇA -->
+  <div class="rel-card rel-card-cobr">
+    <div class="rel-icon">🔴</div>
+    <div class="rel-title">Relatório de Cobrança</div>
+    <div class="rel-desc">Lista completa dos clientes inadimplentes, separados por bairro, com endereço, telefone, valor em atraso e dias de atraso. Pronto para entregar aos cobradores de campo.</div>
+    <div class="rel-tags">
+      <span class="rel-tag rel-tag-cobr">Inadimplentes</span>
+      <span class="rel-tag rel-tag-cobr">Por bairro</span>
+      <span class="rel-tag rel-tag-cobr">Dados de contato</span>
+      <span class="rel-tag rel-tag-cobr">Valor em atraso</span>
+    </div>
+    <button class="rel-btn rel-btn-cobr" onclick="gerarRelatorioCobr()">
+      <span id="spinner-cobr" class="rel-spinner" style="display:none"></span>
+      ⬇ Baixar PDF — Cobrança
+    </button>
+  </div>
+
+  <!-- INVESTIDORES -->
+  <div class="rel-card rel-card-invest">
+    <div class="rel-icon">📊</div>
+    <div class="rel-title">Relatório para Investidores</div>
+    <div class="rel-desc">Visão executiva do negócio: capital deployado, ROI, histórico de crescimento, taxa de inadimplência, projeções e indicadores estratégicos. Ideal para atrair sócios ou investidores.</div>
+    <div class="rel-tags">
+      <span class="rel-tag rel-tag-invest">ROI & Retorno</span>
+      <span class="rel-tag rel-tag-invest">Capital ativo</span>
+      <span class="rel-tag rel-tag-invest">Crescimento</span>
+      <span class="rel-tag rel-tag-invest">Projeções</span>
+    </div>
+    <button class="rel-btn rel-btn-invest" onclick="gerarRelatorioInvest()">
+      <span id="spinner-invest" class="rel-spinner" style="display:none"></span>
+      ⬇ Baixar PDF — Investidores
+    </button>
+  </div>
+
+  <!-- IA / DECISÃO -->
+  <div class="rel-card rel-card-ia">
+    <div class="rel-icon">🤖</div>
+    <div class="rel-title">Briefing para IA</div>
+    <div class="rel-desc">Exporta todos os dados relevantes do negócio em formato otimizado para colar no Claude e receber análise estratégica, identificação de riscos e recomendações de tomada de decisão.</div>
+    <div class="rel-tags">
+      <span class="rel-tag rel-tag-ia">Análise estratégica</span>
+      <span class="rel-tag rel-tag-ia">Todos os dados</span>
+      <span class="rel-tag rel-tag-ia">Formato Claude</span>
+    </div>
+    <button class="rel-btn rel-btn-ia" onclick="gerarRelatorioIA()">
+      <span id="spinner-ia" class="rel-spinner" style="display:none"></span>
+      ⬇ Baixar PDF — Briefing IA
+    </button>
+  </div>
+
+</div>
+
+<div class="comp-section-hdr"><div class="comp-section-lbl">ℹ️ INFORMAÇÕES</div><div class="comp-section-line"></div></div>
+<div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px 20px;font-size:0.58rem;color:var(--muted);line-height:2;display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+  <div><div style="color:var(--red);font-size:0.62rem;margin-bottom:6px;font-weight:600">🔴 Relatório de Cobrança</div>Separa automaticamente os clientes inadimplentes por bairro. O campo "Bairro" é extraído das observações do contrato. Se não cadastrado, agrupa como "Sem Bairro".</div>
+  <div><div style="color:var(--gold2);font-size:0.62rem;margin-bottom:6px;font-weight:600">📊 Relatório de Investidores</div>Dados sigilosos — compartilhe apenas com potenciais sócios em contexto de negociação formal. Inclui taxa real de retorno e estrutura da carteira.</div>
+  <div><div style="color:var(--purple);font-size:0.62rem;margin-bottom:6px;font-weight:600">🤖 Briefing para IA</div>Cole o conteúdo diretamente no chat do Claude e peça: <em style="color:var(--text)">"Analise esses dados e me dê recomendações estratégicas"</em>.</div>
+</div>
+
+</div>
+<!-- /tab-relatorios -->
+
+<script>
+// ══════════════════════════════════════════════════════════
+// GERADOR DE PDFs — RELATÓRIOS
+// ══════════════════════════════════════════════════════════
+
+function _relGetData(){
+  const d=window._relCache;
+  if(!d){alert('Carregue os dados da planilha primeiro!');return null;}
+  return d;
+}
+
+function _relFmt(v){
+  if(typeof v!=='number')return v||'—';
+  return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function _relDate(){
+  return new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+}
+
+function _relSpinner(id,on){
+  const el=document.getElementById('spinner-'+id);
+  if(el)el.style.display=on?'inline-block':'none';
+}
+
+function _relOpenPDF(html, filename){
+  const w=window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>{w.print();},600);
+}
+
+// ─── ESTILOS BASE PDF ────────────────────────────────────
+function _pdfBase(title, accentColor){
+  return`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+  <title>${title}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;color:#1a1a2e;background:#fff;font-size:11px;line-height:1.5;}
+    .page{max-width:780px;margin:0 auto;padding:32px 36px;}
+    .header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;padding-bottom:18px;border-bottom:3px solid ${accentColor};}
+    .header-left h1{font-size:22px;font-weight:700;color:${accentColor};letter-spacing:-0.3px;margin-bottom:3px;}
+    .header-left p{font-size:10px;color:#666;letter-spacing:0.5px;text-transform:uppercase;}
+    .header-right{text-align:right;font-size:10px;color:#888;line-height:1.8;}
+    .header-right strong{color:#333;font-size:11px;}
+    .badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:9px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;}
+    .badge-red{background:#fde8ed;color:#c0392b;}
+    .badge-green{background:#e8f8f2;color:#1a7a4a;}
+    .badge-orange{background:#fef3e2;color:#c87f0a;}
+    .badge-blue{background:#e8f0fe;color:#1a56db;}
+    .badge-purple{background:#f3e8ff;color:#7c3aed;}
+    .section{margin-bottom:24px;}
+    .section-title{font-size:13px;font-weight:700;color:${accentColor};letter-spacing:0.3px;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:6px;}
+    table{width:100%;border-collapse:collapse;margin-bottom:12px;}
+    th{background:${accentColor};color:#fff;padding:7px 10px;text-align:left;font-size:9.5px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;}
+    td{padding:7px 10px;font-size:10px;border-bottom:1px solid #f0f0f0;vertical-align:top;}
+    tr:nth-child(even) td{background:#fafafa;}
+    tr:last-child td{border-bottom:none;}
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+    .kpi-box{background:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;padding:12px 14px;border-top:3px solid ${accentColor};}
+    .kpi-label{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;}
+    .kpi-val{font-size:17px;font-weight:700;color:${accentColor};}
+    .kpi-sub{font-size:9px;color:#aaa;margin-top:2px;}
+    .bairro-header{background:#f0f4ff;padding:8px 12px;font-weight:700;font-size:11px;color:#333;border-left:4px solid ${accentColor};margin-bottom:0;letter-spacing:0.2px;}
+    .info-row{display:flex;gap:0;margin-bottom:8px;}
+    .info-label{width:38%;font-size:10px;color:#888;font-weight:500;}
+    .info-val{flex:1;font-size:10px;color:#222;font-weight:600;}
+    .footer{margin-top:32px;padding-top:14px;border-top:1px solid #eee;display:flex;justify-content:space-between;font-size:9px;color:#aaa;}
+    .highlight-box{background:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;padding:14px 16px;margin-bottom:16px;}
+    .highlight-box p{font-size:10.5px;color:#444;line-height:1.8;}
+    .tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:8.5px;font-weight:600;margin-right:4px;margin-bottom:3px;}
+    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+      .page{max-width:100%;padding:20px 24px;}
+      .no-print{display:none;}}
+  </style></head><body><div class="page">`;
+}
+
+// ════════════════════════════════════════════════════════
+// 1. RELATÓRIO DE COBRANÇA
+// ════════════════════════════════════════════════════════
+function gerarRelatorioCobr(){
+  const d=_relGetData(); if(!d)return;
+  _relSpinner('cobr',true);
+  setTimeout(()=>{
+    try{
+      const {emps,hoje} = d;
+      const atrasados = emps.filter(e=>e.status==='atraso');
+
+      // Agrupa por bairro (extrai do campo obs ou tel — fallback "Sem Bairro")
+      function extrairBairro(e){
+        // Tenta extrair de obs (campo livre) ou idCliente — sem campo dedicado usa fallback
+        if(e.bairro && e.bairro.trim()) return e.bairro.trim();
+        return 'Sem Bairro Cadastrado';
+      }
+      const porBairro={};
+      atrasados.forEach(e=>{
+        const b=extrairBairro(e);
+        if(!porBairro[b])porBairro[b]=[];
+        porBairro[b].push(e);
+      });
+
+      const totalEmAtraso=atrasados.reduce((s,e)=>s+(e.saldo||e.capital),0);
+      const totalJurosAtraso=atrasados.reduce((s,e)=>s+e.jProx,0);
+
+      let html=_pdfBase('Relatório de Cobrança — Capital Investimentos','#c0392b');
+      html+=`
+      <div class="header">
+        <div class="header-left">
+          <h1>🔴 Relatório de Cobrança</h1>
+          <p>Capital Investimentos · Uso Interno — Cobradores de Campo</p>
+        </div>
+        <div class="header-right">
+          <div><strong>Data:</strong> ${_relDate()}</div>
+          <div><strong>Total inadimplentes:</strong> ${atrasados.length}</div>
+          <div><strong>Bairros com pendências:</strong> ${Object.keys(porBairro).length}</div>
+          <div style="margin-top:6px"><span class="badge badge-red">CONFIDENCIAL</span></div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-box">
+          <div class="kpi-label">Clientes em Atraso</div>
+          <div class="kpi-val" style="color:#c0392b">${atrasados.length}</div>
+          <div class="kpi-sub">contratos inadimplentes</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Capital em Risco</div>
+          <div class="kpi-val" style="color:#c0392b">${_relFmt(totalEmAtraso)}</div>
+          <div class="kpi-sub">saldo devedor total</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Juros Pendentes</div>
+          <div class="kpi-val" style="color:#e67e22">${_relFmt(totalJurosAtraso)}</div>
+          <div class="kpi-sub">próximas parcelas</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Bairros</div>
+          <div class="kpi-val" style="color:#c0392b">${Object.keys(porBairro).length}</div>
+          <div class="kpi-sub">regiões com pendências</div>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <p><strong>Instruções para o cobrador:</strong> Visite cada cliente pessoalmente no endereço cadastrado. Apresente este documento, informe o valor em atraso e solicite regularização imediata ou acordo de parcelamento. Em caso de acordo, registre no sistema.</p>
+      </div>`;
+
+      // Por bairro
+      Object.keys(porBairro).sort().forEach(bairro=>{
+        const lista=porBairro[bairro].sort((a,b)=>{
+          const dA=a.proxVenc?Math.floor((hoje-a.proxVenc)/(86400000)):0;
+          const dB=b.proxVenc?Math.floor((hoje-b.proxVenc)/(86400000)):0;
+          return dB-dA;
+        });
+        const totalBairro=lista.reduce((s,e)=>s+(e.saldo||e.capital),0);
+
+        html+=`<div class="section">
+          <div class="bairro-header">📍 ${bairro} — ${lista.length} cliente(s) · Total: ${_relFmt(totalBairro)}</div>
+          <table>
+            <thead><tr>
+              <th>Cliente</th><th>Telefone</th><th>Contrato</th>
+              <th>Dias Atraso</th><th>Parcela</th><th>Saldo Devedor</th>
+            </tr></thead>
+            <tbody>
+              ${lista.map(e=>{
+                const dias=e.proxVenc?Math.max(0,Math.floor((hoje-e.proxVenc)/(86400000))):0;
+                const urgencia=dias>30?'badge-red':dias>15?'badge-orange':'badge-blue';
+                return`<tr>
+                  <td><strong>${e.nome||e.id}</strong><br><span style="color:#888;font-size:9px">${e.id} · Capital: ${_relFmt(e.capital)}</span></td>
+                  <td>${e.tel||'—'}</td>
+                  <td>${e.id}<br><span style="color:#888;font-size:9px">Venc: ${e.proxVenc?e.proxVenc.toLocaleDateString('pt-BR'):'—'}</span></td>
+                  <td><span class="badge ${urgencia}">${dias} dias</span></td>
+                  <td style="color:#e67e22;font-weight:700">${_relFmt(e.jProx)}</td>
+                  <td style="color:#c0392b;font-weight:700">${_relFmt(e.saldo||e.capital)}</td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+      });
+
+      html+=`<div class="footer">
+        <span>Capital Investimentos — Relatório de Cobrança — ${_relDate()}</span>
+        <span>DOCUMENTO CONFIDENCIAL · Uso exclusivo dos cobradores autorizados</span>
+      </div></div></body></html>`;
+
+      _relOpenPDF(html,'cobranca.pdf');
+    }catch(err){alert('Erro ao gerar relatório: '+err.message);}
+    _relSpinner('cobr',false);
+  },300);
+}
+
+// ════════════════════════════════════════════════════════
+// 2. RELATÓRIO PARA INVESTIDORES
+// ════════════════════════════════════════════════════════
+function gerarRelatorioInvest(){
+  const d=_relGetData(); if(!d)return;
+  _relSpinner('invest',true);
+  setTimeout(()=>{
+    try{
+      const {emps,clientes,abertos,atrasado,hoje,totalCap,taxaMediaGlobal,lucroReal,quitados}=d;
+      const totalJuros=abertos.reduce((s,e)=>s+e.jTotal,0);
+      const inadRate=abertos.length>0?atrasado.length/abertos.length:0;
+      const roi=totalCap>0?totalJuros/totalCap:0;
+      const taxaAA=taxaMediaGlobal*12;
+      const mesesDobra=taxaMediaGlobal>0?Math.ceil(Math.log(2)/Math.log(1+taxaMediaGlobal)):null;
+      const capDeploy=abertos.reduce((s,e)=>s+e.capital,0);
+      const capAtraso=atrasado.reduce((s,e)=>s+e.capital,0);
+      const ticketMedio=abertos.length?capDeploy/abertos.length:0;
+      const clientesAtivos=clientes.filter(c=>!c.soQuitados).length;
+
+      // Crescimento mês (últimos 3)
+      const mesAt=hoje.getMonth(),anoAt=hoje.getFullYear();
+
+      let html=_pdfBase('Relatório para Investidores — Capital Investimentos','#c9922a');
+      html+=`
+      <div class="header">
+        <div class="header-left">
+          <h1>📊 Relatório para Investidores</h1>
+          <p>Capital Investimentos · Soluções Financeiras Estratégicas</p>
+        </div>
+        <div class="header-right">
+          <div><strong>Data:</strong> ${_relDate()}</div>
+          <div><strong>Carteira ativa:</strong> ${abertos.length} contratos</div>
+          <div><strong>Clientes ativos:</strong> ${clientesAtivos}</div>
+          <div style="margin-top:6px"><span class="badge badge-orange">CONFIDENCIAL</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">🏦 Resumo Executivo</div>
+        <div class="highlight-box">
+          <p>A Capital Investimentos opera no segmento de crédito privado com foco em empréstimos pessoais de curto prazo. A carteira atual conta com <strong>${abertos.length} contratos ativos</strong>, capital deployado de <strong>${_relFmt(capDeploy)}</strong> e lucro previsto de <strong>${_relFmt(totalJuros)}</strong>. A taxa média de juros praticada é de <strong>${(taxaMediaGlobal*100).toFixed(1)}% ao mês</strong>, com histórico de ${quitados.length} contratos já quitados.</p>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-box"><div class="kpi-label">Capital Deployado</div><div class="kpi-val">${_relFmt(capDeploy)}</div><div class="kpi-sub">em operação ativa</div></div>
+        <div class="kpi-box"><div class="kpi-label">Lucro Previsto</div><div class="kpi-val" style="color:#1a7a4a">${_relFmt(totalJuros)}</div><div class="kpi-sub">juros a receber</div></div>
+        <div class="kpi-box"><div class="kpi-label">ROI Carteira</div><div class="kpi-val" style="color:#c9922a">${(roi*100).toFixed(1)}%</div><div class="kpi-sub">retorno sobre capital</div></div>
+        <div class="kpi-box"><div class="kpi-label">Taxa Média/mês</div><div class="kpi-val" style="color:#c9922a">${(taxaMediaGlobal*100).toFixed(1)}%</div><div class="kpi-sub">${(taxaAA*100).toFixed(1)}% ao ano</div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">📈 Indicadores Operacionais</div>
+        <table>
+          <thead><tr><th>Indicador</th><th>Valor</th><th>Benchmark</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Taxa de Inadimplência</td><td><strong>${(inadRate*100).toFixed(1)}%</strong></td><td>&lt; 10% (mercado)</td><td><span class="badge ${inadRate<0.1?'badge-green':'badge-red'}">${inadRate<0.1?'✓ BOM':'⚠ ATENÇÃO'}</span></td></tr>
+            <tr><td>Ticket Médio por Contrato</td><td><strong>${_relFmt(ticketMedio)}</strong></td><td>—</td><td><span class="badge badge-blue">INFO</span></td></tr>
+            <tr><td>Contratos Ativos</td><td><strong>${abertos.length}</strong></td><td>—</td><td><span class="badge badge-blue">INFO</span></td></tr>
+            <tr><td>Contratos Quitados (histórico)</td><td><strong>${quitados.length}</strong></td><td>—</td><td><span class="badge badge-green">✓ HISTÓRICO</span></td></tr>
+            <tr><td>Clientes Ativos</td><td><strong>${clientesAtivos}</strong></td><td>—</td><td><span class="badge badge-blue">INFO</span></td></tr>
+            <tr><td>Capital em Risco (atraso)</td><td><strong>${_relFmt(capAtraso)}</strong></td><td>&lt; 15% carteira</td><td><span class="badge ${capAtraso/capDeploy<0.15?'badge-green':'badge-red'}">${(capAtraso/capDeploy*100).toFixed(1)}% da carteira</span></td></tr>
+            <tr><td>Lucro Realizado (histórico)</td><td><strong>${_relFmt(lucroReal)}</strong></td><td>—</td><td><span class="badge badge-green">✓ REALIZADO</span></td></tr>
+            ${mesesDobra?`<tr><td>Tempo para dobrar capital</td><td><strong>${mesesDobra} meses</strong></td><td>Juros compostos reinvestidos</td><td><span class="badge badge-orange">PROJEÇÃO</span></td></tr>`:''}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <div class="section-title">🔮 Projeções de Crescimento</div>
+        <table>
+          <thead><tr><th>Período</th><th>Capital Projetado</th><th>Lucro Acumulado</th><th>Base de Cálculo</th></tr></thead>
+          <tbody>
+            <tr><td>3 meses</td><td><strong>${_relFmt(capDeploy*Math.pow(1+taxaMediaGlobal,3))}</strong></td><td><strong style="color:#1a7a4a">+${_relFmt(capDeploy*Math.pow(1+taxaMediaGlobal,3)-capDeploy)}</strong></td><td>Reinvestimento total</td></tr>
+            <tr><td>6 meses</td><td><strong>${_relFmt(capDeploy*Math.pow(1+taxaMediaGlobal,6))}</strong></td><td><strong style="color:#1a7a4a">+${_relFmt(capDeploy*Math.pow(1+taxaMediaGlobal,6)-capDeploy)}</strong></td><td>Reinvestimento total</td></tr>
+            <tr><td>12 meses</td><td><strong>${_relFmt(capDeploy*Math.pow(1+taxaMediaGlobal,12))}</strong></td><td><strong style="color:#1a7a4a">+${_relFmt(capDeploy*Math.pow(1+taxaMediaGlobal,12)-capDeploy)}</strong></td><td>Reinvestimento total</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:9px;color:#aaa;margin-top:6px">* Projeções assumem reinvestimento integral dos juros e manutenção da taxa média atual.</p>
+      </div>
+
+      <div class="footer">
+        <span>Capital Investimentos — Relatório para Investidores — ${_relDate()}</span>
+        <span>CONFIDENCIAL · Distribuição restrita a potenciais sócios e investidores</span>
+      </div></div></body></html>`;
+
+      _relOpenPDF(html,'investidores.pdf');
+    }catch(err){alert('Erro ao gerar relatório: '+err.message);}
+    _relSpinner('invest',false);
+  },300);
+}
+
+// ════════════════════════════════════════════════════════
+// 3. BRIEFING PARA IA
+// ════════════════════════════════════════════════════════
+function gerarRelatorioIA(){
+  const d=_relGetData(); if(!d)return;
+  _relSpinner('ia',true);
+  setTimeout(()=>{
+    try{
+      const {emps,clientes,abertos,atrasado,hoje,totalCap,taxaMediaGlobal,lucroReal,quitados}=d;
+      const totalJuros=abertos.reduce((s,e)=>s+e.jTotal,0);
+      const inadRate=abertos.length>0?atrasado.length/abertos.length:0;
+      const roi=totalCap>0?totalJuros/totalCap:0;
+      const capDeploy=abertos.reduce((s,e)=>s+e.capital,0);
+      const capAtraso=atrasado.reduce((s,e)=>s+e.capital,0);
+      const ticketMedio=abertos.length?capDeploy/abertos.length:0;
+      const clientesAtivos=clientes.filter(c=>!c.soQuitados).length;
+      const taxaAA=taxaMediaGlobal*12;
+      const mesesDobra=taxaMediaGlobal>0?Math.ceil(Math.log(2)/Math.log(1+taxaMediaGlobal)):null;
+
+      // Distribuição de prazos
+      const prazoMap={};
+      abertos.forEach(e=>{
+        const k=`${e.prazo} ${e.unidade||'meses'}`;
+        prazoMap[k]=(prazoMap[k]||0)+1;
+      });
+
+      // Maiores contratos
+      const top5=abertos.slice().sort((a,b)=>b.capital-a.capital).slice(0,5);
+
+      let html=_pdfBase('Briefing para IA — Capital Investimentos','#7c3aed');
+      html+=`
+      <div class="header">
+        <div class="header-left">
+          <h1>🤖 Briefing para IA — Claude</h1>
+          <p>Capital Investimentos · Dados completos para análise estratégica</p>
+        </div>
+        <div class="header-right">
+          <div><strong>Gerado em:</strong> ${_relDate()}</div>
+          <div><strong>Contratos ativos:</strong> ${abertos.length}</div>
+          <div style="margin-top:6px"><span class="badge badge-purple">USO IA</span></div>
+        </div>
+      </div>
+
+      <div class="highlight-box" style="border-left:4px solid #7c3aed;background:#f9f5ff;">
+        <p><strong style="color:#7c3aed">Como usar este documento:</strong> Cole o conteúdo completo no chat do Claude e escreva: <em>"Analise todos esses dados do meu negócio de crédito privado e me dê recomendações estratégicas detalhadas sobre o que devo fazer agora, onde estão os maiores riscos e como posso crescer de forma sustentável."</em></p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">📋 CONTEXTO DO NEGÓCIO</div>
+        <div class="info-row"><div class="info-label">Segmento:</div><div class="info-val">Crédito privado — empréstimos pessoais de curto prazo</div></div>
+        <div class="info-row"><div class="info-label">Data do relatório:</div><div class="info-val">${_relDate()}</div></div>
+        <div class="info-row"><div class="info-label">Operação:</div><div class="info-val">Informal / pessoa física · gestão via planilha integrada</div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">💰 DADOS FINANCEIROS PRINCIPAIS</div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="kpi-box"><div class="kpi-label">Capital Deployado</div><div class="kpi-val" style="font-size:15px">${_relFmt(capDeploy)}</div></div>
+          <div class="kpi-box"><div class="kpi-label">Lucro Previsto (carteira)</div><div class="kpi-val" style="font-size:15px;color:#1a7a4a">${_relFmt(totalJuros)}</div></div>
+          <div class="kpi-box"><div class="kpi-label">Lucro Já Realizado</div><div class="kpi-val" style="font-size:15px;color:#1a7a4a">${_relFmt(lucroReal)}</div></div>
+        </div>
+        <table>
+          <tbody>
+            <tr><td class="info-label">Taxa média mensal</td><td><strong>${(taxaMediaGlobal*100).toFixed(2)}%</strong> a.m. (${(taxaAA*100).toFixed(1)}% a.a.)</td></tr>
+            <tr><td class="info-label">ROI da carteira</td><td><strong>${(roi*100).toFixed(1)}%</strong></td></tr>
+            <tr><td class="info-label">Ticket médio</td><td><strong>${_relFmt(ticketMedio)}</strong></td></tr>
+            <tr><td class="info-label">Capital em atraso</td><td><strong>${_relFmt(capAtraso)}</strong> (${(capAtraso/capDeploy*100).toFixed(1)}% da carteira)</td></tr>
+            ${mesesDobra?`<tr><td class="info-label">Prazo para dobrar capital</td><td><strong>${mesesDobra} meses</strong> com reinvestimento total</td></tr>`:''}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <div class="section-title">📊 CARTEIRA DE CONTRATOS</div>
+        <table>
+          <tbody>
+            <tr><td class="info-label">Contratos ativos</td><td><strong>${abertos.length}</strong></td></tr>
+            <tr><td class="info-label">Contratos em atraso</td><td><strong>${atrasado.length}</strong> (${(inadRate*100).toFixed(1)}% de inadimplência)</td></tr>
+            <tr><td class="info-label">Contratos quitados (histórico)</td><td><strong>${quitados.length}</strong></td></tr>
+            <tr><td class="info-label">Clientes ativos</td><td><strong>${clientesAtivos}</strong></td></tr>
+            <tr><td class="info-label">Total de clientes</td><td><strong>${clientes.length}</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <div class="section-title">⚠️ CONTRATOS EM ATRASO (Inadimplência)</div>
+        ${atrasado.length===0?`<p style="color:#1a7a4a;font-weight:600">✓ Nenhum contrato em atraso no momento.</p>`:`
+        <table>
+          <thead><tr><th>Cliente</th><th>Capital</th><th>Saldo Devedor</th><th>Dias em Atraso</th><th>Taxa</th></tr></thead>
+          <tbody>${atrasado.slice(0,10).map(e=>{
+            const dias=e.proxVenc?Math.max(0,Math.floor((hoje-e.proxVenc)/(86400000))):0;
+            return`<tr><td>${e.nome||e.id}</td><td>${_relFmt(e.capital)}</td><td>${_relFmt(e.saldo||e.capital)}</td><td><strong style="color:#c0392b">${dias} dias</strong></td><td>${(e.taxa*100).toFixed(1)}%/mês</td></tr>`;
+          }).join('')}${atrasado.length>10?`<tr><td colspan="5" style="color:#888;font-style:italic">... e mais ${atrasado.length-10} contratos em atraso</td></tr>`:''}</tbody>
+        </table>`}
+      </div>
+
+      <div class="section">
+        <div class="section-title">🏆 MAIORES CONTRATOS ATIVOS</div>
+        <table>
+          <thead><tr><th>Cliente</th><th>Capital</th><th>Lucro Previsto</th><th>Taxa/mês</th><th>Prazo</th><th>Status</th></tr></thead>
+          <tbody>${top5.map(e=>`<tr>
+            <td>${e.nome||e.id}</td>
+            <td><strong>${_relFmt(e.capital)}</strong></td>
+            <td style="color:#1a7a4a">${_relFmt(e.jTotal)}</td>
+            <td>${(e.taxa*100).toFixed(1)}%</td>
+            <td>${e.prazo} ${e.unidade||'meses'}</td>
+            <td><span class="badge badge-green">✓ ATIVO</span></td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <div class="section-title">📅 DISTRIBUIÇÃO DE PRAZOS</div>
+        <table>
+          <thead><tr><th>Prazo</th><th>Quantidade</th><th>% da carteira</th></tr></thead>
+          <tbody>${Object.entries(prazoMap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+            <tr><td>${k}</td><td>${v}</td><td>${(v/abertos.length*100).toFixed(1)}%</td></tr>
+          `).join('')}</tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <div class="section-title">❓ PERGUNTAS SUGERIDAS PARA A IA</div>
+        <div class="highlight-box" style="border-left:4px solid #7c3aed;background:#f9f5ff;">
+          <p style="margin-bottom:8px">Com base nesses dados, você pode perguntar ao Claude:</p>
+          <ul style="padding-left:16px;line-height:2;font-size:10.5px;color:#444;">
+            <li>Quais são os 3 maiores riscos do meu portfólio agora?</li>
+            <li>Como devo priorizar a cobrança dos inadimplentes?</li>
+            <li>Devo aumentar ou manter minha taxa de juros?</li>
+            <li>Qual é a concentração de risco por cliente e como reduzir?</li>
+            <li>Como posso escalar esse negócio de forma segura?</li>
+            <li>Qual seria o ticket médio ideal para maximizar retorno com menor risco?</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer">
+        <span>Capital Investimentos — Briefing para IA — ${_relDate()}</span>
+        <span>Gerado automaticamente pelo Dashboard Estratégico</span>
+      </div></div></body></html>`;
+
+      _relOpenPDF(html,'briefing-ia.pdf');
+    }catch(err){alert('Erro ao gerar relatório: '+err.message);}
+    _relSpinner('ia',false);
+  },300);
+}
+</script>
 
 </div><!-- /.tab-content-area -->
 </div><!-- /.dashboard-layout -->
