@@ -8551,13 +8551,47 @@ const _origRender=window._cmdHookReady;
 .rel-btn-invest:hover{background:rgba(201,146,42,0.35);}
 .rel-btn-ia{background:linear-gradient(135deg,rgba(155,93,229,0.25),rgba(155,93,229,0.1));color:var(--purple);border:1px solid rgba(155,93,229,0.35);}
 .rel-btn-ia:hover{background:rgba(155,93,229,0.35);}
-.rel-preview-area{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:20px;min-height:120px;display:flex;align-items:center;justify-content:center;}
-.rel-preview-empty{text-align:center;color:var(--muted);font-size:0.65rem;line-height:2;}
 .rel-spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,0.15);border-top-color:currentColor;border-radius:50%;animation:relSpin 0.7s linear infinite;}
 @keyframes relSpin{to{transform:rotate(360deg);}}
+
+/* Modal de seleção de bairro */
+#bairro-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+#bairro-modal-overlay.open{display:flex;}
+#bairro-modal{background:var(--s1);border:1px solid rgba(239,71,111,0.3);border-radius:18px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.6);}
+#bairro-modal-header{padding:20px 22px 16px;border-bottom:1px solid var(--border);background:rgba(239,71,111,0.05);}
+#bairro-modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.1em;color:var(--red);margin-bottom:3px;}
+#bairro-modal-sub{font-size:0.58rem;color:var(--muted);}
+#bairro-list{padding:14px;display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto;}
+.bairro-opt{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--s2);border:1px solid var(--border2);border-radius:10px;cursor:pointer;transition:all 0.15s;}
+.bairro-opt:hover{border-color:rgba(239,71,111,0.4);background:rgba(239,71,111,0.06);}
+.bairro-opt-left{display:flex;flex-direction:column;gap:3px;}
+.bairro-opt-nome{font-size:0.75rem;color:var(--text);font-weight:600;}
+.bairro-opt-sub{font-size:0.55rem;color:var(--muted);}
+.bairro-opt-count{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--red);line-height:1;}
+#bairro-modal-footer{padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:8px;}
+.bairro-modal-btn{flex:1;padding:11px;border-radius:8px;border:none;font-family:'Bebas Neue',sans-serif;font-size:0.85rem;letter-spacing:0.1em;cursor:pointer;}
+.bairro-modal-btn-cancel{background:var(--s2);color:var(--muted);border:1px solid var(--border2);}
+.bairro-modal-btn-cancel:hover{color:var(--text);}
+.bairro-modal-btn-all{background:rgba(239,71,111,0.15);color:var(--red);border:1px solid rgba(239,71,111,0.3);}
+.bairro-modal-btn-all:hover{background:rgba(239,71,111,0.25);}
 </style>
 
-<div class="comp-section-hdr"><div class="comp-section-lbl">📑 GERADOR DE RELATÓRIOS</div><div class="comp-section-line"></div></div>
+<!-- Modal de seleção de bairro -->
+<div id="bairro-modal-overlay">
+  <div id="bairro-modal">
+    <div id="bairro-modal-header">
+      <div id="bairro-modal-title">📍 Selecione o Bairro</div>
+      <div id="bairro-modal-sub">Escolha o bairro para gerar o relatório do cobrador daquela região</div>
+    </div>
+    <div id="bairro-list"></div>
+    <div id="bairro-modal-footer">
+      <button class="bairro-modal-btn bairro-modal-btn-cancel" onclick="document.getElementById('bairro-modal-overlay').classList.remove('open')">Cancelar</button>
+      <button class="bairro-modal-btn bairro-modal-btn-all" onclick="_gerarCobrTodos()">⬇ Todos os Bairros</button>
+    </div>
+  </div>
+</div>
+
+<div class="comp-section-hdr" style="margin-top:0"><div class="comp-section-lbl">📑 GERADOR DE RELATÓRIOS</div><div class="comp-section-line"></div></div>
 <div class="rel-grid">
 
   <!-- COBRANÇA -->
@@ -8571,9 +8605,9 @@ const _origRender=window._cmdHookReady;
       <span class="rel-tag rel-tag-cobr">Dados de contato</span>
       <span class="rel-tag rel-tag-cobr">Valor em atraso</span>
     </div>
-    <button class="rel-btn rel-btn-cobr" onclick="gerarRelatorioCobr()">
+    <button class="rel-btn rel-btn-cobr" onclick="abrirModalBairro()">
       <span id="spinner-cobr" class="rel-spinner" style="display:none"></span>
-      ⬇ Baixar PDF — Cobrança
+      📍 Escolher Bairro e Gerar PDF
     </button>
   </div>
 
@@ -8614,7 +8648,7 @@ const _origRender=window._cmdHookReady;
 
 <div class="comp-section-hdr"><div class="comp-section-lbl">ℹ️ INFORMAÇÕES</div><div class="comp-section-line"></div></div>
 <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px 20px;font-size:0.58rem;color:var(--muted);line-height:2;display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
-  <div><div style="color:var(--red);font-size:0.62rem;margin-bottom:6px;font-weight:600">🔴 Relatório de Cobrança</div>Separa automaticamente os clientes inadimplentes por bairro. O campo "Bairro" é extraído das observações do contrato. Se não cadastrado, agrupa como "Sem Bairro".</div>
+  <div><div style="color:var(--red);font-size:0.62rem;margin-bottom:6px;font-weight:600">🔴 Relatório de Cobrança</div>Selecione o bairro específico para cada cobrador. O relatório gerado contém apenas os clientes daquela região. Se o bairro não estiver cadastrado nas observações do contrato, o cliente aparece em "Sem Bairro".</div>
   <div><div style="color:var(--gold2);font-size:0.62rem;margin-bottom:6px;font-weight:600">📊 Relatório de Investidores</div>Dados sigilosos — compartilhe apenas com potenciais sócios em contexto de negociação formal. Inclui taxa real de retorno e estrutura da carteira.</div>
   <div><div style="color:var(--purple);font-size:0.62rem;margin-bottom:6px;font-weight:600">🤖 Briefing para IA</div>Cole o conteúdo diretamente no chat do Claude e peça: <em style="color:var(--text)">"Analise esses dados e me dê recomendações estratégicas"</em>.</div>
 </div>
