@@ -8541,7 +8541,7 @@ const _origRender=window._cmdHookReady;
 .rel-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.45);}
 
 /* faixa colorida topo */
-.rel-card-head{padding:20px 22px 16px;border-bottom:1px solid var(--border);}
+.rel-card-head{padding:20px 22px 20px;border-bottom:1px solid var(--border);}
 .rel-card-cobr .rel-card-head{border-top:3px solid var(--red);}
 .rel-card-invest .rel-card-head{border-top:3px solid var(--gold);}
 .rel-card-ia .rel-card-head{border-top:3px solid var(--purple);}
@@ -8602,6 +8602,10 @@ const _origRender=window._cmdHookReady;
         <div class="rel-card-title">Relatório de Cobrança</div>
       </div>
       <div class="rel-card-desc">Lista dos clientes inadimplentes separada por bairro, com todos os dados para localização e cobrança em campo.</div>
+      <button class="rel-btn rel-btn-cobr" style="margin-top:14px" onclick="gerarRelatorioCobr()">
+        <span id="spinner-cobr" class="rel-spinner" style="display:none"></span>
+        ⬇ Baixar PDF — Cobrança
+      </button>
     </div>
     <div class="rel-card-body">
       <div class="rel-tags">
@@ -8610,12 +8614,6 @@ const _origRender=window._cmdHookReady;
         <span class="rel-tag rel-tag-cobr">Dados de contato</span>
         <span class="rel-tag rel-tag-cobr">Valor em atraso</span>
       </div>
-    </div>
-    <div class="rel-card-footer">
-      <button class="rel-btn rel-btn-cobr" onclick="gerarRelatorioCobr()">
-        <span id="spinner-cobr" class="rel-spinner" style="display:none"></span>
-        ⬇ Baixar PDF — Cobrança
-      </button>
     </div>
   </div>
 
@@ -8627,6 +8625,10 @@ const _origRender=window._cmdHookReady;
         <div class="rel-card-title">Relatório para Investidores</div>
       </div>
       <div class="rel-card-desc">Visão executiva: capital deployado, ROI, crescimento, inadimplência e projeções. Ideal para atrair sócios.</div>
+      <button class="rel-btn rel-btn-invest" style="margin-top:14px" onclick="gerarRelatorioInvest()">
+        <span id="spinner-invest" class="rel-spinner" style="display:none"></span>
+        ⬇ Baixar PDF — Investidores
+      </button>
     </div>
     <div class="rel-card-body">
       <div class="rel-tags">
@@ -8635,12 +8637,6 @@ const _origRender=window._cmdHookReady;
         <span class="rel-tag rel-tag-invest">Crescimento</span>
         <span class="rel-tag rel-tag-invest">Projeções</span>
       </div>
-    </div>
-    <div class="rel-card-footer">
-      <button class="rel-btn rel-btn-invest" onclick="gerarRelatorioInvest()">
-        <span id="spinner-invest" class="rel-spinner" style="display:none"></span>
-        ⬇ Baixar PDF — Investidores
-      </button>
     </div>
   </div>
 
@@ -8652,6 +8648,10 @@ const _origRender=window._cmdHookReady;
         <div class="rel-card-title">Briefing para IA</div>
       </div>
       <div class="rel-card-desc">Exporta todos os dados em formato otimizado para o Claude gerar análise estratégica, riscos e recomendações.</div>
+      <button class="rel-btn rel-btn-ia" style="margin-top:14px" onclick="gerarRelatorioIA()">
+        <span id="spinner-ia" class="rel-spinner" style="display:none"></span>
+        ⬇ Baixar PDF — Briefing IA
+      </button>
     </div>
     <div class="rel-card-body">
       <div class="rel-tags">
@@ -8659,12 +8659,6 @@ const _origRender=window._cmdHookReady;
         <span class="rel-tag rel-tag-ia">Todos os dados</span>
         <span class="rel-tag rel-tag-ia">Formato Claude</span>
       </div>
-    </div>
-    <div class="rel-card-footer">
-      <button class="rel-btn rel-btn-ia" onclick="gerarRelatorioIA()">
-        <span id="spinner-ia" class="rel-spinner" style="display:none"></span>
-        ⬇ Baixar PDF — Briefing IA
-      </button>
     </div>
   </div>
 
