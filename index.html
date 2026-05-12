@@ -601,34 +601,30 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 <!-- TELA DE LOGIN -->
 <div id="login-screen" class="hidden">
   <div class="login-box">
-    <svg width="80" height="28" viewBox="0 0 80 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:14px">
-      <!-- ~20 barrinhas baixas à esquerda (todas mesma altura) -->
-      <rect x="0"   y="22" width="1.8" height="6" rx="0.4" fill="#c9922a"/>
-      <rect x="2.5" y="22" width="1.8" height="6" rx="0.4" fill="#c9922a"/>
-      <rect x="5"   y="22" width="1.8" height="6" rx="0.4" fill="#c9922a"/>
-      <rect x="7.5" y="22" width="1.8" height="6" rx="0.4" fill="#c9922a"/>
-      <rect x="10"  y="22" width="1.8" height="6" rx="0.4" fill="#c9922a"/>
-      <rect x="12.5" y="22" width="1.8" height="6" rx="0.4" fill="#c9922a"/>
-      <rect x="15"  y="22" width="1.8" height="6" rx="0.4" fill="#c9922a"/>
-      <rect x="17.5" y="22" width="1.8" height="6" rx="0.4" fill="#c9922a"/>
-      <rect x="20"  y="22" width="1.8" height="6" rx="0.4" fill="#c9922a"/>
-      <rect x="22.5" y="22" width="1.8" height="6" rx="0.4" fill="#c9922a"/>
-      <rect x="25"  y="22" width="1.8" height="6" rx="0.4" fill="#c9922a"/>
-      <rect x="27.5" y="22" width="1.8" height="6" rx="0.4" fill="#c9922a"/>
-      <rect x="30"  y="22" width="1.8" height="6" rx="0.4" fill="#c9922a"/>
-      <rect x="32.5" y="22" width="1.8" height="6" rx="0.4" fill="#c9922a"/>
-      <rect x="35"  y="22" width="1.8" height="6" rx="0.4" fill="#c9922a"/>
-      <!-- barras crescentes à direita (rampa suave) -->
-      <rect x="38"  y="20" width="2" height="8"  rx="0.4" fill="#c9922a"/>
-      <rect x="41"  y="18" width="2" height="10" rx="0.4" fill="#c9922a"/>
-      <rect x="44"  y="16" width="2" height="12" rx="0.4" fill="#c9922a"/>
-      <rect x="47"  y="14" width="2" height="14" rx="0.4" fill="#c9922a"/>
-      <rect x="50"  y="11" width="2" height="17" rx="0.4" fill="#c9922a"/>
-      <rect x="53"  y="8"  width="2" height="20" rx="0.4" fill="#c9922a"/>
-      <rect x="56"  y="5"  width="2" height="23" rx="0.4" fill="#c9922a"/>
-      <rect x="59"  y="3"  width="2" height="25" rx="0.4" fill="#c9922a"/>
-      <rect x="62"  y="1"  width="2" height="27" rx="0.4" fill="#c9922a"/>
-      <rect x="65"  y="0"  width="2" height="28" rx="0.4" fill="#c9922a"/>
+    <svg width="70" height="28" viewBox="0 0 70 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:14px">
+      <style>
+        .lb rect{transform-origin:bottom;transform-box:fill-box;animation:barUp 0.4s cubic-bezier(0.22,1,0.36,1) both;}
+        @keyframes barUp{from{transform:scaleY(0);opacity:0;}to{transform:scaleY(1);opacity:1;}}
+        .lb rect:nth-child(1){animation-delay:0.00s}.lb rect:nth-child(2){animation-delay:0.04s}.lb rect:nth-child(3){animation-delay:0.08s}.lb rect:nth-child(4){animation-delay:0.12s}.lb rect:nth-child(5){animation-delay:0.16s}.lb rect:nth-child(6){animation-delay:0.20s}.lb rect:nth-child(7){animation-delay:0.24s}.lb rect:nth-child(8){animation-delay:0.28s}.lb rect:nth-child(9){animation-delay:0.32s}.lb rect:nth-child(10){animation-delay:0.36s}.lb rect:nth-child(11){animation-delay:0.40s}.lb rect:nth-child(12){animation-delay:0.44s}.lb rect:nth-child(13){animation-delay:0.48s}.lb rect:nth-child(14){animation-delay:0.52s}.lb rect:nth-child(15){animation-delay:0.56s}.lb rect:nth-child(16){animation-delay:0.60s}.lb rect:nth-child(17){animation-delay:0.64s}.lb rect:nth-child(18){animation-delay:0.68s}.lb rect:nth-child(19){animation-delay:0.72s}.lb rect:nth-child(20){animation-delay:0.76s}.lb rect:nth-child(21){animation-delay:0.80s}
+      </style>
+      <g class="lb">
+        <rect x="0"  y="27" width="2" height="1"  fill="#c9922a"/>
+        <rect x="3"  y="27" width="2" height="1"  fill="#c9922a"/>
+        <rect x="6"  y="26" width="2" height="2"  fill="#c9922a"/>
+        <rect x="9"  y="26" width="2" height="2"  fill="#c9922a"/>
+        <rect x="12" y="25" width="2" height="3"  fill="#c9922a"/>
+        <rect x="15" y="24" width="2" height="4"  fill="#c9922a"/>
+        <rect x="18" y="23" width="2" height="5"  fill="#c9922a"/>
+        <rect x="21" y="22" width="2" height="6"  fill="#c9922a"/>
+        <rect x="24" y="20" width="2" height="8"  fill="#c9922a"/>
+        <rect x="27" y="18" width="2" height="10" fill="#c9922a"/>
+        <rect x="30" y="15" width="2" height="13" fill="#c9922a"/>
+        <rect x="33" y="12" width="2" height="16" fill="#c9922a"/>
+        <rect x="36" y="9"  width="2" height="19" fill="#c9922a"/>
+        <rect x="39" y="5"  width="2" height="23" fill="#c9922a"/>
+        <rect x="42" y="1"  width="2" height="27" fill="#c9922a"/>
+        <rect x="45" y="0"  width="2" height="28" fill="#c9922a"/>
+      </g>
     </svg>
     <div class="login-brand">Capital Investimentos</div>
     <div class="login-sub">Soluções Financeiras Estratégicas</div>
@@ -643,34 +639,29 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 
 <div id="loading-screen" class="hidden">
   <div class="load-logo-wrap">
-    <svg width="105" height="36" viewBox="0 0 105 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- ~20 barrinhas baixas à esquerda -->
-      <rect x="0"    y="28" width="2.2" height="8" rx="0.5" fill="#c9922a"/>
-      <rect x="3.2"  y="28" width="2.2" height="8" rx="0.5" fill="#c9922a"/>
-      <rect x="6.4"  y="28" width="2.2" height="8" rx="0.5" fill="#c9922a"/>
-      <rect x="9.6"  y="28" width="2.2" height="8" rx="0.5" fill="#c9922a"/>
-      <rect x="12.8" y="28" width="2.2" height="8" rx="0.5" fill="#c9922a"/>
-      <rect x="16"   y="28" width="2.2" height="8" rx="0.5" fill="#c9922a"/>
-      <rect x="19.2" y="28" width="2.2" height="8" rx="0.5" fill="#c9922a"/>
-      <rect x="22.4" y="28" width="2.2" height="8" rx="0.5" fill="#c9922a"/>
-      <rect x="25.6" y="28" width="2.2" height="8" rx="0.5" fill="#c9922a"/>
-      <rect x="28.8" y="28" width="2.2" height="8" rx="0.5" fill="#c9922a"/>
-      <rect x="32"   y="28" width="2.2" height="8" rx="0.5" fill="#c9922a"/>
-      <rect x="35.2" y="28" width="2.2" height="8" rx="0.5" fill="#c9922a"/>
-      <rect x="38.4" y="28" width="2.2" height="8" rx="0.5" fill="#c9922a"/>
-      <rect x="41.6" y="28" width="2.2" height="8" rx="0.5" fill="#c9922a"/>
-      <rect x="44.8" y="28" width="2.2" height="8" rx="0.5" fill="#c9922a"/>
-      <!-- barras crescentes à direita -->
-      <rect x="49"   y="26" width="2.5" height="10" rx="0.5" fill="#c9922a"/>
-      <rect x="52.5" y="23" width="2.5" height="13" rx="0.5" fill="#c9922a"/>
-      <rect x="56"   y="20" width="2.5" height="16" rx="0.5" fill="#c9922a"/>
-      <rect x="59.5" y="17" width="2.5" height="19" rx="0.5" fill="#c9922a"/>
-      <rect x="63"   y="14" width="2.5" height="22" rx="0.5" fill="#c9922a"/>
-      <rect x="66.5" y="10" width="2.5" height="26" rx="0.5" fill="#c9922a"/>
-      <rect x="70"   y="7"  width="2.5" height="29" rx="0.5" fill="#c9922a"/>
-      <rect x="73.5" y="4"  width="2.5" height="32" rx="0.5" fill="#c9922a"/>
-      <rect x="77"   y="2"  width="2.5" height="34" rx="0.5" fill="#c9922a"/>
-      <rect x="80.5" y="0"  width="2.5" height="36" rx="0.5" fill="#c9922a"/>
+    <svg width="90" height="36" viewBox="0 0 90 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <style>
+        .llb rect{transform-origin:bottom;transform-box:fill-box;animation:barUpL 0.4s cubic-bezier(0.22,1,0.36,1) both;}
+        @keyframes barUpL{from{transform:scaleY(0);opacity:0;}to{transform:scaleY(1);opacity:1;}}
+        .llb rect:nth-child(1){animation-delay:0.00s}.llb rect:nth-child(2){animation-delay:0.04s}.llb rect:nth-child(3){animation-delay:0.08s}.llb rect:nth-child(4){animation-delay:0.12s}.llb rect:nth-child(5){animation-delay:0.16s}.llb rect:nth-child(6){animation-delay:0.20s}.llb rect:nth-child(7){animation-delay:0.24s}.llb rect:nth-child(8){animation-delay:0.28s}.llb rect:nth-child(9){animation-delay:0.32s}.llb rect:nth-child(10){animation-delay:0.36s}.llb rect:nth-child(11){animation-delay:0.40s}.llb rect:nth-child(12){animation-delay:0.44s}.llb rect:nth-child(13){animation-delay:0.48s}.llb rect:nth-child(14){animation-delay:0.52s}.llb rect:nth-child(15){animation-delay:0.56s}.llb rect:nth-child(16){animation-delay:0.60s}.llb rect:nth-child(17){animation-delay:0.64s}.llb rect:nth-child(18){animation-delay:0.68s}.llb rect:nth-child(19){animation-delay:0.72s}.llb rect:nth-child(20){animation-delay:0.76s}.llb rect:nth-child(21){animation-delay:0.80s}
+      </style>
+      <g class="llb">
+        <rect x="0"  y="35" width="2.5" height="1"  fill="#c9922a"/>
+        <rect x="4"  y="35" width="2.5" height="1"  fill="#c9922a"/>
+        <rect x="8"  y="34" width="2.5" height="2"  fill="#c9922a"/>
+        <rect x="12" y="34" width="2.5" height="2"  fill="#c9922a"/>
+        <rect x="16" y="33" width="2.5" height="3"  fill="#c9922a"/>
+        <rect x="20" y="31" width="2.5" height="5"  fill="#c9922a"/>
+        <rect x="24" y="29" width="2.5" height="7"  fill="#c9922a"/>
+        <rect x="28" y="27" width="2.5" height="9"  fill="#c9922a"/>
+        <rect x="32" y="24" width="2.5" height="12" fill="#c9922a"/>
+        <rect x="36" y="20" width="2.5" height="16" fill="#c9922a"/>
+        <rect x="40" y="16" width="2.5" height="20" fill="#c9922a"/>
+        <rect x="44" y="11" width="2.5" height="25" fill="#c9922a"/>
+        <rect x="48" y="6"  width="2.5" height="30" fill="#c9922a"/>
+        <rect x="52" y="2"  width="2.5" height="34" fill="#c9922a"/>
+        <rect x="56" y="0"  width="2.5" height="36" fill="#c9922a"/>
+      </g>
     </svg>
     <div><div class="load-brand">Capital Investimentos</div><div class="load-sub">Soluções Financeiras Estratégicas</div></div>
   </div>
@@ -693,33 +684,28 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 <header>
   <div class="header-inner">
     <div class="logo-wrap">
-      <svg width="68" height="22" viewBox="0 0 68 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-        <!-- ~15 barrinhas baixas à esquerda, finas e juntas -->
-        <rect x="0"   y="17" width="1.5" height="5" rx="0.3" fill="#c9922a"/>
-        <rect x="2.2" y="17" width="1.5" height="5" rx="0.3" fill="#c9922a"/>
-        <rect x="4.4" y="17" width="1.5" height="5" rx="0.3" fill="#c9922a"/>
-        <rect x="6.6" y="17" width="1.5" height="5" rx="0.3" fill="#c9922a"/>
-        <rect x="8.8" y="17" width="1.5" height="5" rx="0.3" fill="#c9922a"/>
-        <rect x="11"  y="17" width="1.5" height="5" rx="0.3" fill="#c9922a"/>
-        <rect x="13.2" y="17" width="1.5" height="5" rx="0.3" fill="#c9922a"/>
-        <rect x="15.4" y="17" width="1.5" height="5" rx="0.3" fill="#c9922a"/>
-        <rect x="17.6" y="17" width="1.5" height="5" rx="0.3" fill="#c9922a"/>
-        <rect x="19.8" y="17" width="1.5" height="5" rx="0.3" fill="#c9922a"/>
-        <rect x="22"  y="17" width="1.5" height="5" rx="0.3" fill="#c9922a"/>
-        <rect x="24.2" y="17" width="1.5" height="5" rx="0.3" fill="#c9922a"/>
-        <rect x="26.4" y="17" width="1.5" height="5" rx="0.3" fill="#c9922a"/>
-        <rect x="28.6" y="17" width="1.5" height="5" rx="0.3" fill="#c9922a"/>
-        <rect x="30.8" y="17" width="1.5" height="5" rx="0.3" fill="#c9922a"/>
-        <!-- 10 barras crescentes à direita, finas e juntas -->
-        <rect x="34"  y="16" width="2" height="6"  rx="0.3" fill="#c9922a"/>
-        <rect x="37"  y="14" width="2" height="8"  rx="0.3" fill="#c9922a"/>
-        <rect x="40"  y="11" width="2" height="11" rx="0.3" fill="#c9922a"/>
-        <rect x="43"  y="9"  width="2" height="13" rx="0.3" fill="#c9922a"/>
-        <rect x="46"  y="6"  width="2" height="16" rx="0.3" fill="#c9922a"/>
-        <rect x="49"  y="4"  width="2" height="18" rx="0.3" fill="#c9922a"/>
-        <rect x="52"  y="2"  width="2" height="20" rx="0.3" fill="#c9922a"/>
-        <rect x="55"  y="1"  width="2" height="21" rx="0.3" fill="#c9922a"/>
-        <rect x="58"  y="0"  width="2" height="22" rx="0.3" fill="#c9922a"/>
+      <svg width="62" height="22" viewBox="0 0 62 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+        <style>
+          .hlb rect{transform-origin:bottom;transform-box:fill-box;animation:barUpH 0.4s cubic-bezier(0.22,1,0.36,1) both;}
+          @keyframes barUpH{from{transform:scaleY(0);opacity:0;}to{transform:scaleY(1);opacity:1;}}
+          .hlb rect:nth-child(1){animation-delay:0.00s}.hlb rect:nth-child(2){animation-delay:0.04s}.hlb rect:nth-child(3){animation-delay:0.08s}.hlb rect:nth-child(4){animation-delay:0.12s}.hlb rect:nth-child(5){animation-delay:0.16s}.hlb rect:nth-child(6){animation-delay:0.20s}.hlb rect:nth-child(7){animation-delay:0.24s}.hlb rect:nth-child(8){animation-delay:0.28s}.hlb rect:nth-child(9){animation-delay:0.32s}.hlb rect:nth-child(10){animation-delay:0.36s}.hlb rect:nth-child(11){animation-delay:0.40s}.hlb rect:nth-child(12){animation-delay:0.44s}.hlb rect:nth-child(13){animation-delay:0.48s}.hlb rect:nth-child(14){animation-delay:0.52s}.hlb rect:nth-child(15){animation-delay:0.56s}.hlb rect:nth-child(16){animation-delay:0.60s}
+        </style>
+        <g class="hlb">
+          <rect x="0"  y="21" width="1.8" height="1"  fill="#c9922a"/>
+          <rect x="3"  y="21" width="1.8" height="1"  fill="#c9922a"/>
+          <rect x="6"  y="20" width="1.8" height="2"  fill="#c9922a"/>
+          <rect x="9"  y="20" width="1.8" height="2"  fill="#c9922a"/>
+          <rect x="12" y="19" width="1.8" height="3"  fill="#c9922a"/>
+          <rect x="15" y="18" width="1.8" height="4"  fill="#c9922a"/>
+          <rect x="18" y="17" width="1.8" height="5"  fill="#c9922a"/>
+          <rect x="21" y="15" width="1.8" height="7"  fill="#c9922a"/>
+          <rect x="24" y="13" width="1.8" height="9"  fill="#c9922a"/>
+          <rect x="27" y="10" width="1.8" height="12" fill="#c9922a"/>
+          <rect x="30" y="7"  width="1.8" height="15" fill="#c9922a"/>
+          <rect x="33" y="4"  width="1.8" height="18" fill="#c9922a"/>
+          <rect x="36" y="1"  width="1.8" height="21" fill="#c9922a"/>
+          <rect x="39" y="0"  width="1.8" height="22" fill="#c9922a"/>
+        </g>
       </svg>
       <div class="logo-text">
         <div class="logo-name">Capital Investimentos</div>
