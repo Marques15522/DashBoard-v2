@@ -641,9 +641,24 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
 <header>
   <div class="header-inner">
     <div class="logo-wrap">
-      <div class="logo-bars">
-        <span style="height:28%"></span><span style="height:40%"></span><span style="height:52%"></span><span style="height:64%"></span><span style="height:78%"></span><span style="height:92%"></span><span style="height:100%"></span>
-        <span style="height:20%;margin-left:3px"></span><span style="height:20%"></span><span style="height:20%"></span><span style="height:20%"></span><span style="height:20%"></span>
+      <div class="logo-bars" style="position:relative;width:54px;">
+        <!-- barras horizontais pequenas (base) -->
+        <span style="height:18%;position:absolute;bottom:0;left:0;width:2px"></span>
+        <span style="height:18%;position:absolute;bottom:0;left:3px;width:2px"></span>
+        <span style="height:18%;position:absolute;bottom:0;left:6px;width:2px"></span>
+        <span style="height:18%;position:absolute;bottom:0;left:9px;width:2px"></span>
+        <span style="height:18%;position:absolute;bottom:0;left:12px;width:2px"></span>
+        <span style="height:18%;position:absolute;bottom:0;left:15px;width:2px"></span>
+        <span style="height:18%;position:absolute;bottom:0;left:18px;width:2px"></span>
+        <span style="height:18%;position:absolute;bottom:0;left:21px;width:2px"></span>
+        <!-- barras crescentes (direita) -->
+        <span style="height:28%;position:absolute;bottom:0;left:26px;width:2.5px"></span>
+        <span style="height:40%;position:absolute;bottom:0;left:30px;width:2.5px"></span>
+        <span style="height:52%;position:absolute;bottom:0;left:34px;width:2.5px"></span>
+        <span style="height:64%;position:absolute;bottom:0;left:38px;width:2.5px"></span>
+        <span style="height:78%;position:absolute;bottom:0;left:42px;width:2.5px"></span>
+        <span style="height:92%;position:absolute;bottom:0;left:46px;width:2.5px"></span>
+        <span style="height:100%;position:absolute;bottom:0;left:50px;width:2.5px"></span>
       </div>
       <div class="logo-text">
         <div class="logo-name">Capital Investimentos</div>
@@ -868,6 +883,7 @@ footer{text-align:center;padding:28px;font-size:0.58rem;color:var(--muted);borde
     </div>
     <div class="cmd2-header-center">
       <div class="cmd2-saudacao" id="briefing-saudacao">BOM DIA, SR. MARQUES</div>
+      <script>(function(){var h=new Date().getHours();var s=h<12?'BOM DIA':h<18?'BOA TARDE':'BOA NOITE';var el=document.getElementById('briefing-saudacao');if(el)el.textContent=s+', SR. MARQUES';})();</script>
     </div>
     <div class="cmd2-header-right">
       <div class="cmd2-meta-lbl">Meta mensal (R$):</div>
@@ -7523,6 +7539,7 @@ function cxRender(pagsExternas) {
   const saidaMes   = doMes.filter(l=>l.tipo==='saida').reduce((s,l)=>s+l.valor,0);
   const resultMes  = entradaMes - saidaMes;
   const saldoTotal = todos.reduce((s,l) => l.tipo==='entrada' ? s+l.valor : s-l.valor, 0);
+  window._cxSaldoAtual = Math.max(0, saldoTotal); // expõe para o donut de alocação
 
   const fmt2 = v => 'R$ ' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   document.getElementById('cx-entrada-mes').textContent  = fmt2(entradaMes);
@@ -8367,7 +8384,7 @@ function cmdRender(emps, pags){
   }
 
   // DONUT CAPITAL
-  const capDisp = Math.max(0, totalCap * 0.15); // estimativa conservadora de caixa
+  const capDisp = (typeof window._cxSaldoAtual === 'number') ? window._cxSaldoAtual : 0; // saldo real do caixa
   const capNaRua = totalCap - capRisco;
   const donutData = [Math.max(0,capNaRua), Math.max(0,capDisp), Math.max(0,capRisco)];
   const donutTotal = donutData.reduce((s,v)=>s+v,0)||1;
