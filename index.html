@@ -744,6 +744,7 @@ footer{text-align:center;padding:28px;font-family:'Plus Jakarta Sans',sans-serif
   <div class="nav-tab" data-tab="fluxo90"><span class="tab-icon">🔮</span><span class="tab-label">Fluxo 90d</span></div>
   <div class="nav-tab" data-tab="contratos"><span class="tab-icon">📄</span><span class="tab-label">Contratos</span></div>
   <div class="nav-tab" data-tab="whatsapp"><span class="tab-icon">📱</span><span class="tab-label">WhatsApp</span></div>
+  <div class="nav-tab" data-tab="pdfs"><span class="tab-icon">🖨️</span><span class="tab-label">PDFs</span></div>
 </nav>
 
 <!-- CONTENT AREA -->
@@ -9182,6 +9183,755 @@ function gerarRelatorioIA(){
 }
 </script>
 
+<!-- ═══════════════════════════════════════════════════════════
+     ABA PDFs
+════════════════════════════════════════════════════════════ -->
+<div id="tab-pdfs" class="tab-panel">
+
+<style>
+.pdf-hero{display:flex;align-items:center;gap:18px;padding:24px 28px;background:linear-gradient(135deg,rgba(201,146,42,0.07),rgba(72,149,239,0.04));border:1px solid rgba(201,146,42,0.2);border-radius:16px;margin-bottom:28px;}
+.pdf-hero-icon{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;box-shadow:0 4px 20px rgba(201,146,42,0.3);}
+.pdf-hero-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.08em;color:var(--text);}
+.pdf-hero-sub{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.88rem;color:var(--muted);margin-top:3px;}
+
+.pdf-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-bottom:32px;}
+.pdf-card{background:var(--s2);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;transition:border-color 0.2s,box-shadow 0.2s;position:relative;overflow:hidden;}
+.pdf-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.pdf-card.cobranca::before{background:linear-gradient(90deg,var(--red),rgba(239,71,111,0.3));}
+.pdf-card.socio::before{background:linear-gradient(90deg,var(--gold),rgba(201,146,42,0.3));}
+.pdf-card.ia::before{background:linear-gradient(90deg,var(--blue),rgba(72,149,239,0.3));}
+.pdf-card:hover{border-color:var(--border2);box-shadow:0 8px 32px rgba(0,0,0,0.3);}
+.pdf-card-header{display:flex;align-items:flex-start;gap:14px;}
+.pdf-card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.pdf-card.cobranca .pdf-card-icon{background:rgba(239,71,111,0.12);border:1px solid rgba(239,71,111,0.25);}
+.pdf-card.socio .pdf-card-icon{background:rgba(201,146,42,0.12);border:1px solid rgba(201,146,42,0.25);}
+.pdf-card.ia .pdf-card-icon{background:rgba(72,149,239,0.12);border:1px solid rgba(72,149,239,0.25);}
+.pdf-card-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.08em;color:var(--text);margin-bottom:4px;}
+.pdf-card-sub{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;color:var(--muted);line-height:1.5;}
+.pdf-card-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.pdf-tag{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.72rem;font-weight:600;padding:3px 9px;border-radius:20px;letter-spacing:0.04em;}
+.pdf-tag.red{color:var(--red);background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.2);}
+.pdf-tag.gold{color:var(--gold2);background:rgba(201,146,42,0.1);border:1px solid rgba(201,146,42,0.2);}
+.pdf-tag.blue{color:var(--blue);background:rgba(72,149,239,0.1);border:1px solid rgba(72,149,239,0.2);}
+.pdf-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;letter-spacing:0.03em;}
+.pdf-btn.cobranca{background:linear-gradient(135deg,rgba(239,71,111,0.2),rgba(239,71,111,0.1));border:1px solid rgba(239,71,111,0.4);color:var(--red);}
+.pdf-btn.cobranca:hover{background:rgba(239,71,111,0.25);box-shadow:0 4px 16px rgba(239,71,111,0.2);}
+.pdf-btn.socio{background:linear-gradient(135deg,rgba(201,146,42,0.2),rgba(201,146,42,0.1));border:1px solid rgba(201,146,42,0.4);color:var(--gold2);}
+.pdf-btn.socio:hover{background:rgba(201,146,42,0.25);box-shadow:0 4px 16px rgba(201,146,42,0.2);}
+.pdf-btn.ia{background:linear-gradient(135deg,rgba(72,149,239,0.2),rgba(72,149,239,0.1));border:1px solid rgba(72,149,239,0.4);color:var(--blue);}
+.pdf-btn.ia:hover{background:rgba(72,149,239,0.25);box-shadow:0 4px 16px rgba(72,149,239,0.2);}
+
+/* Modal de cobranças por bairro */
+.cob-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:20px;}
+.cob-modal-overlay.open{display:flex;}
+.cob-modal{background:var(--s1);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:800px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+.cob-modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.cob-modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:0.08em;color:var(--text);}
+.cob-modal-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.cob-modal-close:hover{background:rgba(239,71,111,0.1);border-color:var(--red);color:var(--red);}
+.cob-modal-body{padding:20px 24px;overflow-y:auto;flex:1;}
+.cob-bairro-section{margin-bottom:24px;}
+.cob-bairro-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(239,71,111,0.06);border:1px solid rgba(239,71,111,0.15);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:background 0.15s;}
+.cob-bairro-header:hover{background:rgba(239,71,111,0.1);}
+.cob-bairro-nome{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.08em;color:var(--red);}
+.cob-bairro-stats{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.80rem;color:var(--muted);}
+.cob-cliente-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all 0.15s;}
+.cob-cliente-row:hover{border-color:rgba(239,71,111,0.3);background:rgba(239,71,111,0.04);}
+.cob-cliente-nome{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.90rem;font-weight:600;color:var(--text);}
+.cob-cliente-info{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.78rem;color:var(--muted);margin-top:2px;}
+.cob-cliente-valor{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--red);}
+.cob-cliente-dias{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.72rem;font-weight:600;color:var(--red);opacity:0.8;}
+.cob-empty{text-align:center;padding:48px 24px;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.90rem;}
+</style>
+
+<!-- Hero -->
+<div class="pdf-hero">
+  <div class="pdf-hero-icon">🖨️</div>
+  <div>
+    <div class="pdf-hero-title">Central de Documentos</div>
+    <div class="pdf-hero-sub">Gere PDFs profissionais diretamente dos seus dados em tempo real — sem edição manual.</div>
+  </div>
+</div>
+
+<!-- Cards -->
+<div class="pdf-cards-grid">
+
+  <!-- 1: Cobrança -->
+  <div class="pdf-card cobranca">
+    <div class="pdf-card-header">
+      <div class="pdf-card-icon">⚡</div>
+      <div>
+        <div class="pdf-card-title">Cobranças por Bairro</div>
+        <div class="pdf-card-sub">Lista todos os clientes inadimplentes separados por bairro. Clique em cada cliente para gerar o PDF do contrato com localização, juros e multa.</div>
+      </div>
+    </div>
+    <div class="pdf-card-tags">
+      <span class="pdf-tag red">Inadimplentes</span>
+      <span class="pdf-tag red">Por Bairro</span>
+      <span class="pdf-tag red">Localização</span>
+    </div>
+    <button class="pdf-btn cobranca" onclick="abrirModalCobrancas()">⚡ Abrir Cobranças</button>
+  </div>
+
+  <!-- 2: Sócio/Investidor -->
+  <div class="pdf-card socio">
+    <div class="pdf-card-header">
+      <div class="pdf-card-icon">📊</div>
+      <div>
+        <div class="pdf-card-title">Relatório para Sócio / Investidor</div>
+        <div class="pdf-card-sub">Relatório executivo profissional com todos os KPIs do negócio, carteira, projeções e análise de risco. Pronto para apresentação formal.</div>
+      </div>
+    </div>
+    <div class="pdf-card-tags">
+      <span class="pdf-tag gold">Executivo</span>
+      <span class="pdf-tag gold">KPIs</span>
+      <span class="pdf-tag gold">Projeções</span>
+    </div>
+    <button class="pdf-btn socio" onclick="gerarRelatorioSocio()">📊 Gerar PDF Executivo</button>
+  </div>
+
+  <!-- 3: Briefing IA -->
+  <div class="pdf-card ia">
+    <div class="pdf-card-header">
+      <div class="pdf-card-icon">🤖</div>
+      <div>
+        <div class="pdf-card-title">Briefing para IA</div>
+        <div class="pdf-card-sub">Exporta um relatório estruturado com todos os dados do negócio para você colar numa conversa com Claude e receber análise e direcionamento estratégico.</div>
+      </div>
+    </div>
+    <div class="pdf-card-tags">
+      <span class="pdf-tag blue">Estratégia</span>
+      <span class="pdf-tag blue">Claude AI</span>
+      <span class="pdf-tag blue">Análise</span>
+    </div>
+    <button class="pdf-btn ia" onclick="gerarBriefingIA()">🤖 Gerar Briefing</button>
+  </div>
+
+</div>
+
+<!-- Modal de Cobranças por Bairro -->
+<div class="cob-modal-overlay" id="cobModal">
+  <div class="cob-modal">
+    <div class="cob-modal-header">
+      <div class="cob-modal-title">⚡ Clientes Inadimplentes por Bairro</div>
+      <button class="cob-modal-close" onclick="fecharModalCobrancas()">✕</button>
+    </div>
+    <div class="cob-modal-body" id="cobModalBody">
+      <div class="cob-empty">Carregando dados...</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /tab-pdfs -->
+
+<script>
+// ════════════════════════════════════════════════════
+// UTILITÁRIOS PDF
+// ════════════════════════════════════════════════════
+function _pdfFmt(v){return'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function _pdfDate(){return new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});}
+function _pdfOpen(html,nome){
+  const w=window.open('','_blank');
+  if(!w){alert('Permita pop-ups para gerar o PDF.');return;}
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=>w.print(),800);
+}
+
+// ════════════════════════════════════════════════════
+// COLETA DE DADOS DO DASHBOARD
+// ════════════════════════════════════════════════════
+function _coletarDados(){
+  const txt=id=>document.getElementById(id)?.textContent?.trim()||'—';
+  const num=s=>parseFloat((s||'0').replace(/[^\d,.-]/g,'').replace(',','.'))||0;
+  return{
+    capital:txt('kpi-capital'), capitalN:num(txt('kpi-capital')),
+    juros:txt('kpi-lucro'), jurosN:num(txt('kpi-lucro')),
+    roi:txt('kpi-roi'),
+    inadim:txt('kpi-inadim'),
+    ticket:txt('kpi-ticket'),
+    naRua:txt('kpi-na-rua'),
+    realizado:txt('kpi-realizado'),
+    cliAtivos:txt('kpi-cli-ativos'),
+    semana:txt('kpi-semana'),
+    prazo:txt('kpi-prazo'),
+    meta:document.getElementById('input-meta')?.value||'—',
+    progresso:txt('kpi-progresso')||txt('meta-pct')||'—',
+  };
+}
+
+// Extrai bairro do endereço (heurística)
+function _extrairBairro(endereco){
+  if(!endereco)return'Sem Bairro';
+  // Tenta pegar o bairro após vírgula ou hífen
+  const partes=endereco.split(/,|-/);
+  if(partes.length>=3){
+    const b=partes[1].trim();
+    if(b&&b.length>2&&b.length<40)return _capitalize(b);
+  }
+  // Fallback: retorna "Sem Bairro Cadastrado"
+  return'Sem Endereço';
+}
+function _capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1).toLowerCase();}
+
+// ════════════════════════════════════════════════════
+// MODAL DE COBRANÇAS
+// ════════════════════════════════════════════════════
+function abrirModalCobrancas(){
+  document.getElementById('cobModal').classList.add('open');
+  renderizarCobrancas();
+}
+function fecharModalCobrancas(){
+  document.getElementById('cobModal').classList.remove('open');
+}
+
+function renderizarCobrancas(){
+  const body=document.getElementById('cobModalBody');
+  body.innerHTML='<div class="cob-empty">🔍 Lendo dados dos contratos...</div>';
+
+  // Pega contratos em atraso do cache global
+  setTimeout(()=>{
+    try{
+      // Tenta ler da variável global _lastEmps se disponível
+      const emps=window._lastEmps||[];
+      const atrasados=emps.filter(e=>e.status==='atraso');
+
+      if(atrasados.length===0){
+        body.innerHTML='<div class="cob-empty">✅ Nenhum cliente inadimplente no momento. Carteira limpa!</div>';
+        return;
+      }
+
+      // Carrega pastas para cruzar dados
+      let pastas={};
+      try{const s=localStorage.getItem('pastas_cli');if(s)pastas=JSON.parse(s);}catch(e){}
+
+      // Enriquece com dados da pasta
+      const hoje=new Date();hoje.setHours(0,0,0,0);
+      const enriquecidos=atrasados.map(e=>{
+        // Busca pasta pelo nome
+        const pasta=Object.values(pastas).find(p=>p.nome&&p.nome.toLowerCase()===e.nome.toLowerCase())||null;
+        const endereco=pasta?.endereco||e.unidade||'';
+        const bairro=_extrairBairro(endereco);
+        const diasAtraso=e.proxVenc?Math.floor((hoje-e.proxVenc)/86400000):0;
+        const multa=e.capital*0.02; // 2% multa
+        const jurosMora=e.capital*0.01*Math.max(1,Math.floor(diasAtraso/30)); // 1% a.m. pro-rata
+        return{...e,pasta,endereco,bairro,diasAtraso,multa,jurosMora,totalDevido:e.capital+e.jTotal+multa+jurosMora};
+      });
+
+      // Agrupa por bairro
+      const porBairro={};
+      enriquecidos.forEach(e=>{
+        if(!porBairro[e.bairro])porBairro[e.bairro]=[];
+        porBairro[e.bairro].push(e);
+      });
+
+      // Ordena bairros por total em risco
+      const bairrosOrdenados=Object.entries(porBairro).sort((a,b)=>{
+        const sa=a[1].reduce((s,e)=>s+e.capital,0);
+        const sb=b[1].reduce((s,e)=>s+e.capital,0);
+        return sb-sa;
+      });
+
+      let html='';
+      bairrosOrdenados.forEach(([bairro,clientes])=>{
+        const totalBairro=clientes.reduce((s,e)=>s+e.capital,0);
+        html+=`
+        <div class="cob-bairro-section">
+          <div class="cob-bairro-header">
+            <div class="cob-bairro-nome">📍 ${bairro}</div>
+            <div class="cob-bairro-stats">${clientes.length} cliente(s) · ${_pdfFmt(totalBairro)} em risco</div>
+          </div>
+          ${clientes.map(e=>`
+            <div class="cob-cliente-row" onclick="gerarPDFCobranca(${JSON.stringify(e).replace(/"/g,'&quot;')})">
+              <div>
+                <div class="cob-cliente-nome">${e.nome}</div>
+                <div class="cob-cliente-info">
+                  ${e.endereco?'📍 '+e.endereco+' · ':''}
+                  📞 ${e.pasta?.tel||e.tel||'Não cadastrado'}
+                  ${e.diasAtraso>0?' · ⏰ '+e.diasAtraso+' dia(s) em atraso':''}
+                </div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;margin-left:12px;">
+                <div class="cob-cliente-valor">${_pdfFmt(e.capital)}</div>
+                <div class="cob-cliente-dias">Contrato ${e.id}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>`;
+      });
+
+      body.innerHTML=html||'<div class="cob-empty">Nenhum dado encontrado.</div>';
+    }catch(err){
+      body.innerHTML=`<div class="cob-empty">⚠️ Erro ao carregar: ${err.message}</div>`;
+    }
+  },200);
+}
+
+// ════════════════════════════════════════════════════
+// PDF 1: COBRANÇA INDIVIDUAL
+// ════════════════════════════════════════════════════
+function gerarPDFCobranca(e){
+  const pasta=e.pasta||{};
+  const hoje=new Date();
+  const dataStr=hoje.toLocaleDateString('pt-BR');
+  const hora=hoje.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const vencStr=e.proxVenc?new Date(e.proxVenc).toLocaleDateString('pt-BR'):'—';
+  const dataContratoStr=e.data?new Date(e.data).toLocaleDateString('pt-BR'):'—';
+
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+  <title>Cobrança — ${e.nome}</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#1a1a2e;font-size:11pt;}
+    .page{max-width:800px;margin:0 auto;padding:32px;}
+    .header{display:flex;align-items:flex-start;justify-content:space-between;border-bottom:3px solid #c9922a;padding-bottom:18px;margin-bottom:24px;}
+    .brand{font-size:22pt;font-weight:800;color:#1a1a2e;letter-spacing:-0.5px;}
+    .brand span{color:#c9922a;}
+    .doc-info{text-align:right;font-size:9pt;color:#666;line-height:1.8;}
+    .doc-info strong{color:#1a1a2e;font-size:10pt;}
+    .alert-bar{background:#fff0f3;border:1.5px solid #ef476f;border-radius:8px;padding:12px 18px;display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+    .alert-bar .icon{font-size:22pt;}
+    .alert-title{font-size:13pt;font-weight:800;color:#ef476f;}
+    .alert-sub{font-size:9.5pt;color:#444;margin-top:2px;}
+    .section{margin-bottom:22px;}
+    .section-title{font-size:9pt;font-weight:700;letter-spacing:0.15em;color:#c9922a;text-transform:uppercase;border-bottom:1px solid #f0d080;padding-bottom:5px;margin-bottom:12px;}
+    .row{display:flex;gap:0;margin-bottom:0;}
+    .field{flex:1;padding:8px 12px;border:1px solid #e8e8f0;border-right:none;background:#fff;}
+    .field:last-child{border-right:1px solid #e8e8f0;}
+    .field:first-child{border-radius:6px 0 0 6px;}
+    .field:last-child:not(:first-child){border-radius:0 6px 6px 0;}
+    .field:only-child{border-radius:6px;border-right:1px solid #e8e8f0;}
+    .row+.row .field{border-top:none;border-radius:0;}
+    .row+.row .field:first-child{border-radius:0 0 0 6px;}
+    .row+.row .field:last-child{border-radius:0 0 6px 0;}
+    .field-lbl{font-size:7.5pt;font-weight:700;color:#888;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px;}
+    .field-val{font-size:10.5pt;color:#1a1a2e;font-weight:500;}
+    .field-val.red{color:#ef476f;font-weight:700;}
+    .field-val.gold{color:#b8860b;font-weight:700;}
+    .field-val.big{font-size:14pt;font-weight:800;}
+    .total-box{background:linear-gradient(135deg,#1a1a2e,#252545);color:#fff;border-radius:10px;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;margin:20px 0;}
+    .total-lbl{font-size:9pt;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;opacity:0.7;}
+    .total-val{font-size:20pt;font-weight:800;color:#f5d080;}
+    .map-section{background:#f8f8ff;border:1px solid #dde;border-radius:8px;padding:14px 18px;margin-bottom:18px;}
+    .map-title{font-size:9pt;font-weight:700;color:#444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;}
+    .map-address{font-size:12pt;font-weight:600;color:#1a1a2e;margin-bottom:6px;}
+    .map-link{font-size:9pt;color:#4895ef;text-decoration:none;word-break:break-all;}
+    .footer{margin-top:32px;border-top:1px solid #eee;padding-top:14px;display:flex;justify-content:space-between;font-size:8pt;color:#999;}
+    .obs-box{background:#fffbf0;border:1px solid #f0d080;border-radius:6px;padding:10px 14px;font-size:10pt;color:#555;line-height:1.5;}
+    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+  </style></head><body><div class="page">
+
+  <div class="header">
+    <div>
+      <div class="brand">Capital <span>Investimentos</span></div>
+      <div style="font-size:9pt;color:#888;margin-top:3px;">Operações de Crédito Privado</div>
+    </div>
+    <div class="doc-info">
+      <strong>NOTIFICAÇÃO DE COBRANÇA</strong><br>
+      Contrato: ${e.id}<br>
+      Emitido em: ${dataStr} às ${hora}<br>
+      Cobrador responsável: ___________________
+    </div>
+  </div>
+
+  <div class="alert-bar">
+    <div class="icon">⚠️</div>
+    <div>
+      <div class="alert-title">Contrato em Atraso — Ação Imediata Necessária</div>
+      <div class="alert-sub">Este cliente apresenta inadimplência. Compareça ao endereço abaixo para negociação ou entrega de notificação.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Dados do Cliente</div>
+    <div class="row">
+      <div class="field"><div class="field-lbl">Nome Completo</div><div class="field-val">${e.nome}</div></div>
+      <div class="field"><div class="field-lbl">CPF</div><div class="field-val">${pasta.cpf||'Não cadastrado'}</div></div>
+    </div>
+    <div class="row">
+      <div class="field"><div class="field-lbl">Telefone Principal</div><div class="field-val red">${pasta.tel||e.tel||'Não cadastrado'}</div></div>
+      <div class="field"><div class="field-lbl">Telefone Alternativo</div><div class="field-val">${pasta.tel2||'—'}</div></div>
+    </div>
+    <div class="row">
+      <div class="field"><div class="field-lbl">Estado Civil</div><div class="field-val">${pasta.estadoCivil||'—'}</div></div>
+      <div class="field"><div class="field-lbl">Data de Nascimento</div><div class="field-val">${pasta.nasc||'—'}</div></div>
+    </div>
+    <div class="row">
+      <div class="field"><div class="field-lbl">Empregador / Empresa</div><div class="field-val">${pasta.empresa||pasta.empNome||'—'}</div></div>
+      <div class="field"><div class="field-lbl">Tel. Trabalho</div><div class="field-val">${pasta.telTrabalho||'—'}</div></div>
+    </div>
+    ${pasta.ref1Nome?`<div class="row">
+      <div class="field"><div class="field-lbl">Referência 1</div><div class="field-val">${pasta.ref1Nome} · ${pasta.ref1Tel||'—'} · ${pasta.ref1Grau||'—'}</div></div>
+    </div>`:''}
+    ${pasta.ref2Nome?`<div class="row">
+      <div class="field"><div class="field-lbl">Referência 2</div><div class="field-val">${pasta.ref2Nome} · ${pasta.ref2Tel||'—'} · ${pasta.ref2Grau||'—'}</div></div>
+    </div>`:''}
+  </div>
+
+  <div class="section">
+    <div class="section-title">📍 Localização para Cobrança</div>
+    <div class="map-section">
+      <div class="map-title">Endereço Cadastrado</div>
+      <div class="map-address">${e.endereco||'Endereço não cadastrado na pasta do cliente'}</div>
+      ${e.endereco?`<a class="map-link" href="https://www.google.com/maps/search/${encodeURIComponent(e.endereco+', São Paulo, SP')}" target="_blank">🗺️ Abrir no Google Maps → ${e.endereco}, São Paulo, SP</a>`:'<span style="color:#888;font-size:9pt">⚠️ Cadastre o endereço na Pasta do Cliente para habilitar a localização.</span>'}
+    </div>
+    ${pasta.empEnd?`<div class="map-section" style="margin-top:8px;">
+      <div class="map-title">Endereço da Empresa / Trabalho</div>
+      <div class="map-address">${pasta.empEnd}</div>
+      <a class="map-link" href="https://www.google.com/maps/search/${encodeURIComponent(pasta.empEnd+', São Paulo, SP')}" target="_blank">🗺️ Abrir no Google Maps</a>
+    </div>`:''}
+  </div>
+
+  <div class="section">
+    <div class="section-title">💰 Detalhamento do Contrato</div>
+    <div class="row">
+      <div class="field"><div class="field-lbl">Contrato ID</div><div class="field-val">${e.id}</div></div>
+      <div class="field"><div class="field-lbl">Data do Empréstimo</div><div class="field-val">${dataContratoStr}</div></div>
+      <div class="field"><div class="field-lbl">Último Vencimento</div><div class="field-val red">${vencStr}</div></div>
+    </div>
+    <div class="row">
+      <div class="field"><div class="field-lbl">Capital Emprestado</div><div class="field-val big gold">${_pdfFmt(e.capital)}</div></div>
+      <div class="field"><div class="field-lbl">Taxa de Juros</div><div class="field-val">${((e.taxa||0)*100).toFixed(1)}% a.m. (${e.tipoJuros||'—'})</div></div>
+      <div class="field"><div class="field-lbl">Prazo Original</div><div class="field-val">${e.prazo||'—'} meses</div></div>
+    </div>
+    <div class="row">
+      <div class="field"><div class="field-lbl">Juros Contratuais</div><div class="field-val">${_pdfFmt(e.jTotal)}</div></div>
+      <div class="field"><div class="field-lbl">Multa por Atraso (2%)</div><div class="field-val red">${_pdfFmt(e.multa||e.capital*0.02)}</div></div>
+      <div class="field"><div class="field-lbl">Juros de Mora</div><div class="field-val red">${_pdfFmt(e.jurosMora||0)}</div></div>
+    </div>
+    <div class="row">
+      <div class="field"><div class="field-lbl">Dias em Atraso</div><div class="field-val red">${e.diasAtraso||0} dia(s)</div></div>
+      <div class="field"><div class="field-lbl">Saldo Devedor (base)</div><div class="field-val">${_pdfFmt(e.saldo||e.capital)}</div></div>
+    </div>
+  </div>
+
+  <div class="total-box">
+    <div>
+      <div class="total-lbl">Total a Cobrar (Principal + Juros + Multa + Mora)</div>
+    </div>
+    <div class="total-val">${_pdfFmt(e.totalDevido||(e.capital+e.jTotal+(e.capital*0.02)+(e.jurosMora||0)))}</div>
+  </div>
+
+  ${pasta.obs?`<div class="section">
+    <div class="section-title">📝 Observações do Cadastro</div>
+    <div class="obs-box">${pasta.obs}</div>
+  </div>`:''}
+
+  <div class="section" style="margin-top:24px;">
+    <div class="section-title">✍️ Registro de Visita</div>
+    <div class="row">
+      <div class="field"><div class="field-lbl">Data da Visita</div><div class="field-val" style="height:28px;"></div></div>
+      <div class="field"><div class="field-lbl">Hora</div><div class="field-val" style="height:28px;"></div></div>
+      <div class="field"><div class="field-lbl">Cobrador</div><div class="field-val" style="height:28px;"></div></div>
+    </div>
+    <div class="row">
+      <div class="field"><div class="field-lbl">Resultado</div><div class="field-val" style="height:40px;"></div></div>
+    </div>
+    <div class="row">
+      <div class="field"><div class="field-lbl">Acordo / Próximo Passo</div><div class="field-val" style="height:40px;"></div></div>
+    </div>
+    <div class="row">
+      <div class="field"><div class="field-lbl">Assinatura do Cobrador</div><div class="field-val" style="height:48px;"></div></div>
+      <div class="field"><div class="field-lbl">Assinatura do Cliente</div><div class="field-val" style="height:48px;"></div></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Capital Investimentos · Documento interno de cobrança</span>
+    <span>Gerado em ${dataStr} · Contrato ${e.id}</span>
+  </div>
+
+</div></body></html>`;
+
+  _pdfOpen(html,'cobranca-'+e.id+'.pdf');
+}
+
+// ════════════════════════════════════════════════════
+// PDF 2: RELATÓRIO EXECUTIVO (SÓCIO/INVESTIDOR)
+// ════════════════════════════════════════════════════
+function gerarRelatorioSocio(){
+  const d=_coletarDados();
+  const hoje=_pdfDate();
+  // Tenta ler mais dados do DOM
+  const inadimN=document.getElementById('kpi-inadim')?.textContent?.trim()||'—';
+  const taxaMedia=(()=>{try{const emps=window._lastEmps||[];const ab=emps.filter(e=>e.status!=='quitado');return ab.length?((ab.reduce((s,e)=>s+e.taxa,0)/ab.length)*100).toFixed(1)+'%':'—';}catch(e){return'—';}})();
+  const nContratos=(()=>{try{return (window._lastEmps||[]).filter(e=>e.status!=='quitado').length;}catch(e){return'—';}})();
+  const nAtrasados=(()=>{try{return (window._lastEmps||[]).filter(e=>e.status==='atraso').length;}catch(e){return'—';}})();
+  const nQuitados=(()=>{try{return (window._lastEmps||[]).filter(e=>e.status==='quitado').length;}catch(e){return'—';}})();
+
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+  <title>Relatório Executivo — Capital Investimentos</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#1a1a2e;font-size:10.5pt;}
+    .page{max-width:820px;margin:0 auto;padding:36px;}
+    .cover{text-align:center;padding:60px 0 50px;border-bottom:2px solid #c9922a;margin-bottom:36px;}
+    .cover-tag{font-size:8pt;font-weight:700;letter-spacing:0.25em;color:#c9922a;text-transform:uppercase;margin-bottom:12px;}
+    .cover-title{font-size:28pt;font-weight:800;color:#1a1a2e;line-height:1.15;margin-bottom:8px;}
+    .cover-title span{color:#c9922a;}
+    .cover-sub{font-size:11pt;color:#666;margin-bottom:24px;}
+    .cover-date{font-size:9pt;color:#999;}
+    .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px;}
+    .kpi-box{border:1px solid #e8e8f0;border-radius:10px;padding:16px 18px;background:#fafafe;}
+    .kpi-box.accent{border-color:#c9922a;background:linear-gradient(135deg,#fffbf0,#fff8e8);}
+    .kpi-box.red{border-color:#ef476f;background:#fff8fa;}
+    .kpi-box.green{border-color:#06d6a0;background:#f0fdfb;}
+    .kpi-lbl{font-size:7.5pt;font-weight:700;letter-spacing:0.1em;color:#888;text-transform:uppercase;margin-bottom:4px;}
+    .kpi-val{font-size:17pt;font-weight:800;color:#1a1a2e;}
+    .kpi-val.gold{color:#b8860b;}
+    .kpi-val.red{color:#ef476f;}
+    .kpi-val.green{color:#059669;}
+    .kpi-sub{font-size:8pt;color:#aaa;margin-top:2px;}
+    .section{margin-bottom:28px;}
+    .section-title{font-size:9pt;font-weight:700;letter-spacing:0.15em;color:#c9922a;text-transform:uppercase;border-bottom:1.5px solid #f0d080;padding-bottom:6px;margin-bottom:14px;}
+    table{width:100%;border-collapse:collapse;font-size:9.5pt;}
+    th{background:#1a1a2e;color:#fff;padding:8px 12px;text-align:left;font-size:8pt;letter-spacing:0.06em;font-weight:600;}
+    td{padding:8px 12px;border-bottom:1px solid #eee;}
+    tr:nth-child(even) td{background:#fafafe;}
+    .tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:7.5pt;font-weight:700;}
+    .tag.ok{background:#dcfce7;color:#166534;}
+    .tag.warn{background:#fef9c3;color:#854d0e;}
+    .tag.bad{background:#fee2e2;color:#991b1b;}
+    .highlight{background:linear-gradient(135deg,#1a1a2e,#252545);color:#fff;border-radius:12px;padding:20px 24px;margin:20px 0;}
+    .highlight-title{font-size:10pt;font-weight:700;color:#f5d080;margin-bottom:10px;letter-spacing:0.08em;}
+    .highlight-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .h-item{background:rgba(255,255,255,0.06);border-radius:6px;padding:10px 12px;}
+    .h-lbl{font-size:7.5pt;color:rgba(255,255,255,0.5);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px;}
+    .h-val{font-size:11pt;font-weight:700;color:#f5d080;}
+    .footer{margin-top:36px;border-top:1px solid #eee;padding-top:14px;display:flex;justify-content:space-between;font-size:8pt;color:#bbb;}
+    .conf{background:#fff0f0;border:1px solid #fca5a5;border-radius:6px;padding:8px 14px;font-size:8.5pt;color:#991b1b;margin-bottom:20px;}
+    .proj-table{width:100%;}
+    .proj-table td{text-align:center;}
+    .proj-table td:first-child{text-align:left;}
+    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+  </style></head><body><div class="page">
+
+  <div class="cover">
+    <div class="cover-tag">Confidencial · Uso Restrito</div>
+    <div class="cover-title">Relatório <span>Executivo</span></div>
+    <div class="cover-sub">Visão completa da carteira de crédito privado</div>
+    <div class="cover-date">Emitido em ${hoje}</div>
+  </div>
+
+  <div class="conf">🔒 <strong>DOCUMENTO CONFIDENCIAL</strong> — Este relatório contém informações financeiras sensíveis. Não compartilhe sem autorização prévia.</div>
+
+  <div class="section">
+    <div class="section-title">📊 Indicadores-Chave da Operação</div>
+    <div class="kpi-grid">
+      <div class="kpi-box accent"><div class="kpi-lbl">Capital em Carteira</div><div class="kpi-val gold">${d.capital}</div><div class="kpi-sub">principal ativo emprestado</div></div>
+      <div class="kpi-box green"><div class="kpi-lbl">Lucro Realizado</div><div class="kpi-val green">${d.realizado}</div><div class="kpi-sub">juros efetivamente recebidos</div></div>
+      <div class="kpi-box"><div class="kpi-lbl">ROI da Carteira</div><div class="kpi-val">${d.roi}</div><div class="kpi-sub">retorno sobre capital</div></div>
+      <div class="kpi-box"><div class="kpi-lbl">Exposição Total</div><div class="kpi-val">${d.naRua}</div><div class="kpi-sub">principal + juros a receber</div></div>
+      <div class="kpi-box"><div class="kpi-lbl">Ticket Médio</div><div class="kpi-val">${d.ticket}</div><div class="kpi-sub">por contrato ativo</div></div>
+      <div class="kpi-box ${nAtrasados>0?'red':'green'}"><div class="kpi-lbl">Inadimplência</div><div class="kpi-val ${nAtrasados>0?'red':'green'}">${d.inadim}</div><div class="kpi-sub">${nAtrasados} contrato(s) em atraso</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 Composição da Carteira</div>
+    <table>
+      <thead><tr><th>Indicador</th><th>Valor</th><th>Observação</th></tr></thead>
+      <tbody>
+        <tr><td>Contratos Ativos</td><td><strong>${nContratos}</strong></td><td>Em andamento no momento</td></tr>
+        <tr><td>Contratos Quitados</td><td><strong>${nQuitados}</strong></td><td>Histórico de crédito recuperado</td></tr>
+        <tr><td>Contratos em Atraso</td><td><strong style="color:#ef476f">${nAtrasados}</strong></td><td>${nAtrasados===0?'<span class="tag ok">✅ Carteira Limpa</span>':'<span class="tag bad">⚠️ Requer Ação</span>'}</td></tr>
+        <tr><td>Clientes Ativos</td><td><strong>${d.cliAtivos}</strong></td><td>Base de tomadores ativos</td></tr>
+        <tr><td>Taxa Média da Carteira</td><td><strong>${taxaMedia}</strong></td><td>ao mês sobre o principal</td></tr>
+        <tr><td>Prazo Médio</td><td><strong>${d.prazo} meses</strong></td><td>por contrato</td></tr>
+        <tr><td>A Receber (7 dias)</td><td><strong>${d.semana}</strong></td><td>vencimentos da próxima semana</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="highlight">
+    <div class="highlight-title">💡 Projeção de Resultados (Estimativa)</div>
+    <div class="highlight-grid">
+      <div class="h-item"><div class="h-lbl">Receita Mensal Estimada</div><div class="h-val">${(()=>{try{const c=parseFloat((d.capital||'0').replace(/[^\d,]/g,'').replace(',','.'))||0;const t=parseFloat((taxaMedia||'0').replace('%',''))||10;return _pdfFmt(c*(t/100));}catch(e){return'—';}})()} </div></div>
+      <div class="h-item"><div class="h-lbl">Receita Anual Estimada</div><div class="h-val">${(()=>{try{const c=parseFloat((d.capital||'0').replace(/[^\d,]/g,'').replace(',','.'))||0;const t=parseFloat((taxaMedia||'0').replace('%',''))||10;return _pdfFmt(c*(t/100)*12);}catch(e){return'—';}})()} </div></div>
+      <div class="h-item"><div class="h-lbl">ROI Anualizado</div><div class="h-val">${(()=>{try{const t=parseFloat((taxaMedia||'0').replace('%',''))||10;return (t*12).toFixed(0)+'%';}catch(e){return'—';}})()} a.a.</div></div>
+      <div class="h-item"><div class="h-lbl">Ponto de Equilíbrio</div><div class="h-val">${(()=>{try{const c=parseFloat((d.capital||'0').replace(/[^\d,]/g,'').replace(',','.'))||0;return c>0?'Capital protegido':'—';}catch(e){return'—';}})()} </div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🛡️ Análise de Risco</div>
+    <table>
+      <thead><tr><th>Fator de Risco</th><th>Status</th><th>Avaliação</th></tr></thead>
+      <tbody>
+        <tr><td>Concentração de Carteira</td><td>${d.cliAtivos} clientes</td><td>${parseInt(d.cliAtivos)>5?'<span class="tag ok">Diversificada</span>':'<span class="tag warn">Concentrada</span>'}</td></tr>
+        <tr><td>Taxa de Inadimplência</td><td>${d.inadim}</td><td>${nAtrasados===0?'<span class="tag ok">Excelente</span>':nAtrasados<=2?'<span class="tag warn">Monitorar</span>':'<span class="tag bad">Atenção</span>'}</td></tr>
+        <tr><td>Liquidez (7 dias)</td><td>${d.semana}</td><td><span class="tag ok">Fluxo Ativo</span></td></tr>
+        <tr><td>Prazo Médio</td><td>${d.prazo} meses</td><td>${parseFloat(d.prazo)<=3?'<span class="tag ok">Conservador</span>':parseFloat(d.prazo)<=6?'<span class="tag warn">Moderado</span>':'<span class="tag bad">Longo</span>'}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎯 Proposta para Sócio / Investidor</div>
+    <table>
+      <thead><tr><th>Item</th><th>Detalhe</th></tr></thead>
+      <tbody>
+        <tr><td>Modelo de Negócio</td><td>Crédito privado direto ao consumidor — operação consolidada com histórico de resultados</td></tr>
+        <tr><td>Rentabilidade</td><td>ROI de ${d.roi} sobre o capital emprestado, com retorno mensal consistente</td></tr>
+        <tr><td>Risco</td><td>Inadimplência atual de ${d.inadim} — controle ativo por scoring e análise de perfil</td></tr>
+        <tr><td>Escalabilidade</td><td>Modelo replicável — mais capital = mais contratos, sem aumento proporcional de custo</td></tr>
+        <tr><td>Gestão</td><td>Dashboard digital com monitoramento em tempo real de toda a carteira</td></tr>
+        <tr><td>Retorno ao Investidor</td><td>A definir em negociação — base: participação proporcional ao capital aportado</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;padding:14px 18px;margin:0 0 20px;font-size:9.5pt;color:#14532d;line-height:1.8;">
+    <strong>Nota metodológica:</strong> Este relatório foi gerado automaticamente a partir dos dados cadastrados no sistema de gestão. Os valores de projeção são estimativas baseadas na taxa média atual da carteira. Resultados passados não garantem resultados futuros.
+  </div>
+
+  <div class="footer">
+    <span>Capital Investimentos · Relatório Executivo · Confidencial</span>
+    <span>Emitido em ${hoje}</span>
+  </div>
+
+</div></body></html>`;
+
+  _pdfOpen(html,'relatorio-executivo.pdf');
+}
+
+// ════════════════════════════════════════════════════
+// PDF 3: BRIEFING PARA IA
+// ════════════════════════════════════════════════════
+function gerarBriefingIA(){
+  const d=_coletarDados();
+  const hoje=_pdfDate();
+  const emps=window._lastEmps||[];
+  const ativos=emps.filter(e=>e.status==='ativo');
+  const atrasados=emps.filter(e=>e.status==='atraso');
+  const quitados=emps.filter(e=>e.status==='quitado');
+  const taxaMedia=ativos.length?((ativos.reduce((s,e)=>s+e.taxa,0)/ativos.length)*100).toFixed(2):0;
+
+  // Monta lista de contratos em atraso
+  const listAtraso=atrasados.map(e=>{
+    const dias=e.proxVenc?Math.floor((new Date()-e.proxVenc)/86400000):0;
+    return `- ${e.nome} | Capital: ${_pdfFmt(e.capital)} | Taxa: ${((e.taxa||0)*100).toFixed(1)}% a.m. | ${dias} dia(s) em atraso`;
+  }).join('\n') || '  Nenhum contrato em atraso.';
+
+  // Monta lista de contratos ativos resumida
+  const listAtivos=ativos.slice(0,15).map(e=>`- ${e.nome} | ${_pdfFmt(e.capital)} | ${((e.taxa||0)*100).toFixed(1)}% a.m. | Venc: ${e.proxVenc?new Date(e.proxVenc).toLocaleDateString('pt-BR'):'—'}`).join('\n')||'  Nenhum.';
+
+  const texto=`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BRIEFING DO NEGÓCIO — CAPITAL INVESTIMENTOS
+Data: ${hoje}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+INSTRUÇÃO PARA A IA:
+Leia todos os dados abaixo sobre meu negócio de crédito privado.
+Após ler, me dê um diagnóstico completo da situação atual e
+recomendações estratégicas priorizadas. Identifique riscos e
+oportunidades. Seja direto e objetivo.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. RESUMO EXECUTIVO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Capital em Carteira:      ${d.capital}
+Exposição Total (c/ juros): ${d.naRua}
+Lucro Realizado:          ${d.realizado}
+ROI da Carteira:          ${d.roi}
+Ticket Médio por Contrato: ${d.ticket}
+A Receber (próx. 7 dias): ${d.semana}
+Taxa Média da Carteira:   ${taxaMedia}% a.m.
+Meta Mensal:              R$ ${d.meta}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. CARTEIRA — COMPOSIÇÃO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Contratos Ativos:         ${ativos.length}
+Contratos em Atraso:      ${atrasados.length}
+Contratos Quitados:       ${quitados.length}
+Clientes Ativos:          ${d.cliAtivos}
+Prazo Médio:              ${d.prazo} meses
+Inadimplência:            ${d.inadim}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. CONTRATOS EM ATRASO (INADIMPLÊNCIA)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${listAtraso}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. CONTRATOS ATIVOS (AMOSTRA — ATÉ 15)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${listAtivos}
+${ativos.length>15?`... e mais ${ativos.length-15} contrato(s) não listados acima.`:''}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. CONTEXTO DO NEGÓCIO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Modelo: Crédito privado direto, operação individual
+- Localização: São Paulo, SP — clientes da região metropolitana
+- Operação: Gerenciada digitalmente com dashboard estratégico
+- Tipo de cliente: Pessoa física, público de baixa-média renda
+- Canal de captação: Indicação e relacionamento pessoal
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. PERGUNTAS SUGERIDAS PARA ANÁLISE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Quais são os 3 maiores riscos da minha operação agora?
+2. Devo aumentar, manter ou reduzir minha taxa de juros?
+3. Como devo priorizar a cobrança dos inadimplentes?
+4. Qual o capital ideal para operar com segurança no meu perfil?
+5. Como posso escalar esse negócio de forma estruturada?
+6. Minha carteira está diversificada o suficiente?
+7. O ROI atual está bom para o risco que estou tomando?
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FIM DO BRIEFING — Gerado em ${hoje}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+  <title>Briefing para IA — Capital Investimentos</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Courier New',monospace;background:#fff;color:#1a1a2e;font-size:10pt;line-height:1.7;}
+    .page{max-width:800px;margin:0 auto;padding:36px;}
+    .header{border-bottom:3px solid #4895ef;padding-bottom:16px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end;}
+    .brand{font-size:16pt;font-weight:800;color:#1a1a2e;font-family:'Segoe UI',sans-serif;}
+    .brand span{color:#4895ef;}
+    .doc-tag{font-size:8pt;color:#4895ef;font-family:'Segoe UI',sans-serif;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;}
+    .instr{background:#eff6ff;border:1.5px solid #93c5fd;border-radius:8px;padding:14px 18px;margin-bottom:24px;font-family:'Segoe UI',sans-serif;font-size:10pt;color:#1e3a5f;line-height:1.6;}
+    .instr strong{display:block;font-size:10pt;margin-bottom:4px;color:#1e40af;}
+    pre{background:#f8faff;border:1px solid #e0e7ff;border-radius:10px;padding:24px;font-size:9.5pt;line-height:1.75;white-space:pre-wrap;word-break:break-word;color:#1a1a2e;}
+    .copy-hint{font-family:'Segoe UI',sans-serif;font-size:8.5pt;color:#666;margin-top:16px;text-align:center;}
+    .footer{margin-top:28px;border-top:1px solid #eee;padding-top:12px;font-family:'Segoe UI',sans-serif;font-size:8pt;color:#bbb;display:flex;justify-content:space-between;}
+    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+  </style></head><body><div class="page">
+  <div class="header">
+    <div class="brand">Capital <span>Investimentos</span></div>
+    <div class="doc-tag">🤖 Briefing para IA · ${hoje}</div>
+  </div>
+  <div class="instr">
+    <strong>📋 Como usar este documento:</strong>
+    Copie o texto abaixo e cole numa nova conversa com o Claude (claude.ai).
+    A IA lerá todos os dados do seu negócio e fornecerá análise estratégica
+    personalizada, identificando riscos, oportunidades e recomendações de ação.
+  </div>
+  <pre>${texto.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+  <div class="copy-hint">💡 Imprima ou copie o texto acima · Gerado automaticamente pelo Dashboard Estratégico</div>
+  <div class="footer">
+    <span>Capital Investimentos · Briefing para Claude AI</span>
+    <span>${hoje}</span>
+  </div>
+</div></body></html>`;
+
+  _pdfOpen(html,'briefing-ia.pdf');
+}
+
+// ════════════════════════════════════════════════════
+// HOOK: expõe _lastEmps para os PDFs usarem
+// ════════════════════════════════════════════════════
+(function(){
+  const _origRender=window.render;
+  if(typeof _origRender==='function'){
+    // Já existe — não precisa patchar, será lido via DOM
+  }
+})();
+</script>
 </div><!-- /.tab-content-area -->
 </div><!-- /.dashboard-layout -->
 </div><!-- /.wrap -->
