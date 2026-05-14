@@ -3456,7 +3456,7 @@ function render(empRows,pagRows){
     // ── Métricas executivas ───────────────────────────────
     const roe = totalCapTotal>0 ? (totalJurosBruto/totalCapTotal*100) : 0;
     const margem = totalJurosBruto>0 ? ((totalJurosBruto-totalCustos)/totalJurosBruto*100) : 0;
-    const deployRate = totalCapTotal>0 ? (totalCapDep/totalCapTotal*100) : 0;
+    const deployRate = (() => { const cxLivre = (typeof window._cxSaldoAtual === "number") ? window._cxSaldoAtual : 0; const base = totalCapDep + cxLivre; return base > 0 ? (totalCapDep / base * 100) : 0; })();
     const giro = emps.length>0 ? emps.length/Math.max(1,(() => {
       const datas=emps.map(e=>e.data).filter(Boolean);
       if(!datas.length)return 1;
