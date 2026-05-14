@@ -3430,6 +3430,9 @@ function render(empRows,pagRows){
   destroyChart('saldoProj');
   charts.saldoProj=new Chart(document.getElementById('chartSaldoProj').getContext('2d'),{type:'line',data:{labels:['Hoje',...mL],datasets:[{label:'Saldo Projetado',data:sData,borderColor:'rgba(201,146,42,0.9)',backgroundColor:'rgba(201,146,42,0.06)',borderWidth:2,pointRadius:4,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' Saldo: '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}}}}});
 
+  // CAIXA — roda antes do bloco financeiro para que _cxSaldoAtual esteja disponível
+  cxRender(pags);
+
   // ═══════════════════════════════════════════════════════
   // FINANCEIRO MULTINACIONAL — renderização avançada
   // ═══════════════════════════════════════════════════════
@@ -3456,7 +3459,7 @@ function render(empRows,pagRows){
     // ── Métricas executivas ───────────────────────────────
     const roe = totalCapTotal>0 ? (totalJurosBruto/totalCapTotal*100) : 0;
     const margem = totalJurosBruto>0 ? ((totalJurosBruto-totalCustos)/totalJurosBruto*100) : 0;
-    const deployRate = (() => { try { const pags = window._cxPagsCache || []; const autoEnt = (typeof cxAutoEntradas === "function") ? cxAutoEntradas(pags) : []; const manuais = JSON.parse(localStorage.getItem("caixa_lancamentos") || "[]"); const todos = [...autoEnt, ...manuais]; console.log("[DEPLOY2] manuais completo:", JSON.stringify(manuais)); console.log("[DEPLOY2] autoEnt categorias:", autoEnt.map(x=>x.categoria+":"+x.tipo+":"+x.valor)); const saldoCx = Math.max(0, todos.reduce((s,l) => { if(l.categoria === "capital") return s; return l.tipo === "entrada" ? s+l.valor : s-l.valor; }, 0)); console.log("[DEPLOY2] totalCapDep:", totalCapDep, "saldoCx:", saldoCx); const base = totalCapDep + saldoCx; return base > 0 ? (totalCapDep / base * 100) : 0; } catch(e) { console.error("[DEPLOY err]", e); return totalCapTotal > 0 ? (totalCapDep/totalCapTotal*100) : 0; } })();
+    const deployRate = (() => { const saldoCx = (typeof window._cxSaldoAtual === "number") ? window._cxSaldoAtual : 0; const base = totalCapDep + saldoCx; return base > 0 ? (totalCapDep / base * 100) : 0; })();
     const giro = emps.length>0 ? emps.length/Math.max(1,(() => {
       const datas=emps.map(e=>e.data).filter(Boolean);
       if(!datas.length)return 1;
@@ -4271,8 +4274,7 @@ function render(empRows,pagRows){
   renderFluxo90(abertos, hoje);
   waHistRender();
 
-  // CAIXA — alimenta entradas automáticas com pagamentos da planilha
-  cxRender(pags);
+
 
   // CENTRAL DE COMANDO — atualiza com os dados já processados
   try { cmdRender(emps, pags); } catch(e){ console.warn('cmdRender:', e); }
