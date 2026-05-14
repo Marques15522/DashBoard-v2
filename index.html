@@ -4341,9 +4341,9 @@ let _tpls = tplLoad();
 // Substitui variáveis {nome}, {valor}, etc. pelo valor real do cliente
 function tplApply(txt, c){
   const nome=c.nome.split(' ')[0];
-  // {valor} = parcela devida (saldo em aberto), não o juro total do contrato
+  // {valor} = parcela do próximo vencimento (jProx), ou saldo em atraso
   const val=c.saldoTotal>0?'R$ '+Math.round(c.saldoTotal).toLocaleString('pt-BR')
-            :c.totalJuros>0?'R$ '+Math.round(c.totalJuros).toLocaleString('pt-BR'):'valor em aberto';
+            :c.jProxTotal>0?'R$ '+Math.round(c.jProxTotal).toLocaleString('pt-BR'):'valor em aberto';
   const cap='R$ '+Math.round(c.totalCap).toLocaleString('pt-BR');
   const venc=c.proxVenc?c.proxVenc.toLocaleDateString('pt-BR'):'—';
   return txt
@@ -4737,7 +4737,8 @@ function waRender(clientes,abertos,atrasado,hoje){
     // totalDevido_juros = quitar só os juros + multa (sem devolver o capital)
     const totalSoJuros=jurosDevidos+multa;
     const totalDevido=capitalDevido+jurosDevidos+multa;
-    return{...c,proxVenc,diasAtraso,vence7,saldoTotal,jurosDevidos,multa,totalDevido};
+    return{...c,proxVenc,diasAtraso,vence7,saldoTotal,jurosDevidos,multa,totalDevido,
+           jProxTotal:ab.reduce((s,e)=>s+(e.jProx||0),0)};
   }).sort((a,b)=>{const o={atraso:0,vence:1,emdia:2,inativo:3};return(o[waSit(a).tipo]||9)-(o[waSit(b).tipo]||9);});
   const nA=_waCli.filter(c=>c.diasAtraso>0).length;
   const nV=_waCli.filter(c=>c.vence7&&!c.diasAtraso).length;
