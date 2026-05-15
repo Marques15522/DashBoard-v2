@@ -4649,6 +4649,16 @@ function ctRender() {
   cards.innerHTML = lista.map(e => {
     const cor = statusColor(e.status);
     const cpf = ((_pastas||{})[e.idCliente]||{}).cpf || '';
+    // Badge de garantias
+    const gars = _garGet(e.id);
+    const gAtivas = gars.filter(g => g.status === 'ativa');
+    const gLiquid = gars.filter(g => g.status === 'liquidada');
+    let garBadge = '';
+    if (gLiquid.length > 0) {
+      garBadge = `<span style="font-size:0.75rem;padding:2px 7px;border-radius:10px;background:rgba(239,71,111,0.1);color:var(--red);border:1px solid rgba(239,71,111,0.3);white-space:nowrap">⚡ ${gLiquid.length} liquidada${gLiquid.length>1?'s':''}</span>`;
+    } else if (gAtivas.length > 0) {
+      garBadge = `<span style="font-size:0.75rem;padding:2px 7px;border-radius:10px;background:rgba(201,146,42,0.1);color:var(--gold2);border:1px solid rgba(201,146,42,0.3);white-space:nowrap">🔐 ${gAtivas.length} garantia${gAtivas.length>1?'s':''}</span>`;
+    }
     return `<div class="ct-card" onclick="ctModalAbrir('${e.id}')" style="background:var(--s1);border:1px solid var(--border2);border-radius:12px;padding:18px;cursor:pointer;transition:border-color 0.18s,transform 0.18s;position:relative;overflow:hidden"
       onmouseenter="this.style.borderColor='var(--gold)';this.style.transform='translateY(-2px)'"
       onmouseleave="this.style.borderColor='var(--border2)';this.style.transform='translateY(0)'">
@@ -4659,7 +4669,10 @@ function ctRender() {
           <div style="font-size:0.85rem;color:var(--text);font-weight:500;margin-top:2px">${e.nome||'—'}</div>
           ${cpf ? `<div style="font-size:0.82rem;color:var(--muted);margin-top:1px">${cpf}</div>` : ''}
         </div>
-        <span style="font-size:0.84rem;color:${cor};background:${cor}22;border:1px solid ${cor}44;border-radius:20px;padding:3px 9px;white-space:nowrap">${statusLabel(e.status)}</span>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <span style="font-size:0.84rem;color:${cor};background:${cor}22;border:1px solid ${cor}44;border-radius:20px;padding:3px 9px;white-space:nowrap">${statusLabel(e.status)}</span>
+          ${garBadge}
+        </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.88rem">
         <div><div style="color:var(--muted);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em">Capital</div><div style="color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:1rem">${fmt(e.capital)}</div></div>
@@ -4670,6 +4683,169 @@ function ctRender() {
     </div>`;
   }).join('');
 }
+
+// ══════════════════════════════════════════════════════════════
+// SISTEMA DE GARANTIAS — localStorage por contrato
+// ══════════════════════════════════════════════════════════════
+const _GAR_KEY = 'garantias_v1';
+
+function _garLoad() {
+  try { return JSON.parse(localStorage.getItem(_GAR_KEY) || '{}'); } catch(e) { return {}; }
+}
+function _garSave(data) {
+  try { localStorage.setItem(_GAR_KEY, JSON.stringify(data)); } catch(e) {}
+}
+function _garGet(contratoId) {
+  return (_garLoad()[contratoId] || []);
+}
+function _garSet(contratoId, lista) {
+  const all = _garLoad();
+  all[contratoId] = lista;
+  _garSave(all);
+}
+
+const _GAR_TIPOS = {
+  veiculo:     { emoji: '🚗', label: 'Veículo (carro/moto)' },
+  eletronico:  { emoji: '📱', label: 'Eletrônico/Equipamento' },
+  joia:        { emoji: '💎', label: 'Joia/Objeto de Valor' },
+  outro:       { emoji: '📦', label: 'Outro' }
+};
+
+function _garStatusCor(s) {
+  if (s === 'ativa')     return { cor: 'var(--green)',  bg: 'rgba(6,214,160,0.10)',  brd: 'rgba(6,214,160,0.3)'  };
+  if (s === 'liquidada') return { cor: 'var(--red)',    bg: 'rgba(239,71,111,0.10)', brd: 'rgba(239,71,111,0.3)' };
+  if (s === 'devolvida') return { cor: 'var(--muted)',  bg: 'rgba(110,120,152,0.12)',brd: 'var(--border2)'        };
+  return { cor: 'var(--gold2)', bg: 'rgba(201,146,42,0.10)', brd: 'rgba(201,146,42,0.3)' };
+}
+
+function _garStatusLabel(s) {
+  if (s === 'ativa')     return '🔒 Retida';
+  if (s === 'liquidada') return '⚡ Liquidada';
+  if (s === 'devolvida') return '↩ Devolvida';
+  return '🔒 Retida';
+}
+
+function _garHtml(contratoId, status_contrato) {
+  const lista = _garGet(contratoId);
+  const totalVal = lista.reduce((s, g) => s + (g.valor || 0), 0);
+
+  const itens = lista.length === 0
+    ? `<div style="text-align:center;padding:16px 0;color:var(--muted2);font-size:0.86rem">Nenhuma garantia registrada</div>`
+    : lista.map((g, idx) => {
+        const t = _GAR_TIPOS[g.tipo] || _GAR_TIPOS.outro;
+        const sc = _garStatusCor(g.status || 'ativa');
+        const sl = _garStatusLabel(g.status || 'ativa');
+        const podeAcionar = (g.status === 'ativa') && (status_contrato === 'atraso');
+        const podeDevolver = (g.status === 'ativa');
+        return `
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:1.2rem">${t.emoji}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:0.88rem;color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${g.descricao||t.label}</div>
+              <div style="font-size:0.78rem;color:var(--muted);margin-top:1px">${t.label}${g.valor ? ' · ' + fmt(g.valor) : ''}</div>
+            </div>
+            <span style="font-size:0.78rem;padding:3px 8px;border-radius:12px;white-space:nowrap;background:${sc.bg};color:${sc.cor};border:1px solid ${sc.brd}">${sl}</span>
+          </div>
+          ${g.obs ? `<div style="font-size:0.82rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(255,255,255,0.02);border-radius:6px;border-left:2px solid var(--border2)">${g.obs}</div>` : ''}
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${podeAcionar ? `<button onclick="_garAcionar('${contratoId}',${idx})" style="padding:5px 12px;background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.35);color:var(--red);border-radius:6px;font-family:'DM Mono',monospace;font-size:0.80rem;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='rgba(239,71,111,0.2)'" onmouseout="this.style.background='rgba(239,71,111,0.1)'">⚡ Liquidar Garantia</button>` : ''}
+            ${podeDevolver ? `<button onclick="_garDevolver('${contratoId}',${idx})" style="padding:5px 12px;background:rgba(110,120,152,0.1);border:1px solid var(--border2);color:var(--muted);border-radius:6px;font-family:'DM Mono',monospace;font-size:0.80rem;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='var(--muted)'" onmouseout="this.style.borderColor='var(--border2)'">↩ Devolver</button>` : ''}
+            <button onclick="_garRemover('${contratoId}',${idx})" style="padding:5px 10px;background:transparent;border:1px solid rgba(239,71,111,0.15);color:rgba(239,71,111,0.45);border-radius:6px;font-family:'DM Mono',monospace;font-size:0.80rem;cursor:pointer;margin-left:auto" onmouseover="this.style.color='var(--red)';this.style.borderColor='rgba(239,71,111,0.4)'" onmouseout="this.style.color='rgba(239,71,111,0.45)';this.style.borderColor='rgba(239,71,111,0.15)'">🗑</button>
+          </div>
+        </div>`;
+      }).join('');
+
+  return `
+  <div style="font-size:0.82rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin:18px 0 10px;display:flex;align-items:center;justify-content:space-between">
+    <span>🔐 Garantias${lista.length > 0 ? ' ('+lista.length+')' : ''}</span>
+    ${totalVal > 0 ? `<span style="font-family:'Bebas Neue',sans-serif;font-size:0.95rem;color:var(--gold2)">${fmt(totalVal)}</span>` : ''}
+  </div>
+  ${itens}
+  <div id="gar-form-${contratoId}" style="display:none;background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:14px;margin-top:8px">
+    <div style="font-size:0.82rem;color:var(--muted);margin-bottom:10px;letter-spacing:0.08em;text-transform:uppercase">Nova Garantia</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <div style="font-size:0.75rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:4px">Tipo</div>
+        <select id="gar-tipo-${contratoId}" style="width:100%;background:var(--s1);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.86rem;padding:8px 10px;outline:none">
+          ${Object.entries(_GAR_TIPOS).map(([k,v]) => `<option value="${k}">${v.emoji} ${v.label}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <div style="font-size:0.75rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:4px">Valor Estimado (R$)</div>
+        <input id="gar-valor-${contratoId}" type="text" placeholder="Ex: 2000" style="width:100%;background:var(--s1);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.86rem;padding:8px 10px;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border2)'">
+      </div>
+    </div>
+    <div style="margin-bottom:8px">
+      <div style="font-size:0.75rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:4px">Descrição</div>
+      <input id="gar-desc-${contratoId}" type="text" placeholder="Ex: iPhone 14 Pro, Honda CG 2019, Corrente de ouro..." style="width:100%;background:var(--s1);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.86rem;padding:8px 10px;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border2)'">
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:0.75rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:4px">Observação (opcional)</div>
+      <input id="gar-obs-${contratoId}" type="text" placeholder="Ex: IMEI registrado, placa do veículo, etc." style="width:100%;background:var(--s1);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.86rem;padding:8px 10px;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border2)'">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="_garSalvar('${contratoId}')" style="flex:1;padding:9px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.88rem;font-weight:700;cursor:pointer;letter-spacing:0.06em">✓ Salvar Garantia</button>
+      <button onclick="_garFormToggle('${contratoId}')" style="padding:9px 16px;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:8px;font-family:'DM Mono',monospace;font-size:0.86rem;cursor:pointer">Cancelar</button>
+    </div>
+  </div>
+  <button onclick="_garFormToggle('${contratoId}')" id="gar-add-btn-${contratoId}" style="width:100%;margin-top:8px;padding:8px;background:transparent;border:1px dashed var(--border2);color:var(--muted);border-radius:8px;font-family:'DM Mono',monospace;font-size:0.84rem;cursor:pointer;letter-spacing:0.06em;transition:all 0.2s" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">+ Adicionar Garantia</button>`;
+}
+
+function _garFormToggle(contratoId) {
+  const form = document.getElementById('gar-form-'+contratoId);
+  const btn  = document.getElementById('gar-add-btn-'+contratoId);
+  if (!form) return;
+  const vis = form.style.display === 'none';
+  form.style.display = vis ? 'block' : 'none';
+  if (btn) btn.style.display = vis ? 'none' : '';
+}
+
+function _garSalvar(contratoId) {
+  const tipo  = document.getElementById('gar-tipo-'+contratoId)?.value || 'outro';
+  const valorRaw = document.getElementById('gar-valor-'+contratoId)?.value || '';
+  const desc  = document.getElementById('gar-desc-'+contratoId)?.value?.trim() || '';
+  const obs   = document.getElementById('gar-obs-'+contratoId)?.value?.trim() || '';
+  const valor = parseFloat(valorRaw.replace(/[^\d,\.]/g,'').replace(',','.')) || 0;
+  if (!desc) { alert('Informe uma descrição para a garantia.'); return; }
+  const lista = _garGet(contratoId);
+  lista.push({ tipo, valor, descricao: desc, obs, status: 'ativa', dataCriacao: new Date().toISOString() });
+  _garSet(contratoId, lista);
+  // Reabre o modal para refletir a mudança
+  ctModalAbrir(contratoId);
+}
+
+function _garRemover(contratoId, idx) {
+  if (!confirm('Remover esta garantia?')) return;
+  const lista = _garGet(contratoId);
+  lista.splice(idx, 1);
+  _garSet(contratoId, lista);
+  ctModalAbrir(contratoId);
+}
+
+function _garAcionar(contratoId, idx) {
+  const lista = _garGet(contratoId);
+  const g = lista[idx];
+  if (!g) return;
+  const t = _GAR_TIPOS[g.tipo] || _GAR_TIPOS.outro;
+  const confirmMsg = `⚡ LIQUIDAR GARANTIA\n\n${t.emoji} ${g.descricao||t.label}${g.valor ? '\nValor: '+fmt(g.valor) : ''}\n\nIsso marcará a garantia como liquidada.\nO contrato precisará ser encerrado manualmente.\n\nConfirmar?`;
+  if (!confirm(confirmMsg)) return;
+  lista[idx].status = 'liquidada';
+  lista[idx].dataLiquidacao = new Date().toISOString();
+  _garSet(contratoId, lista);
+  ctModalAbrir(contratoId);
+}
+
+function _garDevolver(contratoId, idx) {
+  const lista = _garGet(contratoId);
+  if (!confirm('Confirmar devolução desta garantia ao cliente?')) return;
+  lista[idx].status = 'devolvida';
+  lista[idx].dataDevolucao = new Date().toISOString();
+  _garSet(contratoId, lista);
+  ctModalAbrir(contratoId);
+}
+
+// ══════════════════════════════════════════════════════════════
 
 function ctModalAbrir(id) {
   const e = _ctEmps.find(x => x.id === id);
@@ -4706,6 +4882,7 @@ function ctModalAbrir(id) {
     ${row('Data de Início', fmtDate(e.data))}
     ${row('Próx. Vencimento', fmtDate(e.proxVenc), e.status==='atraso'?'var(--red)':'')}
     ${row('Venc. do Contrato', fmtDate(e.vencContrato))}
+    ${_garHtml(e.id, e.status)}
   `;
   const overlay = document.getElementById('ct-modal-overlay');
   overlay.style.display = 'flex';
