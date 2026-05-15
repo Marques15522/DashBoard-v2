@@ -5933,18 +5933,25 @@ async function atualizarMapaClientes() {
 
   if (countEl) countEl.textContent = 'Geocodificando endereços...';
 
-  // 2) Geocodifica todos os clientes
+  // 2) Geocodifica todos os clientes — deduplica por nome (um pin por pessoa)
   let plotados = 0;
   const bairroClientes = {}; // nomeBairro -> [pasta]
   const bairroCount = {};
   const plotQueue = []; // { p, lat, lng, cor, status }
+  const clientesVistos = new Set(); // evita duplicatas do mesmo cliente
 
   for (const p of pastas) {
     if (!p.endereco) continue;
+
+    // Deduplica: um marcador por cliente (pelo nome normalizado)
+    const nomeKey = (p.nome || '').toLowerCase().trim();
+    if (nomeKey && clientesVistos.has(nomeKey)) continue;
+    if (nomeKey) clientesVistos.add(nomeKey);
+
     const coords = await geocodificarEndereco(p.endereco);
     if (!coords) continue;
 
-    const comp = _comportamento[(p.nome||'').toLowerCase().trim()] || {};
+    const comp = _comportamento[nomeKey] || {};
     let cor, status;
     if (comp.temAtraso)                              { cor = '#ef476f'; status = 'Em atraso'; }
     else if (comp.qtdContratos > 0 && comp.ativo)   { cor = '#06d6a0'; status = 'Em dia'; }
@@ -5955,7 +5962,10 @@ async function atualizarMapaClientes() {
     const nomeBairro = extrairNomeBairro(p.endereco);
     if (nomeBairro) {
       if (!bairroClientes[nomeBairro]) bairroClientes[nomeBairro] = [];
-      bairroClientes[nomeBairro].push(p);
+      // Evita duplicar o mesmo cliente no agrupamento por bairro
+      if (!bairroClientes[nomeBairro].find(c => (c.nome||'').toLowerCase().trim() === nomeKey)) {
+        bairroClientes[nomeBairro].push(p);
+      }
     }
 
     const bairroKey = coords.map(c => c.toFixed(3)).join(',');
