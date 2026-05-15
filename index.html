@@ -5634,7 +5634,6 @@ async function geocodificarEndereco(endereco) {
 // Carrega GeoJSON dos bairros de SP via Overpass API
 async function carregarBairrosGeoJSON() {
   if (_bairrosGeoJSON) return _bairrosGeoJSON;
-  // Usa dataset de subdistritos de São Paulo do OpenStreetMap via Overpass
   const query = `[out:json][timeout:30];
 area["name"="São Paulo"]["admin_level"="8"]->.sp;
 (
@@ -5643,46 +5642,60 @@ area["name"="São Paulo"]["admin_level"="8"]->.sp;
 );
 out geom;`;
   try {
-    const res = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      body: query
-    });
+    const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
     if (!res.ok) return null;
     const data = await res.json();
 
-    // Encadeia segmentos de ways para formar anéis fechados corretamente
-    function encadearSegmentos(segments) {
-      if (!segments || segments.length === 0) return null;
-      // Clona os segmentos para não modificar o original
-      const segs = segments.map(s => s.slice());
-      const anel = segs.shift().slice();
-      let tentativas = 0;
-      while (segs.length > 0 && tentativas < segs.length * segs.length + 10) {
-        tentativas++;
-        const ultimo = anel[anel.length - 1];
-        let encaixou = false;
-        for (let i = 0; i < segs.length; i++) {
-          const seg = segs[i];
-          const ini = seg[0], fim = seg[seg.length - 1];
-          const eq = (a, b) => Math.abs(a[0]-b[0]) < 1e-7 && Math.abs(a[1]-b[1]) < 1e-7;
-          if (eq(ultimo, ini)) {
-            anel.push(...seg.slice(1));
-            segs.splice(i, 1);
-            encaixou = true;
-            break;
-          } else if (eq(ultimo, fim)) {
-            anel.push(...seg.slice(0, -1).reverse());
-            segs.splice(i, 1);
-            encaixou = true;
-            break;
+    const eq = (a, b) => Math.abs(a[0]-b[0]) < 1e-6 && Math.abs(a[1]-b[1]) < 1e-6;
+
+    // Monta todos os anéis fechados possíveis a partir de uma lista de segmentos
+    // Retorna array de anéis [[lon,lat], ...]
+    function montarAneis(segmentos) {
+      if (!segmentos || segmentos.length === 0) return [];
+      const segs = segmentos.map(s => s.slice()); // clona
+      const aneis = [];
+
+      while (segs.length > 0) {
+        // Começa um novo anel com o primeiro segmento disponível
+        const anel = segs.shift().slice();
+
+        let progrediu = true;
+        while (progrediu) {
+          progrediu = false;
+          const ultimo = anel[anel.length - 1];
+          // Verifica se o anel já fechou
+          if (anel.length > 3 && eq(anel[0], ultimo)) break;
+          for (let i = 0; i < segs.length; i++) {
+            const seg = segs[i];
+            const ini = seg[0], fim = seg[seg.length - 1];
+            if (eq(ultimo, ini)) {
+              anel.push(...seg.slice(1));
+              segs.splice(i, 1);
+              progrediu = true;
+              break;
+            } else if (eq(ultimo, fim)) {
+              anel.push(...seg.slice(0, -1).reverse());
+              segs.splice(i, 1);
+              progrediu = true;
+              break;
+            }
           }
         }
-        if (!encaixou) break; // segmento órfão — interrompe
+
+        // Fecha o anel se necessário
+        if (!eq(anel[0], anel[anel.length - 1])) anel.push([...anel[0]]);
+        if (anel.length >= 4) aneis.push(anel);
       }
-      // Fecha o anel se necessário
-      const first = anel[0], last = anel[anel.length - 1];
-      if (Math.abs(first[0]-last[0]) > 1e-7 || Math.abs(first[1]-last[1]) > 1e-7) anel.push(first);
-      return anel.length >= 4 ? anel : null;
+      return aneis;
+    }
+
+    // Área com sinal pelo método shoelace (positivo = sentido horário em coords geográficas)
+    function areaAnel(anel) {
+      let a = 0;
+      for (let i = 0, j = anel.length - 1; i < anel.length; j = i++) {
+        a += (anel[j][0] + anel[i][0]) * (anel[j][1] - anel[i][1]);
+      }
+      return a / 2;
     }
 
     // Converte para GeoJSON Feature Collection
@@ -5691,32 +5704,47 @@ out geom;`;
       if (el.type !== 'relation' || !el.members) continue;
       const nome = el.tags && (el.tags.name || el.tags['name:pt']) || 'Bairro';
 
-      // Separa outer e inner rings pelos roles dos membros
+      // Separa outer e inner pelos roles
       const outerSegs = [], innerSegs = [];
       for (const m of el.members) {
         if (m.type !== 'way' || !m.geometry || m.geometry.length < 2) continue;
         const coords = m.geometry.map(p => [p.lon, p.lat]);
         if (m.role === 'inner') innerSegs.push(coords);
-        else outerSegs.push(coords); // 'outer' ou sem role
+        else outerSegs.push(coords);
       }
       if (outerSegs.length === 0) continue;
 
-      // Monta o anel exterior encadeando as ways
-      const exterior = encadearSegmentos(outerSegs);
-      if (!exterior) continue;
+      // Monta todos os anéis exteriores e interiores
+      const outerRings = montarAneis(outerSegs);
+      const innerRings = montarAneis(innerSegs);
+      if (outerRings.length === 0) continue;
 
-      // Monta anéis interiores (furos), se houver
-      const coordinates = [exterior];
-      if (innerSegs.length > 0) {
-        const interior = encadearSegmentos(innerSegs);
-        if (interior) coordinates.push(interior);
+      if (outerRings.length === 1) {
+        // Polígono simples (com possíveis furos)
+        const coordinates = [outerRings[0], ...innerRings];
+        features.push({
+          type: 'Feature',
+          properties: { name: nome },
+          geometry: { type: 'Polygon', coordinates }
+        });
+      } else {
+        // MultiPolygon — bairros com partes desconexas
+        // Associa cada inner ao outer que o contém (simplificado: pelo centroide)
+        const polys = outerRings.map(outer => [outer]);
+        for (const inner of innerRings) {
+          // Encontra o outer que tem maior área e contém o inner
+          let best = 0;
+          for (let i = 1; i < polys.length; i++) {
+            if (Math.abs(areaAnel(polys[i][0])) > Math.abs(areaAnel(polys[best][0]))) best = i;
+          }
+          polys[best].push(inner);
+        }
+        features.push({
+          type: 'Feature',
+          properties: { name: nome },
+          geometry: { type: 'MultiPolygon', coordinates: polys }
+        });
       }
-
-      features.push({
-        type: 'Feature',
-        properties: { name: nome },
-        geometry: { type: 'Polygon', coordinates }
-      });
     }
     _bairrosGeoJSON = { type: 'FeatureCollection', features };
     return _bairrosGeoJSON;
