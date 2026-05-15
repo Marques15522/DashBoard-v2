@@ -5909,10 +5909,10 @@ function iniciarMapa() {
 
 // Cores por densidade de clientes no bairro
 function corPoligono(qtd) {
-  if (qtd === 0) return { fill: 'rgba(201,146,42,0.0)', border: 'rgba(201,146,42,0.0)' };
-  if (qtd === 1) return { fill: 'rgba(72,149,239,0.13)', border: 'rgba(72,149,239,0.55)' };
-  if (qtd === 2) return { fill: 'rgba(232,184,75,0.15)', border: 'rgba(232,184,75,0.65)' };
-  return         { fill: 'rgba(239,71,111,0.18)', border: 'rgba(239,71,111,0.70)' };
+  if (qtd === 0) return { fill: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.12)', weight: 0.7 };
+  if (qtd === 1) return { fill: 'rgba(72,149,239,0.18)',  border: 'rgba(72,149,239,0.70)',  weight: 2 };
+  if (qtd === 2) return { fill: 'rgba(232,184,75,0.22)',  border: 'rgba(232,184,75,0.80)',  weight: 2 };
+  return               { fill: 'rgba(239,71,111,0.22)',   border: 'rgba(239,71,111,0.85)',  weight: 2 };
 }
 
 async function atualizarMapaClientes() {
@@ -5973,28 +5973,39 @@ async function atualizarMapaClientes() {
     }
   }
 
-  // 3) Desenha polígonos dos bairros com clientes (se GeoJSON disponível)
+  // 3) Desenha TODOS os bairros de SP (cinza discreto) + destaca os com clientes
   const bairrosDesenhados = new Set();
   if (geojson) {
+    // Primeiro passo: desenha todos os bairros em cinza (fundo)
+    for (const feature of geojson.features) {
+      const camada = L.geoJSON(feature);
+      const bounds = camada.getBounds();
+      if (!bounds.isValid()) continue;
+      const largKm = bounds.getNorthEast().distanceTo(bounds.getSouthWest()) / 1000;
+      if (largKm > 8) continue; // descarta distritos grandes
+
+      const { fill, border, weight } = corPoligono(0);
+      const poligono = L.geoJSON(feature, {
+        style: { fillColor: fill, fillOpacity: 1, color: border, weight, opacity: 1 }
+      });
+      poligono.addTo(_mapaLeaflet);
+      _mapaPoligonos.push(poligono);
+    }
+
+    // Segundo passo: redesenha por cima os bairros com clientes destacados
     for (const [nomeBairro, clientes] of Object.entries(bairroClientes)) {
       const feature = encontrarBairroGeoJSON(nomeBairro, geojson);
       if (!feature) continue;
 
-      // Valida tamanho do polígono: rejeita se bounding box > ~4km (evita distritos grandes)
       const camada = L.geoJSON(feature);
       const bounds = camada.getBounds();
+      if (!bounds.isValid()) continue;
       const largKm = bounds.getNorthEast().distanceTo(bounds.getSouthWest()) / 1000;
-      if (largKm > 8) continue; // polígono grande demais — provavelmente um distrito, não bairro
+      if (largKm > 8) continue;
 
-      const { fill, border } = corPoligono(clientes.length);
+      const { fill, border, weight } = corPoligono(clientes.length);
       const poligono = L.geoJSON(feature, {
-        style: {
-          fillColor: fill,
-          fillOpacity: 1,
-          color: border,
-          weight: 1.8,
-          opacity: 1,
-        }
+        style: { fillColor: fill, fillOpacity: 1, color: border, weight, opacity: 1 }
       });
       poligono.bindPopup(construirPopupBairro(nomeBairro, clientes), {
         className: 'mapa-bairro-popup',
@@ -6006,13 +6017,11 @@ async function atualizarMapaClientes() {
     }
   }
 
-  // Fallback: círculo para bairros sem polígono válido
+  // Fallback: círculo para bairros com clientes mas sem polígono válido
   for (const [nomeBairro, clientes] of Object.entries(bairroClientes)) {
     if (bairrosDesenhados.has(nomeBairro)) continue;
-    // Usa coordenadas do dicionário SP_BAIRROS ou centroide do cliente geocodificado
     let centro = SP_BAIRROS[nomeBairro];
     if (!centro) {
-      // Calcula centroide médio dos clientes desse bairro
       const lats = [], lngs = [];
       for (const q of plotQueue) {
         if ((bairroClientes[nomeBairro] || []).includes(q.p)) { lats.push(q.lat); lngs.push(q.lng); }
@@ -6020,17 +6029,12 @@ async function atualizarMapaClientes() {
       if (lats.length > 0) centro = [lats.reduce((a,b)=>a+b,0)/lats.length, lngs.reduce((a,b)=>a+b,0)/lngs.length];
     }
     if (!centro) continue;
-    const { fill, border } = corPoligono(clientes.length);
+    const { fill, border, weight } = corPoligono(clientes.length);
     const circulo = L.circle(centro, {
-      radius: 700,
-      fillColor: fill,
-      fillOpacity: 1,
-      color: border,
-      weight: 2,
+      radius: 700, fillColor: fill, fillOpacity: 1, color: border, weight,
     });
     circulo.bindPopup(construirPopupBairro(nomeBairro, clientes), {
-      className: 'mapa-bairro-popup',
-      maxWidth: 280,
+      className: 'mapa-bairro-popup', maxWidth: 280,
     });
     circulo.addTo(_mapaLeaflet);
     _mapaPoligonos.push(circulo);
