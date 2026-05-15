@@ -5635,7 +5635,7 @@ async function geocodificarEndereco(endereco) {
 async function carregarBairrosGeoJSON() {
   if (_bairrosGeoJSON) return _bairrosGeoJSON;
   // Usa dataset de subdistritos de São Paulo do OpenStreetMap via Overpass
-  const query = `[out:json][timeout:25];
+  const query = `[out:json][timeout:30];
 area["name"="São Paulo"]["admin_level"="8"]->.sp;
 (
   relation["boundary"="administrative"]["admin_level"="10"](area.sp);
@@ -5649,30 +5649,73 @@ out geom;`;
     });
     if (!res.ok) return null;
     const data = await res.json();
+
+    // Encadeia segmentos de ways para formar anéis fechados corretamente
+    function encadearSegmentos(segments) {
+      if (!segments || segments.length === 0) return null;
+      // Clona os segmentos para não modificar o original
+      const segs = segments.map(s => s.slice());
+      const anel = segs.shift().slice();
+      let tentativas = 0;
+      while (segs.length > 0 && tentativas < segs.length * segs.length + 10) {
+        tentativas++;
+        const ultimo = anel[anel.length - 1];
+        let encaixou = false;
+        for (let i = 0; i < segs.length; i++) {
+          const seg = segs[i];
+          const ini = seg[0], fim = seg[seg.length - 1];
+          const eq = (a, b) => Math.abs(a[0]-b[0]) < 1e-7 && Math.abs(a[1]-b[1]) < 1e-7;
+          if (eq(ultimo, ini)) {
+            anel.push(...seg.slice(1));
+            segs.splice(i, 1);
+            encaixou = true;
+            break;
+          } else if (eq(ultimo, fim)) {
+            anel.push(...seg.slice(0, -1).reverse());
+            segs.splice(i, 1);
+            encaixou = true;
+            break;
+          }
+        }
+        if (!encaixou) break; // segmento órfão — interrompe
+      }
+      // Fecha o anel se necessário
+      const first = anel[0], last = anel[anel.length - 1];
+      if (Math.abs(first[0]-last[0]) > 1e-7 || Math.abs(first[1]-last[1]) > 1e-7) anel.push(first);
+      return anel.length >= 4 ? anel : null;
+    }
+
     // Converte para GeoJSON Feature Collection
     const features = [];
     for (const el of (data.elements || [])) {
       if (el.type !== 'relation' || !el.members) continue;
       const nome = el.tags && (el.tags.name || el.tags['name:pt']) || 'Bairro';
-      // Monta polígono a partir dos membros way
-      const aneis = [];
+
+      // Separa outer e inner rings pelos roles dos membros
+      const outerSegs = [], innerSegs = [];
       for (const m of el.members) {
-        if (m.type === 'way' && m.geometry && m.geometry.length > 1) {
-          const coords = m.geometry.map(p => [p.lon, p.lat]);
-          aneis.push(coords);
-        }
+        if (m.type !== 'way' || !m.geometry || m.geometry.length < 2) continue;
+        const coords = m.geometry.map(p => [p.lon, p.lat]);
+        if (m.role === 'inner') innerSegs.push(coords);
+        else outerSegs.push(coords); // 'outer' ou sem role
       }
-      if (aneis.length === 0) continue;
-      // Usa o maior anel como exterior
-      aneis.sort((a, b) => b.length - a.length);
-      const exterior = aneis[0];
-      // Fecha o polígono se necessário
-      const first = exterior[0], last = exterior[exterior.length-1];
-      if (first[0] !== last[0] || first[1] !== last[1]) exterior.push(first);
+      if (outerSegs.length === 0) continue;
+
+      // Monta o anel exterior encadeando as ways
+      const exterior = encadearSegmentos(outerSegs);
+      if (!exterior) continue;
+
+      // Monta anéis interiores (furos), se houver
+      const coordinates = [exterior];
+      if (innerSegs.length > 0) {
+        const interior = encadearSegmentos(innerSegs);
+        if (interior) coordinates.push(interior);
+      }
+
       features.push({
         type: 'Feature',
         properties: { name: nome },
-        geometry: { type: 'Polygon', coordinates: [exterior] }
+        geometry: { type: 'Polygon', coordinates }
       });
     }
     _bairrosGeoJSON = { type: 'FeatureCollection', features };
