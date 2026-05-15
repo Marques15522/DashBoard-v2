@@ -5976,7 +5976,7 @@ async function atualizarMapaClientes() {
   // 3) Desenha TODOS os bairros de SP (cinza discreto) + destaca os com clientes
   const bairrosDesenhados = new Set();
   if (geojson) {
-    // Primeiro passo: desenha todos os bairros em cinza (fundo)
+    // Primeiro passo: desenha todos os bairros em cinza (fundo) — clicáveis
     for (const feature of geojson.features) {
       const camada = L.geoJSON(feature);
       const bounds = camada.getBounds();
@@ -5984,10 +5984,22 @@ async function atualizarMapaClientes() {
       const largKm = bounds.getNorthEast().distanceTo(bounds.getSouthWest()) / 1000;
       if (largKm > 8) continue; // descarta distritos grandes
 
+      const nomeBairro = (feature.properties && feature.properties.name) || 'Bairro';
       const { fill, border, weight } = corPoligono(0);
       const poligono = L.geoJSON(feature, {
         style: { fillColor: fill, fillOpacity: 1, color: border, weight, opacity: 1 }
       });
+      const popupVazio = `
+        <div style="overflow:hidden;border-radius:10px;font-family:'Source Sans 3',sans-serif;">
+          <div style="background:linear-gradient(135deg,rgba(90,98,130,0.15),rgba(12,15,24,0.97));padding:11px 14px 8px;border-bottom:1px solid #212840;">
+            <div style="font-size:12px;font-weight:700;color:#8a93b8;letter-spacing:0.05em;">${nomeBairro.toUpperCase()}</div>
+            <div style="font-size:10px;color:#5a6282;margin-top:2px;">Nenhum cliente neste bairro</div>
+          </div>
+          <div style="padding:8px 14px 10px;">
+            <div style="font-size:10px;color:#5a6282;font-style:italic;">Área sem atuação ainda — oportunidade de expansão.</div>
+          </div>
+        </div>`;
+      poligono.bindPopup(popupVazio, { className: 'mapa-bairro-popup', maxWidth: 240 });
       poligono.addTo(_mapaLeaflet);
       _mapaPoligonos.push(poligono);
     }
