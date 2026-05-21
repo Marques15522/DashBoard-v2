@@ -3450,7 +3450,7 @@ function render(empRows,pagRows){
     const totalCapDep = emps.filter(e=>e.status!=='quitado').reduce((s,e)=>s+e.capital,0);
     const totalCapTotal = emps.reduce((s,e)=>s+e.capital,0);
     const totalJurosBruto = emps.reduce((s,e)=>s+e.jTotal,0);
-    const totalRecebido = emps.reduce((s,e)=>s+(e.totalPago||0),0);
+    const totalRecebido = pags.reduce((s,p)=>s+p.juros,0);
     const totalCaixa = totalRecebido - totalCapDep;
     const inadimValor = atrasado.reduce((s,e)=>s+(e.saldo||e.capital),0);
     const taxaMedia = emps.length>0 ? emps.reduce((s,e)=>s+(e.taxa||0),0)/emps.length : 0;
