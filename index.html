@@ -8886,19 +8886,16 @@ function cmdRender(emps, pags){
   }
   _h('cmd-agenda-body', agendaHtml);
 
-  // RENOVAÇÕES — clientes cujo contrato vence nos próximos 30 dias
+  // RENOVAÇÕES — contratos ativos cujo vencimento final (proxVenc) é nos próximos 30 dias
   const em30=new Date(hoje); em30.setDate(hoje.getDate()+30);
   const renovOp=abertos
     .filter(e=>{
-      // Usa APENAS vencContrato (fim do contrato), não proxVenc (próxima parcela)
+      // vencContrato = data original do fim do contrato (coluna J)
+      // Mostra quando o vencContrato está chegando nos próximos 30 dias
       const venc=e.vencContrato;
       return venc && venc>=hoje && venc<=em30;
     })
-    .sort((a,b)=>{
-      const va=a.vencContrato;
-      const vb=b.vencContrato;
-      return va-vb;
-    })
+    .sort((a,b)=>a.vencContrato-b.vencContrato)
     .slice(0,5);
 
   const cores=['#c9922a','#e8b84b','#06d6a0','#4895ef','#9b5de5'];
