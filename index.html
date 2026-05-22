@@ -1011,7 +1011,7 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   </div>
 
   <!-- ══ HUB CENTRAL: COLUNAS + MAPA ══ -->
-  <div class="cmd2-section"><span class="dot"></span> TEATRO DE OPERAÇÕES <span class="line"></span></div>
+  <div class="cmd2-section"><span class="dot"></span> VISÃO OPERACIONAL <span class="line"></span></div>
   <div class="cmd2-hub">
 
     <!-- COLUNA ESQUERDA -->
@@ -2997,8 +2997,9 @@ function parseStatus(v){
 function render(empRows,pagRows){
   const hoje=new Date();hoje.setHours(0,0,0,0);
   // Corrige status: se proxVenc já passou e não está quitado → atraso
-  function corrigirStatus(status, proxVenc){
+  function corrigirStatus(status, proxVenc, saldo){
     if(status==='quitado') return 'quitado';
+    if(saldo<=0) return 'quitado';
     if(proxVenc && proxVenc < hoje) return 'atraso';
     return status || 'ativo';
   }
@@ -3018,7 +3019,7 @@ function render(empRows,pagRows){
       const proxVenc=parseDate(r[CE.proxVenc]);
       const vencContrato=parseDate(r[CE.vencContrato]);
       const statusRaw=parseStatus(r[CE.status]);
-      const status=corrigirStatus(statusRaw, proxVenc);
+      const status=corrigirStatus(statusRaw, proxVenc, parseNum(r[CE.saldo]));
       return {id:String(r[CE.id]).trim(),idCliente:String(r[CE.clienteId]||'').trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital:parseNum(r[CE.cap]),data:parseDate(r[CE.data]),taxa:parseTaxa(r[CE.taxa]),prazo:parseNum(r[CE.prazo]),tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal:parseNum(r[CE.jTotal]),saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status,proxVenc,vencContrato,unidade:getUnidade(r)};
     })
     .filter(e=>e.status!==null&&e.capital>0);
@@ -3044,7 +3045,7 @@ function render(empRows,pagRows){
   const roi=totalCap?totalJuros/totalCap:0;
   const ticket=abertos.length?totalCap/abertos.length:0;
   const inadimPct=abertos.length?atrasado.length/abertos.length:0;
-  const lucroReal=pags.reduce((s,p)=>s+p.juros,0);
+  const lucroReal=pags.filter(p=>p.data&&p.data.getMonth()===hoje.getMonth()&&p.data.getFullYear()===hoje.getFullYear()).reduce((s,p)=>s+p.juros,0);
   const prazoMedio=abertos.length?abertos.reduce((s,e)=>s+e.prazo,0)/abertos.length:0;
   const taxaMediaGlobal=abertos.length?abertos.reduce((s,e)=>s+e.taxa,0)/abertos.length:0.1;
   const em7=new Date(hoje);em7.setDate(hoje.getDate()+7);
@@ -5907,12 +5908,12 @@ function iniciarMapa() {
   setTimeout(atualizarMapaClientes, 300);
 }
 
-// Cores por densidade de clientes no bairro
-function corPoligono(qtd) {
+// Cores por densidade e status de clientes no bairro
+function corPoligono(qtd, temAtivo, temAtraso) {
   if (qtd === 0) return { fill: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.12)', weight: 0.7 };
-  if (qtd === 1) return { fill: 'rgba(72,149,239,0.18)',  border: 'rgba(72,149,239,0.70)',  weight: 2 };
-  if (qtd === 2) return { fill: 'rgba(232,184,75,0.22)',  border: 'rgba(232,184,75,0.80)',  weight: 2 };
-  return               { fill: 'rgba(239,71,111,0.22)',   border: 'rgba(239,71,111,0.85)',  weight: 2 };
+  if (temAtraso) return { fill: 'rgba(239,71,111,0.22)',   border: 'rgba(239,71,111,0.85)',  weight: 2 };
+  if (temAtivo)  return { fill: 'rgba(72,149,239,0.18)',   border: 'rgba(72,149,239,0.70)',  weight: 2 };
+  return               { fill: 'rgba(90,98,130,0.18)',    border: 'rgba(90,98,130,0.60)',   weight: 2 };
 }
 
 async function atualizarMapaClientes() {
@@ -6025,7 +6026,9 @@ async function atualizarMapaClientes() {
       const largKm = bounds.getNorthEast().distanceTo(bounds.getSouthWest()) / 1000;
       if (largKm > 8) continue;
 
-      const { fill, border, weight } = corPoligono(clientes.length);
+      const _temAtraso = clientes.some(c => (_comportamento[(c.nome||'').toLowerCase().trim()]||{}).temAtraso);
+      const _temAtivo  = clientes.some(c => (_comportamento[(c.nome||'').toLowerCase().trim()]||{}).ativo);
+      const { fill, border, weight } = corPoligono(clientes.length, _temAtivo, _temAtraso);
       const poligono = L.geoJSON(feature, {
         style: { fillColor: fill, fillOpacity: 1, color: border, weight, opacity: 1 }
       });
@@ -6051,7 +6054,9 @@ async function atualizarMapaClientes() {
       if (lats.length > 0) centro = [lats.reduce((a,b)=>a+b,0)/lats.length, lngs.reduce((a,b)=>a+b,0)/lngs.length];
     }
     if (!centro) continue;
-    const { fill, border, weight } = corPoligono(clientes.length);
+    const _temAtraso2 = clientes.some(c => (_comportamento[(c.nome||'').toLowerCase().trim()]||{}).temAtraso);
+    const _temAtivo2  = clientes.some(c => (_comportamento[(c.nome||'').toLowerCase().trim()]||{}).ativo);
+    const { fill, border, weight } = corPoligono(clientes.length, _temAtivo2, _temAtraso2);
     const circulo = L.circle(centro, {
       radius: 700, fillColor: fill, fillOpacity: 1, color: border, weight,
     });
@@ -8881,17 +8886,17 @@ function cmdRender(emps, pags){
   }
   _h('cmd-agenda-body', agendaHtml);
 
-  // RENOVAÇÕES — clientes que vão quitar nos próximos 30 dias
+  // RENOVAÇÕES — clientes cujo contrato vence nos próximos 30 dias
   const em30=new Date(hoje); em30.setDate(hoje.getDate()+30);
   const renovOp=abertos
     .filter(e=>{
-      // Quitação próxima = vencContrato ou proxVenc próximo
-      const venc=e.vencContrato||e.proxVenc;
+      // Usa APENAS vencContrato (fim do contrato), não proxVenc (próxima parcela)
+      const venc=e.vencContrato;
       return venc && venc>=hoje && venc<=em30;
     })
     .sort((a,b)=>{
-      const va=a.vencContrato||a.proxVenc;
-      const vb=b.vencContrato||b.proxVenc;
+      const va=a.vencContrato;
+      const vb=b.vencContrato;
       return va-vb;
     })
     .slice(0,5);
@@ -8901,7 +8906,7 @@ function cmdRender(emps, pags){
     _h('cmd-renov-body','<div class="cmd-renov-empty">✅ Nenhuma renovação prevista nos próximos 30 dias</div>');
   } else {
     _h('cmd-renov-body', renovOp.map((e,i)=>{
-      const venc=e.vencContrato||e.proxVenc;
+      const venc=e.vencContrato;
       const dias=Math.round((venc-hoje)/86400000);
       const initials=(e.nome||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
       const tag = dias<=7 ? `<span class="cmd-renov-tag agora">Vence em ${dias}d</span>` : `<span class="cmd-renov-tag quase">Em ${dias} dias</span>`;
