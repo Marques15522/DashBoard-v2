@@ -8886,16 +8886,19 @@ function cmdRender(emps, pags){
   }
   _h('cmd-agenda-body', agendaHtml);
 
-  // RENOVAÇÕES — contratos ativos cujo vencimento final (proxVenc) é nos próximos 30 dias
+  // RENOVAÇÕES — contratos no último ciclo de pagamento (proxVenc >= vencContrato e vence em 30 dias)
   const em30=new Date(hoje); em30.setDate(hoje.getDate()+30);
   const renovOp=abertos
     .filter(e=>{
-      // vencContrato = data original do fim do contrato (coluna J)
-      // Mostra quando o vencContrato está chegando nos próximos 30 dias
-      const venc=e.vencContrato;
-      return venc && venc>=hoje && venc<=em30;
+      const venc=e.proxVenc;
+      if(!venc) return false;
+      // Só mostra se proxVenc está no futuro dentro de 30 dias
+      if(venc < hoje || venc > em30) return false;
+      // E se proxVenc >= vencContrato (último ciclo ou vencimento já chegou)
+      if(e.vencContrato && venc < e.vencContrato) return false;
+      return true;
     })
-    .sort((a,b)=>a.vencContrato-b.vencContrato)
+    .sort((a,b)=>a.proxVenc-b.proxVenc)
     .slice(0,5);
 
   const cores=['#c9922a','#e8b84b','#06d6a0','#4895ef','#9b5de5'];
@@ -8903,7 +8906,7 @@ function cmdRender(emps, pags){
     _h('cmd-renov-body','<div class="cmd-renov-empty">✅ Nenhuma renovação prevista nos próximos 30 dias</div>');
   } else {
     _h('cmd-renov-body', renovOp.map((e,i)=>{
-      const venc=e.vencContrato;
+      const venc=e.proxVenc;
       const dias=Math.round((venc-hoje)/86400000);
       const initials=(e.nome||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
       const tag = dias<=7 ? `<span class="cmd-renov-tag agora">Vence em ${dias}d</span>` : `<span class="cmd-renov-tag quase">Em ${dias} dias</span>`;
