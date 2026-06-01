@@ -5570,9 +5570,6 @@ function salvarGeocodeCache() {
 }
 
 // Dicionário de bairros SP para fallback e detecção de nome de bairro
-// Bairros cujo polígono do OSM tem geometria incorreta — usa círculo no lugar
-const BAIRROS_SKIP_POLYGON = new Set(['cidade lider','cidade líder']);
-
 const SP_BAIRROS = {
   'cidade lider':[-23.5657,-46.4742],'cidade líder':[-23.5657,-46.4742],
   'centro': [-23.5505, -46.6333],'sé': [-23.5506, -46.6340],'república': [-23.5433, -46.6395],
@@ -5790,10 +5787,29 @@ function encontrarBairroGeoJSON(nomeBairro, geojson) {
   if (!geojson || !nomeBairro) return null;
   const norm = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const alvo = norm(nomeBairro);
-  return geojson.features.find(f => {
+
+  // 1) Tenta match exato primeiro
+  const exato = geojson.features.find(f => norm(f.properties.name || '') === alvo);
+  if (exato) return exato;
+
+  // 2) Entre os matches parciais, retorna o de menor bounding box (evita pegar distrito grande)
+  const parciais = geojson.features.filter(f => {
     const n = norm(f.properties.name || '');
-    return n === alvo || n.includes(alvo) || alvo.includes(n);
-  }) || null;
+    return n.includes(alvo) || alvo.includes(n);
+  });
+  if (parciais.length === 0) return null;
+  if (parciais.length === 1) return parciais[0];
+
+  // Ordena pelo menor bounding box diagonal
+  return parciais.sort((a, b) => {
+    const diag = feat => {
+      try {
+        const b = L.geoJSON(feat).getBounds();
+        return b.isValid() ? b.getNorthEast().distanceTo(b.getSouthWest()) : Infinity;
+      } catch { return Infinity; }
+    };
+    return diag(a) - diag(b);
+  })[0];
 }
 
 function criarIconeCliente(cor) {
@@ -5988,11 +6004,19 @@ async function atualizarMapaClientes() {
       }
     }
 
+    // Se bairro conhecido e geocode retornou ponto longe demais (>4km), usa centroide do bairro
+    let lat = coords[0], lng = coords[1];
+    if (nomeBairro && SP_BAIRROS[nomeBairro]) {
+      const [blat, blng] = SP_BAIRROS[nomeBairro];
+      const distKm = L.latLng(lat, lng).distanceTo(L.latLng(blat, blng)) / 1000;
+      if (distKm > 4) { lat = blat; lng = blng; }
+    }
+
     const bairroKey = coords.map(c => c.toFixed(3)).join(',');
     bairroCount[bairroKey] = (bairroCount[bairroKey] || 0) + 1;
     const jitter = Math.min(bairroCount[bairroKey] - 1, 5) * 0.0012;
-    const lat = coords[0] + (Math.random() - 0.5) * jitter;
-    const lng = coords[1] + (Math.random() - 0.5) * jitter;
+    lat = lat + (Math.random() - 0.5) * jitter;
+    lng = lng + (Math.random() - 0.5) * jitter;
 
     plotQueue.push({ p, lat, lng, cor, status });
     plotados++;
@@ -6036,9 +6060,6 @@ async function atualizarMapaClientes() {
 
     // Segundo passo: redesenha por cima os bairros com clientes destacados
     for (const [nomeBairro, clientes] of Object.entries(bairroClientes)) {
-      const nomeNorm = nomeBairro.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-      if (BAIRROS_SKIP_POLYGON.has(nomeNorm) || BAIRROS_SKIP_POLYGON.has(nomeBairro.toLowerCase())) continue;
-
       const feature = encontrarBairroGeoJSON(nomeBairro, geojson);
       if (!feature) continue;
 
