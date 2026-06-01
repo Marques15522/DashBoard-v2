@@ -5570,8 +5570,11 @@ function salvarGeocodeCache() {
 }
 
 // Dicionário de bairros SP para fallback e detecção de nome de bairro
+// Bairros cujo polígono do OSM tem geometria incorreta — usa círculo no lugar
+const BAIRROS_SKIP_POLYGON = new Set(['cidade lider','cidade líder']);
+
 const SP_BAIRROS = {
-  'cidade lider':[-23.5707,-46.4780],'cidade líder':[-23.5707,-46.4780],
+  'cidade lider':[-23.5657,-46.4742],'cidade líder':[-23.5657,-46.4742],
   'centro': [-23.5505, -46.6333],'sé': [-23.5506, -46.6340],'república': [-23.5433, -46.6395],
   'bela vista': [-23.5612, -46.6472],'consolação': [-23.5531, -46.6573],
   'cerqueira césar': [-23.5622, -46.6680],'jardins': [-23.5730, -46.6687],
@@ -6009,7 +6012,7 @@ async function atualizarMapaClientes() {
       const bounds = camada.getBounds();
       if (!bounds.isValid()) continue;
       const largKm = bounds.getNorthEast().distanceTo(bounds.getSouthWest()) / 1000;
-      if (largKm > 5) continue; // descarta distritos grandes
+      if (largKm > 8) continue; // descarta distritos grandes
 
       const nomeBairro = (feature.properties && feature.properties.name) || 'Bairro';
       const { fill, border, weight } = corPoligono(0);
@@ -6033,6 +6036,9 @@ async function atualizarMapaClientes() {
 
     // Segundo passo: redesenha por cima os bairros com clientes destacados
     for (const [nomeBairro, clientes] of Object.entries(bairroClientes)) {
+      const nomeNorm = nomeBairro.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      if (BAIRROS_SKIP_POLYGON.has(nomeNorm) || BAIRROS_SKIP_POLYGON.has(nomeBairro.toLowerCase())) continue;
+
       const feature = encontrarBairroGeoJSON(nomeBairro, geojson);
       if (!feature) continue;
 
@@ -6040,7 +6046,7 @@ async function atualizarMapaClientes() {
       const bounds = camada.getBounds();
       if (!bounds.isValid()) continue;
       const largKm = bounds.getNorthEast().distanceTo(bounds.getSouthWest()) / 1000;
-      if (largKm > 5) continue;
+      if (largKm > 8) continue;
 
       const _temAtraso = clientes.some(c => (_comportamento[(c.nome||'').toLowerCase().trim()]||{}).temAtraso);
       const _temAtivo  = clientes.some(c => (_comportamento[(c.nome||'').toLowerCase().trim()]||{}).ativo);
@@ -7817,7 +7823,7 @@ async function loadData(mostrarLoading){
       if (!nome) return;
       // Cria ou atualiza pasta com endereço da planilha
       if (!_pastas[id]) _pastas[id] = { id, nome };
-      if (endereco) _pastas[id].endereco = endereco; // sempre usa endereço da planilha (fonte de verdade)
+      if (endereco && !_pastas[id].endereco) _pastas[id].endereco = endereco;
       // Atualiza nome/telefone/empresa se pasta não tiver
       if (!_pastas[id].tel) _pastas[id].tel = String(row[3]||'').trim();
       if (!_pastas[id].empresa) _pastas[id].empresa = String(row[6]||'').trim();
