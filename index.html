@@ -83,18 +83,32 @@ body.fs-mode #fs-wrapper #main{flex:1;overflow-y:auto;}
 .fullscreen-btn.fs-active{border-color:rgba(201,146,42,0.5);color:var(--gold2);}
 /* ── SIDEBAR NAV ── */
 .dashboard-layout{display:flex;min-height:calc(100vh - 58px);gap:0;}
-.sidebar{width:220px;min-width:220px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:18px 0 24px;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;flex-shrink:0;}
-.sidebar-section-lbl{font-family:'Source Sans 3',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.18em;color:var(--muted2);text-transform:uppercase;padding:14px 18px 6px;margin-top:4px;}
+.sidebar{width:220px;min-width:220px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:18px 0 24px;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;overflow-x:hidden;flex-shrink:0;transition:width 0.28s cubic-bezier(.4,0,.2,1), min-width 0.28s cubic-bezier(.4,0,.2,1), padding 0.28s cubic-bezier(.4,0,.2,1);}
+.sidebar-section-lbl{font-family:'Source Sans 3',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.18em;color:var(--muted2);text-transform:uppercase;padding:14px 18px 6px;margin-top:4px;transition:opacity 0.15s, height 0.2s, padding 0.2s, margin 0.2s;white-space:nowrap;overflow:hidden;}
 .sidebar-section-lbl:first-child{margin-top:0;}
 .nav-tab{display:flex;align-items:center;gap:10px;padding:10px 18px;font-family:'Source Sans 3',sans-serif;font-size:0.75rem;font-weight:600;letter-spacing:0.05em;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all 0.18s;text-transform:uppercase;user-select:none;border-left:2px solid transparent;position:relative;}
 .nav-tab .tab-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0;}
+.nav-tab .tab-label{transition:opacity 0.15s, width 0.2s;overflow:hidden;}
 .nav-tab:hover{color:var(--text);background:rgba(255,255,255,0.03);border-left-color:var(--border2);}
 .nav-tab.active{color:var(--gold);background:rgba(201,146,42,0.07);border-left-color:var(--gold);}
 .nav-tab.active::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-right:5px solid var(--border);}
-.sidebar-divider{height:1px;background:var(--border);margin:8px 18px;}
+.sidebar-divider{height:1px;background:var(--border);margin:8px 18px;transition:opacity 0.15s, margin 0.2s;}
 .tab-content-area{flex:1;min-width:0;padding:24px 24px 40px;}
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
+/* Botão de colapso */
+.sidebar-toggle-btn{display:flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:6px;cursor:pointer;color:var(--muted);font-size:0.80rem;margin:0 auto 10px auto;flex-shrink:0;transition:all 0.18s, transform 0.28s cubic-bezier(.4,0,.2,1);user-select:none;line-height:1;}
+.sidebar-toggle-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,146,42,0.07);}
+/* Estado colapsado */
+.sidebar.collapsed{width:46px;min-width:46px;padding:12px 0;}
+.sidebar.collapsed .sidebar-section-lbl{opacity:0;height:0;padding-top:0;padding-bottom:0;margin-top:0;margin-bottom:0;pointer-events:none;}
+.sidebar.collapsed .sidebar-divider{opacity:0;margin-top:2px;margin-bottom:2px;}
+.sidebar.collapsed .nav-tab{padding:10px 0;justify-content:center;}
+.sidebar.collapsed .nav-tab .tab-label{opacity:0;width:0;pointer-events:none;}
+.sidebar.collapsed .nav-tab.active::after{display:none;}
+.sidebar.collapsed .sidebar-toggle-btn{transform:rotate(180deg);}
+/* Tooltip ao passar o mouse quando colapsado */
+.sidebar.collapsed .nav-tab:hover::before{content:attr(data-label);position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);background:var(--s3);border:1px solid var(--border2);border-radius:7px;padding:5px 11px;font-size:0.73rem;font-weight:600;color:var(--text);white-space:nowrap;letter-spacing:0.04em;z-index:200;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,0.5);}
 /* Remove old wrap padding since sidebar handles layout */
 .wrap{max-width:none;margin:0;padding:0;}
 @media(max-width:768px){
@@ -106,6 +120,7 @@ body.fs-mode #fs-wrapper #main{flex:1;overflow-y:auto;}
   .sidebar-section-lbl{display:none;}
   .sidebar-divider{display:none;}
   .tab-content-area{padding:16px 12px 40px;}
+  .sidebar-toggle-btn{display:none;}
 }
 .section-label{font-family:'Source Sans 3',sans-serif;font-size:0.74rem;font-weight:700;letter-spacing:0.2em;color:var(--muted);margin:24px 0 12px;border-left:2px solid var(--gold);padding-left:10px;text-transform:uppercase;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
@@ -727,24 +742,25 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
 <div class="dashboard-layout">
 
 <!-- SIDEBAR -->
-<nav class="sidebar">
+<nav class="sidebar" id="main-sidebar">
+  <div class="sidebar-toggle-btn" id="sidebar-toggle-btn" title="Recolher menu">‹</div>
   <div class="sidebar-section-lbl">Principal</div>
-  <div class="nav-tab active" data-tab="visao"><span class="tab-icon">🎯</span><span class="tab-label">Central de Comando</span></div>
-  <div class="nav-tab" data-tab="financeiro"><span class="tab-icon">💰</span><span class="tab-label">Financeiro</span></div>
-  <div class="nav-tab" data-tab="caixa"><span class="tab-icon">🏦</span><span class="tab-label">Caixa</span></div>
+  <div class="nav-tab active" data-tab="visao" data-label="Central de Comando"><span class="tab-icon">🎯</span><span class="tab-label">Central de Comando</span></div>
+  <div class="nav-tab" data-tab="financeiro" data-label="Financeiro"><span class="tab-icon">💰</span><span class="tab-label">Financeiro</span></div>
+  <div class="nav-tab" data-tab="caixa" data-label="Caixa"><span class="tab-icon">🏦</span><span class="tab-label">Caixa</span></div>
   <div class="sidebar-divider"></div>
   <div class="sidebar-section-lbl">Gestão</div>
-  <div class="nav-tab" data-tab="risco"><span class="tab-icon">⚠️</span><span class="tab-label">Risco & Alertas</span></div>
-  <div class="nav-tab" data-tab="clientes"><span class="tab-icon">👤</span><span class="tab-label">Clientes</span></div>
-  <div class="nav-tab" data-tab="comparativo"><span class="tab-icon">📈</span><span class="tab-label">Comparativos</span></div>
+  <div class="nav-tab" data-tab="risco" data-label="Risco & Alertas"><span class="tab-icon">⚠️</span><span class="tab-label">Risco & Alertas</span></div>
+  <div class="nav-tab" data-tab="clientes" data-label="Clientes"><span class="tab-icon">👤</span><span class="tab-label">Clientes</span></div>
+  <div class="nav-tab" data-tab="comparativo" data-label="Comparativos"><span class="tab-icon">📈</span><span class="tab-label">Comparativos</span></div>
   <div class="sidebar-divider"></div>
   <div class="sidebar-section-lbl">Ferramentas</div>
-  <div class="nav-tab" data-tab="agenda"><span class="tab-icon">📅</span><span class="tab-label">Agenda</span></div>
-  <div class="nav-tab" data-tab="simulador"><span class="tab-icon">🧮</span><span class="tab-label">Simulador</span></div>
-  <div class="nav-tab" data-tab="fluxo90"><span class="tab-icon">🔮</span><span class="tab-label">Fluxo 90d</span></div>
-  <div class="nav-tab" data-tab="contratos"><span class="tab-icon">📄</span><span class="tab-label">Contratos</span></div>
-  <div class="nav-tab" data-tab="whatsapp"><span class="tab-icon">📱</span><span class="tab-label">WhatsApp</span></div>
-  <div class="nav-tab" data-tab="pdfs"><span class="tab-icon">🖨️</span><span class="tab-label">PDFs</span></div>
+  <div class="nav-tab" data-tab="agenda" data-label="Agenda"><span class="tab-icon">📅</span><span class="tab-label">Agenda</span></div>
+  <div class="nav-tab" data-tab="simulador" data-label="Simulador"><span class="tab-icon">🧮</span><span class="tab-label">Simulador</span></div>
+  <div class="nav-tab" data-tab="fluxo90" data-label="Fluxo 90d"><span class="tab-icon">🔮</span><span class="tab-label">Fluxo 90d</span></div>
+  <div class="nav-tab" data-tab="contratos" data-label="Contratos"><span class="tab-icon">📄</span><span class="tab-label">Contratos</span></div>
+  <div class="nav-tab" data-tab="whatsapp" data-label="WhatsApp"><span class="tab-icon">📱</span><span class="tab-label">WhatsApp</span></div>
+  <div class="nav-tab" data-tab="pdfs" data-label="PDFs"><span class="tab-icon">🖨️</span><span class="tab-label">PDFs</span></div>
 </nav>
 
 <!-- CONTENT AREA -->
@@ -6557,6 +6573,23 @@ function simPDF(){
   </div>
 
 </div>
+
+<script>
+// ── SIDEBAR COLLAPSE ──
+(function(){
+  const sidebar = document.getElementById('main-sidebar');
+  const btn = document.getElementById('sidebar-toggle-btn');
+  if (!sidebar || !btn) return;
+  const saved = localStorage.getItem('sidebar-collapsed');
+  if (saved === 'true') sidebar.classList.add('collapsed');
+  btn.addEventListener('click', () => {
+    const isCollapsed = sidebar.classList.toggle('collapsed');
+    btn.title = isCollapsed ? 'Expandir menu' : 'Recolher menu';
+    localStorage.setItem('sidebar-collapsed', isCollapsed);
+    setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 300);
+  });
+})();
+</script>
 </body></html>`;
   const w=window.open('','_blank');
   w.document.write(html);
