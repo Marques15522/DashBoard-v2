@@ -1079,7 +1079,10 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
           <div class="mapa-header-title">📍 Distribuição de Clientes — SP</div>
           <div style="font-size:0.86rem;color:var(--muted);margin-top:1px" id="mapa-clientes-count">Carregando...</div>
         </div>
-        <div class="mapa-header-badge"><div class="mapa-live-dot"></div> MAPA AO VIVO</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button onclick="limparCacheGeocodeERenderizar()" title="Limpar cache e re-renderizar mapa" style="background:transparent;border:1px solid rgba(201,146,42,0.25);color:var(--muted);border-radius:6px;padding:3px 8px;font-size:0.68rem;cursor:pointer;letter-spacing:0.04em;transition:all 0.15s;" onmouseover="this.style.borderColor='rgba(201,146,42,0.6)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='rgba(201,146,42,0.25)';this.style.color='var(--muted)'">↺ Resetar</button>
+          <div class="mapa-header-badge"><div class="mapa-live-dot"></div> MAPA AO VIVO</div>
+        </div>
       </div>
       <div id="mapa-clientes"></div>
       <div id="mapa-clientes-footer">
@@ -5569,6 +5572,17 @@ function salvarGeocodeCache() {
   try { localStorage.setItem('_geocode_cache_v2', JSON.stringify(_geocodeCache)); } catch(e) {}
 }
 
+function limparCacheGeocodeERenderizar() {
+  try { localStorage.removeItem('_geocode_cache_v2'); } catch(e) {}
+  _geocodeCache = {};
+  // Reseta o mapa para forçar re-renderização completa
+  if (_mapaLeaflet) {
+    _mapaMarkers.forEach(m => m.remove()); _mapaMarkers = [];
+    _mapaPoligonos.forEach(p => p.remove()); _mapaPoligonos = [];
+    atualizarMapaClientes();
+  }
+}
+
 // Dicionário de bairros SP para fallback e detecção de nome de bairro
 const SP_BAIRROS = {
   'cidade lider':[-23.5657,-46.4742],'cidade líder':[-23.5657,-46.4742],
@@ -5995,7 +6009,17 @@ async function atualizarMapaClientes() {
     else                                             { cor = '#c9922a'; status = 'Cadastrado'; }
 
     // Detecta bairro pelo endereço
-    const nomeBairro = extrairNomeBairro(p.endereco);
+    let nomeBairro = extrairNomeBairro(p.endereco);
+
+    // Fallback: se não encontrou pelo texto, tenta pelo bairro mais próximo das coords geocodificadas
+    if (!nomeBairro && coords) {
+      let menorDist = Infinity;
+      for (const [nb, [blat, blng]] of Object.entries(SP_BAIRROS)) {
+        const d = L.latLng(coords[0], coords[1]).distanceTo(L.latLng(blat, blng));
+        if (d < menorDist && d < 1500) { menorDist = d; nomeBairro = nb; }
+      }
+    }
+
     if (nomeBairro) {
       if (!bairroClientes[nomeBairro]) bairroClientes[nomeBairro] = [];
       // Evita duplicar o mesmo cliente no agrupamento por bairro
@@ -6004,17 +6028,21 @@ async function atualizarMapaClientes() {
       }
     }
 
-    // Se bairro conhecido e geocode retornou ponto longe demais (>4km), usa centroide do bairro
+    // Se bairro conhecido: usa centroide do bairro sempre (garante que o pin fica dentro da área)
+    // Fallback: se geocode retornou ponto muito longe (>4km), também usa centroide
     let lat = coords[0], lng = coords[1];
     if (nomeBairro && SP_BAIRROS[nomeBairro]) {
       const [blat, blng] = SP_BAIRROS[nomeBairro];
       const distKm = L.latLng(lat, lng).distanceTo(L.latLng(blat, blng)) / 1000;
-      if (distKm > 4) { lat = blat; lng = blng; }
+      // Usa centroide do bairro se: (a) ponto fora do bairro (>1.5km do centroide), ou
+      // (b) o geocode retornou um ponto longe demais, indicando bairro errado
+      if (distKm > 1.5) { lat = blat; lng = blng; }
     }
 
-    const bairroKey = coords.map(c => c.toFixed(3)).join(',');
+    // Jitter baseado em lat/lng finais (pós-correção de bairro) para manter pins dentro da área
+    const bairroKey = [lat.toFixed(3), lng.toFixed(3)].join(',');
     bairroCount[bairroKey] = (bairroCount[bairroKey] || 0) + 1;
-    const jitter = Math.min(bairroCount[bairroKey] - 1, 5) * 0.0012;
+    const jitter = Math.min(bairroCount[bairroKey] - 1, 5) * 0.0010;
     lat = lat + (Math.random() - 0.5) * jitter;
     lng = lng + (Math.random() - 0.5) * jitter;
 
