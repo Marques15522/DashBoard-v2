@@ -5564,18 +5564,18 @@ let _geocodeCache = {};
 let _bairrosGeoJSON = null; // cache do GeoJSON de bairros
 
 try {
-  // v3: invalida cache anterior (v2 tinha bug de word boundary no match de bairro)
-  localStorage.removeItem('_geocode_cache_v2');
-  const gc = localStorage.getItem('_geocode_cache_v3');
+  // v4: invalida cache anterior (v3 tinha threshold muito alto e fallback por distância errado)
+  
+  const gc = localStorage.getItem('_geocode_cache_v4');
   if (gc) _geocodeCache = JSON.parse(gc);
 } catch(e) { _geocodeCache = {}; }
 
 function salvarGeocodeCache() {
-  try { localStorage.setItem('_geocode_cache_v3', JSON.stringify(_geocodeCache)); } catch(e) {}
+  try { localStorage.setItem('_geocode_cache_v4', JSON.stringify(_geocodeCache)); } catch(e) {}
 }
 
 function limparCacheGeocodeERenderizar() {
-  try { localStorage.removeItem('_geocode_cache_v3'); } catch(e) {}
+  try { localStorage.removeItem('_geocode_cache_v4'); } catch(e) {}
   _geocodeCache = {};
   // Reseta o mapa para forçar re-renderização completa
   if (_mapaLeaflet) {
@@ -6030,13 +6030,28 @@ async function atualizarMapaClientes() {
     // Detecta bairro pelo endereço
     let nomeBairro = extrairNomeBairro(p.endereco);
 
-    // Fallback: se não encontrou pelo texto, tenta pelo bairro mais próximo das coords geocodificadas
+    // Fallback: se não encontrou pelo texto, faz reverse geocode para descobrir o bairro real
     if (!nomeBairro && coords) {
-      let menorDist = Infinity;
-      for (const [nb, [blat, blng]] of Object.entries(SP_BAIRROS)) {
-        const d = L.latLng(coords[0], coords[1]).distanceTo(L.latLng(blat, blng));
-        if (d < menorDist && d < 1500) { menorDist = d; nomeBairro = nb; }
-      }
+      // Tenta encontrar bairro pelo reverse geocode das coords finais
+      try {
+        const revUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords[0]}&lon=${coords[1]}&zoom=14&addressdetails=1`;
+        const revRes = await fetch(revUrl, { headers: { 'Accept-Language': 'pt-BR' } });
+        if (revRes.ok) {
+          const revData = await revRes.json();
+          const addr = revData.address || {};
+          // Nominatim pode retornar suburb, neighbourhood, quarter, city_district
+          const bairroTexto = (addr.suburb || addr.neighbourhood || addr.quarter || addr.city_district || '').toLowerCase();
+          if (bairroTexto) {
+            // Tenta match com SP_BAIRROS
+            const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'');
+            for (const nb of Object.keys(SP_BAIRROS)) {
+              if (norm(bairroTexto).includes(norm(nb)) || norm(nb).includes(norm(bairroTexto))) {
+                nomeBairro = nb; break;
+              }
+            }
+          }
+        }
+      } catch(e) {}
     }
 
     if (nomeBairro) {
@@ -6055,7 +6070,7 @@ async function atualizarMapaClientes() {
       const distKm = L.latLng(lat, lng).distanceTo(L.latLng(blat, blng)) / 1000;
       // Usa centroide do bairro se: (a) ponto fora do bairro (>1.5km do centroide), ou
       // (b) o geocode retornou um ponto longe demais, indicando bairro errado
-      if (distKm > 1.5) { lat = blat; lng = blng; }
+      if (distKm > 0.8) { lat = blat; lng = blng; }
     }
 
     // Jitter baseado em lat/lng finais (pós-correção de bairro) para manter pins dentro da área
@@ -6065,7 +6080,6 @@ async function atualizarMapaClientes() {
     lat = lat + (Math.random() - 0.5) * jitter;
     lng = lng + (Math.random() - 0.5) * jitter;
 
-    console.log("[MAPA DEBUG] "+p.nome+" | end: "+p.endereco+" | bairro: "+nomeBairro+" | coords: ["+lat.toFixed(5)+","+lng.toFixed(5)+"] | status: "+status);
     console.log("[MAPA DEBUG] "+p.nome+" | end: "+p.endereco+" | bairro: "+nomeBairro+" | coords: ["+lat.toFixed(5)+","+lng.toFixed(5)+"] | status: "+status);
     plotQueue.push({ p, lat, lng, cor, status });
     plotados++;
@@ -6178,20 +6192,6 @@ async function atualizarMapaClientes() {
       : `${pastas.length} cliente(s) cadastrado(s) — adicione endereços para visualizar`;
   }
 
-  // PAINEL DEBUG — mostra diagnóstico de cada cliente no mapa
-  let debugEl = document.getElementById('mapa-debug-panel');
-  if (!debugEl) {
-    debugEl = document.createElement('div');
-    debugEl.id = 'mapa-debug-panel';
-    debugEl.style.cssText = 'margin:8px 14px 0;background:#0a0d14;border:1px solid rgba(239,71,111,0.3);border-radius:8px;padding:10px 14px;font-family:monospace;font-size:0.72rem;color:#8a93b8;max-height:180px;overflow-y:auto;';
-    const wrap = document.getElementById('mapa-clientes-wrap');
-    if (wrap) wrap.appendChild(debugEl);
-  }
-  const debugLinhas = plotQueue.map(({p, lat, lng, cor, status}) => {
-    const nb = extrairNomeBairro(p.endereco) || '❌ NÃO DETECTADO';
-    return `<div style="border-bottom:1px solid #1a2035;padding:3px 0"><span style="color:#ef476f;font-weight:700">${p.nome}</span> | bairro: <span style="color:#f5d080">${nb}</span> | coords: [${lat.toFixed(4)}, ${lng.toFixed(4)}] | <span style="color:${cor}">${status}</span><br><span style="color:#4a5068">end: ${p.endereco}</span></div>`;
-  });
-  debugEl.innerHTML = '<div style="color:#ef476f;font-weight:700;margin-bottom:4px">🔍 DEBUG MAPA — remover após corrigir</div>' + (debugLinhas.length ? debugLinhas.join('') : '<div style="color:#5a6282">Nenhum cliente geocodificado</div>');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
