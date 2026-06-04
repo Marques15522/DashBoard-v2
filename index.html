@@ -6065,6 +6065,8 @@ async function atualizarMapaClientes() {
     lat = lat + (Math.random() - 0.5) * jitter;
     lng = lng + (Math.random() - 0.5) * jitter;
 
+    console.log("[MAPA DEBUG] "+p.nome+" | end: "+p.endereco+" | bairro: "+nomeBairro+" | coords: ["+lat.toFixed(5)+","+lng.toFixed(5)+"] | status: "+status);
+    console.log("[MAPA DEBUG] "+p.nome+" | end: "+p.endereco+" | bairro: "+nomeBairro+" | coords: ["+lat.toFixed(5)+","+lng.toFixed(5)+"] | status: "+status);
     plotQueue.push({ p, lat, lng, cor, status });
     plotados++;
 
@@ -6175,6 +6177,21 @@ async function atualizarMapaClientes() {
       ? `${plotados} cliente(s) no mapa · clique para detalhes`
       : `${pastas.length} cliente(s) cadastrado(s) — adicione endereços para visualizar`;
   }
+
+  // PAINEL DEBUG — mostra diagnóstico de cada cliente no mapa
+  let debugEl = document.getElementById('mapa-debug-panel');
+  if (!debugEl) {
+    debugEl = document.createElement('div');
+    debugEl.id = 'mapa-debug-panel';
+    debugEl.style.cssText = 'margin:8px 14px 0;background:#0a0d14;border:1px solid rgba(239,71,111,0.3);border-radius:8px;padding:10px 14px;font-family:monospace;font-size:0.72rem;color:#8a93b8;max-height:180px;overflow-y:auto;';
+    const wrap = document.getElementById('mapa-clientes-wrap');
+    if (wrap) wrap.appendChild(debugEl);
+  }
+  const debugLinhas = plotQueue.map(({p, lat, lng, cor, status}) => {
+    const nb = extrairNomeBairro(p.endereco) || '❌ NÃO DETECTADO';
+    return `<div style="border-bottom:1px solid #1a2035;padding:3px 0"><span style="color:#ef476f;font-weight:700">${p.nome}</span> | bairro: <span style="color:#f5d080">${nb}</span> | coords: [${lat.toFixed(4)}, ${lng.toFixed(4)}] | <span style="color:${cor}">${status}</span><br><span style="color:#4a5068">end: ${p.endereco}</span></div>`;
+  });
+  debugEl.innerHTML = '<div style="color:#ef476f;font-weight:700;margin-bottom:4px">🔍 DEBUG MAPA — remover após corrigir</div>' + (debugLinhas.length ? debugLinhas.join('') : '<div style="color:#5a6282">Nenhum cliente geocodificado</div>');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
