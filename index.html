@@ -5564,16 +5564,18 @@ let _geocodeCache = {};
 let _bairrosGeoJSON = null; // cache do GeoJSON de bairros
 
 try {
-  const gc = localStorage.getItem('_geocode_cache_v2');
+  // v3: invalida cache anterior (v2 tinha bug de word boundary no match de bairro)
+  localStorage.removeItem('_geocode_cache_v2');
+  const gc = localStorage.getItem('_geocode_cache_v3');
   if (gc) _geocodeCache = JSON.parse(gc);
 } catch(e) { _geocodeCache = {}; }
 
 function salvarGeocodeCache() {
-  try { localStorage.setItem('_geocode_cache_v2', JSON.stringify(_geocodeCache)); } catch(e) {}
+  try { localStorage.setItem('_geocode_cache_v3', JSON.stringify(_geocodeCache)); } catch(e) {}
 }
 
 function limparCacheGeocodeERenderizar() {
-  try { localStorage.removeItem('_geocode_cache_v2'); } catch(e) {}
+  try { localStorage.removeItem('_geocode_cache_v3'); } catch(e) {}
   _geocodeCache = {};
   // Reseta o mapa para forçar re-renderização completa
   if (_mapaLeaflet) {
@@ -5619,20 +5621,37 @@ const SP_BAIRROS = {
 function extrairNomeBairro(endereco) {
   if (!endereco) return null;
   const end = endereco.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  // Usa word boundary para evitar "bras" dentro de "brasil" ou "belem" dentro de outro termo
+  // Retorna o match mais específico (nome mais longo que aparece no endereço)
+  let melhor = null;
   for (const bairro of Object.keys(SP_BAIRROS)) {
     const bNorm = bairro.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    if (end.includes(bNorm)) return bairro;
+    // Verifica se o bairro aparece como palavra isolada no endereço
+    const regex = new RegExp('(?:^|[\\s,\\-/])' + bNorm.replace(/[-]/g,'[-]') + '(?=$|[\\s,\\-/])', 'i');
+    if (regex.test(end)) {
+      // Prefere o match mais longo (mais específico)
+      if (!melhor || bNorm.length > melhor.bNorm.length) {
+        melhor = { bairro, bNorm };
+      }
+    }
   }
-  return null;
+  return melhor ? melhor.bairro : null;
 }
 
 function extrairBairroSP_fallback(endereco) {
   if (!endereco) return null;
   const end = endereco.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  let melhor = null;
   for (const [bairro, coords] of Object.entries(SP_BAIRROS)) {
     const bNorm = bairro.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    if (end.includes(bNorm)) return coords;
+    const regex = new RegExp('(?:^|[\\s,\\-/])' + bNorm.replace(/[-]/g,'[-]') + '(?=$|[\\s,\\-/])', 'i');
+    if (regex.test(end)) {
+      if (!melhor || bNorm.length > melhor.bNorm.length) {
+        melhor = { coords, bNorm };
+      }
+    }
   }
+  if (melhor) return melhor.coords;
   if (end.includes('sao paulo') || end.includes('sp')) {
     return [-23.5505 + (Math.random()-0.5)*0.1, -46.6333 + (Math.random()-0.5)*0.1];
   }
