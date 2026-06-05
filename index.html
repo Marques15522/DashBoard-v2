@@ -2964,18 +2964,43 @@ document.querySelectorAll('.nav-tab').forEach(tab=>{
 
 document.getElementById('today-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
 
+// ── Apps Script proxy URL (resolve CORS) ──
+const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxdjjEuSwxlYdGAvK7zQmRO3NRnt3Ex3V0Dfgf3K6l2e-4g6XlCQO2qOOyUtcOU4OmZKQ/exec';
+let _sheetCache={};
+
 async function fetchSheet(gid){
-  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}&t=${Date.now()}`;
+  // Se já temos no cache desta sessão de load, reutiliza
+  if(_sheetCache[gid]) return _sheetCache[gid];
   const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),12000);
+  const timeout=setTimeout(()=>controller.abort(),20000);
   try{
+    const url=APPS_SCRIPT_URL+'?gid='+gid+'&t='+Date.now();
     const r=await fetch(url,{cache:'no-store',signal:controller.signal});
     clearTimeout(timeout);
     if(!r.ok) throw new Error('HTTP '+r.status);
-    return csvToArray(await r.text());
+    const json=await r.json();
+    if(json.error) throw new Error(json.error);
+    // Converte array de objetos JSON → array 2D compatível com render()
+    // A primeira linha é o cabeçalho (chaves do primeiro objeto, normalizadas)
+    if(!json.data || !Array.isArray(json.data) || json.data.length===0) return [];
+    // Normaliza chaves: remove \n
+    const normalizeKey=k=>k.replace(/\n/g,' ').replace(/\s+/g,' ').trim();
+    const rawKeys=Object.keys(json.data[0]);
+    const normKeys=rawKeys.map(normalizeKey);
+    // Gera linhas 2D — a ordem das colunas segue o mapeamento CE/CP
+    const rows=json.data.map(obj=>{
+      const normObj={};
+      for(const k of rawKeys){ normObj[normalizeKey(k)]=obj[k]; }
+      return normKeys.map(k=>normObj[k]??'');
+    });
+    // Adiciona linha de cabeçalho na posição 0 para autoSkipCSV funcionar
+    const header=normKeys;
+    const result=[header,...rows];
+    _sheetCache[gid]=result;
+    return result;
   }catch(e){
     clearTimeout(timeout);
-    if(e.name==='AbortError') throw new Error('Tempo esgotado (12s). Verifique sua conexão ou se a planilha está pública.');
+    if(e.name==='AbortError') throw new Error('Tempo esgotado. Verifique sua conexão.');
     throw e;
   }
 }
@@ -7903,6 +7928,7 @@ async function loadData(mostrarLoading){
     error.classList.remove('show');
     main.classList.remove('visible');
   }
+  _sheetCache={}; // limpa cache a cada loadData
   try{
     const[empT,pagT,cliT]=await Promise.all([fetchSheet(GID_EMP),fetchSheetPag(),fetchSheet(GID_CLI)]);
     const empRows=empT.slice(autoSkipCSV(empT)),pagRows=pagT.slice(autoSkipCSV(pagT));
