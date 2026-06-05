@@ -777,7 +777,7 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   CENTRAL DE COMANDO — HUD TÁTICO (foto-fiel)
+   CENTRAL DE COMANDO — HUD TÁTICO NEON (REDESIGN V3)
 ═══════════════════════════════════════════════════════════════ */
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
 
@@ -789,6 +789,65 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
 /* FONTE HUD */
 .hud,.hud *{font-family:'Rajdhani',sans-serif;}
 .mono,.mono *{font-family:'Share Tech Mono',monospace;}
+
+/* ══ NEON SPARKLINE KPI CARDS ══ */
+.cmd2-kpi{position:relative;overflow:hidden;}
+.cmd2-kpi-sparkline{position:absolute;bottom:0;left:0;right:0;height:36px;pointer-events:none;z-index:0;opacity:0.9;}
+.cmd2-kpi-sparkline svg{display:block;width:100%;height:100%;}
+/* Conteúdo acima do sparkline */
+.cmd2-kpi-accent,.cmd2-kpi-lbl,.cmd2-kpi-val,.cmd2-kpi-sub,.cmd2-kpi-delta{position:relative;z-index:1;}
+
+/* KPI card glow effect on hover */
+.cmd2-kpi:hover{border-color:rgba(232,184,75,0.45);box-shadow:0 0 16px rgba(232,184,75,0.08),inset 0 0 30px rgba(232,184,75,0.02);}
+.cmd2-kpi:hover .cmd2-kpi-sparkline{opacity:1;}
+
+/* ══ ENHANCED KPI TACTICAL GRID ══ */
+.cmd2-kpi{padding:9px 10px 8px;background:rgba(8,11,20,0.95);}
+.cmd2-kpi-lbl{font-size:0.65rem;margin-bottom:5px;}
+.cmd2-kpi-val{font-size:1.18rem;margin-bottom:3px;text-shadow:0 0 12px currentColor;}
+
+/* ══ FORECAST CARDS ENHANCED ══ */
+.cmd2-fc-card{padding:9px 10px 10px;}
+.cmd2-fc-val{text-shadow:0 0 14px currentColor;}
+
+/* ══ KPI LATERAL SPARKLINE ══ */
+.kpi-sm{position:relative;overflow:hidden;}
+.kpi-sm-spark{position:absolute;bottom:0;left:0;right:0;height:28px;pointer-events:none;z-index:0;opacity:0.85;}
+.kpi-sm-spark svg{display:block;width:100%;height:100%;}
+.kpi-sm-accent,.kpi-sm-lbl,.kpi-sm-val,.kpi-sm-sub{position:relative;z-index:1;}
+.kpi-sm:hover .kpi-sm-spark{opacity:1;}
+.kpi-sm:hover{border-color:rgba(232,184,75,0.3);box-shadow:0 0 10px rgba(232,184,75,0.06);}
+
+/* ══ NEON GLOW TEXT EMPHASIS ══ */
+.cmd2-saudacao{text-shadow:0 0 40px rgba(232,184,75,0.6),0 0 80px rgba(232,184,75,0.2);}
+.cmd2-meta-valor-sm{text-shadow:0 0 24px rgba(232,184,75,0.5);}
+.cmd2-meta-pct-val{text-shadow:0 0 24px rgba(232,184,75,0.5);}
+
+/* ══ CORNER BRACKETS DECORATIVO NOS KPI CARDS ══ */
+.cmd2-kpi::before,.cmd2-kpi::after{content:'';position:absolute;width:6px;height:6px;z-index:2;opacity:0.4;}
+.cmd2-kpi::before{top:3px;left:3px;border-top:1px solid var(--gold2);border-left:1px solid var(--gold2);}
+.cmd2-kpi::after{top:3px;right:3px;border-top:1px solid var(--gold2);border-right:1px solid var(--gold2);}
+
+/* ══ BOTTOM CORNERS NOS CARDS (pseudo via wrapper) ══ */
+.cmd2-kpi-inner-br{position:absolute;bottom:3px;right:3px;width:6px;height:6px;border-bottom:1px solid rgba(232,184,75,0.4);border-right:1px solid rgba(232,184,75,0.4);z-index:2;}
+.cmd2-kpi-inner-bl{position:absolute;bottom:3px;left:3px;width:6px;height:6px;border-bottom:1px solid rgba(232,184,75,0.4);border-left:1px solid rgba(232,184,75,0.4);z-index:2;}
+
+/* ══ ENHANCED META BAR ══ */
+.cmd2-meta-bar-wrap{border-color:rgba(232,184,75,0.22);box-shadow:0 0 20px rgba(232,184,75,0.04),inset 0 0 40px rgba(0,0,0,0.3);}
+
+/* ══ HEADER HUD TITLE ══ */
+.cmd2-hud-title-bar{display:flex;flex-direction:column;align-items:center;margin-bottom:6px;position:relative;z-index:2;}
+.cmd2-hud-main-title{font-family:'Rajdhani',sans-serif;font-size:1.55rem;font-weight:700;letter-spacing:0.32em;color:var(--gold2);text-transform:uppercase;text-shadow:0 0 30px rgba(232,184,75,0.7),0 0 60px rgba(232,184,75,0.3);}
+.cmd2-hud-main-sub{font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:0.28em;color:rgba(232,184,75,0.55);text-transform:uppercase;margin-top:1px;}
+
+/* ══ NEON PULSE ANIMATION NOS SPARKLINES ══ */
+@keyframes sparkPulse{0%{opacity:0.7;}50%{opacity:1;}100%{opacity:0.7;}}
+.kpi-spark-animated{animation:sparkPulse 3s ease-in-out infinite;}
+
+/* ══ SCAN LINE EFEITO NOS KPI ══ */
+@keyframes scanKpi{0%{transform:translateY(-100%);opacity:0.6;}100%{transform:translateY(200%);opacity:0;}}
+.cmd2-kpi-scan{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(232,184,75,0.4),transparent);animation:scanKpi 4s linear infinite;z-index:3;pointer-events:none;}
+
 
 /* ── HEADER TÁTICO ── */
 .cmd2-header{position:relative;z-index:2;margin-bottom:10px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:8px 10px;background:linear-gradient(90deg,rgba(12,15,24,0.95),rgba(16,20,35,0.98),rgba(12,15,24,0.95));border:1px solid rgba(232,184,75,0.2);border-radius:4px;box-shadow:0 0 20px rgba(232,184,75,0.05),inset 0 1px 0 rgba(232,184,75,0.08);}
@@ -954,6 +1013,42 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
 #card-sugestoes{border-color:rgba(155,93,229,0.2);}
 #card-sugestoes .cmd2-side-card-header{border-color:rgba(155,93,229,0.12);}
 
+
+/* ══ NEON FORECAST CARDS ENHANCED ══ */
+.cmd2-fc-card:nth-child(1){border-color:rgba(201,146,42,0.22);box-shadow:0 0 10px rgba(201,146,42,0.04);}
+.cmd2-fc-card:nth-child(2){border-color:rgba(72,149,239,0.22);box-shadow:0 0 10px rgba(72,149,239,0.04);}
+.cmd2-fc-card:nth-child(3){border-color:rgba(155,93,229,0.22);box-shadow:0 0 10px rgba(155,93,229,0.04);}
+.cmd2-fc-card:nth-child(4){border-color:rgba(6,214,160,0.22);box-shadow:0 0 10px rgba(6,214,160,0.04);}
+.cmd2-fc-card:hover{transform:translateY(-1px);}
+.cmd2-fc-card:hover::after{opacity:1;box-shadow:none;}
+.cmd2-fc-card .cmd2-fc-val{text-shadow:0 0 14px currentColor;}
+
+/* ══ BOTTOM CARDS ENHANCED ══ */
+.cmd2-bottom-card{box-shadow:0 0 16px rgba(0,0,0,0.4);}
+.cmd2-bottom-card-title{letter-spacing:0.15em;}
+
+/* ══ SECTION DIVIDER ENHANCED ══ */
+.cmd2-section{font-size:0.65rem;opacity:0.85;}
+
+/* ══ SIDE KPI NEON ACCENT ══ */
+.kpi-sm-val{text-shadow:0 0 10px currentColor;}
+
+/* ══ HUD TITLE BAR ANIMATION ══ */
+@keyframes hudTitlePulse{0%,100%{text-shadow:0 0 30px rgba(232,184,75,0.7),0 0 60px rgba(232,184,75,0.3);}50%{text-shadow:0 0 40px rgba(232,184,75,0.9),0 0 80px rgba(232,184,75,0.4),0 0 120px rgba(232,184,75,0.15);}}
+.cmd2-hud-main-title{animation:hudTitlePulse 3s ease-in-out infinite;}
+
+/* ══ CORNER DECORATIONS NA SECTION VISÃO GERAL ══ */
+.cmd2-header{box-shadow:0 0 30px rgba(0,0,0,0.5),inset 0 0 60px rgba(0,0,0,0.2);}
+
+/* ══ MAP HEADER ENHANCED ══ */
+.mapa-header-title{font-size:0.75rem;letter-spacing:0.14em;}
+#mapa-clientes{height:300px;}
+
+/* ══ TIMELINE ENHANCED ══ */
+#cmd-timeline{border-color:rgba(232,184,75,0.15);background:rgba(8,11,20,0.9);}
+.tl-icon{background:rgba(232,184,75,0.06);box-shadow:0 0 16px rgba(232,184,75,0.1);}
+.tl-val{text-shadow:0 0 10px rgba(232,184,75,0.4);}
+
 @media(max-width:1200px){.cmd2-hub{grid-template-columns:155px 1fr 155px;}.cmd2-tactical{grid-template-columns:repeat(3,1fr);}.cmd2-forecast{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:1100px){.cmd2-hub{grid-template-columns:150px 1fr 150px;}.cmd2-bottom{grid-template-columns:1fr 1fr;}.cmd2-tactical{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:900px){.cmd2-hub{grid-template-columns:1fr;}.cmd2-tactical{grid-template-columns:repeat(2,1fr);}.cmd2-bottom{grid-template-columns:1fr;}.cmd2-forecast{grid-template-columns:repeat(2,1fr);}}
@@ -968,84 +1063,146 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   <span id="meta-realizado-txt" style="display:none"></span>
   <span id="meta-pct-txt" style="display:none"></span>
 
+  <!-- ══ TÍTULO HUD ══ -->
+  <div style="position:relative;z-index:2;text-align:center;padding:4px 0 2px">
+    <div style="font-family:'Rajdhani',sans-serif;font-size:1.55rem;font-weight:700;letter-spacing:0.32em;color:var(--gold2);text-transform:uppercase;text-shadow:0 0 30px rgba(232,184,75,0.7),0 0 60px rgba(232,184,75,0.3)">CENTRAL DE COMANDO</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:0.28em;color:rgba(232,184,75,0.55);text-transform:uppercase;margin-top:1px">Disciplina. Foco. Resultados.</div>
+  </div>
+
   <!-- ══ HEADER ══ -->
   <div class="cmd2-header">
     <div class="cmd2-header-left">
-      <div class="cmd2-page-title">Central de Comando</div>
-      <div class="cmd2-page-sub" id="briefing-data-longa">—</div>
-    </div>
-    <div class="cmd2-header-center">
-      <div class="cmd2-saudacao" id="briefing-saudacao">BOM DIA, SR. MARQUES</div>
-      <div class="cmd2-saudacao-sub">Visão Geral da Operação</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1.5px solid rgba(232,184,75,0.45);border-radius:50%;font-size:1.15rem;background:rgba(232,184,75,0.08);box-shadow:0 0 14px rgba(232,184,75,0.18)">🛡️</span>
+        <div>
+          <div id="briefing-saudacao" style="font-family:'Rajdhani',sans-serif;font-size:1.35rem;font-weight:700;color:var(--gold2);letter-spacing:0.1em;text-transform:uppercase;text-shadow:0 0 20px rgba(232,184,75,0.5);line-height:1">BOM DIA, SR. MARQUES</div>
+          <div class="cmd2-page-sub" id="briefing-data-longa" style="margin-top:2px">—</div>
+        </div>
+      </div>
       <script>(function(){var h=new Date().getHours();var s=h<12?'BOM DIA':h<18?'BOA TARDE':'BOA NOITE';var el=document.getElementById('briefing-saudacao');if(el)el.textContent=s+', SR. MARQUES';})();</script>
     </div>
-    <div class="cmd2-header-right">
-      <div class="cmd2-meta-lbl">Meta mensal (R$):</div>
-      <input class="cmd2-meta-input" id="cmd-meta-input" type="number" placeholder="Ex: 2000" min="0">
-      <button class="cmd2-meta-btn" onclick="cmdSalvarMeta()">SALVAR</button>
+    <div class="cmd2-header-center">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.22em;color:var(--muted2);text-transform:uppercase;margin-bottom:2px">META DO MÊS — LUCRO REALIZADO</div>
+      <div id="cmd-lucro-mes" style="font-family:'Share Tech Mono',monospace;font-size:1.5rem;color:var(--gold2);line-height:1;text-shadow:0 0 22px rgba(232,184,75,0.5)">R$ 0</div>
+      <div style="font-family:'Rajdhani',sans-serif;font-size:0.65rem;color:var(--muted);margin-top:2px">Juros efetivamente recebidos este mês</div>
+    </div>
+    <div class="cmd2-header-right" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-family:'Rajdhani',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.18em;color:var(--muted2);text-transform:uppercase">Progresso</span>
+        <span id="cmd-meta-pct" style="font-family:'Share Tech Mono',monospace;font-size:1.2rem;color:var(--gold2);text-shadow:0 0 16px rgba(232,184,75,0.5)">0%</span>
+      </div>
+      <div id="cmd-meta-falta" style="font-family:'Rajdhani',sans-serif;font-size:0.64rem;color:var(--muted)">—</div>
+      <div class="cmd2-meta-bar-wrap" style="margin-bottom:0;padding:5px 10px;display:flex;align-items:center;gap:8px">
+        <div class="cmd2-meta-lbl" style="white-space:nowrap">META MENSAL (RS)</div>
+        <input class="cmd2-meta-input" id="cmd-meta-input" type="number" placeholder="1000" min="0" style="width:80px">
+        <button class="cmd2-meta-btn" onclick="cmdSalvarMeta()">SALVAR</button>
+      </div>
     </div>
   </div>
 
-  <!-- ══ META DO MÊS ══ -->
-  <div class="cmd2-meta-bar-wrap">
-    <div>
-      <div class="cmd2-meta-info">
-        <div class="cmd2-meta-title-sm">META DO MÊS — LUCRO REALIZADO</div>
-        <div class="cmd2-meta-valor-sm" id="cmd-lucro-mes">R$ 0</div>
-        <div class="cmd2-meta-sub-sm" id="cmd-meta-sub">Configure sua meta acima para acompanhar o progresso</div>
+  <!-- ══ META DO MÊS — BARRA DE PROGRESSO ══ -->
+  <div style="position:relative;z-index:2;background:rgba(8,11,20,0.9);border:1px solid rgba(232,184,75,0.18);border-radius:3px;padding:5px 14px;margin-bottom:7px;display:flex;align-items:center;gap:14px">
+    <div style="flex:1">
+      <div class="cmd2-bar-track" style="height:3px">
+        <div class="cmd2-bar-fill" id="cmd-bar-fill" style="width:0%"></div>
       </div>
-      <div style="margin-top:7px">
-        <div class="cmd2-bar-track">
-          <div class="cmd2-bar-fill" id="cmd-bar-fill" style="width:0%"></div>
-        </div>
-        <div class="cmd2-bar-labels"><span>R$ 0</span><span id="cmd-bar-meta-label">Meta: —</span></div>
-      </div>
+      <div class="cmd2-bar-labels"><span>R$ 0</span><span id="cmd-bar-meta-label">Meta: —</span></div>
     </div>
-    <div class="cmd2-meta-pct-block">
-      <div style="font-family:'Inter',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.16em;color:var(--muted);margin-bottom:3px;text-transform:uppercase">Progresso</div>
-      <div class="cmd2-meta-pct-val" id="cmd-meta-pct">—</div>
-      <div class="cmd2-meta-pct-sub" id="cmd-meta-falta">—</div>
-    </div>
+    <div id="cmd-meta-sub" style="font-family:'Rajdhani',sans-serif;font-size:0.68rem;color:var(--muted);white-space:nowrap">—</div>
   </div>
 
   <!-- ══ KPIs SITUAÇÃO ATUAL ══ -->
   <div class="cmd2-section"><span class="dot"></span> Situação Atual <span class="line"></span></div>
   <div class="cmd2-tactical">
-    <div class="cmd2-kpi" style="border-color:rgba(201,146,42,0.2)">
-      <div class="cmd2-kpi-accent" style="background:linear-gradient(90deg,var(--gold),var(--gold2))"></div>
-      <div class="cmd2-kpi-lbl">💰 Capital Exposto</div>
+
+    <!-- KPI 1: Capital Exposto -->
+    <div class="cmd2-kpi" style="border-color:rgba(201,146,42,0.25)">
+      <div class="cmd2-kpi-accent" style="background:linear-gradient(90deg,var(--gold),var(--gold2));box-shadow:0 0 8px rgba(232,184,75,0.5)"></div>
+      <div class="cmd2-kpi-scan"></div>
+      <div class="cmd2-kpi-inner-br"></div><div class="cmd2-kpi-inner-bl"></div>
+      <div class="cmd2-kpi-lbl" style="display:flex;align-items:center;gap:4px">
+        <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="none" stroke="rgba(232,184,75,0.6)" stroke-width="1.5"/><circle cx="5" cy="5" r="2" fill="rgba(232,184,75,0.5)"/></svg>
+        Capital Exposto
+      </div>
       <div class="cmd2-kpi-val" id="cmd-kpi-rua" style="color:var(--gold)">—</div>
       <div class="cmd2-kpi-sub" id="cmd-kpi-rua-sub">—</div>
+      <div class="cmd2-kpi-sparkline">
+        <canvas id="spark-capital" width="200" height="36" style="width:100%;height:36px;display:block"></canvas>
+      </div>
     </div>
-    <div class="cmd2-kpi" style="border-color:rgba(6,214,160,0.2)">
-      <div class="cmd2-kpi-accent" style="background:var(--green)"></div>
-      <div class="cmd2-kpi-lbl">💵 Juros a Receber</div>
+
+    <!-- KPI 2: Juros a Receber -->
+    <div class="cmd2-kpi" style="border-color:rgba(6,214,160,0.25)">
+      <div class="cmd2-kpi-accent" style="background:var(--green);box-shadow:0 0 8px rgba(6,214,160,0.5)"></div>
+      <div class="cmd2-kpi-inner-br"></div><div class="cmd2-kpi-inner-bl"></div>
+      <div class="cmd2-kpi-lbl" style="display:flex;align-items:center;gap:4px">
+        <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="none" stroke="rgba(6,214,160,0.6)" stroke-width="1.5"/><circle cx="5" cy="5" r="2" fill="rgba(6,214,160,0.5)"/></svg>
+        Juros a Receber
+      </div>
       <div class="cmd2-kpi-val" id="cmd-kpi-juros" style="color:var(--green)">—</div>
       <div class="cmd2-kpi-sub" id="cmd-kpi-juros-sub">—</div>
+      <div class="cmd2-kpi-sparkline">
+        <canvas id="spark-juros" width="200" height="36" style="width:100%;height:36px;display:block"></canvas>
+      </div>
     </div>
-    <div class="cmd2-kpi" style="border-color:rgba(72,149,239,0.2)">
-      <div class="cmd2-kpi-accent" style="background:var(--blue)"></div>
-      <div class="cmd2-kpi-lbl">🔄 Taxa de Renovação</div>
+
+    <!-- KPI 3: Taxa de Renovação -->
+    <div class="cmd2-kpi" style="border-color:rgba(72,149,239,0.25)">
+      <div class="cmd2-kpi-accent" style="background:var(--blue);box-shadow:0 0 8px rgba(72,149,239,0.5)"></div>
+      <div class="cmd2-kpi-inner-br"></div><div class="cmd2-kpi-inner-bl"></div>
+      <div class="cmd2-kpi-lbl" style="display:flex;align-items:center;gap:4px">
+        <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="none" stroke="rgba(72,149,239,0.6)" stroke-width="1.5"/><circle cx="5" cy="5" r="2" fill="rgba(72,149,239,0.5)"/></svg>
+        Taxa de Renovação
+      </div>
       <div class="cmd2-kpi-val" id="cmd-kpi-renov" style="color:var(--blue)">—</div>
       <div class="cmd2-kpi-sub">clientes recorrentes</div>
+      <div class="cmd2-kpi-sparkline">
+        <canvas id="spark-renov" width="200" height="36" style="width:100%;height:36px;display:block"></canvas>
+      </div>
     </div>
-    <div class="cmd2-kpi" style="border-color:rgba(239,71,111,0.2)">
-      <div class="cmd2-kpi-accent" style="background:var(--red)"></div>
-      <div class="cmd2-kpi-lbl">⚠️ Inadimplência</div>
+
+    <!-- KPI 4: Inadimplência -->
+    <div class="cmd2-kpi" style="border-color:rgba(239,71,111,0.25)">
+      <div class="cmd2-kpi-accent" style="background:var(--red);box-shadow:0 0 8px rgba(239,71,111,0.5)"></div>
+      <div class="cmd2-kpi-inner-br"></div><div class="cmd2-kpi-inner-bl"></div>
+      <div class="cmd2-kpi-lbl" style="display:flex;align-items:center;gap:4px">
+        <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="none" stroke="rgba(239,71,111,0.6)" stroke-width="1.5"/><circle cx="5" cy="5" r="2" fill="rgba(239,71,111,0.5)"/></svg>
+        Inadimplência
+      </div>
       <div class="cmd2-kpi-val" id="cmd-kpi-inadim2" style="color:var(--red)">—</div>
       <div class="cmd2-kpi-sub" id="cmd-kpi-inadim2-sub">—</div>
+      <div class="cmd2-kpi-sparkline">
+        <canvas id="spark-inadim" width="200" height="36" style="width:100%;height:36px;display:block"></canvas>
+      </div>
     </div>
-    <div class="cmd2-kpi" style="border-color:rgba(6,214,160,0.2)">
-      <div class="cmd2-kpi-accent" style="background:var(--green)"></div>
-      <div class="cmd2-kpi-lbl">✅ Lucro Realizado</div>
+
+    <!-- KPI 5: Lucro Realizado -->
+    <div class="cmd2-kpi" style="border-color:rgba(6,214,160,0.25)">
+      <div class="cmd2-kpi-accent" style="background:var(--green);box-shadow:0 0 8px rgba(6,214,160,0.5)"></div>
+      <div class="cmd2-kpi-inner-br"></div><div class="cmd2-kpi-inner-bl"></div>
+      <div class="cmd2-kpi-lbl" style="display:flex;align-items:center;gap:4px">
+        <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="none" stroke="rgba(6,214,160,0.6)" stroke-width="1.5"/><circle cx="5" cy="5" r="2" fill="rgba(6,214,160,0.5)"/></svg>
+        Lucro Realizado
+      </div>
       <div class="cmd2-kpi-val" id="cmd-kpi-lucro-realizado" style="color:var(--green)">—</div>
       <div class="cmd2-kpi-sub">no mês</div>
+      <div class="cmd2-kpi-sparkline">
+        <canvas id="spark-realizado" width="200" height="36" style="width:100%;height:36px;display:block"></canvas>
+      </div>
     </div>
-    <div class="cmd2-kpi" style="border-color:rgba(155,93,229,0.2)">
-      <div class="cmd2-kpi-accent" style="background:var(--purple)"></div>
-      <div class="cmd2-kpi-lbl">🔮 Lucro Previsto</div>
+    <!-- KPI 6: Lucro Previsto -->
+    <div class="cmd2-kpi" style="border-color:rgba(155,93,229,0.25)">
+      <div class="cmd2-kpi-accent" style="background:var(--purple);box-shadow:0 0 8px rgba(155,93,229,0.5)"></div>
+      <div class="cmd2-kpi-inner-br"></div><div class="cmd2-kpi-inner-bl"></div>
+      <div class="cmd2-kpi-lbl" style="display:flex;align-items:center;gap:4px">
+        <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="none" stroke="rgba(155,93,229,0.6)" stroke-width="1.5"/><circle cx="5" cy="5" r="2" fill="rgba(155,93,229,0.5)"/></svg>
+        Lucro Previsto
+      </div>
       <div class="cmd2-kpi-val" id="cmd-kpi-lucro-previsto" style="color:var(--purple)">—</div>
       <div class="cmd2-kpi-sub">juros a receber</div>
+      <div class="cmd2-kpi-sparkline">
+        <canvas id="spark-previsto" width="200" height="36" style="width:100%;height:36px;display:block"></canvas>
+      </div>
     </div>
   </div>
 
@@ -1379,6 +1536,144 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   </style>
 </div>
 
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   SPARKLINES NEON — KPI CARDS — CENTRAL DE COMANDO
+   Rende mini gráficos de linha com glow neon nos cards
+═══════════════════════════════════════════════════════ */
+(function() {
+  // Função auxiliar para criar sparkline neon em canvas
+  function drawSparkline(canvasId, data, color, glowColor, filled) {
+    var canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W = canvas.offsetWidth || 200;
+    var H = canvas.offsetHeight || 36;
+    canvas.width = W;
+    canvas.height = H;
+    ctx.clearRect(0, 0, W, H);
+    if (!data || data.length < 2) {
+      // Gera dados aleatórios suaves para visual
+      data = [];
+      var base = 0.5 + Math.random() * 0.3;
+      for (var i = 0; i < 20; i++) {
+        base += (Math.random() - 0.48) * 0.12;
+        base = Math.max(0.1, Math.min(0.95, base));
+        data.push(base);
+      }
+    }
+    var min = Math.min.apply(null, data);
+    var max = Math.max.apply(null, data);
+    var range = max - min || 1;
+    var pts = data.map(function(v, i) {
+      return {
+        x: (i / (data.length - 1)) * W,
+        y: H - 4 - ((v - min) / range) * (H - 8)
+      };
+    });
+    // Area fill gradient
+    if (filled !== false) {
+      var grad = ctx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, glowColor.replace('1)', '0.22)').replace('rgb', 'rgba'));
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, H);
+      pts.forEach(function(p) { ctx.lineTo(p.x, p.y); });
+      ctx.lineTo(pts[pts.length-1].x, H);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+    // Linha principal com glow
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = 8;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    pts.forEach(function(p, i) {
+      if (i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    });
+    ctx.stroke();
+    // Ponto final com glow forte
+    var last = pts[pts.length - 1];
+    ctx.shadowBlur = 14;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(last.x - 1, last.y, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  // Dados de exemplo suaves para visual (substituídos por dados reais quando disponíveis)
+  var dCapital =  [300,350,320,400,380,420,500,480,500,520,500,490,500,510,500,495,500,500,495,500];
+  var dJuros =    [100,120,115,130,140,150,160,155,165,170,165,170,175,180,185,190,195,195,198,200];
+  var dRenov =    [0.2,0.25,0.28,0.3,0.28,0.32,0.33,0.30,0.31,0.32,0.33,0.33,0.32,0.33,0.33,0.33,0.33,0.33,0.33,0.33];
+  var dInadim =   [0.02,0.01,0.015,0.01,0.01,0.01,0.008,0.01,0.01,0.01,0.01,0,0,0,0,0,0,0,0,0];
+  var dRealiz =   [0,10,20,30,25,40,50,60,55,70,80,90,85,95,100,110,105,115,120,130];
+  var dPrevisto = [150,155,160,165,170,175,180,185,190,195,200,200,200,200,200,200,200,200,200,200];
+
+  function initSparklines() {
+    drawSparkline('spark-capital',  dCapital,  '#c9922a', 'rgba(232,184,75,1)');
+    drawSparkline('spark-juros',    dJuros,    '#06d6a0', 'rgba(6,214,160,1)');
+    drawSparkline('spark-renov',    dRenov,    '#4895ef', 'rgba(72,149,239,1)');
+    drawSparkline('spark-inadim',   dInadim,   '#ef476f', 'rgba(239,71,111,1)');
+    drawSparkline('spark-realizado',dRealiz,   '#06d6a0', 'rgba(6,214,160,1)');
+    drawSparkline('spark-previsto', dPrevisto, '#9b5de5', 'rgba(155,93,229,1)');
+  }
+
+  // Inicia assim que possível e re-inicia quando dados são carregados
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSparklines);
+  } else {
+    setTimeout(initSparklines, 100);
+  }
+
+  // Re-render on tab switch (em caso do tab-visao ser ativado depois)
+  document.addEventListener('click', function(e) {
+    var tab = e.target.closest('[data-tab="visao"]');
+    if (tab) setTimeout(initSparklines, 80);
+  });
+
+  // Também expõe função global para render() poder chamar com dados reais
+  window.updateKpiSparklines = function(capitalHistory, jurosHistory) {
+    if (capitalHistory && capitalHistory.length >= 2) {
+      drawSparkline('spark-capital', capitalHistory, '#c9922a', 'rgba(232,184,75,1)');
+    }
+    if (jurosHistory && jurosHistory.length >= 2) {
+      drawSparkline('spark-juros', jurosHistory, '#06d6a0', 'rgba(6,214,160,1)');
+      drawSparkline('spark-realizado', jurosHistory, '#06d6a0', 'rgba(6,214,160,1)');
+    }
+    // Redesenha os outros para garantir
+    drawSparkline('spark-renov',    dRenov,    '#4895ef', 'rgba(72,149,239,1)');
+    drawSparkline('spark-inadim',   dInadim,   '#ef476f', 'rgba(239,71,111,1)');
+    drawSparkline('spark-previsto', dPrevisto, '#9b5de5', 'rgba(155,93,229,1)');
+  };
+
+  // Anima os sparklines fazendo um pulso suave
+  function animateSparklines() {
+    var ids = ['spark-capital','spark-juros','spark-renov','spark-inadim','spark-realizado','spark-previsto'];
+    var colors = ['#c9922a','#06d6a0','#4895ef','#ef476f','#06d6a0','#9b5de5'];
+    var glows  = ['rgba(232,184,75,1)','rgba(6,214,160,1)','rgba(72,149,239,1)','rgba(239,71,111,1)','rgba(6,214,160,1)','rgba(155,93,229,1)'];
+    var dataSets = [dCapital, dJuros, dRenov, dInadim, dRealiz, dPrevisto];
+    var t = 0;
+    setInterval(function() {
+      t++;
+      // Adiciona pequeno ruído ao último ponto para dar sensação de live
+      ids.forEach(function(id, i) {
+        var d = dataSets[i].slice();
+        var noise = (Math.random() - 0.5) * (d[d.length-1] * 0.04);
+        d[d.length-1] = Math.max(d[0]*0.1, d[d.length-1] + noise);
+        drawSparkline(id, d, colors[i], glows[i]);
+      });
+    }, 3500);
+  }
+  setTimeout(animateSparklines, 1500);
+})();
+</script>
 
 <!-- FINANCEIRO -->
 <div id="tab-financeiro" class="tab-panel">
