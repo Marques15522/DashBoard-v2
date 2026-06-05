@@ -1035,6 +1035,18 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
       <div class="cmd2-kpi-val" id="cmd-kpi-inadim2" style="color:var(--red)">—</div>
       <div class="cmd2-kpi-sub" id="cmd-kpi-inadim2-sub">—</div>
     </div>
+    <div class="cmd2-kpi" style="border-color:rgba(6,214,160,0.2)">
+      <div class="cmd2-kpi-accent" style="background:var(--green)"></div>
+      <div class="cmd2-kpi-lbl">✅ Lucro Realizado</div>
+      <div class="cmd2-kpi-val" id="cmd-kpi-lucro-realizado" style="color:var(--green)">—</div>
+      <div class="cmd2-kpi-sub">no mês</div>
+    </div>
+    <div class="cmd2-kpi" style="border-color:rgba(155,93,229,0.2)">
+      <div class="cmd2-kpi-accent" style="background:var(--purple)"></div>
+      <div class="cmd2-kpi-lbl">🔮 Lucro Previsto</div>
+      <div class="cmd2-kpi-val" id="cmd-kpi-lucro-previsto" style="color:var(--purple)">—</div>
+      <div class="cmd2-kpi-sub">juros a receber</div>
+    </div>
   </div>
 
   <!-- ══ PREVISÃO DE ENTRADA ══ -->
@@ -1054,6 +1066,11 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
       <div class="cmd2-fc-lbl">🔮 Este Mês (total)</div>
       <div class="cmd2-fc-val" id="cmd-fc-mes" style="color:var(--purple)">—</div>
       <div class="cmd2-fc-sub" id="cmd-fc-mes-sub">—</div>
+    </div>
+    <div class="cmd2-fc-card" style="border-color:rgba(6,214,160,0.2)">
+      <div class="cmd2-fc-lbl">⏱️ Prazo Médio</div>
+      <div class="cmd2-fc-val" id="cmd-fc-prazo" style="color:var(--green)">—</div>
+      <div class="cmd2-fc-sub">meses</div>
     </div>
   </div>
 
@@ -1167,33 +1184,57 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
         <div class="kpi-sm-sub">próximos 7 dias</div>
       </div>
       <div class="kpi-sm">
-        <div class="kpi-sm-accent" style="background:var(--green)"></div>
-        <div class="kpi-sm-lbl">Clientes Ativos</div>
-        <div class="kpi-sm-val" id="kpi-cli-ativos" style="color:var(--green)">—</div>
-        <div class="kpi-sm-sub" id="kpi-cli-sub">—</div>
+        <div class="kpi-sm-accent" style="background:var(--blue)"></div>
+        <div class="kpi-sm-lbl">Bairros</div>
+        <div class="kpi-sm-val" id="kpi-bairros" style="color:var(--blue)">—</div>
+        <div class="kpi-sm-sub">ativos</div>
       </div>
       <div class="kpi-sm">
-        <div class="kpi-sm-accent" style="background:var(--blue)"></div>
+        <div class="kpi-sm-accent" style="background:var(--green)"></div>
         <div class="kpi-sm-lbl">Lucro Realizado</div>
-        <div class="kpi-sm-val" id="kpi-realizado" style="color:var(--blue)">—</div>
+        <div class="kpi-sm-val" id="kpi-realizado" style="color:var(--green)">—</div>
         <div class="kpi-sm-sub">juros recebidos</div>
       </div>
       <div class="kpi-sm">
         <div class="kpi-sm-accent" style="background:var(--purple)"></div>
-        <div class="kpi-sm-lbl">Ticket Médio</div>
-        <div class="kpi-sm-val" id="kpi-ticket" style="color:var(--purple)">—</div>
-        <div class="kpi-sm-sub">por contrato ativo</div>
+        <div class="kpi-sm-lbl">Clientes</div>
+        <div class="kpi-sm-val" id="kpi-cli-ativos" style="color:var(--purple)">—</div>
+        <div class="kpi-sm-sub" id="kpi-cli-sub">ativos</div>
       </div>
       <div class="kpi-sm">
         <div class="kpi-sm-accent" style="background:var(--gold)"></div>
-        <div class="kpi-sm-lbl">Prazo Médio</div>
-        <div class="kpi-sm-val" id="kpi-prazo" style="color:var(--gold)">—</div>
-        <div class="kpi-sm-sub">meses</div>
+        <div class="kpi-sm-lbl">Ticket Médio</div>
+        <div class="kpi-sm-val" id="kpi-ticket" style="color:var(--gold)">—</div>
+        <div class="kpi-sm-sub">por contrato ativo</div>
+      </div>
+      <!-- Composição da Carteira — donut compacto -->
+      <div class="cmd2-side-card" style="border-color:rgba(232,184,75,0.18)">
+        <div class="cmd2-side-card-header">
+          <div class="cmd2-side-card-title">🍩 Composição da Carteira</div>
+        </div>
+        <div style="padding:8px 10px;display:flex;align-items:center;gap:10px">
+          <div style="position:relative;width:64px;height:64px;flex-shrink:0">
+            <canvas id="cmd-donut-composicao-col" width="64" height="64"></canvas>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none">
+              <div id="cmd-comp-pct-col" style="font-family:'Share Tech Mono',monospace;font-size:0.80rem;color:var(--gold2);line-height:1">—%</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px;flex:1">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-family:'Rajdhani',sans-serif;font-size:0.68rem;color:var(--gold)">● Capital</span>
+              <span id="cmd-comp-capital-col" style="font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--text)">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-family:'Rajdhani',sans-serif;font-size:0.68rem;color:var(--green)">● Juros</span>
+              <span id="cmd-comp-juros-col" style="font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--text)">—</span>
+            </div>
+          </div>
+        </div>
       </div>
       <!-- Sugestões -->
       <div id="card-sugestoes" class="cmd2-side-card" style="border-color:rgba(155,93,229,0.22)">
         <div class="cmd2-side-card-header" style="border-color:rgba(155,93,229,0.15)">
-          <div class="cmd2-side-card-title">💡 Sugestões</div>
+          <div class="cmd2-side-card-title">⚡ Alertas &amp; Sugestões</div>
           <button class="cmd2-side-btn" onclick="sugestoesAtualizar()"
             onmouseover="this.style.borderColor='var(--purple)';this.style.color='var(--purple)'"
             onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">↺</button>
@@ -1319,6 +1360,23 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   <span id="briefing-status" style="display:none"></span>
   <span id="briefing-cards" style="display:none"></span>
   <div id="briefing-dia" style="display:none"><div id="briefing-acoes" style="display:none"></div></div>
+
+  <!-- ══ LINHA DO TEMPO ══ -->
+  <div class="cmd2-section" style="margin-top:10px"><span class="dot"></span> Linha do Tempo — Atividades Recentes <span class="line"></span></div>
+  <div id="cmd-timeline" style="position:relative;z-index:2;background:rgba(12,15,24,0.85);border:1px solid rgba(232,184,75,0.12);border-radius:3px;padding:14px 20px;display:flex;align-items:flex-start;gap:0;overflow-x:auto">
+    <div id="cmd-timeline-inner" style="display:flex;align-items:flex-start;gap:0;min-width:100%;position:relative">
+      <!-- Populated by JS -->
+      <div style="padding:20px;font-family:'Rajdhani',sans-serif;font-size:0.80rem;color:var(--muted);text-align:center;width:100%">Carregando...</div>
+    </div>
+  </div>
+  <style>
+    .tl-step{display:flex;flex-direction:column;align-items:center;flex:1;min-width:160px;position:relative;}
+    .tl-step:not(:last-child)::after{content:'';position:absolute;top:20px;left:50%;right:-50%;height:1px;background:linear-gradient(90deg,rgba(232,184,75,0.4),rgba(232,184,75,0.1));z-index:0;}
+    .tl-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;position:relative;z-index:1;border:1px solid rgba(232,184,75,0.3);}
+    .tl-label{font-family:'Rajdhani',sans-serif;font-size:0.72rem;font-weight:700;color:var(--text);letter-spacing:0.08em;text-align:center;margin-top:8px;text-transform:uppercase;}
+    .tl-val{font-family:'Share Tech Mono',monospace;font-size:0.85rem;color:var(--gold2);text-align:center;margin-top:2px;}
+    .tl-sub{font-family:'Rajdhani',sans-serif;font-size:0.66rem;color:var(--muted);text-align:center;margin-top:1px;}
+  </style>
 </div>
 
 
@@ -2964,43 +3022,18 @@ document.querySelectorAll('.nav-tab').forEach(tab=>{
 
 document.getElementById('today-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
 
-// ── Apps Script proxy URL (resolve CORS) ──
-const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxdjjEuSwxlYdGAvK7zQmRO3NRnt3Ex3V0Dfgf3K6l2e-4g6XlCQO2qOOyUtcOU4OmZKQ/exec';
-let _sheetCache={};
-
 async function fetchSheet(gid){
-  // Se já temos no cache desta sessão de load, reutiliza
-  if(_sheetCache[gid]) return _sheetCache[gid];
+  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}&t=${Date.now()}`;
   const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),20000);
+  const timeout=setTimeout(()=>controller.abort(),12000);
   try{
-    const url=APPS_SCRIPT_URL+'?gid='+gid+'&t='+Date.now();
     const r=await fetch(url,{cache:'no-store',signal:controller.signal});
     clearTimeout(timeout);
     if(!r.ok) throw new Error('HTTP '+r.status);
-    const json=await r.json();
-    if(json.error) throw new Error(json.error);
-    // Converte array de objetos JSON → array 2D compatível com render()
-    // A primeira linha é o cabeçalho (chaves do primeiro objeto, normalizadas)
-    if(!json.data || !Array.isArray(json.data) || json.data.length===0) return [];
-    // Normaliza chaves: remove \n
-    const normalizeKey=k=>k.replace(/\n/g,' ').replace(/\s+/g,' ').trim();
-    const rawKeys=Object.keys(json.data[0]);
-    const normKeys=rawKeys.map(normalizeKey);
-    // Gera linhas 2D — a ordem das colunas segue o mapeamento CE/CP
-    const rows=json.data.map(obj=>{
-      const normObj={};
-      for(const k of rawKeys){ normObj[normalizeKey(k)]=obj[k]; }
-      return normKeys.map(k=>normObj[k]??'');
-    });
-    // Adiciona linha de cabeçalho na posição 0 para autoSkipCSV funcionar
-    const header=normKeys;
-    const result=[header,...rows];
-    _sheetCache[gid]=result;
-    return result;
+    return csvToArray(await r.text());
   }catch(e){
     clearTimeout(timeout);
-    if(e.name==='AbortError') throw new Error('Tempo esgotado. Verifique sua conexão.');
+    if(e.name==='AbortError') throw new Error('Tempo esgotado (12s). Verifique sua conexão ou se a planilha está pública.');
     throw e;
   }
 }
@@ -3162,6 +3195,9 @@ function render(empRows,pagRows){
   _s('kpi-cli-sub',cliInativos.length+' inativos');
   _s('kpi-realizado',fmt(lucroReal));
   _s('kpi-prazo',prazoMedio.toFixed(1));
+  // Bairros ativos (unique neighborhoods with active contracts)
+  const bairrosAtivos = new Set(abertos.map(e=>e.bairro).filter(Boolean)).size;
+  _s('kpi-bairros', bairrosAtivos || '—');
   _s('cli-ativos-n',cliAtivos.length);
 
   // CARDS TOPO
@@ -7928,7 +7964,6 @@ async function loadData(mostrarLoading){
     error.classList.remove('show');
     main.classList.remove('visible');
   }
-  _sheetCache={}; // limpa cache a cada loadData
   try{
     const[empT,pagT,cliT]=await Promise.all([fetchSheet(GID_EMP),fetchSheetPag(),fetchSheet(GID_CLI)]);
     const empRows=empT.slice(autoSkipCSV(empT)),pagRows=pagT.slice(autoSkipCSV(pagT));
@@ -8985,6 +9020,8 @@ function cmdRender(emps, pags){
   _s('cmd-kpi-renov', (renovPct*100).toFixed(0)+'%');
   _s('cmd-kpi-inadim2', (inadimPct*100).toFixed(1)+'%');
   _s('cmd-kpi-inadim2-sub', atrasados.length+' contrato(s) em atraso');
+  _s('cmd-kpi-lucro-realizado', fmt(lucroMes));
+  _s('cmd-kpi-lucro-previsto', fmt(totalJuros));
 
   // FORECAST
   const em7=new Date(hoje); em7.setDate(hoje.getDate()+7);
@@ -9004,6 +9041,10 @@ function cmdRender(emps, pags){
   const entraMesVal=entraMes.reduce((s,e)=>s+e.jProx,0)+lucroMes;
   _s('cmd-fc-mes', fmt(entraMesVal));
   _s('cmd-fc-mes-sub', 'recebido + a receber');
+
+  // Prazo médio
+  const prazoMedioCmd = abertos.length ? abertos.reduce((s,e)=>s+(e.prazo||0),0)/abertos.length : 0;
+  _s('cmd-fc-prazo', prazoMedioCmd.toFixed(1));
 
   // AGENDA 7 DIAS
   const diasSemana=['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
@@ -9112,12 +9153,58 @@ function cmdRender(emps, pags){
     });
   }
 
+  // DONUT COMPOSIÇÃO — coluna direita
+  const compCapVal = totalCap;
+  const compJurosVal = totalJuros;
+  const compTotal = compCapVal + compJurosVal || 1;
+  const compPct = compCapVal > 0 ? Math.round(compCapVal/compTotal*100) : 0;
+  _s('cmd-comp-pct-col', compPct+'%');
+  _s('cmd-comp-capital-col', fmt(compCapVal)+' ('+Math.round(compCapVal/compTotal*100)+'%)');
+  _s('cmd-comp-juros-col', fmt(compJurosVal)+' ('+Math.round(compJurosVal/compTotal*100)+'%)');
+  if(window._cmdCompColChart){window._cmdCompColChart.destroy();window._cmdCompColChart=null;}
+  const ctxCompCol=document.getElementById('cmd-donut-composicao-col');
+  if(ctxCompCol){
+    window._cmdCompColChart=new Chart(ctxCompCol.getContext('2d'),{
+      type:'doughnut',
+      data:{labels:['Capital','Juros'],datasets:[{data:[compCapVal,compJurosVal],backgroundColor:['rgba(201,146,42,0.85)','rgba(6,214,160,0.8)'],borderColor:'#0c0f18',borderWidth:2,hoverOffset:4}]},
+      options:{responsive:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)}`}}}}
+    });
+  }
+
   // Meta
   const metaSalva=parseFloat(localStorage.getItem('ci_meta_lucro'))||0;
   if(metaSalva>0){
     document.getElementById('cmd-meta-input').value=metaSalva;
   }
   cmdAtualizarMeta(metaSalva, lucroMes);
+
+  // ── LINHA DO TEMPO ──
+  const tlInner = document.getElementById('cmd-timeline-inner');
+  if(tlInner){
+    const mesAtualLucro = lucroMes;
+    const metaLucroLt = parseFloat(localStorage.getItem('ci_meta_lucro'))||0;
+    const pctMetaLt = metaLucroLt > 0 ? Math.round(mesAtualLucro/metaLucroLt*100) : 0;
+    const ultContr = emps.length > 0 ? [...emps].sort((a,b)=>new Date(b[10]||0)-new Date(a[10]||0))[0] : null;
+    const ultContNome = ultContr ? (ultContr[1]||'').split(' ').slice(0,3).join(' ') : '—';
+    const ultimoPag = pags.length > 0 ? [...pags].sort((a,b)=>b.data-a.data)[0] : null;
+    const agora = new Date();
+    function diffDias(d){if(!d)return null;const ms=agora-d;return Math.floor(ms/86400000);}
+    function fmtDias(d){if(d===null)return '';if(d===0)return 'hoje';if(d===1)return 'há 1 dia';return 'há '+d+' dias';}
+    const steps = [
+      {icon:'👤',bg:'rgba(201,146,42,0.12)',border:'rgba(201,146,42,0.4)',lbl:'Contrato criado',val:ultContNome,sub:fmtDias(diffDias(ultContr?new Date(ultContr[10]):null))},
+      {icon:'💵',bg:'rgba(6,214,160,0.10)',border:'rgba(6,214,160,0.4)',lbl:'Juros a receber',val:fmt(totalJuros),sub:fmtDias(1)},
+      {icon:'💳',bg:'rgba(72,149,239,0.10)',border:'rgba(72,149,239,0.4)',lbl:'Pagamento recebido',val:fmt(ultimoPag?ultimoPag.juros:0),sub:fmtDias(ultimoPag?diffDias(ultimoPag.data):null)||'hoje'},
+      {icon:'🎯',bg:'rgba(155,93,229,0.10)',border:'rgba(155,93,229,0.4)',lbl:'Meta do mês',val:pctMetaLt+'% concluído',sub:'hoje'}
+    ];
+    tlInner.innerHTML = steps.map((s,i)=>`
+      <div class="tl-step">
+        <div class="tl-icon" style="background:${s.bg};border-color:${s.border}">${s.icon}</div>
+        <div class="tl-label">${s.lbl}</div>
+        <div class="tl-val">${s.val}</div>
+        <div class="tl-sub">${s.sub}</div>
+      </div>
+    `).join('');
+  }
 }
 
 // Hook: chama cmdRender quando os dados são carregados
