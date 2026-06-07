@@ -792,32 +792,11 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
 .cmd2-header-center{flex:1;display:flex;align-items:center;justify-content:center;}
 .cmd2-saudacao{font-family:'Cormorant Garamond', serif;font-size:2.2rem;color:var(--gold);letter-spacing:0.1em;text-align:center;text-shadow:0 0 40px rgba(201,146,42,0.25);}
 .cmd2-header-right{display:flex;align-items:center;gap:8px;}
-.cmd2-meta-input{background:var(--s2);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.92rem;padding:7px 11px;outline:none;width:130px;transition:border-color 0.2s;}
-.cmd2-meta-input:focus{border-color:var(--gold);}
-.cmd2-meta-lbl{font-size:0.86rem;color:var(--muted);}
-.cmd2-meta-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07090e;border:none;border-radius:7px;padding:7px 14px;font-family:'Cormorant Garamond', serif;font-size:0.86rem;letter-spacing:0.1em;cursor:pointer;transition:opacity 0.2s;}
-.cmd2-meta-btn:hover{opacity:0.85;}
 
 /* SECTION DIVIDER */
 .cmd2-section{font-size:0.85rem;letter-spacing:0.22em;color:var(--muted2);text-transform:uppercase;margin:14px 0 10px;display:flex;align-items:center;gap:8px;position:relative;z-index:1;}
 .cmd2-section .line{flex:1;height:1px;background:var(--border);}
 .cmd2-section .dot{display:inline-block;width:18px;height:1px;background:var(--gold);opacity:0.6;}
-
-/* META PROGRESS BAR */
-.cmd2-meta-bar-wrap{position:relative;z-index:1;background:var(--s1);border:1px solid rgba(201,146,42,0.2);border-radius:12px;padding:14px 18px;margin-bottom:14px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;}
-.cmd2-meta-bar-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold3));border-radius:12px 12px 0 0;}
-.cmd2-meta-info{display:flex;flex-direction:column;gap:5px;}
-.cmd2-meta-title-sm{font-family:'Cormorant Garamond', serif;font-size:0.88rem;letter-spacing:0.18em;color:var(--muted);}
-.cmd2-meta-valor-sm{font-family:'Source Sans 3',sans-serif;font-size:1.6rem;font-weight:600;color:var(--gold);line-height:1;}
-.cmd2-meta-sub-sm{font-size:0.86rem;color:var(--muted);}
-.cmd2-bar-track{background:var(--border);border-radius:99px;height:8px;overflow:hidden;margin-top:4px;}
-.cmd2-bar-fill{height:100%;border-radius:99px;transition:width 1s cubic-bezier(.34,1.56,.64,1);background:linear-gradient(90deg,var(--gold),var(--gold2));}
-.cmd2-bar-fill.danger{background:linear-gradient(90deg,var(--red),#ff6b8a);}
-.cmd2-bar-fill.success{background:linear-gradient(90deg,var(--green),#0fffc7);}
-.cmd2-bar-labels{display:flex;justify-content:space-between;font-size:0.86rem;color:var(--muted);margin-top:3px;}
-.cmd2-meta-pct-block{text-align:right;}
-.cmd2-meta-pct-val{font-family:'Source Sans 3',sans-serif;font-size:2rem;font-weight:600;color:var(--gold2);line-height:1;}
-.cmd2-meta-pct-sub{font-size:0.86rem;color:var(--muted);margin-top:2px;}
 
 /* KPI STRIP TOPO */
 .cmd2-kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;position:relative;z-index:1;}
@@ -933,11 +912,6 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   <!-- IDs fantasma (JS referencia) -->
   <div id="alertasBanner"></div>
   <div id="notif-venc" style="display:none"><span id="notif-venc-texto"></span><span id="notif-venc-sub"></span></div>
-  <span id="meta-desc" style="display:none"></span>
-  <span id="meta-input" style="display:none"></span>
-  <span id="meta-bar-fill" style="display:none"></span>
-  <span id="meta-realizado-txt" style="display:none"></span>
-  <span id="meta-pct-txt" style="display:none"></span>
 
   <!-- ══ HEADER COMANDO ══ -->
   <div class="cmd2-header">
@@ -950,31 +924,6 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
       <script>(function(){var h=new Date().getHours();var s=h<12?'BOM DIA':h<18?'BOA TARDE':'BOA NOITE';var el=document.getElementById('briefing-saudacao');if(el)el.textContent=s+', SR. MARQUES';})();</script>
     </div>
     <div class="cmd2-header-right">
-      <div class="cmd2-meta-lbl">Meta mensal (R$):</div>
-      <input class="cmd2-meta-input" id="cmd-meta-input" type="number" placeholder="Ex: 2000" min="0">
-      <button class="cmd2-meta-btn" onclick="cmdSalvarMeta()">SALVAR</button>
-    </div>
-  </div>
-
-  <!-- ══ META DO MÊS ══ -->
-  <div class="cmd2-meta-bar-wrap">
-    <div>
-      <div class="cmd2-meta-info">
-        <div class="cmd2-meta-title-sm">META DO MÊS — LUCRO REALIZADO</div>
-        <div class="cmd2-meta-valor-sm" id="cmd-lucro-mes">R$ 0</div>
-        <div class="cmd2-meta-sub-sm" id="cmd-meta-sub">Configure sua meta acima para acompanhar o progresso</div>
-      </div>
-      <div style="margin-top:8px;">
-        <div class="cmd2-bar-track">
-          <div class="cmd2-bar-fill" id="cmd-bar-fill" style="width:0%"></div>
-        </div>
-        <div class="cmd2-bar-labels"><span>R$ 0</span><span id="cmd-bar-meta-label">Meta: —</span></div>
-      </div>
-    </div>
-    <div class="cmd2-meta-pct-block">
-      <div style="font-family:'Cormorant Garamond', serif;font-size:0.84rem;letter-spacing:0.16em;color:var(--muted);margin-bottom:4px;">PROGRESSO</div>
-      <div class="cmd2-meta-pct-val" id="cmd-meta-pct">—</div>
-      <div class="cmd2-meta-pct-sub" id="cmd-meta-falta">—</div>
     </div>
   </div>
 
@@ -5141,32 +5090,6 @@ function verificarVencimentos(abertos, hoje){
 }
 
 // ════════════════════════════════════════════════════════
-// META MENSAL DE JUROS
-// ════════════════════════════════════════════════════════
-function salvarMeta(){
-  const v=parseFloat(document.getElementById('meta-input')?.value)||0;
-  if(v>0) try{localStorage.setItem('meta_mensal',v);}catch(e){}
-  atualizarMetaBar(_lucroRealGlobal||0);
-}
-let _lucroRealGlobal=0;
-function atualizarMetaBar(lucroReal){
-  _lucroRealGlobal=lucroReal;
-  let meta=0;
-  try{meta=parseFloat(localStorage.getItem('meta_mensal'))||0;}catch(e){}
-  const input=document.getElementById('meta-input');
-  if(input&&!input.value&&meta>0) input.value=meta;
-  const pct=meta>0?Math.min(lucroReal/meta*100,100):0;
-  const fill=document.getElementById('meta-bar-fill');
-  const desc=document.getElementById('meta-desc');
-  const realTxt=document.getElementById('meta-realizado-txt');
-  const pctTxt=document.getElementById('meta-pct-txt');
-  if(fill) fill.style.width=pct+'%';
-  if(fill) fill.style.background=pct>=100?'linear-gradient(90deg,var(--green),#04a87b)':pct>=60?'linear-gradient(90deg,var(--gold),var(--gold2))':'linear-gradient(90deg,var(--red),#c9433a)';
-  if(desc) desc.textContent=meta>0?`Meta: R$ ${meta.toLocaleString('pt-BR')} · ${pct>=100?'✅ META ATINGIDA!':pct.toFixed(0)+'% concluída'}`:'Defina sua meta de juros para o mês →';
-  if(realTxt) realTxt.textContent=`R$ ${Math.round(lucroReal).toLocaleString('pt-BR')} realizados`;
-  if(pctTxt) pctTxt.textContent=meta>0?pct.toFixed(1)+'%':'—';
-}
-
 // ════════════════════════════════════════════════════════
 // SIMULADOR DE EMPRÉSTIMO
 // ════════════════════════════════════════════════════════
@@ -8877,44 +8800,6 @@ window.addEventListener('DOMContentLoaded', () => {
 // ════════════════════════════════════════════════════════
 let _cmdChart = null;
 
-function cmdSalvarMeta(){
-  const v = parseFloat(document.getElementById('cmd-meta-input').value)||0;
-  if(v<=0){alert('Informe um valor de meta maior que zero.');return;}
-  localStorage.setItem('ci_meta_lucro', v);
-  cmdAtualizarMeta(v, _cmdLucroMes||0);
-}
-
-function cmdAtualizarMeta(meta, realizado){
-  const pct = meta>0 ? Math.min(realizado/meta*100, 100) : 0;
-  const pctOver = meta>0 ? realizado/meta*100 : 0;
-  const el = id=>document.getElementById(id);
-  const fmtR = v=>'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-
-  el('cmd-lucro-mes').textContent = fmtR(realizado);
-  el('cmd-bar-meta-label').textContent = meta>0 ? 'Meta: '+fmtR(meta) : 'Meta: não definida';
-
-  if(meta>0){
-    const fill = el('cmd-bar-fill');
-    fill.style.width = Math.min(pctOver,100)+'%';
-    fill.className = 'cmd-bar-fill' + (pctOver>=100?' success': pct<30?' danger':'');
-    el('cmd-meta-pct').textContent = pctOver.toFixed(0)+'%';
-    if(pctOver>=100){
-      el('cmd-meta-falta').textContent = '🏆 Meta batida! +'+fmtR(realizado-meta)+' acima';
-      el('cmd-meta-falta').style.color='var(--green)';
-    } else {
-      const falta = meta - realizado;
-      el('cmd-meta-falta').textContent = 'Faltam '+fmtR(falta)+' para a meta';
-      el('cmd-meta-falta').style.color='var(--muted)';
-    }
-    el('cmd-meta-sub').textContent = 'Juros efetivamente recebidos este mês';
-  } else {
-    el('cmd-meta-pct').textContent = '—';
-    el('cmd-meta-falta').textContent = 'Configure uma meta mensal acima';
-    el('cmd-bar-fill').style.width = '0%';
-    el('cmd-meta-sub').textContent = 'Configure sua meta para acompanhar o progresso';
-  }
-}
-
 let _cmdLucroMes = 0;
 
 function cmdRender(emps, pags){
@@ -9199,13 +9084,6 @@ function cmdRender(emps, pags){
       }
     });
   }
-
-  // Meta
-  const metaSalva=parseFloat(localStorage.getItem('ci_meta_lucro'))||0;
-  if(metaSalva>0){
-    document.getElementById('cmd-meta-input').value=metaSalva;
-  }
-  cmdAtualizarMeta(metaSalva, lucroMes);
 }
 
 // Hook: chama cmdRender quando os dados são carregados
