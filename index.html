@@ -4657,7 +4657,10 @@ function ctRender() {
         <div><div style="color:var(--muted);font-size:0.86rem;text-transform:uppercase;letter-spacing:0.08em">Capital</div><div style="color:var(--gold);font-family:'Cormorant Garamond', serif;font-size:1rem">${fmt(e.capital)}</div></div>
         <div><div style="color:var(--muted);font-size:0.86rem;text-transform:uppercase;letter-spacing:0.08em">Taxa</div><div style="color:var(--text)">${(e.taxa*100).toFixed(1)}% a.m.</div></div>
         <div><div style="color:var(--muted);font-size:0.86rem;text-transform:uppercase;letter-spacing:0.08em">Juros Total</div><div style="color:var(--green)">${fmt(e.jTotal)}</div></div>
-        <div><div style="color:var(--muted);font-size:0.86rem;text-transform:uppercase;letter-spacing:0.08em">Próx. Venc.</div><div style="color:${e.status==='atraso'?'var(--red)':'var(--text)'}">${fmtDate(e.proxVenc)}</div></div>
+        ${e.status==='quitado'
+          ? `<div><div style="color:var(--muted);font-size:0.86rem;text-transform:uppercase;letter-spacing:0.08em">Término</div><div style="color:var(--muted)">${fmtDate(e.vencContrato)}</div></div>`
+          : `<div><div style="color:var(--muted);font-size:0.86rem;text-transform:uppercase;letter-spacing:0.08em">Próx. Venc.</div><div style="color:${e.status==='atraso'?'var(--red)':'var(--text)'}">${fmtDate(e.proxVenc)}</div></div>`
+        }
       </div>
     </div>`;
   }).join('');
@@ -4856,11 +4859,12 @@ function ctModalAbrir(id) {
     ${row('Tipo de Juros', e.tipoJuros||'—')}
     ${row('Juros Total', fmt(e.jTotal), 'var(--green)')}
     ${row('Saldo Restante', fmt(e.saldo), e.saldo>0?'var(--red)':'var(--muted)')}
-    ${row('Juros Próx. Venc.', fmt(e.jProx), 'var(--gold2)')}
+    ${e.status!=='quitado' ? row('Juros Próx. Venc.', fmt(e.jProx), 'var(--gold2)') : ''}
     <div style="font-size:0.88rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin:14px 0 6px">Datas</div>
     ${row('Data de Início', fmtDate(e.data))}
-    ${row('Próx. Vencimento', fmtDate(e.proxVenc), e.status==='atraso'?'var(--red)':'')}
-    ${row('Venc. do Contrato', fmtDate(e.vencContrato))}
+    ${e.status!=='quitado' ? row('Próx. Vencimento', fmtDate(e.proxVenc), e.status==='atraso'?'var(--red)':'') : ''}
+    ${row('Término do Contrato', fmtDate(e.vencContrato))}
+    ${e.obs && e.obs.toLowerCase().includes('reneg') ? row('Renegociação', e.obs, 'var(--gold2)') : ''}
     ${_garHtml(e.id, e.status)}
   `;
   const overlay = document.getElementById('ct-modal-overlay');
