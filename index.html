@@ -2655,7 +2655,7 @@ async function dossieSyncCarregar() {
 
       // Remove localmente IDs que sumiram do servidor
       Object.keys(_pastas).forEach(id => {
-        if (!idsServidor.has(id) && !_deletedIds.has(id)) {
+        if (!idsServidor.has(id) && !_deletedIds.has(id) && !(_pendingSaveIds && _pendingSaveIds.has(id))) {
           delete _pastas[id];
           try { localStorage.removeItem('pastas_docs_' + id); } catch(e) {}
         }
@@ -2859,6 +2859,7 @@ function destroyChart(k){if(charts[k]){charts[k].destroy();delete charts[k];}}
 // Tab switching + auto-sync polling
 let _syncInterval = null;
 let _deletedIds = new Set(); // IDs excluídos localmente — nunca restaurar do servidor
+let _pendingSaveIds = new Set(); // IDs recém-salvos — protege contra deleção prematura no sync
 
 function iniciarSyncPolling() {
   if (_syncInterval) return;
@@ -7292,9 +7293,13 @@ function pastaSalvar(){
   // 1. Sobe para o servidor
   syncStatusUpdate('⏳ Salvando na nuvem...', 'var(--gold2)');
   dossieSyncSalvar(_pastas[id]).then(async () => {
-    // 2. Aguarda servidor processar e baixa tudo atualizado
-    await new Promise(r => setTimeout(r, 800));
+    // 2. Aguarda servidor processar — tempo maior para garantir que o ID já conste na planilha
+    await new Promise(r => setTimeout(r, 3000));
+    // Protege o ID recém-salvo de ser deletado caso o servidor ainda não o tenha retornado
+    _pendingSaveIds = _pendingSaveIds || new Set();
+    _pendingSaveIds.add(id);
     await dossieSyncCarregar();
+    _pendingSaveIds && _pendingSaveIds.delete(id);
     const agora = new Date().toLocaleTimeString('pt-BR');
     syncStatusUpdate('✅ Sincronizado às ' + agora, 'var(--green)');
   }).catch(()=>{
