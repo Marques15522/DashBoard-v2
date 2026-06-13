@@ -2910,6 +2910,12 @@ document.querySelectorAll('.nav-tab').forEach(tab=>{
 
 document.getElementById('today-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
 
+// Função global para navegar até uma aba programaticamente
+window.showTab = function(tabId) {
+  const tab = document.querySelector('.nav-tab[data-tab="'+tabId+'"]');
+  if(tab) tab.click();
+};
+
 async function fetchSheet(gid){
   const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}&t=${Date.now()}`;
   const controller=new AbortController();
@@ -4208,9 +4214,8 @@ function render(empRows,pagRows){
         // células fora do mês atual
       }
       const cls=['month-day-cell', !c.mesAtual?'other-month':'', c.isToday?'today':'', c.total>0&&c.mesAtual?'has-payment':''].filter(Boolean).join(' ');
-      const chipsHtml=c.vencimentos.slice(0,3).map(e=>`<div class="month-chip ${e.status==='atraso'?'atraso':''}">${(e.nome||e.id).split(' ')[0]}</div>`).join('');
-      const maisHtml=c.vencimentos.length>3?`<div class="month-chip-more">+${c.vencimentos.length-3} mais</div>`:'';
-      return`<div class="${cls}"><div class="month-day-num">${c.dia}</div>${c.total>0&&c.mesAtual?`<div class="month-day-total">${fmt(c.total)}</div>`:''}${c.vencimentos.length>0&&c.mesAtual?`<div class="month-day-chips">${chipsHtml}${maisHtml}</div>`:''}</div>`;
+      const chipsHtml=c.vencimentos.map(e=>`<div class="month-chip ${e.status==='atraso'?'atraso':''}" onclick="event.stopPropagation();showTab('contratos');setTimeout(()=>ctModalAbrir('${e.id}'),120)" title="${e.nome||e.id} · Juros: ${fmt(e.jProx)} · Capital: ${fmt(e.capital)}" style="cursor:pointer">${(e.nome||e.id).split(' ')[0]} <span style=\"opacity:0.75;font-size:0.82em\">${fmt(e.jProx)}</span></div>`).join('');
+      return`<div class="${cls}"><div class="month-day-num">${c.dia}</div>${c.total>0&&c.mesAtual?`<div class="month-day-total">${fmt(c.total)}</div>`:''}${c.vencimentos.length>0&&c.mesAtual?`<div class="month-day-chips">${chipsHtml}</div>`:''}</div>`;
     }).join('');
 
     const prevOffset=offset-1, nextOffset=offset+1;
@@ -4235,7 +4240,7 @@ function render(empRows,pagRows){
   const fimMes2=new Date(mesBase2.getFullYear(), mesBase2.getMonth()+1, 0); fimMes2.setHours(23,59,59,999);
   const todosV=abertos.filter(e=>e.proxVenc&&e.proxVenc>=mesBase2&&e.proxVenc<=fimMes2).map(e=>({...e, diaVenc:{dia:e.proxVenc.getDate(), nome:DIAS_SEMANA[e.proxVenc.getDay()]}}));
   const nomeMesAtual=MESES_NOMES[mesBase2.getMonth()];
-  document.getElementById('cobrancaList').innerHTML=todosV.length===0?`<div style="color:var(--muted);font-size:0.92rem;padding:12px 0">Nenhum vencimento em ${nomeMesAtual}.</div>`:[...todosV].sort((a,b)=>(a.status==='atraso'?-1:1)-(b.status==='atraso'?-1:1)||a.proxVenc-b.proxVenc).map(e=>{const isAt=e.status==='atraso';return`<div class="cobr-row"><div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:0.92rem;color:var(--text)">${e.nome||e.id}</span><span style="font-size:0.88rem;color:var(--muted)">${e.id} · vence ${e.diaVenc.nome} ${e.diaVenc.dia}/${(mesBase2.getMonth()+1).toString().padStart(2,'0')}</span></div><div style="display:flex;align-items:center;gap:10px"><span class="badge ${isAt?'bad':'ok'}">${isAt?'⚠️ ATRASO':'✓ EM DIA'}</span><span style="font-family:'Cormorant Garamond', serif;font-size:1rem;color:${isAt?'var(--red)':'var(--green)'}">${fmt(e.jProx)}</span></div></div>`;}).join('');
+  document.getElementById('cobrancaList').innerHTML=todosV.length===0?`<div style="color:var(--muted);font-size:0.92rem;padding:12px 0">Nenhum vencimento em ${nomeMesAtual}.</div>`:[...todosV].sort((a,b)=>(a.status==='atraso'?-1:1)-(b.status==='atraso'?-1:1)||a.proxVenc-b.proxVenc).map(e=>{const isAt=e.status==='atraso';return`<div class="cobr-row" onclick="showTab('contratos');setTimeout(()=>ctModalAbrir('${e.id}'),120)" style="cursor:pointer;transition:background 0.15s" onmouseenter="this.style.background='rgba(255,255,255,0.03)'" onmouseleave="this.style.background=''"><div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:0.92rem;color:var(--text)">${e.nome||e.id}</span><span style="font-size:0.88rem;color:var(--muted)">${e.id} · vence ${e.diaVenc.nome} ${e.diaVenc.dia}/${(mesBase2.getMonth()+1).toString().padStart(2,'0')}</span></div><div style="display:flex;align-items:center;gap:10px"><span class="badge ${isAt?'bad':'ok'}">${isAt?'⚠️ ATRASO':'✓ EM DIA'}</span><div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px"><span style="font-family:'Cormorant Garamond', serif;font-size:1rem;color:${isAt?'var(--red)':'var(--green)'}">${fmt(e.jProx)} <span style="font-size:0.82rem;color:var(--muted)">juros</span></span><span style="font-family:'Cormorant Garamond', serif;font-size:0.88rem;color:var(--gold)">${fmt(e.capital)} <span style="font-size:0.78rem;color:var(--muted)">capital</span></span></div></div></div>`;}).join('');
 
   // CONTRATOS 30 DIAS
   const em30=new Date(hoje);em30.setDate(hoje.getDate()+30);
