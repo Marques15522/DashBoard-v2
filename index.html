@@ -6345,30 +6345,32 @@ function simPDF(){
   if(!cliente.trim()||cliente==='Cliente'){alert('Informe o nome do cliente.');return;}
 
   const isSemanal = prazoUnidade==='semanas';
-  const periodoLabel = isSemanal ? 'Semana' : 'Mês';
-  const periodoSufixo = isSemanal ? 'semana' : 'mês';
-  const periodosSufixo = isSemanal ? 'semanas' : 'meses';
+  const isQuinzenal = prazoUnidade==='quinzenas';
+  const periodoLabel = isSemanal ? 'Semana' : isQuinzenal ? 'Quinzena' : 'Mês';
+  const periodoSufixo = isSemanal ? 'semana' : isQuinzenal ? 'quinzena' : 'mês';
+  const periodosSufixo = isSemanal ? 'semanas' : isQuinzenal ? 'quinzenas' : 'meses';
 
   const SEMANAS_POR_MES_PDF = 4;
+  const QUINZENAS_POR_MES_PDF = 2;
   let taxaPeriodo;
   if(taxaUnidade==='mensal' && isSemanal){
     taxaPeriodo = tipo==='composto' ? Math.pow(1+taxa/100,1/SEMANAS_POR_MES_PDF)-1 : (taxa/100)/SEMANAS_POR_MES_PDF;
-  } else if(taxaUnidade==='semanal' && !isSemanal){
+  } else if(taxaUnidade==='mensal' && isQuinzenal){
+    taxaPeriodo = tipo==='composto' ? Math.pow(1+taxa/100,1/QUINZENAS_POR_MES_PDF)-1 : (taxa/100)/QUINZENAS_POR_MES_PDF;
+  } else if(taxaUnidade==='semanal' && !isSemanal && !isQuinzenal){
     taxaPeriodo = tipo==='composto' ? Math.pow(1+taxa/100,SEMANAS_POR_MES_PDF)-1 : (taxa/100)*SEMANAS_POR_MES_PDF;
+  } else if(taxaUnidade==='semanal' && isQuinzenal){
+    taxaPeriodo = tipo==='composto' ? Math.pow(1+taxa/100,2)-1 : (taxa/100)*2;
   } else {
     taxaPeriodo = taxa/100;
   }
-  const prazoNormPDF = (taxaUnidade==='semanal' && !isSemanal) ? prazo * SEMANAS_POR_MES_PDF : prazo;
 
   // Taxa para exibição no PDF
   const taxaMensalEqPdf = taxaUnidade==='semanal'
     ? tipo==='composto' ? (Math.pow(1+taxa/100,4.33333)-1)*100 : (taxa/100)*4.33333*100
     : taxa;
-  const taxaSemanalEqPdf = taxaUnidade==='mensal'
-    ? tipo==='composto' ? (Math.pow(1+taxa/100,1/4.33333)-1)*100 : (taxa/100)/4.33333*100
-    : taxa;
   const taxaExibicao = taxaUnidade==='mensal'
-    ? `${taxa}% a.m.${isSemanal?' (≈ '+taxaSemanalEqPdf.toFixed(2)+'% a.s.)':''}`
+    ? `${taxa}% a.m.${isQuinzenal?' (≈ '+(taxa/QUINZENAS_POR_MES_PDF).toFixed(2)+'% a.q.)':isSemanal?' (≈ '+(taxa/SEMANAS_POR_MES_PDF).toFixed(2)+'% a.s.)':''}`
     : `${taxa}% a.s. · equiv. ${taxaMensalEqPdf.toFixed(2)}% a.m.`;
 
   // Cálculos financeiros
@@ -6384,6 +6386,7 @@ function simPDF(){
   for(let p=1;p<=prazo;p++){
     const d=new Date(dataInicio);
     if(isSemanal) d.setDate(dataInicio.getDate()+p*7);
+    else if(isQuinzenal) d.setDate(dataInicio.getDate()+p*15);
     else d.setMonth(dataInicio.getMonth()+p);
     vencimentos.push(d);
   }
@@ -6523,7 +6526,7 @@ function simPDF(){
     <div class="parcela-left">
       <div class="parcela-lbl">Valor da parcela por ${periodoSufixo}</div>
       <div class="parcela-val">${fmtR(parcela)}</div>
-      <div class="parcela-sub">${prazo} parcela${prazo>1?'s':''} ${isSemanal?'semanais':'mensais'} · juros ${tipo==='simples'?'simples':'compostos'}</div>
+      <div class="parcela-sub">${prazo} parcela${prazo>1?'s':''} ${isSemanal?'semanais':isQuinzenal?'quinzenais':'mensais'} · juros ${tipo==='simples'?'simples':'compostos'}</div>
     </div>
     <div class="parcela-right">
       <div class="parcela-total-lbl">Valor total do contrato</div>
