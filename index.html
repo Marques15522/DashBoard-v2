@@ -2848,7 +2848,7 @@ function getUnidade(row){
   if(u==='semanal')   return 'semanal';
   return 'mensal';
 }
-const CP={id:0,tipo:2,valor:3,data:4,juros:5,amort:6};
+const CP={id:0,tipo:2,valor:3,data:4,juros:5,amort:6,multa:7,diasAtraso:8,obs:9};
 const GID_EMP=147333899, GID_PAG=647642652, GID_CLI=213648997;
 const fmt=v=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
 const pct=v=>(Number(v)*100).toFixed(1)+'%';
@@ -3010,7 +3010,9 @@ function render(empRows,pagRows){
       const valor=parseNum(r[CP.valor]);
       const juros=parseNum(r[CP.juros]);
       const amort=parseNum(r[CP.amort]);
-      return{id:String(r[CP.id]).trim(),tipo:String(r[CP.tipo]||''),valor,data:parseDate(r[CP.data]),juros,amort};
+      const multa=parseNum(r[CP.multa]);
+      const diasAtraso=parseNum(r[CP.diasAtraso]);
+      return{id:String(r[CP.id]).trim(),tipo:String(r[CP.tipo]||''),valor,data:parseDate(r[CP.data]),juros,amort,multa,diasAtraso};
     });
 
   const ativos=emps.filter(e=>e.status==='ativo');
