@@ -3226,47 +3226,45 @@ function render(empRows,pagRows){
     });
   })();
 
-  // ── CHART 2: LUCRO REALIZADO VS PREVISTO — doughnut + cards internos ──
+  // ── CHART 2: LUCRO REALIZADO VS PREVISTO — line chart mensal ──
   destroyChart('lucro');
-  const lucroRealShow=lucroReal>0?lucroReal:0.01;
   (()=>{
-    // Substituir por doughnut mais elegante com % de realização
-    const pct=totalJuros>0?Math.min(100,(lucroReal/totalJuros)*100):0;
-    const restante=Math.max(0,totalJuros-lucroReal);
+    // Dados mensais: recebido vs a receber nos últimos 6 meses
+    const hoje2=new Date();
+    const lucroLabels=[],lucroRecebido=[],lucroAReceber=[];
+    for(let i=5;i>=0;i--){
+      const d=new Date(hoje2.getFullYear(),hoje2.getMonth()-i,1);
+      lucroLabels.push(d.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));
+      const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      const recMes=pags.filter(p=>p.data&&`${p.data.getFullYear()}-${String(p.data.getMonth()+1).padStart(2,'0')}`===k).reduce((s,p)=>s+(p.juros||0),0);
+      const prevMes=emps.filter(e=>e.status!=='quitado'&&e.proxVenc&&`${e.proxVenc.getFullYear()}-${String(e.proxVenc.getMonth()+1).padStart(2,'0')}`===k).reduce((s,e)=>s+(e.jProx||0),0);
+      lucroRecebido.push(recMes);
+      lucroAReceber.push(prevMes);
+    }
     const canvas=document.getElementById('chartLucro');
     const ctx2=canvas.getContext('2d');
+    const gRec=ctx2.createLinearGradient(0,0,0,200);gRec.addColorStop(0,'rgba(6,214,160,0.22)');gRec.addColorStop(1,'rgba(6,214,160,0)');
+    const gPrev=ctx2.createLinearGradient(0,0,0,200);gPrev.addColorStop(0,'rgba(240,180,41,0.18)');gPrev.addColorStop(1,'rgba(240,180,41,0)');
     charts.lucro=new Chart(ctx2,{
-      type:'doughnut',
+      type:'line',
       data:{
-        labels:['Recebido','A Receber'],
-        datasets:[{
-          data:[lucroReal>0?lucroReal:0.01, restante>0?restante:0.01],
-          backgroundColor:['rgba(6,214,160,0.85)','rgba(240,180,41,0.5)'],
-          borderColor:['rgba(6,214,160,1)','rgba(240,180,41,0.8)'],
-          borderWidth:2,hoverOffset:10,
-        }]
+        labels:lucroLabels,
+        datasets:[
+          {label:'Recebido',data:lucroRecebido,borderColor:'rgba(6,214,160,1)',backgroundColor:gRec,borderWidth:2,pointBackgroundColor:'rgba(6,214,160,1)',pointRadius:4,pointHoverRadius:6,fill:true,tension:0.35},
+          {label:'A Receber',data:lucroAReceber,borderColor:'rgba(240,180,41,0.9)',backgroundColor:gPrev,borderWidth:2,pointBackgroundColor:'rgba(240,180,41,0.9)',pointRadius:4,pointHoverRadius:6,fill:true,tension:0.35,borderDash:[5,4]}
+        ]
       },
       options:{
-        responsive:true,maintainAspectRatio:false,cutout:'72%',
+        responsive:true,maintainAspectRatio:false,
         plugins:{
           legend:{position:'bottom',labels:{color:'#5a6282',font:{family:'DM Mono',size:9},padding:16,boxWidth:10,boxHeight:10}},
-          tooltip:{...TOOLTIP,callbacks:{label:ctx=>{const pct2=(ctx.raw/(lucroReal+restante)*100).toFixed(1);return` ${ctx.label}: ${fmt(ctx.raw)}  (${pct2}%)`;}}}
+          tooltip:{...TOOLTIP,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)}`}}
+        },
+        scales:{
+          x:{grid:{color:'rgba(26,32,53,0.8)'},border:{dash:[3,3]},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},maxRotation:0}},
+          y:{grid:{color:'rgba(26,32,53,0.8)'},border:{dash:[3,3]},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},callback:v=>fmt(v)},beginAtZero:true}
         }
-      },
-      plugins:[{
-        id:'centerText',
-        afterDraw(chart){
-          const{ctx:c,chartArea:{top,bottom,left,right}}=chart;
-          const cx=(left+right)/2, cy=(top+bottom)/2;
-          c.save();
-          c.textAlign='center'; c.textBaseline='middle';
-          c.fillStyle='rgba(6,214,160,1)'; c.font="bold 22px 'Cormorant Garamond', serif";
-          c.fillText(pct.toFixed(0)+'%', cx, cy-8);
-          c.fillStyle='#5a6282'; c.font="10px 'DM Mono', monospace";
-          c.fillText('realizado', cx, cy+10);
-          c.restore();
-        }
-      }]
+      }
     });
   })();
 
@@ -3440,9 +3438,9 @@ function render(empRows,pagRows){
 
     // Custos do caixa (saídas não-capital)
     const cxEntradas = (JSON.parse(localStorage.getItem('caixaMovs')||'[]'));
-    const custosOp = cxEntradas.filter(m=>m.tipo==='saida'&&m.cat==='operacional').reduce((s,m)=>s+m.valor,0);
-    const custosPes = cxEntradas.filter(m=>m.tipo==='saida'&&m.cat==='pessoal').reduce((s,m)=>s+m.valor,0);
-    const retiradas = cxEntradas.filter(m=>m.tipo==='saida'&&m.cat==='retirada').reduce((s,m)=>s+m.valor,0);
+    const custosOp = cxEntradas.filter(m=>m.tipo==='saida'&&(m.categoria||m.cat)==='operacional').reduce((s,m)=>s+m.valor,0);
+    const custosPes = cxEntradas.filter(m=>m.tipo==='saida'&&(m.categoria||m.cat)==='pessoal').reduce((s,m)=>s+m.valor,0);
+    const retiradas = cxEntradas.filter(m=>m.tipo==='saida'&&(m.categoria||m.cat)==='retirada').reduce((s,m)=>s+m.valor,0);
     const totalCustos = custosOp + custosPes + retiradas;
 
     // ── Métricas executivas ───────────────────────────────
@@ -3534,7 +3532,7 @@ function render(empRows,pagRows){
       meses6.push(d.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));
       const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
       const rec=emps.filter(e=>e.data&&`${e.data.getFullYear()}-${String(e.data.getMonth()+1).padStart(2,'0')}`===k).reduce((s,e)=>s+e.jTotal,0);
-      const cst=cxEntradas.filter(m=>m.tipo==='saida'&&m.data&&m.data.startsWith(k)&&m.cat!=='capital').reduce((s,m)=>s+m.valor,0);
+      const cst=cxEntradas.filter(m=>m.tipo==='saida'&&m.data&&m.data.startsWith(k)&&(m.categoria||m.cat)!=='capital').reduce((s,m)=>s+m.valor,0);
       rBruta.push(rec); rCustos.push(cst); rLucro.push(Math.max(0,rec-cst));
     }
     destroyChart('plChart');
@@ -5991,6 +5989,16 @@ async function atualizarMapaClientes() {
           }
         }
       } catch(e) {}
+    }
+
+    // Fallback final: se nomeBairro ainda é null mas temos coords, acha o centroide SP_BAIRROS mais próximo (<1.5km)
+    if (!nomeBairro && coords) {
+      let minDist = Infinity, nearest = null;
+      for (const [nb, [blat, blng]] of Object.entries(SP_BAIRROS)) {
+        const dist = L.latLng(coords[0], coords[1]).distanceTo(L.latLng(blat, blng));
+        if (dist < minDist) { minDist = dist; nearest = nb; }
+      }
+      if (minDist < 1500) nomeBairro = nearest;
     }
 
     if (nomeBairro) {
