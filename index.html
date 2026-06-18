@@ -3226,45 +3226,63 @@ function render(empRows,pagRows){
     });
   })();
 
-  // ── CHART 2: LUCRO REALIZADO VS PREVISTO — line chart mensal ──
+  // ── CHART 2: LUCRO REALIZADO VS PREVISTO — line chart diário (mês atual) ──
   destroyChart('lucro');
   (()=>{
-    // Dados mensais: recebido vs a receber nos últimos 6 meses
+    // Todos os dias do mês corrente
     const hoje2=new Date();
+    const ano=hoje2.getFullYear(), mes=hoje2.getMonth();
+    const diasNoMes=new Date(ano,mes+1,0).getDate();
     const lucroLabels=[],lucroRecebido=[],lucroAReceber=[];
-    for(let i=5;i>=0;i--){
-      const d=new Date(hoje2.getFullYear(),hoje2.getMonth()-i,1);
-      lucroLabels.push(d.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));
-      const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-      const recMes=pags.filter(p=>p.data&&`${p.data.getFullYear()}-${String(p.data.getMonth()+1).padStart(2,'0')}`===k).reduce((s,p)=>s+(p.juros||0),0);
-      const prevMes=emps.filter(e=>e.status!=='quitado'&&e.proxVenc&&`${e.proxVenc.getFullYear()}-${String(e.proxVenc.getMonth()+1).padStart(2,'0')}`===k).reduce((s,e)=>s+(e.jProx||0),0);
-      lucroRecebido.push(recMes);
-      lucroAReceber.push(prevMes);
+    for(let d=1;d<=diasNoMes;d++){
+      const dStr=`${ano}-${String(mes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      lucroLabels.push(String(d));
+      // Recebido: pagamentos com data exata neste dia
+      const recDia=pags.filter(p=>p.data&&p.data.getFullYear()===ano&&p.data.getMonth()===mes&&p.data.getDate()===d).reduce((s,p)=>s+(p.juros||0),0);
+      // A receber: contratos com proxVenc neste dia (ainda não quitados)
+      const prevDia=emps.filter(e=>e.status!=='quitado'&&e.proxVenc&&e.proxVenc.getFullYear()===ano&&e.proxVenc.getMonth()===mes&&e.proxVenc.getDate()===d).reduce((s,e)=>s+(e.jProx||0),0);
+      lucroRecebido.push(recDia);
+      lucroAReceber.push(prevDia);
     }
     const canvas=document.getElementById('chartLucro');
     const ctx2=canvas.getContext('2d');
     const gRec=ctx2.createLinearGradient(0,0,0,200);gRec.addColorStop(0,'rgba(6,214,160,0.22)');gRec.addColorStop(1,'rgba(6,214,160,0)');
     const gPrev=ctx2.createLinearGradient(0,0,0,200);gPrev.addColorStop(0,'rgba(240,180,41,0.18)');gPrev.addColorStop(1,'rgba(240,180,41,0)');
+    // Linha vertical no dia atual
+    const hojeDia=hoje2.getDate();
+    const pluginHoje={id:'linhaHoje',afterDraw(chart){
+      const{ctx:c,chartArea:{top,bottom},scales:{x}}=chart;
+      if(!x)return;
+      const xPos=x.getPixelForValue(hojeDia-1);
+      c.save();c.beginPath();c.moveTo(xPos,top);c.lineTo(xPos,bottom);
+      c.strokeStyle='rgba(201,146,42,0.5)';c.lineWidth=1.5;c.setLineDash([4,3]);c.stroke();
+      c.fillStyle='rgba(201,146,42,0.9)';c.font="9px 'DM Mono',monospace";c.textAlign='center';
+      c.fillText('hoje',xPos,top+8);c.restore();
+    }};
     charts.lucro=new Chart(ctx2,{
       type:'line',
       data:{
         labels:lucroLabels,
         datasets:[
-          {label:'Recebido',data:lucroRecebido,borderColor:'rgba(6,214,160,1)',backgroundColor:gRec,borderWidth:2,pointBackgroundColor:'rgba(6,214,160,1)',pointRadius:4,pointHoverRadius:6,fill:true,tension:0.35},
-          {label:'A Receber',data:lucroAReceber,borderColor:'rgba(240,180,41,0.9)',backgroundColor:gPrev,borderWidth:2,pointBackgroundColor:'rgba(240,180,41,0.9)',pointRadius:4,pointHoverRadius:6,fill:true,tension:0.35,borderDash:[5,4]}
+          {label:'Recebido',data:lucroRecebido,borderColor:'rgba(6,214,160,1)',backgroundColor:gRec,borderWidth:2,pointBackgroundColor:'rgba(6,214,160,1)',pointRadius:3,pointHoverRadius:5,fill:true,tension:0.3},
+          {label:'A Receber',data:lucroAReceber,borderColor:'rgba(240,180,41,0.9)',backgroundColor:gPrev,borderWidth:2,pointBackgroundColor:'rgba(240,180,41,0.9)',pointRadius:3,pointHoverRadius:5,fill:true,tension:0.3,borderDash:[5,4]}
         ]
       },
       options:{
         responsive:true,maintainAspectRatio:false,
         plugins:{
           legend:{position:'bottom',labels:{color:'#5a6282',font:{family:'DM Mono',size:9},padding:16,boxWidth:10,boxHeight:10}},
-          tooltip:{...TOOLTIP,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)}`}}
+          tooltip:{...TOOLTIP,callbacks:{
+            title:items=>`${items[0].label} de ${new Date(ano,mes,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}`,
+            label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)}`
+          }}
         },
         scales:{
-          x:{grid:{color:'rgba(26,32,53,0.8)'},border:{dash:[3,3]},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},maxRotation:0}},
+          x:{grid:{color:'rgba(26,32,53,0.8)'},border:{dash:[3,3]},ticks:{color:'#5a6282',font:{family:'DM Mono',size:8},maxRotation:0,autoSkip:true,maxTicksLimit:10}},
           y:{grid:{color:'rgba(26,32,53,0.8)'},border:{dash:[3,3]},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},callback:v=>fmt(v)},beginAtZero:true}
         }
-      }
+      },
+      plugins:[pluginHoje]
     });
   })();
 
@@ -3437,10 +3455,10 @@ function render(empRows,pagRows){
     const taxaMedia = emps.length>0 ? emps.reduce((s,e)=>s+(e.taxa||0),0)/emps.length : 0;
 
     // Custos do caixa (saídas não-capital)
-    const cxEntradas = (JSON.parse(localStorage.getItem('caixaMovs')||'[]'));
-    const custosOp = cxEntradas.filter(m=>m.tipo==='saida'&&(m.categoria||m.cat)==='operacional').reduce((s,m)=>s+m.valor,0);
-    const custosPes = cxEntradas.filter(m=>m.tipo==='saida'&&(m.categoria||m.cat)==='pessoal').reduce((s,m)=>s+m.valor,0);
-    const retiradas = cxEntradas.filter(m=>m.tipo==='saida'&&(m.categoria||m.cat)==='retirada').reduce((s,m)=>s+m.valor,0);
+    const cxEntradas = (JSON.parse(localStorage.getItem('caixa_lancamentos')||'[]'));
+    const custosOp = cxEntradas.filter(m=>m.tipo==='saida'&&m.categoria==='operacional').reduce((s,m)=>s+m.valor,0);
+    const custosPes = cxEntradas.filter(m=>m.tipo==='saida'&&m.categoria==='pessoal').reduce((s,m)=>s+m.valor,0);
+    const retiradas = cxEntradas.filter(m=>m.tipo==='saida'&&m.categoria==='retirada').reduce((s,m)=>s+m.valor,0);
     const totalCustos = custosOp + custosPes + retiradas;
 
     // ── Métricas executivas ───────────────────────────────
@@ -3532,7 +3550,7 @@ function render(empRows,pagRows){
       meses6.push(d.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));
       const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
       const rec=emps.filter(e=>e.data&&`${e.data.getFullYear()}-${String(e.data.getMonth()+1).padStart(2,'0')}`===k).reduce((s,e)=>s+e.jTotal,0);
-      const cst=cxEntradas.filter(m=>m.tipo==='saida'&&m.data&&m.data.startsWith(k)&&(m.categoria||m.cat)!=='capital').reduce((s,m)=>s+m.valor,0);
+      const cst=cxEntradas.filter(m=>m.tipo==='saida'&&m.data&&m.data.startsWith(k)&&m.categoria!=='capital').reduce((s,m)=>s+m.valor,0);
       rBruta.push(rec); rCustos.push(cst); rLucro.push(Math.max(0,rec-cst));
     }
     destroyChart('plChart');
@@ -6095,14 +6113,16 @@ async function atualizarMapaClientes() {
     }
   }
 
-  // Fallback: círculo para bairros com clientes mas sem polígono válido
+  // Fallback: círculo para bairros com clientes sem polígono GeoJSON válido
+  // Garante coloração mesmo quando Overpass falha ou nome não bate
   for (const [nomeBairro, clientes] of Object.entries(bairroClientes)) {
     if (bairrosDesenhados.has(nomeBairro)) continue;
+    // Tenta centroide de SP_BAIRROS primeiro; depois usa média das coords dos clientes do plotQueue
     let centro = SP_BAIRROS[nomeBairro];
     if (!centro) {
       const lats = [], lngs = [];
       for (const q of plotQueue) {
-        if ((bairroClientes[nomeBairro] || []).includes(q.p)) { lats.push(q.lat); lngs.push(q.lng); }
+        if (clientes.includes(q.p)) { lats.push(q.lat); lngs.push(q.lng); }
       }
       if (lats.length > 0) centro = [lats.reduce((a,b)=>a+b,0)/lats.length, lngs.reduce((a,b)=>a+b,0)/lngs.length];
     }
@@ -6111,10 +6131,29 @@ async function atualizarMapaClientes() {
     const _temAtivo2  = clientes.some(c => (_comportamento[(c.nome||'').toLowerCase().trim()]||{}).ativo);
     const { fill, border, weight } = corPoligono(clientes.length, _temAtivo2, _temAtraso2);
     const circulo = L.circle(centro, {
-      radius: 700, fillColor: fill, fillOpacity: 1, color: border, weight,
+      radius: 800, fillColor: fill, fillOpacity: 0.85, color: border, weight,
     });
     circulo.bindPopup(construirPopupBairro(nomeBairro, clientes), {
       className: 'mapa-bairro-popup', maxWidth: 280,
+    });
+    circulo.addTo(_mapaLeaflet);
+    _mapaPoligonos.push(circulo);
+  }
+
+  // Garantia extra: clientes cujo nomeBairro não entrou em bairroClientes (null) mas têm coords —
+  // renderiza um círculo individual na posição exata do pin
+  for (const { p, lat, lng, cor, status } of plotQueue) {
+    const nomeKey = (p.nome||'').toLowerCase().trim();
+    // Checa se este cliente já teve seu bairro desenhado em alguma forma
+    const jaTem = Object.entries(bairroClientes).some(([nb, cls]) =>
+      cls.includes(p) && (bairrosDesenhados.has(nb) || SP_BAIRROS[nb])
+    );
+    if (jaTem) continue;
+    // Ainda não tem área colorida — desenha círculo pequeno na posição do pin
+    const comp = _comportamento[nomeKey] || {};
+    const { fill, border, weight } = corPoligono(1, comp.ativo, comp.temAtraso);
+    const circulo = L.circle([lat, lng], {
+      radius: 600, fillColor: fill, fillOpacity: 0.7, color: border, weight,
     });
     circulo.addTo(_mapaLeaflet);
     _mapaPoligonos.push(circulo);
