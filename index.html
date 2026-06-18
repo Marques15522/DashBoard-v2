@@ -5521,16 +5521,16 @@ let _bairrosGeoJSON = null; // cache do GeoJSON de bairros
 try {
   // v4: invalida cache anterior (v3 tinha threshold muito alto e fallback por distância errado)
   
-  const gc = localStorage.getItem('_geocode_cache_v5');
+  const gc = localStorage.getItem('_geocode_cache_v6');
   if (gc) _geocodeCache = JSON.parse(gc);
 } catch(e) { _geocodeCache = {}; }
 
 function salvarGeocodeCache() {
-  try { localStorage.setItem('_geocode_cache_v5', JSON.stringify(_geocodeCache)); } catch(e) {}
+  try { localStorage.setItem('_geocode_cache_v6', JSON.stringify(_geocodeCache)); } catch(e) {}
 }
 
 function limparCacheGeocodeERenderizar() {
-  try { localStorage.removeItem('_geocode_cache_v5'); } catch(e) {}
+  try { localStorage.removeItem('_geocode_cache_v6'); } catch(e) {}
   _geocodeCache = {};
   // Reseta o mapa para forçar re-renderização completa
   if (_mapaLeaflet) {
@@ -6028,17 +6028,15 @@ async function atualizarMapaClientes() {
       }
     }
 
-    // Se bairro conhecido: usa centroide do bairro sempre (garante que o pin fica dentro da área)
-    // Fallback: se geocode retornou ponto muito longe (>4km), também usa centroide
+    // Se bairro conhecido pelo texto do endereço: SEMPRE usa o centroide do SP_BAIRROS.
+    // O Nominatim frequentemente geocodifica o pin para o bairro vizinho (ex: Venice cai fora
+    // do Cidade Líder, Victor cai fora da Vila Curuçá). A única fonte confiável de posição
+    // dentro do bairro correto é o centroide do nosso dicionário.
+    // Só usa coords brutas do Nominatim se o bairro for desconhecido.
     let lat = coords[0], lng = coords[1];
     if (nomeBairro && SP_BAIRROS[nomeBairro]) {
       const [blat, blng] = SP_BAIRROS[nomeBairro];
-      const distKm = L.latLng(lat, lng).distanceTo(L.latLng(blat, blng)) / 1000;
-      // Usa centroide do bairro se: (a) ponto fora do bairro (>0.3km do centroide), ou
-      // (b) o geocode retornou um ponto longe demais, indicando bairro errado
-      // Threshold reduzido para 0.3km: garante que clientes no mesmo bairro
-      // sempre caem no centroide correto (evita Venice vs Marcos no mesmo endereço ficarem separados)
-      if (distKm > 0.3) { lat = blat; lng = blng; }
+      lat = blat; lng = blng; // sempre snap para o centroide do bairro detectado
     }
 
     // Jitter baseado em lat/lng finais — garante que clientes no mesmo endereço ficam visíveis
