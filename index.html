@@ -6038,12 +6038,17 @@ async function atualizarMapaClientes() {
       if (distKm > 0.8) { lat = blat; lng = blng; }
     }
 
-    // Jitter baseado em lat/lng finais (pós-correção de bairro) para manter pins dentro da área
+    // Jitter baseado em lat/lng finais — garante que clientes no mesmo endereço ficam visíveis
     const bairroKey = [lat.toFixed(3), lng.toFixed(3)].join(',');
     bairroCount[bairroKey] = (bairroCount[bairroKey] || 0) + 1;
-    const jitter = Math.min(bairroCount[bairroKey] - 1, 5) * 0.0010;
-    lat = lat + (Math.random() - 0.5) * jitter;
-    lng = lng + (Math.random() - 0.5) * jitter;
+    const cnt = bairroCount[bairroKey];
+    if (cnt > 1) {
+      // Posiciona em anel ao redor do ponto central: cada cliente em ângulo diferente
+      const angulo = ((cnt - 2) / 6) * 2 * Math.PI;
+      const raio = 0.0018; // ~200m
+      lat = lat + Math.sin(angulo) * raio;
+      lng = lng + Math.cos(angulo) * raio;
+    }
 
     console.log("[MAPA DEBUG] "+p.nome+" | end: "+p.endereco+" | bairro: "+nomeBairro+" | coords: ["+lat.toFixed(5)+","+lng.toFixed(5)+"] | status: "+status);
     plotQueue.push({ p, lat, lng, cor, status });
@@ -6088,7 +6093,38 @@ async function atualizarMapaClientes() {
 
     // Segundo passo: redesenha por cima os bairros com clientes destacados
     for (const [nomeBairro, clientes] of Object.entries(bairroClientes)) {
-      const feature = encontrarBairroGeoJSON(nomeBairro, geojson);
+      // Método 1: match por nome
+      let feature = encontrarBairroGeoJSON(nomeBairro, geojson);
+
+      // Método 2: se não achou por nome, busca pelo ponto do cliente dentro do polígono
+      if (!feature) {
+        // Usa coords do SP_BAIRROS como referência (mais confiável que plotQueue pós-jitter)
+        const refCoords = SP_BAIRROS[nomeBairro]
+          || (()=>{ const q=plotQueue.find(qq=>clientes.includes(qq.p)); return q?[q.lat,q.lng]:null; })();
+        if (refCoords) {
+          let melhorFeature = null, melhorArea = Infinity;
+          for (const f of geojson.features) {
+            if (!f.geometry) continue;
+            try {
+              const camadaTmp = L.geoJSON(f);
+              const bounds = camadaTmp.getBounds();
+              if (!bounds.isValid()) continue;
+              if (!bounds.contains([refCoords[0], refCoords[1]])) continue;
+              const largKm = bounds.getNorthEast().distanceTo(bounds.getSouthWest()) / 1000;
+              if (largKm > 8) continue;
+              // Verifica point-in-polygon para precisão
+              const ringCoords = f.geometry.type === 'Polygon'
+                ? f.geometry.coordinates[0]
+                : (f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates[0][0] : null);
+              if (ringCoords && pontoNoPoli(refCoords[0], refCoords[1], ringCoords)) {
+                if (largKm < melhorArea) { melhorArea = largKm; melhorFeature = f; }
+              }
+            } catch(e) {}
+          }
+          if (melhorFeature) feature = melhorFeature;
+        }
+      }
+
       if (!feature) continue;
 
       const camada = L.geoJSON(feature);
@@ -6140,24 +6176,6 @@ async function atualizarMapaClientes() {
     _mapaPoligonos.push(circulo);
   }
 
-  // Garantia extra: clientes cujo nomeBairro não entrou em bairroClientes (null) mas têm coords —
-  // renderiza um círculo individual na posição exata do pin
-  for (const { p, lat, lng, cor, status } of plotQueue) {
-    const nomeKey = (p.nome||'').toLowerCase().trim();
-    // Checa se este cliente já teve seu bairro desenhado em alguma forma
-    const jaTem = Object.entries(bairroClientes).some(([nb, cls]) =>
-      cls.includes(p) && (bairrosDesenhados.has(nb) || SP_BAIRROS[nb])
-    );
-    if (jaTem) continue;
-    // Ainda não tem área colorida — desenha círculo pequeno na posição do pin
-    const comp = _comportamento[nomeKey] || {};
-    const { fill, border, weight } = corPoligono(1, comp.ativo, comp.temAtraso);
-    const circulo = L.circle([lat, lng], {
-      radius: 600, fillColor: fill, fillOpacity: 0.7, color: border, weight,
-    });
-    circulo.addTo(_mapaLeaflet);
-    _mapaPoligonos.push(circulo);
-  }
 
   // 4) Plota marcadores dos clientes (por cima dos polígonos)
   for (const { p, lat, lng, cor, status } of plotQueue) {
