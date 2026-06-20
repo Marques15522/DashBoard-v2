@@ -4270,7 +4270,7 @@ function render(empRows,pagRows){
 
   // WhatsApp
   waRender(clientes, abertos, atrasado, hoje);
-  renderContratos(emps); // passa todos os contratos incluindo quitados
+  renderContratos(emps, pags); // passa todos os contratos incluindo quitados
 
   // NOVAS FEATURES
   verificarVencimentos(abertos, hoje);
@@ -4562,12 +4562,14 @@ function waSearchClear(){
 
 // ── CONTRATOS ────────────────────────────────────────────
 let _ctEmps = [];
+let _ctPags = [];
 let _ctFiltro = 'ativos';
 let _ctBusca = '';
 let _ctOrdem = { campo: 'proxVenc', asc: true };
 
-function renderContratos(emps) {
+function renderContratos(emps, pags) {
   _ctEmps = emps;
+  if (pags) _ctPags = pags;
   ctRender();
 }
 
@@ -4865,8 +4867,41 @@ function ctModalAbrir(id) {
   const row = (lbl, val, cor2='') => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
     <span style="font-size:0.86rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">${lbl}</span>
     <span style="font-size:0.90rem;${cor2?'color:'+cor2:''}">${val}</span></div>`;
+
+  // ── Histórico de pagamentos deste contrato ─────────────────
+  const pagsEmp = (_ctPags||[]).filter(p => p.id === e.id).sort((a,b)=>(a.data||0)-(b.data||0));
+  const jurosPago = pagsEmp.reduce((s,p)=>s+(p.juros||0),0);
+  const amortPago = pagsEmp.reduce((s,p)=>s+(p.amort||0),0);
+  const multaPaga = pagsEmp.reduce((s,p)=>s+(p.multa||0),0);
+  const totalPago = pagsEmp.reduce((s,p)=>s+(p.valor||0),0);
+  const valorEmprestado = e.capital || 0;
+  const valorTotalDevido = valorEmprestado + (e.jTotal || 0); // capital + juros do ciclo atual
+  const renovacoes = pagsEmp.filter(p => (p.tipo||'').toLowerCase().includes('juro') && (p.amort||0) === 0).length;
+  const lucroObtido = jurosPago + multaPaga;
+
+  // ── Card de resumo financeiro (visão rápida) ───────────────
+  const resumo = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px">
+        <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Valor Emprestado</div>
+        <div style="font-family:'Cormorant Garamond', serif;font-size:1.3rem;color:var(--purple)">${fmt(valorEmprestado)}</div>
+      </div>
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px">
+        <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Total a Pagar (ciclo)</div>
+        <div style="font-family:'Cormorant Garamond', serif;font-size:1.3rem;color:var(--gold)">${fmt(valorTotalDevido)}</div>
+      </div>
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px">
+        <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Juros Já Pagos</div>
+        <div style="font-family:'Cormorant Garamond', serif;font-size:1.3rem;color:var(--green)">${fmt(jurosPago)}</div>
+      </div>
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px">
+        <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Saldo Restante</div>
+        <div style="font-family:'Cormorant Garamond', serif;font-size:1.3rem;color:${e.saldo>0?'var(--red)':'var(--muted)'}">${fmt(e.saldo)}</div>
+      </div>
+    </div>`;
+
   document.getElementById('ct-modal-body').innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
       <div style="width:4px;height:48px;background:${cor};border-radius:2px;flex-shrink:0"></div>
       <div>
         <div style="font-size:0.84rem;color:var(--muted);letter-spacing:0.1em">${e.id}</div>
@@ -4876,14 +4911,24 @@ function ctModalAbrir(id) {
       </div>
       <span style="margin-left:auto;font-size:0.86rem;color:${cor};background:${cor}22;border:1px solid ${cor}44;border-radius:20px;padding:4px 12px">${statusLabel}</span>
     </div>
+    ${resumo}
     <div style="font-size:0.88rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px">Financeiro</div>
-    ${row('Capital', fmt(e.capital), 'var(--gold)')}
+    ${row('Capital Emprestado', fmt(valorEmprestado), 'var(--gold)')}
     ${row('Taxa', (e.taxa*100).toFixed(1)+'% a.m.')}
     ${row('Prazo', (e.prazo||'—')+' '+(e.unidade==='semanal'?'semanas':e.unidade==='quinzenal'?'quinzenas':'meses'))}
     ${row('Tipo de Juros', e.tipoJuros||'—')}
-    ${row('Juros Total', fmt(e.jTotal), 'var(--green)')}
+    ${row('Juros do Ciclo Atual', fmt(e.jTotal), 'var(--green)')}
+    ${row('Valor Total a Pagar (capital + juros)', fmt(valorTotalDevido), 'var(--gold)')}
     ${row('Saldo Restante', fmt(e.saldo), e.saldo>0?'var(--red)':'var(--muted)')}
     ${e.status!=='quitado' ? row('Juros Próx. Venc.', fmt(e.jProx), 'var(--gold2)') : ''}
+    <div style="font-size:0.88rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin:14px 0 6px">Pagamentos Recebidos</div>
+    ${row('Total Já Recebido (juros + amort. + multas)', fmt(totalPago), 'var(--green)')}
+    ${row('Juros Já Pagos', fmt(jurosPago), 'var(--green)')}
+    ${row('Amortização Paga (capital quitado)', fmt(amortPago))}
+    ${row('Multas por Atraso Pagas', fmt(multaPaga), multaPaga>0?'var(--red)':'var(--muted)')}
+    ${row('Lucro Obtido até Agora (juros + multas)', fmt(lucroObtido), 'var(--green)')}
+    ${renovacoes>0 ? row('Renovações (só juros pagos no mês)', renovacoes+'x', 'var(--gold2)') : ''}
+    ${pagsEmp.length ? `<div style="margin-top:10px">${pagsEmp.slice().reverse().map(p=>`<div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--muted);padding:5px 0;border-bottom:1px dashed var(--border)"><span>${fmtDate(p.data)} · ${p.tipo||'Pagamento'}${p.diasAtraso>0?' · '+p.diasAtraso+'d atraso':''}</span><span style="color:var(--text)">${fmt(p.valor)}</span></div>`).join('')}</div>` : `<div style="font-size:0.84rem;color:var(--muted);padding:8px 0">Nenhum pagamento registrado ainda.</div>`}
     <div style="font-size:0.88rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin:14px 0 6px">Datas</div>
     ${row('Data de Início', fmtDate(e.data))}
     ${e.status!=='quitado' ? row('Próx. Vencimento', fmtDate(e.proxVenc), e.status==='atraso'?'var(--red)':'') : ''}
@@ -4895,6 +4940,7 @@ function ctModalAbrir(id) {
   overlay.style.display = 'flex';
   requestAnimationFrame(() => { document.getElementById('ct-modal').style.opacity = '1'; });
 }
+
 
 function ctModalFechar() {
   document.getElementById('ct-modal-overlay').style.display = 'none';
