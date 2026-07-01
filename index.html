@@ -112,6 +112,7 @@ body.fs-mode #fs-wrapper #main{flex:1;overflow-y:auto;}
 /* Remove old wrap padding since sidebar handles layout */
 .wrap{max-width:none;margin:0;padding:0;}
 @media(max-width:768px){
+  /* ── SIDEBAR ── */
   .sidebar{width:54px;min-width:54px;padding:12px 0;}
   .nav-tab{padding:10px 0;justify-content:center;border-left:none;border-bottom:2px solid transparent;}
   .nav-tab .tab-label{display:none;}
@@ -119,8 +120,98 @@ body.fs-mode #fs-wrapper #main{flex:1;overflow-y:auto;}
   .nav-tab.active::after{display:none;}
   .sidebar-section-lbl{display:none;}
   .sidebar-divider{display:none;}
-  .tab-content-area{padding:16px 12px 40px;}
+  .tab-content-area{padding:12px 10px 80px;}
   .sidebar-toggle-btn{display:none;}
+
+  /* ── HEADER ── */
+  .header-inner{padding:0 10px;height:50px;}
+  .header-logo-text{display:none;}
+  .header-subtitle{display:none;}
+  .header-right{gap:6px;}
+  .refresh-btn span:not(.btn-icon){display:none;}
+  .header-time{font-size:0.65rem;}
+
+  /* ── GRIDS → COLUNA ÚNICA ── */
+  .grid-2,.grid-3,.grid-4,.grid-5{grid-template-columns:1fr!important;gap:10px;}
+
+  /* ── KPIs ── */
+  .kpi{padding:14px 14px;}
+  .kpi-val{font-size:1.6rem;}
+
+  /* ── CARDS ── */
+  .card{padding:14px 12px;}
+  .card-header{flex-wrap:wrap;gap:8px;}
+
+  /* ── SECTION LABEL ── */
+  .section-label{font-size:0.65rem;margin:16px 0 8px;}
+
+  /* ── TABELAS → SCROLL HORIZONTAL ── */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table{min-width:600px;}
+  .ct-th,.ct-td{padding:8px 8px;font-size:0.55rem;}
+
+  /* ── WHATSAPP CARDS ── */
+  .wa-cards{grid-template-columns:1fr!important;}
+  .wa-card-head{padding:10px 12px;}
+  .wa-client-name{font-size:0.78rem;}
+  .wa-btn-send{font-size:0.58rem;padding:9px 10px;}
+  .wa-tpl-select{font-size:0.6rem;}
+  .wa-msg-preview{font-size:0.6rem;min-height:80px;}
+
+  /* ── SIMULADOR ── */
+  .sim-results{grid-template-columns:1fr 1fr;}
+
+  /* ── CHARTS ── */
+  .chart-wrap{height:200px!important;}
+  .chart-wrap.xtall{height:240px!important;}
+  canvas{max-height:200px;}
+
+  /* ── FLUXO 90D ── */
+  .f90-venc-item{flex-wrap:wrap;gap:4px;}
+
+  /* ── DOSSIÊ ── */
+  .pasta-grid{grid-template-columns:1fr!important;}
+  .pasta-card{padding:12px;}
+  .pasta-search-bar{flex-wrap:wrap;gap:8px;}
+  .pasta-new-btn{width:100%;}
+
+  /* ── FLOATING PLAYER ── */
+  #floating-player{bottom:16px;min-width:280px;padding:10px 14px;gap:10px;}
+  .fp-text{max-width:160px;font-size:0.55rem;}
+  .fp-stop,.fp-goto{padding:5px 10px;font-size:0.52rem;}
+
+  /* ── MODAL ── */
+  .tpl-modal,.pasta-modal,.pag-modal{padding:18px 14px;}
+  .tpl-modal-overlay,.pasta-modal-overlay,.pag-modal-overlay{padding:10px;}
+
+  /* ── SYNC BAR ── */
+  #sync-bar{flex-wrap:wrap;gap:8px;}
+
+  /* ── CONTRATOS FILTROS ── */
+  #ct-filtros{gap:4px;}
+  .ct-filter-btn{padding:5px 10px;font-size:0.55rem;}
+  #ct-busca{min-width:100%;max-width:100%;}
+
+  /* ── SCORE BADGE ── */
+  .score-badge{font-size:0.65rem;padding:2px 7px;}
+
+  /* ── CENTRAL COMANDO ── */
+  .cmd2-hub{grid-template-columns:1fr!important;}
+  .cmd2-kpi-strip{grid-template-columns:repeat(2,1fr)!important;}
+  .cmd2-bottom{grid-template-columns:1fr!important;}
+  .cmd-renov-card{flex-wrap:wrap;}
+
+  /* ── AGENDA ── */
+  .agenda-grid{grid-template-columns:1fr!important;}
+
+  /* ── TEXTO GERAL MENOR ── */
+  .kpi-lbl{font-size:0.55rem;}
+  .kpi-sub{font-size:0.5rem;}
+  .card-title{font-size:0.78rem;}
+  .card-desc{font-size:0.58rem;}
+
+  /* ── BOTTOM NAV (alternativa ao sidebar no mobile) ── */
+  body{padding-bottom:0;}
 }
 .section-label{font-family:'Source Sans 3',sans-serif;font-size:0.74rem;font-weight:700;letter-spacing:0.2em;color:var(--muted);margin:24px 0 12px;border-left:2px solid var(--gold);padding-left:10px;text-transform:uppercase;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
@@ -547,8 +638,27 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
 .ct-badge.atraso{background:rgba(239,71,111,0.12);color:#ef476f;border:1px solid rgba(239,71,111,0.25);}
 .ct-badge.quitado{background:rgba(90,98,130,0.12);color:var(--muted);border:1px solid var(--border2);}
 
-/* ── FLOATING PLAYER ── */
-#floating-player{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--s1);border:1px solid rgba(155,93,229,0.4);border-radius:16px;padding:12px 20px;display:none;align-items:center;gap:14px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.5);min-width:320px;max-width:90vw;animation:slideUp 0.3s ease;}
+/* ── MOBILE BOTTOM NAV ── */
+#mobile-bottom-nav{display:none;}
+#mbn-more-menu{display:none;}
+@media(max-width:768px){
+  #mobile-bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--s1);border-top:1px solid var(--border);z-index:500;height:56px;align-items:stretch;}
+  .mbn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-size:1.1rem;color:var(--muted);transition:color 0.2s;padding:4px 2px;}
+  .mbn-item span{font-size:0.45rem;letter-spacing:0.04em;text-transform:uppercase;font-family:'DM Mono',monospace;}
+  .mbn-item.active{color:var(--gold);}
+  .mbn-item:hover{color:var(--text);}
+  #mbn-more-menu{position:fixed;bottom:56px;left:0;right:0;background:var(--s1);border-top:1px solid var(--border);z-index:499;padding:6px 0;}
+  #mbn-more-menu.open{display:block;}
+  .mbn-more-item{padding:12px 20px;font-size:0.7rem;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+  .mbn-more-item:hover{background:var(--s2);}
+  .mbn-more-item.active{color:var(--gold);}
+  .tab-content-area{padding-bottom:70px!important;}
+  #floating-player{bottom:70px!important;}
+  .sidebar{display:none!important;}
+  .main-layout{display:block!important;}
+}
+
+/* ── FLOATING PLAYER ── */left:50%;transform:translateX(-50%);background:var(--s1);border:1px solid rgba(155,93,229,0.4);border-radius:16px;padding:12px 20px;display:none;align-items:center;gap:14px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.5);min-width:320px;max-width:90vw;animation:slideUp 0.3s ease;}
 #floating-player.visible{display:flex;}
 @keyframes slideUp{from{transform:translateX(-50%) translateY(20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
 .fp-icon{font-size:1.2rem;animation:pulse 1.5s infinite;}
@@ -2409,6 +2519,25 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   </div>
   <button class="fp-goto" onclick="floatingPlayerIrParaVisao()">Ver</button>
   <button class="fp-stop" onclick="sugTtsParar()">■ Parar</button>
+</div>
+
+<!-- BOTTOM NAV — só aparece no mobile -->
+<nav id="mobile-bottom-nav">
+  <div class="mbn-item active" data-tab="visao">📊<span>Início</span></div>
+  <div class="mbn-item" data-tab="financeiro">💰<span>Financeiro</span></div>
+  <div class="mbn-item" data-tab="clientes">👤<span>Clientes</span></div>
+  <div class="mbn-item" data-tab="contratos">📄<span>Contratos</span></div>
+  <div class="mbn-item" data-tab="whatsapp">📱<span>WhatsApp</span></div>
+  <div class="mbn-item" data-tab="more" id="mbn-more">⋯<span>Mais</span></div>
+</nav>
+
+<!-- MENU "MAIS" DO MOBILE -->
+<div id="mbn-more-menu">
+  <div class="mbn-more-item" data-tab="risco">⚠️ Risco & Alertas</div>
+  <div class="mbn-more-item" data-tab="comparativo">📈 Comparativos</div>
+  <div class="mbn-more-item" data-tab="agenda">📅 Agenda</div>
+  <div class="mbn-more-item" data-tab="simulador">🧮 Simulador</div>
+  <div class="mbn-more-item" data-tab="fluxo90">🔮 Fluxo 90d</div>
 </div>
 
 <footer>
@@ -8120,6 +8249,40 @@ function loginSair() {
 })();
 
 setInterval(()=>loadData(false), 15*60*1000);
+
+// ── MOBILE BOTTOM NAV ─────────────────────────────────────
+(function(){
+  function switchTab(tabName){
+    const sidebarTab=document.querySelector(`.nav-tab[data-tab="${tabName}"]`);
+    if(sidebarTab) sidebarTab.click();
+    document.querySelectorAll('.mbn-item').forEach(i=>i.classList.remove('active'));
+    const mbnItem=document.querySelector(`.mbn-item[data-tab="${tabName}"]`);
+    if(mbnItem) mbnItem.classList.add('active');
+    else document.querySelector('.mbn-item[data-tab="more"]')?.classList.add('active');
+    document.querySelectorAll('.mbn-more-item').forEach(i=>i.classList.remove('active'));
+    const moreItem=document.querySelector(`.mbn-more-item[data-tab="${tabName}"]`);
+    if(moreItem) moreItem.classList.add('active');
+    document.getElementById('mbn-more-menu')?.classList.remove('open');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  document.querySelectorAll('.mbn-item').forEach(item=>{
+    item.addEventListener('click',()=>{
+      if(item.dataset.tab==='more'){
+        document.getElementById('mbn-more-menu')?.classList.toggle('open');
+        return;
+      }
+      switchTab(item.dataset.tab);
+    });
+  });
+  document.querySelectorAll('.mbn-more-item').forEach(item=>{
+    item.addEventListener('click',()=>switchTab(item.dataset.tab));
+  });
+  document.addEventListener('click',e=>{
+    if(!e.target.closest('#mbn-more-menu')&&!e.target.closest('#mbn-more')){
+      document.getElementById('mbn-more-menu')?.classList.remove('open');
+    }
+  });
+})();
 
 // ══════════════════════════════════════════════════════════
 // CAIXA — lançamentos manuais + entradas automáticas
