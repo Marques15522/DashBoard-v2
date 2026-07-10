@@ -2952,6 +2952,8 @@ const GID_EMP=147333899, GID_PAG=647642652, GID_CLI=213648997;
 // GID da aba "Investidores" na planilha — crie a aba, copie o gid da URL e cole aqui.
 // Enquanto for 0, o módulo de Investidores funciona só localmente (sem sync entre dispositivos).
 const GID_INV = 0;
+// GID da aba "Caixa" na planilha — mesma lógica: crie a aba, copie o gid da URL e cole aqui.
+const GID_CX = 0;
 const fmt=v=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
 const pct=v=>(Number(v)*100).toFixed(1)+'%';
 let charts={};
@@ -7300,8 +7302,7 @@ async function invSincronizarPlanilha(){
   if(!GID_INV){ return; }
   try{
     const rows = await fetchSheet(GID_INV);
-    const dataRows = rows.slice(autoSkipCSV(rows));
-    const doSheet = dataRows.filter(r=>r[0]).map(r=>({
+    const doSheet = rows.filter(r=>String(r[0]||'').trim().toUpperCase().startsWith('INV')).map(r=>({
       id: String(r[0]||'').trim(),
       nome: String(r[1]||'').trim(),
       tel: String(r[2]||'').trim(),
@@ -8752,6 +8753,29 @@ function cxSave(lancamentos) {
   try { localStorage.setItem(CX_KEY, JSON.stringify(lancamentos)); } catch(e) {}
 }
 
+// Sincroniza os lançamentos manuais do Caixa com a aba "Caixa" da planilha,
+// pro saldo/lançamentos aparecerem iguais no PC e no celular.
+// Estrutura esperada da aba: ID | Tipo | Categoria | Descricao | Valor | Data
+async function cxSincronizarPlanilha(){
+  if(!GID_CX) return;
+  try{
+    const rows = await fetchSheet(GID_CX);
+    const doSheet = rows.filter(r=>r[0] && (String(r[1]).trim()==='entrada'||String(r[1]).trim()==='saida')).map(r=>({
+      id: isNaN(r[0]) ? String(r[0]).trim() : Number(r[0]),
+      tipo: String(r[1]||'saida').trim(),
+      categoria: String(r[2]||'').trim(),
+      descricao: String(r[3]||'').trim(),
+      valor: invParseNumBR(r[4]),
+      data: String(r[5]||'').trim()
+    }));
+    if(doSheet.length){
+      const local = cxLoad();
+      const localOnly = local.filter(l => !doSheet.some(s=>String(s.id)===String(l.id)));
+      cxSave([...doSheet, ...localOnly]);
+    }
+  }catch(e){ console.warn('Sync do caixa falhou (usando dados locais):', e.message); }
+}
+
 function cxFmtData(d) {
   return d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` : null;
 }
@@ -8810,26 +8834,32 @@ function cxLancar() {
   if (!data)  { fb.innerHTML = '<span style="color:var(--red)">⚠️ Informe a data.</span>'; return; }
 
   const lancamentos = cxLoad();
-  lancamentos.push({
-    id: Date.now(),
-    tipo: _cxTipo,
-    categoria: cat,
-    descricao: desc,
-    valor,
-    data,
-  });
+  const novo = { id: Date.now(), tipo: _cxTipo, categoria: cat, descricao: desc, valor, data };
+  lancamentos.push(novo);
   cxSave(lancamentos);
 
   // Limpa campos
   document.getElementById('cx-descricao').value = '';
   document.getElementById('cx-valor').value = '';
   fb.innerHTML = '<span style="color:var(--green)">✅ Lançamento registrado!</span>';
-  setTimeout(() => { fb.innerHTML = ''; }, 3000);
+
+  const scriptUrl = localStorage.getItem('pag_script_url') || '';
+  if(scriptUrl){
+    fetch(scriptUrl, { method:'POST', body: JSON.stringify({ action:'registrarLancamentoCaixa', ...novo }) })
+      .then(r=>r.json())
+      .then(json=>{
+        if(json.ok) fb.innerHTML = '<span style="color:var(--green)">✅ Registrado e sincronizado com a planilha.</span>';
+        else fb.innerHTML = '<span style="color:var(--gold2)">⚠️ Salvo localmente. Planilha não sincronizada.</span>';
+      })
+      .catch(()=>{ fb.innerHTML = '<span style="color:var(--gold2)">⚠️ Salvo localmente. Sem conexão com a planilha.</span>'; });
+  }
+  setTimeout(() => { fb.innerHTML = ''; }, 4000);
 
   cxRender();
 }
 
-function cxRender(pagsExternas) {
+async function cxRender(pagsExternas) {
+  await cxSincronizarPlanilha();
   // pagsExternas = array de pagamentos vindos da planilha (pags do render principal)
   // Se não informado, usa cache global
   const pags = pagsExternas || window._cxPagsCache || [];
@@ -8983,6 +9013,10 @@ function cxDeletar(id) {
   if(!confirm('Excluir este lançamento?')) return;
   const lista = cxLoad().filter(l => l.id !== id);
   cxSave(lista);
+  const scriptUrl = localStorage.getItem('pag_script_url') || '';
+  if(scriptUrl){
+    fetch(scriptUrl, { method:'POST', body: JSON.stringify({ action:'excluirLancamentoCaixa', id }) }).catch(()=>{});
+  }
   cxRender();
 }
 
