@@ -7452,25 +7452,25 @@ async function invMigrarParaPlanilha(){
   }
   if(!confirm(`Enviar ${_invLista.length} investidor(es) e ${_invPagamentos.length} pagamento(s) deste aparelho para a planilha?`)) return;
 
-  let ok=0, falha=0;
+  let ok=0, falha=0, ultimoErro='';
   for(const inv of _invLista){
     st.textContent = `⏳ Enviando investidores... (${ok+falha+1}/${_invLista.length})`;
     try{
       const res = await fetch(scriptUrl, { method:'POST', body: JSON.stringify({ action:'registrarInvestidor', ...inv }) });
       const json = await res.json();
-      if(json.ok) ok++; else falha++;
-    }catch(e){ falha++; }
+      if(json.ok) ok++; else { falha++; ultimoErro = json.erro || 'erro desconhecido'; }
+    }catch(e){ falha++; ultimoErro = e.message; }
   }
   for(const p of _invPagamentos){
     st.textContent = `⏳ Enviando pagamentos de juros...`;
     try{
       const res = await fetch(scriptUrl, { method:'POST', body: JSON.stringify({ action:'registrarPagamentoInvestidor', ...p }) });
       const json = await res.json();
-      if(!json.ok) falha++;
-    }catch(e){ falha++; }
+      if(!json.ok){ falha++; ultimoErro = json.erro || 'erro desconhecido'; }
+    }catch(e){ falha++; ultimoErro = e.message; }
   }
   st.style.cssText = `display:block;margin:12px 0 0;padding:10px 14px;border-radius:8px;font-size:0.86rem;background:${falha?'rgba(240,180,41,0.1)':'rgba(6,214,160,0.1)'};border:1px solid ${falha?'rgba(240,180,41,0.3)':'rgba(6,214,160,0.3)'};color:${falha?'var(--gold2)':'var(--green)'}`;
-  st.textContent = falha ? `⚠️ Enviado com ${falha} falha(s). Confira e tente de novo se precisar.` : `✅ Tudo enviado! Confira no outro aparelho.`;
+  st.textContent = falha ? `⚠️ Enviado com ${falha} falha(s). Último erro: ${ultimoErro}` : `✅ Tudo enviado! Confira no outro aparelho.`;
 }
 
 function invModalAbrir(id){
@@ -9085,18 +9085,18 @@ async function cxMigrarParaPlanilha(){
   }
   if(!confirm(`Enviar ${lancamentos.length} lançamento(s) deste aparelho para a planilha? Faça isso apenas uma vez, de preferência no aparelho com o histórico mais completo.`)) return;
 
-  let ok=0, falha=0;
+  let ok=0, falha=0, ultimoErro='';
   for(const l of lancamentos){
     st.style.cssText = 'display:block;margin-bottom:10px;padding:10px 14px;border-radius:8px;font-size:0.86rem;background:rgba(72,149,239,0.1);border:1px solid rgba(72,149,239,0.3);color:var(--blue)';
     st.textContent = `⏳ Enviando ${ok+falha+1}/${lancamentos.length}...`;
     try{
       const res = await fetch(scriptUrl, { method:'POST', body: JSON.stringify({ action:'registrarLancamentoCaixa', ...l }) });
       const json = await res.json();
-      if(json.ok) ok++; else falha++;
-    }catch(e){ falha++; }
+      if(json.ok) ok++; else { falha++; ultimoErro = json.erro || 'erro desconhecido retornado pelo script'; }
+    }catch(e){ falha++; ultimoErro = e.message; }
   }
   st.style.cssText = `display:block;margin-bottom:10px;padding:10px 14px;border-radius:8px;font-size:0.86rem;background:${falha?'rgba(240,180,41,0.1)':'rgba(6,214,160,0.1)'};border:1px solid ${falha?'rgba(240,180,41,0.3)':'rgba(6,214,160,0.3)'};color:${falha?'var(--gold2)':'var(--green)'}`;
-  st.textContent = falha ? `⚠️ ${ok} enviados, ${falha} falharam. Tente novamente para os que falharam.` : `✅ ${ok} lançamento(s) enviados! Agora abra o dashboard no outro aparelho pra conferir.`;
+  st.textContent = falha ? `⚠️ ${ok} enviados, ${falha} falharam. Último erro: ${ultimoErro}` : `✅ ${ok} lançamento(s) enviados! Agora abra o dashboard no outro aparelho pra conferir.`;
 }
 
 function cxExportar() {
