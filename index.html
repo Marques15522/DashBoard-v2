@@ -1234,6 +1234,11 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
           </div>
         </div>
         <div style="background:var(--s2);border-radius:7px;padding:9px 12px;font-size:0.84rem;color:var(--muted);line-height:1.7;margin-top:8px" id="cmd-cap-analise">Aguardando dados...</div>
+        <div style="background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.2);border-radius:7px;padding:9px 12px;margin-top:8px" id="cmd-cap-projecao">
+          <div style="font-size:0.82rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">📈 Projeção 30 dias — capital p/ novos empréstimos</div>
+          <div style="font-family:'Cormorant Garamond', serif;font-size:1.3rem;color:var(--green)" id="cmd-cap-proj-val">—</div>
+          <div style="font-size:0.82rem;color:var(--muted2)" id="cmd-cap-proj-sub">calculando...</div>
+        </div>
         <!-- KPIs extra abaixo -->
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px">
           <div style="text-align:center">
@@ -9886,6 +9891,26 @@ function cmdRender(emps, pags){
     .slice(0,5);
 
   const cores=['#c9922a','#e8b84b','#06d6a0','#4895ef','#9b5de5'];
+
+  // ── SCORE DE PROPENSÃO A RENOVAR ──────────────────────────
+  // Baseado em: já é recorrente, nunca atrasou, tempo de relacionamento, não está em atraso agora
+  function calcPropensao(nome){
+    const hist = emps.filter(e => (e.nome||e.id) === nome);
+    if(!hist.length) return 0;
+    const qtd = hist.length;
+    const qtdAtrasoHist = hist.filter(e=>e.status==='atraso').length;
+    const emAtrasoAgora = hist.some(e=>e.status==='atraso');
+    const datas = hist.map(e=>e.data).filter(Boolean);
+    const primeiroContrato = datas.length ? new Date(Math.min(...datas.map(d=>d.getTime()))) : null;
+    const mesesRelac = primeiroContrato ? Math.max(0,(hoje-primeiroContrato)/2628000000) : 0;
+    let score = 0;
+    score += qtd>1 ? 35 : 0;                          // já renovou antes
+    score += qtdAtrasoHist===0 ? 25 : 0;               // nunca atrasou
+    score += Math.min(mesesRelac/12,1)*25;             // tempo de relacionamento (até 12 meses)
+    score += !emAtrasoAgora ? 15 : 0;                  // não está em atraso no momento
+    return Math.round(Math.min(score,100));
+  }
+
   if(renovOp.length===0){
     _h('cmd-renov-body','<div class="cmd-renov-empty">✅ Nenhuma renovação prevista nos próximos 30 dias</div>');
   } else {
@@ -9894,12 +9919,16 @@ function cmdRender(emps, pags){
       const dias=Math.round((venc-hoje)/86400000);
       const initials=(e.nome||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
       const tag = dias<=7 ? `<span class="cmd-renov-tag agora">Vence em ${dias}d</span>` : `<span class="cmd-renov-tag quase">Em ${dias} dias</span>`;
+      const prop = calcPropensao(e.nome||e.id);
+      const propCor = prop>=70?'var(--green)':prop>=40?'var(--gold2)':'var(--red)';
+      const propBadge = `<span style="font-size:0.82rem;padding:1px 7px;border-radius:10px;background:${propCor}22;border:1px solid ${propCor}44;color:${propCor};white-space:nowrap">🎯 ${prop}% propensão</span>`;
       return `<div class="cmd-renov-item">
         <div class="cmd-renov-avatar" style="background:${cores[i%cores.length]}22;color:${cores[i%cores.length]};border:1px solid ${cores[i%cores.length]}44">${initials}</div>
         <div class="cmd-renov-info">
           <div class="cmd-renov-nome">${e.nome}</div>
           <div class="cmd-renov-sub">${fmt(e.capital)} · taxa ${(e.taxa*100).toFixed(1)}%/mês</div>
         </div>
+        ${propBadge}
         ${tag}
       </div>`;
     }).join(''));
@@ -9915,6 +9944,15 @@ function cmdRender(emps, pags){
   _s('cmd-cap-rua-leg', fmt(capNaRua));
   _s('cmd-cap-disp-leg', fmt(capDisp));
   _s('cmd-cap-risco-leg', fmt(capRisco));
+
+  // ── PROJEÇÃO 30 DIAS: capital disponível para novos empréstimos ──
+  // Caixa atual + capital de contratos que encerram (vencContrato) nos próximos 30 dias
+  const retornoCap30 = abertos
+    .filter(e => e.vencContrato && e.vencContrato >= hoje && e.vencContrato <= em30)
+    .reduce((s,e) => s + e.capital, 0);
+  const projecao30 = capDisp + retornoCap30;
+  _s('cmd-cap-proj-val', fmt(projecao30));
+  _s('cmd-cap-proj-sub', `${fmt(capDisp)} em caixa + ${fmt(retornoCap30)} de contratos encerrando`);
 
   // Análise de capital
   let analise='';
