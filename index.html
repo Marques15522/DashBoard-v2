@@ -747,6 +747,7 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   <div class="sidebar-section-lbl">Principal</div>
   <div class="nav-tab active" data-tab="visao" data-label="Central de Comando"><span class="tab-icon">🎯</span><span class="tab-label">Central de Comando</span></div>
   <div class="nav-tab" data-tab="metas" data-label="Metas"><span class="tab-icon">🏆</span><span class="tab-label">Metas</span></div>
+  <div class="nav-tab" data-tab="historico" data-label="Histórico Mensal"><span class="tab-icon">🗓️</span><span class="tab-label">Histórico Mensal</span></div>
   <div class="nav-tab" data-tab="financeiro" data-label="Financeiro"><span class="tab-icon">💰</span><span class="tab-label">Financeiro</span></div>
   <div class="nav-tab" data-tab="caixa" data-label="Caixa"><span class="tab-icon">🏦</span><span class="tab-label">Caixa</span></div>
   <div class="sidebar-divider"></div>
@@ -1312,6 +1313,39 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   <div class="card">
     <div class="card-header"><div><div class="card-title">📈 Realizado vs. Cenários de Projeção</div><div class="card-desc">Exposição total: histórico registrado a partir de hoje vs. cenário pleno (taxa média atual dos contratos) vs. cenário mínimo necessário para bater a meta no prazo</div></div><div class="card-badge">PROJEÇÃO</div></div>
     <div class="chart-wrap tall" style="height:320px"><canvas id="chartMetas"></canvas></div>
+  </div>
+</div>
+
+<!-- HISTÓRICO MENSAL -->
+<div id="tab-historico" class="tab-panel">
+  <div class="section-label">HISTÓRICO MENSAL — LINHA DO TEMPO DA OPERAÇÃO</div>
+
+  <div class="grid-4" id="hist-kpis"></div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">📋 Novos Contratos vs. Quitados</div><div class="card-desc">Contratos abertos vs. contratos quitados por mês</div></div><div class="card-badge">HISTÓRICO</div></div>
+      <div class="chart-wrap tall"><canvas id="chartHistContratos"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">💰 Capital Emprestado vs. Juros Recebido</div><div class="card-desc">Saída de capital em novos contratos vs. juros efetivamente recebidos por mês</div></div><div class="card-badge">HISTÓRICO</div></div>
+      <div class="chart-wrap tall"><canvas id="chartHistCapital"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">🗓️ Detalhamento Mês a Mês</div><div class="card-desc">Clique em um mês para ver os nomes dos clientes envolvidos em cada métrica</div></div>
+      <div class="card-badge">CLIQUE PARA EXPANDIR</div>
+    </div>
+    <div class="table-wrap"><table class="sim-table">
+      <thead><tr>
+        <th>Mês</th><th>Novos Clientes</th><th>Novos Contratos</th><th>Capital Emprestado</th>
+        <th>Clientes que Pagaram</th><th>Pagamentos</th><th>Juros Recebidos</th><th>Amortização</th>
+        <th>Contratos Quitados</th><th>Entradas Caixa</th><th>Saídas Caixa</th><th>Resultado Caixa</th><th>Saldo Caixa</th>
+      </tr></thead>
+      <tbody id="hist-tbody"></tbody>
+    </table></div>
   </div>
 </div>
 
@@ -3051,6 +3085,7 @@ document.querySelectorAll('.nav-tab').forEach(tab=>{
     if(tab.dataset.tab === 'simulador'){ calcDesagio(); calcOportunidade(); }
     if(tab.dataset.tab === 'investidores'){ invRender(); }
     if(tab.dataset.tab === 'metas'){ metasRenderAll(); setTimeout(()=>{ if(charts.metas) charts.metas.resize(); },100); }
+    if(tab.dataset.tab === 'historico'){ historicoRenderAll(); setTimeout(()=>{ if(charts.histContratos) charts.histContratos.resize(); if(charts.histCapital) charts.histCapital.resize(); },100); }
     if(tab.dataset.tab === 'comando' && _cmdChart){ setTimeout(()=>{ if(_cmdChart) _cmdChart.resize(); },100); }
     if(tab.dataset.tab === 'clientes') {
       iniciarSyncPolling();
@@ -4470,6 +4505,9 @@ function render(empRows,pagRows){
 
   // METAS — atualiza histórico e recalcula cenários/sugestão
   try { metasAtualizar(naRua, taxaMediaGlobal, abertos.length, cliAtivos.length); } catch(e){ console.warn('metasAtualizar:', e); }
+
+  // HISTÓRICO MENSAL — atualiza com os dados já processados
+  try { historicoAtualizar(emps, pags, clientes); } catch(e){ console.warn('historicoAtualizar:', e); }
 }
 
 // ── METAS ────────────────────────────────────────────────
@@ -4608,6 +4646,165 @@ function metasRenderChart(d,cfg){
     {label:'Cenário Pleno (taxa atual)',data:pleno,borderColor:'rgba(6,214,160,0.8)',borderWidth:2,borderDash:[6,4],pointRadius:0,tension:0.25},
     {label:'Cenário Mínimo (necessário)',data:minimo,borderColor:'rgba(240,180,41,0.8)',borderWidth:2,borderDash:[2,3],pointRadius:0,tension:0.25}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+(ctx.raw==null?'—':fmt(ctx.raw))}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}}}}});
+}
+
+// ── HISTÓRICO MENSAL ─────────────────────────────────────
+function histMesKey(d){
+  if(!d) return null;
+  if(typeof d === 'string') return d.slice(0,7);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function histMesLabel(key){
+  const [y,m]=key.split('-');
+  return new Date(+y,+m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});
+}
+function historicoConstruir(emps, pags, clientes){
+  const pagsPorId={};
+  pags.forEach(p=>{ if(!pagsPorId[p.id]) pagsPorId[p.id]=[]; pagsPorId[p.id].push(p); });
+
+  const lancamentos=cxLoad();
+  const autoEntradas=cxAutoEntradas(pags);
+  const todosCx=[...autoEntradas, ...lancamentos];
+
+  const mesesSet=new Set();
+  emps.forEach(e=>{ if(e.data) mesesSet.add(histMesKey(e.data)); });
+  pags.forEach(p=>{ if(p.data) mesesSet.add(histMesKey(p.data)); });
+  todosCx.forEach(l=>{ if(l.data) mesesSet.add(histMesKey(l.data)); });
+  const hoje=new Date();
+  mesesSet.add(histMesKey(hoje));
+  if(mesesSet.size===0) return [];
+
+  const mesesOrdenados=[...mesesSet].sort();
+  const primeiroMes=mesesOrdenados[0];
+  // gera sequência contínua entre o primeiro mês com dado e o mês atual (sem buracos)
+  const [y0,m0]=primeiroMes.split('-').map(Number);
+  const chaves=[];
+  let cursor=new Date(y0, m0-1, 1);
+  const fim=new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  while(cursor<=fim){
+    chaves.push(`${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}`);
+    cursor.setMonth(cursor.getMonth()+1);
+  }
+
+  let saldoAcum=0;
+  const resultado=chaves.map(key=>{
+    const novosContratosLista=emps.filter(e=>e.data && histMesKey(e.data)===key).map(e=>({id:e.id, nome:e.nome||e.id, capital:e.capital}));
+    const novosContratosCapital=novosContratosLista.reduce((s,e)=>s+e.capital,0);
+
+    const novosClientesLista=clientes.filter(c=>c.primeiroContrato && histMesKey(c.primeiroContrato)===key).map(c=>c.nome);
+
+    const quitadosLista=emps.filter(e=>{
+      if(e.status!=='quitado') return false;
+      const hist=pagsPorId[e.id]||[];
+      if(!hist.length) return false;
+      const ultimaData=hist.reduce((m,p)=>(p.data&&(!m||p.data>m)?p.data:m),null);
+      return ultimaData && histMesKey(ultimaData)===key;
+    }).map(e=>({id:e.id, nome:e.nome||e.id, capital:e.capital}));
+
+    const pagsDoMes=pags.filter(p=>p.data && histMesKey(p.data)===key);
+    const clientesPagaramSet=new Set();
+    pagsDoMes.forEach(p=>{ const e=emps.find(x=>x.id===p.id); if(e) clientesPagaramSet.add(e.nome||e.id); });
+
+    const jurosRecebidos=pagsDoMes.reduce((s,p)=>s+p.juros,0);
+    const amortRecebida=pagsDoMes.reduce((s,p)=>s+p.amort,0);
+
+    const cxDoMes=todosCx.filter(l=>l.data && histMesKey(l.data)===key);
+    const entradas=cxDoMes.filter(l=>l.tipo==='entrada').reduce((s,l)=>s+l.valor,0);
+    const saidas=cxDoMes.filter(l=>l.tipo==='saida').reduce((s,l)=>s+l.valor,0);
+    saldoAcum += entradas-saidas;
+
+    return {
+      mesKey:key, label:histMesLabel(key),
+      novosClientesLista, novosClientesQtd:novosClientesLista.length,
+      novosContratosLista, novosContratosQtd:novosContratosLista.length, novosContratosCapital,
+      quitadosLista, quitadosQtd:quitadosLista.length,
+      clientesPagaramLista:[...clientesPagaramSet], clientesPagaramQtd:clientesPagaramSet.size,
+      pagamentosQtd:pagsDoMes.length, jurosRecebidos, amortRecebida,
+      caixaEntradas:entradas, caixaSaidas:saidas, caixaResultado:entradas-saidas, caixaSaldo:saldoAcum
+    };
+  });
+
+  return resultado.reverse(); // mais recente primeiro
+}
+function historicoAtualizar(emps, pags, clientes){
+  window._histDados={emps, pags, clientes};
+  historicoRenderAll();
+}
+function historicoRenderAll(){
+  if(!window._histDados) return;
+  const {emps, pags, clientes}=window._histDados;
+  const meses=historicoConstruir(emps, pags, clientes);
+  historicoRenderKpis(meses);
+  historicoRenderCharts(meses);
+  historicoRenderTabela(meses);
+}
+function historicoRenderKpis(meses){
+  const el=document.getElementById('hist-kpis');
+  if(!el) return;
+  if(!meses.length){ el.innerHTML=''; return; }
+  const n=meses.length;
+  const totalNovosClientes=meses.reduce((s,m)=>s+m.novosClientesQtd,0);
+  const totalNovosContratos=meses.reduce((s,m)=>s+m.novosContratosQtd,0);
+  const totalCapitalEmprestado=meses.reduce((s,m)=>s+m.novosContratosCapital,0);
+  const totalJuros=meses.reduce((s,m)=>s+m.jurosRecebidos,0);
+  const totalQuitados=meses.reduce((s,m)=>s+m.quitadosQtd,0);
+  const taxaQuitacao=totalNovosContratos>0?(totalQuitados/totalNovosContratos*100):0;
+  el.innerHTML=`
+    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Novos Clientes / Mês</div><div class="kpi-val" style="color:var(--gold)">${(totalNovosClientes/n).toFixed(1)}</div><div class="kpi-sub">média em ${n} mês(es)</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Novos Contratos / Mês</div><div class="kpi-val" style="color:var(--blue)">${(totalNovosContratos/n).toFixed(1)}</div><div class="kpi-sub">${totalNovosContratos} no período</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--purple)"></div><div class="kpi-lbl">Capital Emprestado (total)</div><div class="kpi-val" style="color:var(--purple)">${fmt(totalCapitalEmprestado)}</div><div class="kpi-sub">soma de todos os meses</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Juros Recebidos (total)</div><div class="kpi-val" style="color:var(--green)">${fmt(totalJuros)}</div><div class="kpi-sub">${taxaQuitacao.toFixed(0)}% dos contratos já quitaram</div></div>
+  `;
+}
+function historicoRenderCharts(meses){
+  const c1=document.getElementById('chartHistContratos'), c2=document.getElementById('chartHistCapital');
+  if(!c1||!c2) return;
+  const ord=[...meses].reverse(); // cronológico
+  const labels=ord.map(m=>m.label);
+  destroyChart('histContratos');
+  charts.histContratos=new Chart(c1.getContext('2d'),{type:'bar',data:{labels,datasets:[
+    {label:'Novos Contratos',data:ord.map(m=>m.novosContratosQtd),backgroundColor:'rgba(72,149,239,0.75)',borderRadius:5,borderSkipped:false},
+    {label:'Quitados',data:ord.map(m=>m.quitadosQtd),backgroundColor:'rgba(6,214,160,0.7)',borderRadius:5,borderSkipped:false}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+ctx.raw}}},scales:{x:{grid:{display:false},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},stepSize:1},beginAtZero:true}}}});
+
+  destroyChart('histCapital');
+  charts.histCapital=new Chart(c2.getContext('2d'),{type:'bar',data:{labels,datasets:[
+    {label:'Capital Emprestado',data:ord.map(m=>m.novosContratosCapital),backgroundColor:'rgba(155,93,229,0.75)',borderRadius:5,borderSkipped:false},
+    {label:'Juros Recebidos',data:ord.map(m=>m.jurosRecebidos),backgroundColor:'rgba(6,214,160,0.7)',borderRadius:5,borderSkipped:false}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.raw)}}},scales:{x:{grid:{display:false},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)},beginAtZero:true}}}});
+}
+function historicoRenderTabela(meses){
+  const tbody=document.getElementById('hist-tbody');
+  if(!tbody) return;
+  if(!meses.length){ tbody.innerHTML='<tr><td colspan="13" style="text-align:center;color:var(--muted);padding:16px">Sem dados suficientes ainda.</td></tr>'; return; }
+  const fmt2=v=>'R$ '+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  tbody.innerHTML=meses.map((m,i)=>{
+    const rid='hist-det-'+i;
+    const corRes=m.caixaResultado>=0?'var(--green)':'var(--red)';
+    return `<tr onclick="document.getElementById('${rid}').style.display=document.getElementById('${rid}').style.display==='none'?'table-row':'none'" style="cursor:pointer">
+      <td><strong>${m.label}</strong></td>
+      <td>${m.novosClientesQtd}</td>
+      <td>${m.novosContratosQtd}</td>
+      <td>${fmt(m.novosContratosCapital)}</td>
+      <td>${m.clientesPagaramQtd}</td>
+      <td>${m.pagamentosQtd}</td>
+      <td style="color:var(--green)">${fmt(m.jurosRecebidos)}</td>
+      <td>${fmt(m.amortRecebida)}</td>
+      <td>${m.quitadosQtd}</td>
+      <td style="color:var(--green)">${fmt2(m.caixaEntradas)}</td>
+      <td style="color:var(--red)">${fmt2(m.caixaSaidas)}</td>
+      <td style="color:${corRes}">${fmt2(m.caixaResultado)}</td>
+      <td>${fmt2(m.caixaSaldo)}</td>
+    </tr>
+    <tr id="${rid}" style="display:none;background:rgba(255,255,255,0.02)"><td colspan="13" style="padding:14px 18px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;font-size:0.88rem">
+        <div><div style="color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-size:0.78rem;margin-bottom:6px">👤 Novos Clientes (${m.novosClientesQtd})</div>${m.novosClientesLista.length?m.novosClientesLista.map(n=>`<div>${n}</div>`).join(''):'<div style="color:var(--muted2)">—</div>'}</div>
+        <div><div style="color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-size:0.78rem;margin-bottom:6px">📋 Novos Contratos (${m.novosContratosQtd})</div>${m.novosContratosLista.length?m.novosContratosLista.map(e=>`<div>${e.nome} <span style="color:var(--muted2)">· ${fmt(e.capital)}</span></div>`).join(''):'<div style="color:var(--muted2)">—</div>'}</div>
+        <div><div style="color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-size:0.78rem;margin-bottom:6px">💵 Clientes que Pagaram (${m.clientesPagaramQtd})</div>${m.clientesPagaramLista.length?m.clientesPagaramLista.map(n=>`<div>${n}</div>`).join(''):'<div style="color:var(--muted2)">—</div>'}</div>
+        <div><div style="color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-size:0.78rem;margin-bottom:6px">✅ Contratos Quitados (${m.quitadosQtd})</div>${m.quitadosLista.length?m.quitadosLista.map(e=>`<div>${e.nome} <span style="color:var(--muted2)">· ${fmt(e.capital)}</span></div>`).join(''):'<div style="color:var(--muted2)">—</div>'}</div>
+      </div>
+    </td></tr>`;
+  }).join('');
 }
 
 // ── WHATSAPP ─────────────────────────────────────────────
