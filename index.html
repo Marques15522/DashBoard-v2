@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Capital Investimentos — Dashboard Estratégico</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-date-fns/3.0.0/chartjs-adapter-date-fns.bundle.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Sans+3:wght@400;500;600;700&family=DM+Mono:ital,wght@0,400;0,500&display=swap" rel="stylesheet">
@@ -4539,12 +4540,12 @@ function metasSalvar(){
 function metasHistoricoAtualizar(naRua, contratosAtivos, clientesAtivos){
   let hist=[];
   try{ hist=JSON.parse(localStorage.getItem(METAS_HIST_KEY))||[]; }catch(e){ hist=[]; }
-  const key=new Date().toISOString().slice(0,10);
-  const idx=hist.findIndex(h=>h.data===key);
-  const entry={data:key, naRua, contratosAtivos, clientesAtivos};
-  if(idx>=0) hist[idx]=entry; else hist.push(entry);
-  if(hist.length>400) hist=hist.slice(-400);
-  try{ localStorage.setItem(METAS_HIST_KEY, JSON.stringify(hist)); }catch(e){}
+  const ultimo=hist[hist.length-1];
+  if(!ultimo || Number(ultimo.naRua)!==Number(naRua)){
+    hist.push({ts:new Date().toISOString(), naRua, contratosAtivos, clientesAtivos});
+    if(hist.length>3000) hist=hist.slice(-3000);
+    try{ localStorage.setItem(METAS_HIST_KEY, JSON.stringify(hist)); }catch(e){}
+  }
   return hist;
 }
 function metasAtualizar(naRua, taxaMediaGlobal, contratosAtivos, clientesAtivos){
@@ -4615,37 +4616,48 @@ function metasRenderChart(d,cfg){
   const canvas=document.getElementById('chartMetas');
   if(!canvas) return;
   destroyChart('metas');
-  const hoje=new Date(); hoje.setHours(0,0,0,0);
-  const dataAlvo = cfg.dataAlvo ? new Date(cfg.dataAlvo+'T00:00:00') : new Date(hoje.getFullYear(),hoje.getMonth()+6,1);
-  let nMeses = (dataAlvo.getFullYear()-hoje.getFullYear())*12+(dataAlvo.getMonth()-hoje.getMonth());
-  nMeses = Math.max(1, Math.min(nMeses, 36));
-  const diffDias=Math.max((dataAlvo-hoje)/86400000, 1);
+  const agora=new Date();
+
+  // REALIZADO — todos os pontos de mudança real registrados, em tempo real (sem agrupar por mês)
+  let hist=[];
+  try{ hist=JSON.parse(localStorage.getItem(METAS_HIST_KEY))||[]; }catch(e){ hist=[]; }
+  const realizado=hist.map(h=>({x:new Date(h.ts||(h.data+'T12:00:00')), y:h.naRua}));
+  if(!realizado.length || realizado[realizado.length-1].y!==d.naRua){
+    realizado.push({x:agora, y:d.naRua});
+  } else {
+    realizado[realizado.length-1]={x:agora, y:d.naRua}; // estica a linha até agora
+  }
+
+  // CENÁRIOS — projeção mensal a partir de agora até a data da meta
+  const dataAlvo = cfg.dataAlvo ? new Date(cfg.dataAlvo+'T00:00:00') : new Date(agora.getFullYear(),agora.getMonth()+6,1);
+  const diffDias=Math.max((dataAlvo-agora)/86400000, 1);
   const mesesRestantesF=diffDias/30;
   const taxaAtual=d.taxaMediaGlobal||0;
   const taxaNecessaria = cfg.valorAlvo ? Math.pow(Math.max(cfg.valorAlvo,1)/Math.max(d.naRua,1), 1/mesesRestantesF)-1 : 0;
+  const nMeses = Math.max(1, Math.min(Math.ceil(diffDias/30), 36));
 
-  const labels=[], pleno=[], minimo=[];
+  const pleno=[], minimo=[];
   for(let i=0;i<=nMeses;i++){
-    const dt=new Date(hoje.getFullYear(), hoje.getMonth()+i, 1);
-    labels.push(dt.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));
-    pleno.push(d.naRua*Math.pow(1+taxaAtual, i));
-    minimo.push(cfg.valorAlvo ? d.naRua*Math.pow(1+taxaNecessaria, i) : null);
+    let dt=new Date(agora); dt.setDate(dt.getDate()+Math.round(i*30));
+    if(dt>dataAlvo) dt=new Date(dataAlvo);
+    pleno.push({x:dt, y:d.naRua*Math.pow(1+taxaAtual, i)});
+    if(cfg.valorAlvo) minimo.push({x:dt, y:d.naRua*Math.pow(1+taxaNecessaria, i)});
   }
 
-  let hist=[];
-  try{ hist=JSON.parse(localStorage.getItem(METAS_HIST_KEY))||[]; }catch(e){ hist=[]; }
-  const realizado=labels.map((_,i)=>{
-    const dt=new Date(hoje.getFullYear(), hoje.getMonth()+i, 1);
-    const doMes=hist.filter(h=>{const hd=new Date(h.data+'T00:00:00'); return hd.getFullYear()===dt.getFullYear()&&hd.getMonth()===dt.getMonth();});
-    if(doMes.length===0) return i===0?d.naRua:null;
-    return doMes[doMes.length-1].naRua;
-  });
-
-  charts.metas=new Chart(canvas.getContext('2d'),{type:'line',data:{labels,datasets:[
-    {label:'Realizado',data:realizado,borderColor:'rgba(201,146,42,0.95)',backgroundColor:'rgba(201,146,42,0.08)',borderWidth:3,pointRadius:4,spanGaps:false,fill:true,tension:0.2},
-    {label:'Cenário Pleno (taxa atual)',data:pleno,borderColor:'rgba(6,214,160,0.8)',borderWidth:2,borderDash:[6,4],pointRadius:0,tension:0.25},
-    {label:'Cenário Mínimo (necessário)',data:minimo,borderColor:'rgba(240,180,41,0.8)',borderWidth:2,borderDash:[2,3],pointRadius:0,tension:0.25}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+(ctx.raw==null?'—':fmt(ctx.raw))}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}}}}});
+  charts.metas=new Chart(canvas.getContext('2d'),{type:'line',data:{datasets:[
+    {label:'Realizado',data:realizado,borderColor:'rgba(201,146,42,0.95)',backgroundColor:'rgba(201,146,42,0.20)',borderWidth:3,pointRadius:realizado.length<60?3:0,pointBackgroundColor:'rgba(201,146,42,0.95)',fill:true,tension:0.15},
+    {label:'Cenário Pleno (taxa atual)',data:pleno,borderColor:'rgba(6,214,160,0.9)',backgroundColor:'rgba(6,214,160,0.14)',borderWidth:2,borderDash:[6,4],pointRadius:0,fill:true,tension:0.2},
+    {label:'Cenário Mínimo (necessário)',data:minimo,borderColor:'rgba(240,180,41,0.9)',backgroundColor:'rgba(240,180,41,0.12)',borderWidth:2,borderDash:[2,3],pointRadius:0,fill:true,tension:0.2}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},
+      tooltip:{...TOOLTIP,callbacks:{
+        title:ctx=>new Date(ctx[0].parsed.x).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}),
+        label:ctx=>' '+ctx.dataset.label+': '+(ctx.parsed.y==null?'—':fmt(ctx.parsed.y))
+      }}},
+    scales:{
+      x:{type:'time',time:{unit:'day',tooltipFormat:'dd/MM/yyyy HH:mm',displayFormats:{day:'dd/MM',week:'dd/MM',month:'MMM/yy'}},grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},maxRotation:0,autoSkip:true}},
+      y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}}
+    }}});
 }
 
 // ── HISTÓRICO MENSAL ─────────────────────────────────────
