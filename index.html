@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Capital Investimentos — Dashboard Estratégico</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-date-fns/3.0.0/chartjs-adapter-date-fns.bundle.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Sans+3:wght@400;500;600;700&family=DM+Mono:ital,wght@0,400;0,500&display=swap" rel="stylesheet">
@@ -3085,8 +3084,8 @@ document.querySelectorAll('.nav-tab').forEach(tab=>{
     document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
     if(tab.dataset.tab === 'simulador'){ calcDesagio(); calcOportunidade(); }
     if(tab.dataset.tab === 'investidores'){ invRender(); }
-    if(tab.dataset.tab === 'metas'){ metasRenderAll(); setTimeout(()=>{ if(charts.metas) charts.metas.resize(); },100); }
-    if(tab.dataset.tab === 'historico'){ historicoRenderAll(); setTimeout(()=>{ if(charts.histContratos) charts.histContratos.resize(); if(charts.histCapital) charts.histCapital.resize(); },100); }
+    if(tab.dataset.tab === 'metas'){ try{ metasRenderAll(); }catch(e){ console.warn('metasRenderAll:',e); } setTimeout(()=>{ if(charts.metas) charts.metas.resize(); },100); }
+    if(tab.dataset.tab === 'historico'){ try{ historicoRenderAll(); }catch(e){ console.warn('historicoRenderAll:',e); } setTimeout(()=>{ if(charts.histContratos) charts.histContratos.resize(); if(charts.histCapital) charts.histCapital.resize(); },100); }
     if(tab.dataset.tab === 'comando' && _cmdChart){ setTimeout(()=>{ if(_cmdChart) _cmdChart.resize(); },100); }
     if(tab.dataset.tab === 'clientes') {
       iniciarSyncPolling();
@@ -4621,11 +4620,11 @@ function metasRenderChart(d,cfg){
   // REALIZADO — todos os pontos de mudança real registrados, em tempo real (sem agrupar por mês)
   let hist=[];
   try{ hist=JSON.parse(localStorage.getItem(METAS_HIST_KEY))||[]; }catch(e){ hist=[]; }
-  const realizado=hist.map(h=>({x:new Date(h.ts||(h.data+'T12:00:00')), y:h.naRua}));
+  const realizado=hist.map(h=>({x:new Date(h.ts||(h.data+'T12:00:00')).getTime(), y:h.naRua}));
   if(!realizado.length || realizado[realizado.length-1].y!==d.naRua){
-    realizado.push({x:agora, y:d.naRua});
+    realizado.push({x:agora.getTime(), y:d.naRua});
   } else {
-    realizado[realizado.length-1]={x:agora, y:d.naRua}; // estica a linha até agora
+    realizado[realizado.length-1]={x:agora.getTime(), y:d.naRua}; // estica a linha até agora
   }
 
   // CENÁRIOS — projeção mensal a partir de agora até a data da meta
@@ -4640,24 +4639,26 @@ function metasRenderChart(d,cfg){
   for(let i=0;i<=nMeses;i++){
     let dt=new Date(agora); dt.setDate(dt.getDate()+Math.round(i*30));
     if(dt>dataAlvo) dt=new Date(dataAlvo);
-    pleno.push({x:dt, y:d.naRua*Math.pow(1+taxaAtual, i)});
-    if(cfg.valorAlvo) minimo.push({x:dt, y:d.naRua*Math.pow(1+taxaNecessaria, i)});
+    pleno.push({x:dt.getTime(), y:d.naRua*Math.pow(1+taxaAtual, i)});
+    if(cfg.valorAlvo) minimo.push({x:dt.getTime(), y:d.naRua*Math.pow(1+taxaNecessaria, i)});
   }
 
-  charts.metas=new Chart(canvas.getContext('2d'),{type:'line',data:{datasets:[
-    {label:'Realizado',data:realizado,borderColor:'rgba(201,146,42,0.95)',backgroundColor:'rgba(201,146,42,0.20)',borderWidth:3,pointRadius:realizado.length<60?3:0,pointBackgroundColor:'rgba(201,146,42,0.95)',fill:true,tension:0.15},
-    {label:'Cenário Pleno (taxa atual)',data:pleno,borderColor:'rgba(6,214,160,0.9)',backgroundColor:'rgba(6,214,160,0.14)',borderWidth:2,borderDash:[6,4],pointRadius:0,fill:true,tension:0.2},
-    {label:'Cenário Mínimo (necessário)',data:minimo,borderColor:'rgba(240,180,41,0.9)',backgroundColor:'rgba(240,180,41,0.12)',borderWidth:2,borderDash:[2,3],pointRadius:0,fill:true,tension:0.2}
-  ]},options:{responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},
-      tooltip:{...TOOLTIP,callbacks:{
-        title:ctx=>new Date(ctx[0].parsed.x).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}),
-        label:ctx=>' '+ctx.dataset.label+': '+(ctx.parsed.y==null?'—':fmt(ctx.parsed.y))
-      }}},
-    scales:{
-      x:{type:'time',time:{unit:'day',tooltipFormat:'dd/MM/yyyy HH:mm',displayFormats:{day:'dd/MM',week:'dd/MM',month:'MMM/yy'}},grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},maxRotation:0,autoSkip:true}},
-      y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}}
-    }}});
+  try{
+    charts.metas=new Chart(canvas.getContext('2d'),{type:'line',data:{datasets:[
+      {label:'Realizado',data:realizado,borderColor:'rgba(201,146,42,0.95)',backgroundColor:'rgba(201,146,42,0.20)',borderWidth:3,pointRadius:realizado.length<60?3:0,pointBackgroundColor:'rgba(201,146,42,0.95)',fill:true,tension:0.15},
+      {label:'Cenário Pleno (taxa atual)',data:pleno,borderColor:'rgba(6,214,160,0.9)',backgroundColor:'rgba(6,214,160,0.14)',borderWidth:2,borderDash:[6,4],pointRadius:0,fill:true,tension:0.2},
+      {label:'Cenário Mínimo (necessário)',data:minimo,borderColor:'rgba(240,180,41,0.9)',backgroundColor:'rgba(240,180,41,0.12)',borderWidth:2,borderDash:[2,3],pointRadius:0,fill:true,tension:0.2}
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},
+        tooltip:{...TOOLTIP,callbacks:{
+          title:ctx=>new Date(ctx[0].parsed.x).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}),
+          label:ctx=>' '+ctx.dataset.label+': '+(ctx.parsed.y==null?'—':fmt(ctx.parsed.y))
+        }}},
+      scales:{
+        x:{type:'linear',grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},maxRotation:0,autoSkip:true,callback:v=>new Date(v).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}},
+        y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}}
+      }}});
+  }catch(e){ console.warn('metasRenderChart:', e); }
 }
 
 // ── HISTÓRICO MENSAL ─────────────────────────────────────
