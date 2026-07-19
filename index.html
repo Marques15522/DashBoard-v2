@@ -230,6 +230,10 @@ body.fs-mode #fs-wrapper #main{flex:1;overflow-y:auto;}
 .cl-regular{background:rgba(72,149,239,0.1);color:var(--blue);border:1px solid rgba(72,149,239,0.25);}
 .cl-risco{background:rgba(239,71,111,0.1);color:var(--red);border:1px solid rgba(239,71,111,0.25);}
 .cl-inativo{background:rgba(90,98,130,0.1);color:var(--muted);border:1px solid var(--border2);}
+.cl-empresa{background:rgba(155,93,229,0.15);color:var(--purple);border:1px solid rgba(155,93,229,0.3);}
+.p-empresa-toggle{font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.04em;padding:4px 9px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;}
+.p-empresa-toggle:hover{border-color:var(--purple);color:var(--purple);}
+.p-empresa-toggle.on{background:rgba(155,93,229,0.15);border-color:var(--purple);color:var(--purple);}
 .p-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
 .pstat{display:flex;flex-direction:column;gap:1px;}
 .pstat-lbl{font-family:'Source Sans 3',sans-serif;font-size:0.74rem;font-weight:600;color:var(--muted);}
@@ -1596,6 +1600,7 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
     <div class="card"><div class="card-header"><div><div class="card-title">🎫 Ticket Médio por Cliente</div><div class="card-desc">Valor médio emprestado por cliente</div></div><div class="card-badge">TICKET</div></div><div class="chart-wrap xtall"><canvas id="chartTicketCliente"></canvas></div></div>
   </div>
   <div class="section-label">CLUSTERIZAÇÃO DE CLIENTES</div>
+  <div class="card"><div class="card-header"><div><div class="card-title">🥧 Tipos de Clientes</div><div class="card-desc">Distribuição percentual: Premium · Regular Fiel · Regular · Alto Risco · Inativo · Empresa</div></div><div class="card-badge">%</div></div><div class="chart-wrap tall"><canvas id="chartTiposClientes"></canvas></div></div>
   <div class="card"><div class="card-header"><div><div class="card-title">🧩 Perfil de Clientes</div><div class="card-desc">Agrupamento automático por comportamento: Premium · Regular Fiel · Alto Risco · Inativo</div></div><div class="card-badge">IA</div></div><div class="profile-grid" id="profileGrid"></div></div>
   <div class="card"><div class="card-header"><div><div class="card-title">📋 Histórico de Pagamentos por Cliente</div><div class="card-desc">Pontualidade e volume registrado</div></div><div class="card-badge">HISTÓRICO</div></div><div class="hist-list" id="histList"></div></div>
 
@@ -3168,6 +3173,7 @@ function parseStatus(v){
 }
 
 function render(empRows,pagRows){
+  window._lastEmpRows=empRows; window._lastPagRows=pagRows;
   invCarregarLocal(); // garante _invLista/_invPagamentos atualizados p/ os alertas de investidores
   const hoje=new Date();hoje.setHours(0,0,0,0);
   // Corrige status: se proxVenc já passou e não está quitado → atraso
@@ -4012,8 +4018,9 @@ function render(empRows,pagRows){
   charts.ticketCliente=new Chart(document.getElementById('chartTicketCliente').getContext('2d'),{type:'bar',data:{labels:cTS.map(c=>c.nome),datasets:[{label:'Ticket Médio',data:cTS.map(c=>c.ticketMedio),backgroundColor:'rgba(155,93,229,0.75)',borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}},y:{grid:{display:false},ticks:{color:'#dde1f0',font:{family:'DM Mono',size:10}}}}}});
 
   // CLUSTERIZAÇÃO
-  function cluster(c){const sc=calcScore(c);if(!c.ativo)return{lbl:'Inativo',cls:'cl-inativo'};if(sc<20&&c.ticketMedio>ticket*1.2)return{lbl:'Premium',cls:'cl-premium'};if(sc>=50)return{lbl:'Alto Risco',cls:'cl-risco'};if(c.recorrente)return{lbl:'Regular Fiel',cls:'cl-regular'};return{lbl:'Regular',cls:'cl-regular'};}
-  _h('profileGrid',clientes.map(c=>{const cl=cluster(c);const ini=c.nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();const sc=calcScore(c);const corSc=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';const capTotal=c.contratos.reduce((s,e)=>s+e.capital,0);const roi=capTotal>0?c.totalJuros/capTotal:0;const corRoi=roi>0.3?'var(--gold)':roi>0.15?'var(--green)':'var(--blue)';return`<div class="profile-card"><div class="profile-top"><div class="p-avatar">${ini}</div><div class="p-name">${c.nome}</div><div class="p-cluster ${cl.cls}">${cl.lbl}</div></div><div class="p-stats"><div class="pstat"><div class="pstat-lbl">Capital Total</div><div class="pstat-val" style="color:var(--gold)">${fmt(c.totalCap)}</div></div><div class="pstat"><div class="pstat-lbl">Lucro Recebido</div><div class="pstat-val" style="color:var(--green)">${fmt(c.totalPago)}</div></div><div class="pstat"><div class="pstat-lbl">Lucro Previsto (total)</div><div class="pstat-val" style="color:var(--gold2)">${fmt(c.totalJuros)}</div></div><div class="pstat"><div class="pstat-lbl">Contratos</div><div class="pstat-val">${c.qtdContratos}</div></div><div class="pstat"><div class="pstat-lbl">Score Risco</div><div class="pstat-val" style="color:${corSc}">${sc}</div></div><div class="pstat"><div class="pstat-lbl">Relacionamento</div><div class="pstat-val" style="color:var(--blue)">${c.mesesRelac}m</div></div><div class="pstat"><div class="pstat-lbl">Status</div><div class="pstat-val" style="color:${c.ativo?'var(--green)':'var(--muted)'}">${c.ativo?'ATIVO':'INATIVO'}</div></div></div><div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font-size:0.86rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase">Já Recebido / Total do Contrato</div><div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:'Cormorant Garamond', serif;font-size:1.1rem;color:var(--green);line-height:1">${fmt(c.totalPago)}</span><span style="font-family:'DM Mono',monospace;font-size:0.92rem;color:var(--muted)">/ ${fmt(c.totalJuros)}</span></div></div></div>`;}).join(''));
+  function cluster(c){if(empresaEhMarcada(c.nome))return{lbl:'Empresa',cls:'cl-empresa'};const sc=calcScore(c);if(!c.ativo)return{lbl:'Inativo',cls:'cl-inativo'};if(sc<20&&c.ticketMedio>ticket*1.2)return{lbl:'Premium',cls:'cl-premium'};if(sc>=50)return{lbl:'Alto Risco',cls:'cl-risco'};if(c.recorrente)return{lbl:'Regular Fiel',cls:'cl-regular'};return{lbl:'Regular',cls:'cl-regular'};}
+  _h('profileGrid',clientes.map(c=>{const cl=cluster(c);const ini=c.nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();const sc=calcScore(c);const corSc=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';const capTotal=c.contratos.reduce((s,e)=>s+e.capital,0);const roi=capTotal>0?c.totalJuros/capTotal:0;const corRoi=roi>0.3?'var(--gold)':roi>0.15?'var(--green)':'var(--blue)';const nomeAttr=c.nome.replace(/"/g,'&quot;');const ehEmpresa=empresaEhMarcada(c.nome);return`<div class="profile-card"><div class="profile-top"><div class="p-avatar">${ini}</div><div class="p-name">${c.nome}</div><div class="p-cluster ${cl.cls}">${cl.lbl}</div></div><div style="margin:6px 0 2px"><button class="p-empresa-toggle ${ehEmpresa?'on':''}" data-nome="${nomeAttr}" onclick="empresaToggle(this.dataset.nome)">🏢 ${ehEmpresa?'É empresa ✓':'Marcar como empresa'}</button></div><div class="p-stats"><div class="pstat"><div class="pstat-lbl">Capital Total</div><div class="pstat-val" style="color:var(--gold)">${fmt(c.totalCap)}</div></div><div class="pstat"><div class="pstat-lbl">Lucro Recebido</div><div class="pstat-val" style="color:var(--green)">${fmt(c.totalPago)}</div></div><div class="pstat"><div class="pstat-lbl">Lucro Previsto (total)</div><div class="pstat-val" style="color:var(--gold2)">${fmt(c.totalJuros)}</div></div><div class="pstat"><div class="pstat-lbl">Contratos</div><div class="pstat-val">${c.qtdContratos}</div></div><div class="pstat"><div class="pstat-lbl">Score Risco</div><div class="pstat-val" style="color:${corSc}">${sc}</div></div><div class="pstat"><div class="pstat-lbl">Relacionamento</div><div class="pstat-val" style="color:var(--blue)">${c.mesesRelac}m</div></div><div class="pstat"><div class="pstat-lbl">Status</div><div class="pstat-val" style="color:${c.ativo?'var(--green)':'var(--muted)'}">${c.ativo?'ATIVO':'INATIVO'}</div></div></div><div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font-size:0.86rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase">Já Recebido / Total do Contrato</div><div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:'Cormorant Garamond', serif;font-size:1.1rem;color:var(--green);line-height:1">${fmt(c.totalPago)}</span><span style="font-family:'DM Mono',monospace;font-size:0.92rem;color:var(--muted)">/ ${fmt(c.totalJuros)}</span></div></div></div>`;}).join(''));
+  try{ clientesRenderTiposChart(clientes, cluster); }catch(e){ console.warn('clientesRenderTiposChart:', e); }
 
   // HISTÓRICO PAGAMENTOS
   _h('histList',[...clientes].sort((a,b)=>b.totalPago-a.totalPago).map(c=>{const isAt=c.temAtraso,isQ=c.soQuitados;const st=isQ?`<span class="badge ok">✅ QUITADO</span>`:isAt?`<span class="badge bad">⚠️ ATRASO</span>`:`<span class="badge ok">✓ EM DIA</span>`;const rec=c.recorrente?`<span class="badge blue">↩ RECORRENTE</span>`:'';return`<div class="hist-row"><span class="hist-nome">${c.nome}</span><div class="hist-badges"><span class="badge muted">${c.qtdContratos} contrato(s)</span><span class="badge muted">${fmt(c.totalPago)}</span>${rec}${st}</div></div>`;}).join(''));
@@ -4818,6 +4825,49 @@ function historicoRenderTabela(meses){
       </div>
     </td></tr>`;
   }).join('');
+}
+
+// ── TIPOS DE CLIENTES (Empresa + clusterização) ─────────
+const CLIENTES_EMPRESA_KEY='clientesEmpresaV1';
+function empresaMapaGet(){
+  try{ return JSON.parse(localStorage.getItem(CLIENTES_EMPRESA_KEY))||{}; }catch(e){ return {}; }
+}
+function empresaEhMarcada(nome){
+  const m=empresaMapaGet();
+  return !!m[nome];
+}
+function empresaToggle(nome){
+  const m=empresaMapaGet();
+  if(m[nome]) delete m[nome]; else m[nome]=true;
+  try{ localStorage.setItem(CLIENTES_EMPRESA_KEY, JSON.stringify(m)); }catch(e){}
+  if(window._lastEmpRows) render(window._lastEmpRows, window._lastPagRows);
+}
+function clientesRenderTiposChart(clientes, clusterFn){
+  const canvas=document.getElementById('chartTiposClientes');
+  if(!canvas) return;
+  destroyChart('tiposClientes');
+  const cores={
+    'Premium':'rgba(201,146,42,0.85)','Regular Fiel':'rgba(72,149,239,0.85)','Regular':'rgba(72,149,239,0.5)',
+    'Alto Risco':'rgba(239,71,111,0.85)','Inativo':'rgba(90,98,130,0.6)','Empresa':'rgba(155,93,229,0.85)'
+  };
+  const contagem={};
+  clientes.forEach(c=>{ const lbl=clusterFn(c).lbl; contagem[lbl]=(contagem[lbl]||0)+1; });
+  const labels=Object.keys(contagem);
+  const total=clientes.length||1;
+  const valores=labels.map(l=>contagem[l]);
+  try{
+    charts.tiposClientes=new Chart(canvas.getContext('2d'),{type:'doughnut',data:{labels,datasets:[{
+      data:valores,
+      backgroundColor:labels.map(l=>cores[l]||'rgba(136,146,175,0.7)'),
+      borderColor:'#0a0e1a',borderWidth:2
+    }]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'right',labels:{color:'#8892b0',font:{family:'DM Mono',size:10},boxWidth:12,boxHeight:12,
+          generateLabels:chart=>chart.data.labels.map((l,i)=>({text:`${l} — ${(chart.data.datasets[0].data[i]/total*100).toFixed(0)}%`,fillStyle:chart.data.datasets[0].backgroundColor[i],strokeStyle:chart.data.datasets[0].backgroundColor[i],index:i}))
+        }},
+        tooltip:{...TOOLTIP,callbacks:{label:ctx=>{const v=ctx.raw;const p=(v/total*100).toFixed(1);return ` ${ctx.label}: ${v} cliente(s) (${p}%)`;}}}
+      }}});
+  }catch(e){ console.warn('clientesRenderTiposChart:', e); }
 }
 
 // ── WHATSAPP ─────────────────────────────────────────────
