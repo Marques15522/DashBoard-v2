@@ -1600,7 +1600,7 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
     <div class="card"><div class="card-header"><div><div class="card-title">🎫 Ticket Médio por Cliente</div><div class="card-desc">Valor médio emprestado por cliente</div></div><div class="card-badge">TICKET</div></div><div class="chart-wrap xtall"><canvas id="chartTicketCliente"></canvas></div></div>
   </div>
   <div class="section-label">CLUSTERIZAÇÃO DE CLIENTES</div>
-  <div class="card"><div class="card-header"><div><div class="card-title">🥧 Tipos de Clientes</div><div class="card-desc">Distribuição percentual: Premium · Regular Fiel · Regular · Alto Risco · Inativo · Empresa</div></div><div class="card-badge">%</div></div><div class="chart-wrap" style="height:420px"><canvas id="chartTiposClientes"></canvas></div></div>
+  <div class="card"><div class="card-header"><div><div class="card-title">🥧 Tipos de Clientes</div><div class="card-desc">Distribuição percentual: Premium · Regular Fiel · Regular · Alto Risco · Inativo · Empresa</div></div><div class="card-badge">%</div></div><div class="chart-wrap" style="height:300px"><canvas id="chartTiposClientes"></canvas></div></div>
   <div class="card"><div class="card-header"><div><div class="card-title">🧩 Perfil de Clientes</div><div class="card-desc">Agrupamento automático por comportamento: Premium · Regular Fiel · Alto Risco · Inativo</div></div><div class="card-badge">IA</div></div><div class="profile-grid" id="profileGrid"></div></div>
   <div class="card"><div class="card-header"><div><div class="card-title">📋 Histórico de Pagamentos por Cliente</div><div class="card-desc">Pontualidade e volume registrado</div></div><div class="card-badge">HISTÓRICO</div></div><div class="hist-list" id="histList"></div></div>
 
@@ -4877,7 +4877,7 @@ function clientesRenderTiposChart(clientes, clusterFn){
       const meta=chart.getDatasetMeta(0);
       if(!meta || !meta.data || !meta.data.length) return;
       const {ctx}=chart;
-      const DEPTH=16, CAMADAS=16;
+      const DEPTH=9, CAMADAS=10;
       ctx.save();
       for(let camada=CAMADAS;camada>=1;camada--){
         const offY=(DEPTH/CAMADAS)*camada;
@@ -4885,7 +4885,7 @@ function clientesRenderTiposChart(clientes, clusterFn){
           if(!arc || arc.circumference===0) return;
           const {x,y,startAngle,endAngle,outerRadius}=arc;
           ctx.beginPath();
-          ctx.fillStyle=_shadeRgba(cores_arr[i], -42);
+          ctx.fillStyle=_shadeRgba(cores_arr[i], -30);
           ctx.moveTo(x, y+offY);
           ctx.arc(x, y+offY, outerRadius, startAngle, endAngle);
           ctx.closePath();
@@ -4895,7 +4895,7 @@ function clientesRenderTiposChart(clientes, clusterFn){
       ctx.restore();
     }
   };
-  // plugin: % escrito direto em cada fatia
+  // plugin: % escrito direto em cada fatia — branco com contorno escuro, legível em qualquer cor
   const labelsNaFatia={
     id:'labelsNaFatia_'+Math.random().toString(36).slice(2),
     afterDatasetsDraw(chart){
@@ -4910,10 +4910,13 @@ function clientesRenderTiposChart(clientes, clusterFn){
         const mid=(arc.startAngle+arc.endAngle)/2;
         const r=arc.outerRadius*0.66;
         const tx=arc.x+Math.cos(mid)*r, ty=arc.y+Math.sin(mid)*r;
-        ctx.fillStyle='#0a0e1a';
-        ctx.font="bold 15px 'DM Mono', monospace";
+        ctx.font="bold 12px 'DM Mono', monospace";
         ctx.textAlign='center';
         ctx.textBaseline='middle';
+        ctx.lineWidth=3;
+        ctx.strokeStyle='rgba(10,14,26,0.85)';
+        ctx.strokeText(p.toFixed(0)+'%', tx, ty);
+        ctx.fillStyle='#ffffff';
         ctx.fillText(p.toFixed(0)+'%', tx, ty);
       });
       ctx.restore();
@@ -4927,12 +4930,12 @@ function clientesRenderTiposChart(clientes, clusterFn){
       borderColor:'#0a0e1a',borderWidth:2
     }]},
     plugins:[depth3d, labelsNaFatia],
-    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{bottom:26,top:10}},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{bottom:16,top:8}},
       plugins:{
-        legend:{position:'bottom',labels:{color:'#c8cde0',font:{family:'DM Mono',size:13},boxWidth:16,boxHeight:16,padding:16,
+        legend:{position:'bottom',labels:{color:'#c8cde0',font:{family:'DM Mono',size:10.5},boxWidth:11,boxHeight:11,padding:10,usePointStyle:true,pointStyle:'circle',
           generateLabels:chart=>chart.data.labels.map((l,i)=>({text:`${l} — ${(chart.data.datasets[0].data[i]/total*100).toFixed(0)}%`,fillStyle:chart.data.datasets[0].backgroundColor[i],strokeStyle:chart.data.datasets[0].backgroundColor[i],index:i}))
         }},
-        tooltip:{...TOOLTIP,bodyFont:{family:'DM Mono',size:13},titleFont:{family:'DM Mono',size:13},callbacks:{label:ctx=>{const v=ctx.raw;const p=(v/total*100).toFixed(1);return ` ${ctx.label}: ${v} cliente(s) (${p}%)`;}}}
+        tooltip:{...TOOLTIP,bodyFont:{family:'DM Mono',size:12},titleFont:{family:'DM Mono',size:12},callbacks:{label:ctx=>{const v=ctx.raw;const p=(v/total*100).toFixed(1);return ` ${ctx.label}: ${v} cliente(s) (${p}%)`;}}}
       }}});
   }catch(e){ console.warn('clientesRenderTiposChart:', e); }
 }
