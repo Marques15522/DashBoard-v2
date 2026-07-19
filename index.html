@@ -1600,7 +1600,7 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
     <div class="card"><div class="card-header"><div><div class="card-title">🎫 Ticket Médio por Cliente</div><div class="card-desc">Valor médio emprestado por cliente</div></div><div class="card-badge">TICKET</div></div><div class="chart-wrap xtall"><canvas id="chartTicketCliente"></canvas></div></div>
   </div>
   <div class="section-label">CLUSTERIZAÇÃO DE CLIENTES</div>
-  <div class="card"><div class="card-header"><div><div class="card-title">🥧 Tipos de Clientes</div><div class="card-desc">Distribuição percentual: Premium · Regular Fiel · Regular · Alto Risco · Inativo · Empresa</div></div><div class="card-badge">%</div></div><div class="chart-wrap tall"><canvas id="chartTiposClientes"></canvas></div></div>
+  <div class="card"><div class="card-header"><div><div class="card-title">🥧 Tipos de Clientes</div><div class="card-desc">Distribuição percentual: Premium · Regular Fiel · Regular · Alto Risco · Inativo · Empresa</div></div><div class="card-badge">%</div></div><div class="chart-wrap" style="height:420px"><canvas id="chartTiposClientes"></canvas></div></div>
   <div class="card"><div class="card-header"><div><div class="card-title">🧩 Perfil de Clientes</div><div class="card-desc">Agrupamento automático por comportamento: Premium · Regular Fiel · Alto Risco · Inativo</div></div><div class="card-badge">IA</div></div><div class="profile-grid" id="profileGrid"></div></div>
   <div class="card"><div class="card-header"><div><div class="card-title">📋 Histórico de Pagamentos por Cliente</div><div class="card-desc">Pontualidade e volume registrado</div></div><div class="card-badge">HISTÓRICO</div></div><div class="hist-list" id="histList"></div></div>
 
@@ -4842,30 +4842,97 @@ function empresaToggle(nome){
   try{ localStorage.setItem(CLIENTES_EMPRESA_KEY, JSON.stringify(m)); }catch(e){}
   if(window._lastEmpRows) render(window._lastEmpRows, window._lastPagRows);
 }
+function _shadeRgba(rgbaStr, pct){
+  // escurece/clareia uma cor rgba(...) em `pct`% (negativo escurece)
+  const m=rgbaStr.match(/rgba?\(([^)]+)\)/);
+  if(!m) return rgbaStr;
+  const parts=m[1].split(',').map(s=>s.trim());
+  let [r,g,b]=parts.map(Number);
+  const a=parts[3]!==undefined?parts[3]:1;
+  const f=pct/100;
+  r=Math.max(0,Math.min(255,Math.round(r+(f<0?r:255-r)*f)));
+  g=Math.max(0,Math.min(255,Math.round(g+(f<0?g:255-g)*f)));
+  b=Math.max(0,Math.min(255,Math.round(b+(f<0?b:255-b)*f)));
+  return `rgba(${r},${g},${b},${a})`;
+}
 function clientesRenderTiposChart(clientes, clusterFn){
   const canvas=document.getElementById('chartTiposClientes');
   if(!canvas) return;
   destroyChart('tiposClientes');
   const cores={
-    'Premium':'rgba(201,146,42,0.85)','Regular Fiel':'rgba(72,149,239,0.85)','Regular':'rgba(72,149,239,0.5)',
-    'Alto Risco':'rgba(239,71,111,0.85)','Inativo':'rgba(90,98,130,0.6)','Empresa':'rgba(155,93,229,0.85)'
+    'Premium':'rgba(201,146,42,0.95)','Regular Fiel':'rgba(72,149,239,0.95)','Regular':'rgba(72,149,239,0.6)',
+    'Alto Risco':'rgba(239,71,111,0.95)','Inativo':'rgba(90,98,130,0.75)','Empresa':'rgba(155,93,229,0.95)'
   };
   const contagem={};
   clientes.forEach(c=>{ const lbl=clusterFn(c).lbl; contagem[lbl]=(contagem[lbl]||0)+1; });
   const labels=Object.keys(contagem);
   const total=clientes.length||1;
   const valores=labels.map(l=>contagem[l]);
+  const cores_arr=labels.map(l=>cores[l]||'rgba(136,146,175,0.85)');
+
+  // plugin: efeito "3D" — desenha camadas escurecidas por baixo simulando profundidade (sem lib externa)
+  const depth3d={
+    id:'depth3d_'+Math.random().toString(36).slice(2),
+    beforeDatasetsDraw(chart){
+      const meta=chart.getDatasetMeta(0);
+      if(!meta || !meta.data || !meta.data.length) return;
+      const {ctx}=chart;
+      const DEPTH=16, CAMADAS=16;
+      ctx.save();
+      for(let camada=CAMADAS;camada>=1;camada--){
+        const offY=(DEPTH/CAMADAS)*camada;
+        meta.data.forEach((arc,i)=>{
+          if(!arc || arc.circumference===0) return;
+          const {x,y,startAngle,endAngle,outerRadius}=arc;
+          ctx.beginPath();
+          ctx.fillStyle=_shadeRgba(cores_arr[i], -42);
+          ctx.moveTo(x, y+offY);
+          ctx.arc(x, y+offY, outerRadius, startAngle, endAngle);
+          ctx.closePath();
+          ctx.fill();
+        });
+      }
+      ctx.restore();
+    }
+  };
+  // plugin: % escrito direto em cada fatia
+  const labelsNaFatia={
+    id:'labelsNaFatia_'+Math.random().toString(36).slice(2),
+    afterDatasetsDraw(chart){
+      const meta=chart.getDatasetMeta(0);
+      if(!meta || !meta.data || !meta.data.length) return;
+      const {ctx}=chart;
+      ctx.save();
+      meta.data.forEach((arc,i)=>{
+        if(!arc || arc.circumference===0) return;
+        const v=valores[i], p=v/total*100;
+        if(p<4) return; // fatia pequena demais, deixa só na legenda
+        const mid=(arc.startAngle+arc.endAngle)/2;
+        const r=arc.outerRadius*0.66;
+        const tx=arc.x+Math.cos(mid)*r, ty=arc.y+Math.sin(mid)*r;
+        ctx.fillStyle='#0a0e1a';
+        ctx.font="bold 15px 'DM Mono', monospace";
+        ctx.textAlign='center';
+        ctx.textBaseline='middle';
+        ctx.fillText(p.toFixed(0)+'%', tx, ty);
+      });
+      ctx.restore();
+    }
+  };
+
   try{
-    charts.tiposClientes=new Chart(canvas.getContext('2d'),{type:'doughnut',data:{labels,datasets:[{
+    charts.tiposClientes=new Chart(canvas.getContext('2d'),{type:'pie',data:{labels,datasets:[{
       data:valores,
-      backgroundColor:labels.map(l=>cores[l]||'rgba(136,146,175,0.7)'),
+      backgroundColor:cores_arr,
       borderColor:'#0a0e1a',borderWidth:2
-    }]},options:{responsive:true,maintainAspectRatio:false,
+    }]},
+    plugins:[depth3d, labelsNaFatia],
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{bottom:26,top:10}},
       plugins:{
-        legend:{position:'right',labels:{color:'#8892b0',font:{family:'DM Mono',size:10},boxWidth:12,boxHeight:12,
+        legend:{position:'bottom',labels:{color:'#c8cde0',font:{family:'DM Mono',size:13},boxWidth:16,boxHeight:16,padding:16,
           generateLabels:chart=>chart.data.labels.map((l,i)=>({text:`${l} — ${(chart.data.datasets[0].data[i]/total*100).toFixed(0)}%`,fillStyle:chart.data.datasets[0].backgroundColor[i],strokeStyle:chart.data.datasets[0].backgroundColor[i],index:i}))
         }},
-        tooltip:{...TOOLTIP,callbacks:{label:ctx=>{const v=ctx.raw;const p=(v/total*100).toFixed(1);return ` ${ctx.label}: ${v} cliente(s) (${p}%)`;}}}
+        tooltip:{...TOOLTIP,bodyFont:{family:'DM Mono',size:13},titleFont:{family:'DM Mono',size:13},callbacks:{label:ctx=>{const v=ctx.raw;const p=(v/total*100).toFixed(1);return ` ${ctx.label}: ${v} cliente(s) (${p}%)`;}}}
       }}});
   }catch(e){ console.warn('clientesRenderTiposChart:', e); }
 }
