@@ -746,6 +746,7 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   <div class="sidebar-toggle-btn" id="sidebar-toggle-btn" title="Recolher menu">‹</div>
   <div class="sidebar-section-lbl">Principal</div>
   <div class="nav-tab active" data-tab="visao" data-label="Central de Comando"><span class="tab-icon">🎯</span><span class="tab-label">Central de Comando</span></div>
+  <div class="nav-tab" data-tab="metas" data-label="Metas"><span class="tab-icon">🏆</span><span class="tab-label">Metas</span></div>
   <div class="nav-tab" data-tab="financeiro" data-label="Financeiro"><span class="tab-icon">💰</span><span class="tab-label">Financeiro</span></div>
   <div class="nav-tab" data-tab="caixa" data-label="Caixa"><span class="tab-icon">🏦</span><span class="tab-label">Caixa</span></div>
   <div class="sidebar-divider"></div>
@@ -1272,6 +1273,46 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   <span id="kpi-melhor-cli-sub-ghost" style="display:none"></span>
   <span id="briefing-cards" style="display:none"></span>
   <div id="briefing-dia" style="display:none"><div id="briefing-acoes" style="display:none"></div></div>
+</div>
+
+<!-- METAS -->
+<div id="tab-metas" class="tab-panel">
+  <div class="section-label">METAS — ACOMPANHAMENTO DE CRESCIMENTO DA CARTEIRA</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">🎯 Meta de Valor</div><div class="card-desc">Exposição total alvo (principal + juros) e prazo</div></div>
+        <div class="card-badge">EDITÁVEL</div>
+      </div>
+      <div class="sim-form">
+        <div class="sim-field"><label class="sim-label">💰 Valor Alvo (R$)</label><input class="sim-input" id="mt-valor-alvo" type="number" placeholder="10000" oninput="metasSalvar()"></div>
+        <div class="sim-field"><label class="sim-label">📅 Data Limite</label><input class="sim-input" id="mt-data-alvo" type="date" oninput="metasSalvar()"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">👥 Meta de Clientes/Contratos</div><div class="card-desc">Nº de contratos ativos simultâneos desejado</div></div>
+        <div class="card-badge">EDITÁVEL</div>
+      </div>
+      <div class="sim-form">
+        <div class="sim-field"><label class="sim-label">📋 Contratos Ativos Alvo</label><input class="sim-input" id="mt-clientes-alvo" type="number" placeholder="15" oninput="metasSalvar()"></div>
+      </div>
+      <div style="font-size:0.82rem;color:var(--muted2);margin-top:10px;line-height:1.6">As metas ficam salvas neste dispositivo (não sincronizam entre PC e celular).</div>
+    </div>
+  </div>
+
+  <div class="grid-4" id="mt-kpis"></div>
+
+  <div class="card" id="mt-sugestao-card">
+    <div class="card-header"><div><div class="card-title">💡 Diagnóstico do Ritmo</div><div class="card-desc">Comparação entre o ritmo atual de reinvestimento e o necessário para bater a meta no prazo</div></div><div class="card-badge" id="mt-sugestao-badge">STATUS</div></div>
+    <div id="mt-sugestao-texto" style="font-family:'Cormorant Garamond', serif;font-size:1.05rem;line-height:1.7;color:var(--text)"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">📈 Realizado vs. Cenários de Projeção</div><div class="card-desc">Exposição total: histórico registrado a partir de hoje vs. cenário pleno (taxa média atual dos contratos) vs. cenário mínimo necessário para bater a meta no prazo</div></div><div class="card-badge">PROJEÇÃO</div></div>
+    <div class="chart-wrap tall" style="height:320px"><canvas id="chartMetas"></canvas></div>
+  </div>
 </div>
 
 <!-- FINANCEIRO -->
@@ -3009,6 +3050,7 @@ document.querySelectorAll('.nav-tab').forEach(tab=>{
     document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
     if(tab.dataset.tab === 'simulador'){ calcDesagio(); calcOportunidade(); }
     if(tab.dataset.tab === 'investidores'){ invRender(); }
+    if(tab.dataset.tab === 'metas'){ metasRenderAll(); setTimeout(()=>{ if(charts.metas) charts.metas.resize(); },100); }
     if(tab.dataset.tab === 'comando' && _cmdChart){ setTimeout(()=>{ if(_cmdChart) _cmdChart.resize(); },100); }
     if(tab.dataset.tab === 'clientes') {
       iniciarSyncPolling();
@@ -4425,6 +4467,147 @@ function render(empRows,pagRows){
     taxaMediaGlobal, lucroReal, quitados,
     fmt, pct: v=>(v*100).toFixed(1)+'%',
     fmtDate: d=>d?d.toLocaleDateString('pt-BR'):'—' };
+
+  // METAS — atualiza histórico e recalcula cenários/sugestão
+  try { metasAtualizar(naRua, taxaMediaGlobal, abertos.length, cliAtivos.length); } catch(e){ console.warn('metasAtualizar:', e); }
+}
+
+// ── METAS ────────────────────────────────────────────────
+const METAS_CFG_KEY='metasConfigV1';
+const METAS_HIST_KEY='metasHistoricoV1';
+
+function metasConfigGet(){
+  try{ return JSON.parse(localStorage.getItem(METAS_CFG_KEY))||{}; }catch(e){ return {}; }
+}
+function metasConfigSet(cfg){
+  try{ localStorage.setItem(METAS_CFG_KEY, JSON.stringify(cfg)); }catch(e){}
+}
+function metasPopulateInputs(){
+  const cfg=metasConfigGet();
+  const ev=document.getElementById('mt-valor-alvo'), ed=document.getElementById('mt-data-alvo'), ec=document.getElementById('mt-clientes-alvo');
+  if(ev && cfg.valorAlvo) ev.value=cfg.valorAlvo;
+  if(ed && cfg.dataAlvo) ed.value=cfg.dataAlvo;
+  if(ec && cfg.clientesAlvo) ec.value=cfg.clientesAlvo;
+}
+function metasSalvar(){
+  const cfg={
+    valorAlvo: parseFloat(document.getElementById('mt-valor-alvo').value)||0,
+    dataAlvo: document.getElementById('mt-data-alvo').value||'',
+    clientesAlvo: parseInt(document.getElementById('mt-clientes-alvo').value)||0
+  };
+  metasConfigSet(cfg);
+  metasRenderAll();
+}
+function metasHistoricoAtualizar(naRua, contratosAtivos, clientesAtivos){
+  let hist=[];
+  try{ hist=JSON.parse(localStorage.getItem(METAS_HIST_KEY))||[]; }catch(e){ hist=[]; }
+  const key=new Date().toISOString().slice(0,10);
+  const idx=hist.findIndex(h=>h.data===key);
+  const entry={data:key, naRua, contratosAtivos, clientesAtivos};
+  if(idx>=0) hist[idx]=entry; else hist.push(entry);
+  if(hist.length>400) hist=hist.slice(-400);
+  try{ localStorage.setItem(METAS_HIST_KEY, JSON.stringify(hist)); }catch(e){}
+  return hist;
+}
+function metasAtualizar(naRua, taxaMediaGlobal, contratosAtivos, clientesAtivos){
+  window._metasDados={naRua, taxaMediaGlobal, contratosAtivos, clientesAtivos};
+  metasHistoricoAtualizar(naRua, contratosAtivos, clientesAtivos);
+  metasRenderAll();
+}
+function metasRenderAll(){
+  metasPopulateInputs();
+  if(!window._metasDados) return;
+  const d=window._metasDados, cfg=metasConfigGet();
+  metasRenderKpis(d,cfg);
+  metasRenderSugestao(d,cfg);
+  metasRenderChart(d,cfg);
+}
+function metasRenderKpis(d,cfg){
+  const el=document.getElementById('mt-kpis');
+  if(!el) return;
+  const pctConcluido = cfg.valorAlvo ? Math.min(100, d.naRua/cfg.valorAlvo*100) : 0;
+  el.innerHTML=`
+    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Exposição Atual</div><div class="kpi-val" style="color:var(--gold)">${fmt(d.naRua)}</div><div class="kpi-sub">principal + juros em aberto</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Meta de Valor</div><div class="kpi-val" style="color:var(--green)">${cfg.valorAlvo?fmt(cfg.valorAlvo):'—'}</div><div class="kpi-sub">${cfg.valorAlvo?pctConcluido.toFixed(0)+'% concluído':'defina a meta acima'}</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Contratos Ativos</div><div class="kpi-val" style="color:var(--blue)">${d.contratosAtivos}${cfg.clientesAlvo?' / '+cfg.clientesAlvo:''}</div><div class="kpi-sub">meta de contratos simultâneos</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--purple)"></div><div class="kpi-lbl">Taxa Média Atual</div><div class="kpi-val" style="color:var(--purple)">${pct(d.taxaMediaGlobal)}</div><div class="kpi-sub">usada no cenário pleno</div></div>
+  `;
+}
+function metasRenderSugestao(d,cfg){
+  const box=document.getElementById('mt-sugestao-texto'), badge=document.getElementById('mt-sugestao-badge');
+  if(!box||!badge) return;
+  if(!cfg.valorAlvo || !cfg.dataAlvo){
+    box.innerHTML='Defina o valor alvo e a data limite acima para ver o diagnóstico do ritmo.';
+    badge.textContent='SEM META'; badge.style.color='var(--muted)';
+    return;
+  }
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const dataAlvo=new Date(cfg.dataAlvo+'T00:00:00');
+  if(d.naRua>=cfg.valorAlvo){
+    box.innerHTML=`🎉 Meta batida! Sua exposição total atual (<strong style="color:var(--gold)">${fmt(d.naRua)}</strong>) já superou a meta de ${fmt(cfg.valorAlvo)}. Hora de definir uma meta maior.`;
+    badge.textContent='META BATIDA'; badge.style.color='var(--green)';
+    return;
+  }
+  const diffDias=(dataAlvo-hoje)/86400000;
+  if(diffDias<=0){
+    box.innerHTML=`⚠️ O prazo da meta (${dataAlvo.toLocaleDateString('pt-BR')}) já venceu. Exposição atual: ${fmt(d.naRua)} de ${fmt(cfg.valorAlvo)} — faltam ${fmt(cfg.valorAlvo-d.naRua)}.`;
+    badge.textContent='PRAZO VENCIDO'; badge.style.color='var(--red)';
+    return;
+  }
+  const mesesRestantesF=diffDias/30;
+  const taxaAtual=d.taxaMediaGlobal;
+  if(!taxaAtual || taxaAtual<=0){
+    box.innerHTML='Sem contratos ativos suficientes para estimar uma taxa média de reinvestimento. Assim que houver contratos ativos, o diagnóstico aparece aqui automaticamente.';
+    badge.textContent='SEM DADOS'; badge.style.color='var(--muted)';
+    return;
+  }
+  const taxaNecessaria=Math.pow(cfg.valorAlvo/d.naRua, 1/mesesRestantesF)-1;
+  const mesesNecessarios=Math.log(cfg.valorAlvo/d.naRua)/Math.log(1+taxaAtual);
+  if(mesesNecessarios<=mesesRestantesF){
+    const diff=mesesRestantesF-mesesNecessarios;
+    box.innerHTML=`✅ Muito bem, continue assim! No ritmo atual (taxa média de <strong style="color:var(--green)">${pct(taxaAtual)}</strong>/mês reinvestindo o lucro), você deve bater a meta de ${fmt(cfg.valorAlvo)} em <strong>~${mesesNecessarios.toFixed(1)} meses</strong> — cerca de <strong style="color:var(--green)">${diff.toFixed(1)} mês(es) antes do prazo</strong> (${dataAlvo.toLocaleDateString('pt-BR')}).`;
+    badge.textContent='NO RITMO'; badge.style.color='var(--green)';
+  } else {
+    const atraso=mesesNecessarios-mesesRestantesF;
+    box.innerHTML=`⚠️ No ritmo atual (taxa média de <strong style="color:var(--gold2)">${pct(taxaAtual)}</strong>/mês), você bateria a meta em ~${mesesNecessarios.toFixed(1)} meses — isso é <strong style="color:var(--red)">${atraso.toFixed(1)} mês(es) depois do prazo</strong>. Para chegar em dia, a taxa média de reinvestimento precisaria subir para ~<strong>${pct(taxaNecessaria)}</strong>/mês, ou você precisa captar mais capital/clientes para acelerar o giro.`;
+    badge.textContent='ABAIXO DO RITMO'; badge.style.color='var(--gold2)';
+  }
+}
+function metasRenderChart(d,cfg){
+  const canvas=document.getElementById('chartMetas');
+  if(!canvas) return;
+  destroyChart('metas');
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const dataAlvo = cfg.dataAlvo ? new Date(cfg.dataAlvo+'T00:00:00') : new Date(hoje.getFullYear(),hoje.getMonth()+6,1);
+  let nMeses = (dataAlvo.getFullYear()-hoje.getFullYear())*12+(dataAlvo.getMonth()-hoje.getMonth());
+  nMeses = Math.max(1, Math.min(nMeses, 36));
+  const diffDias=Math.max((dataAlvo-hoje)/86400000, 1);
+  const mesesRestantesF=diffDias/30;
+  const taxaAtual=d.taxaMediaGlobal||0;
+  const taxaNecessaria = cfg.valorAlvo ? Math.pow(Math.max(cfg.valorAlvo,1)/Math.max(d.naRua,1), 1/mesesRestantesF)-1 : 0;
+
+  const labels=[], pleno=[], minimo=[];
+  for(let i=0;i<=nMeses;i++){
+    const dt=new Date(hoje.getFullYear(), hoje.getMonth()+i, 1);
+    labels.push(dt.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));
+    pleno.push(d.naRua*Math.pow(1+taxaAtual, i));
+    minimo.push(cfg.valorAlvo ? d.naRua*Math.pow(1+taxaNecessaria, i) : null);
+  }
+
+  let hist=[];
+  try{ hist=JSON.parse(localStorage.getItem(METAS_HIST_KEY))||[]; }catch(e){ hist=[]; }
+  const realizado=labels.map((_,i)=>{
+    const dt=new Date(hoje.getFullYear(), hoje.getMonth()+i, 1);
+    const doMes=hist.filter(h=>{const hd=new Date(h.data+'T00:00:00'); return hd.getFullYear()===dt.getFullYear()&&hd.getMonth()===dt.getMonth();});
+    if(doMes.length===0) return i===0?d.naRua:null;
+    return doMes[doMes.length-1].naRua;
+  });
+
+  charts.metas=new Chart(canvas.getContext('2d'),{type:'line',data:{labels,datasets:[
+    {label:'Realizado',data:realizado,borderColor:'rgba(201,146,42,0.95)',backgroundColor:'rgba(201,146,42,0.08)',borderWidth:3,pointRadius:4,spanGaps:false,fill:true,tension:0.2},
+    {label:'Cenário Pleno (taxa atual)',data:pleno,borderColor:'rgba(6,214,160,0.8)',borderWidth:2,borderDash:[6,4],pointRadius:0,tension:0.25},
+    {label:'Cenário Mínimo (necessário)',data:minimo,borderColor:'rgba(240,180,41,0.8)',borderWidth:2,borderDash:[2,3],pointRadius:0,tension:0.25}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+(ctx.raw==null?'—':fmt(ctx.raw))}}},scales:{x:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}}}}});
 }
 
 // ── WHATSAPP ─────────────────────────────────────────────
