@@ -4524,6 +4524,7 @@ function render(empRows,pagRows){
     taxaMediaGlobal, lucroReal, quitados,
     fmt, pct: v=>(v*100).toFixed(1)+'%',
     fmtDate: d=>d?d.toLocaleDateString('pt-BR'):'—' };
+  window._lastEmps = emps; // usado pelo Relatório para Claude, Relatório Executivo e modal de Cobranças
 
   // METAS — atualiza histórico e recalcula cenários/sugestão
   try { metasAtualizar(naRua, taxaMediaGlobal, abertos.length, cliAtivos.length); } catch(e){ console.warn('metasAtualizar:', e); }
@@ -11886,7 +11887,7 @@ function gerarBriefingIA(){
     `BRIEFING DO NEGÓCIO — CAPITAL INVESTIMENTOS — ${hoje}`,
     ``,`RESUMO EXECUTIVO`,
     `Capital em Carteira: ${d.capital} | Exposição Total: ${d.naRua} | Lucro Realizado: ${d.realizado} | ROI: ${d.roi}`,
-    `Ticket Médio: ${d.ticket} | A Receber (7d): ${d.semana} | Taxa Média: ${taxaMedia}% a.m. | Meta Mensal: R$ ${d.meta}`,
+    `Ticket Médio: ${d.ticket} | A Receber (7d): ${d.semana} | Taxa Média: ${taxaMedia}% a.m. | Meta de Exposição: ${metaCfg&&metaCfg.valorAlvo?_pdfFmt(metaCfg.valorAlvo):'não definida'}`,
     ``,`CARTEIRA: ${ativos.length} ativos, ${atrasados.length} em atraso, ${quitados.length} quitados, ${d.cliAtivos} clientes ativos, prazo médio ${d.prazo} meses, inadimplência ${d.inadim}`,
     ``,`CONTRATOS EM ATRASO:`,
     (atrasados.map(e=>{const dias=e.proxVenc?Math.floor((new Date()-e.proxVenc)/86400000):0;return `- ${e.nome} | ${_pdfFmt(e.capital)} | ${((e.taxa||0)*100).toFixed(1)}% a.m. | ${dias}d em atraso`;}).join('\n')||'Nenhum.'),
@@ -11971,7 +11972,7 @@ function gerarBriefingIA(){
       <div class="kpi-box"><div class="kpi-lbl">Ticket Médio</div><div class="kpi-val">${d.ticket}</div></div>
       <div class="kpi-box"><div class="kpi-lbl">A Receber (7 dias)</div><div class="kpi-val">${d.semana}</div></div>
       <div class="kpi-box"><div class="kpi-lbl">Taxa Média</div><div class="kpi-val">${taxaMedia}% a.m.</div></div>
-      <div class="kpi-box"><div class="kpi-lbl">Meta Mensal</div><div class="kpi-val">R$ ${d.meta}</div></div>
+      <div class="kpi-box"><div class="kpi-lbl">Meta de Exposição</div><div class="kpi-val">${metaCfg&&metaCfg.valorAlvo?_pdfFmt(metaCfg.valorAlvo):'não definida'}</div></div>
     </div>
   </div>
 
