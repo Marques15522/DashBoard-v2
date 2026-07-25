@@ -11280,7 +11280,7 @@ function gerarRelatorioIA(){
       <div class="pdf-card-icon">🤖</div>
       <div>
         <div class="pdf-card-title">Briefing para IA</div>
-        <div class="pdf-card-sub">Exporta um relatório estruturado com todos os dados do negócio para você colar numa conversa com Claude e receber análise e direcionamento estratégico.</div>
+        <div class="pdf-card-sub">Relatório completo e em tempo real — carteira, inadimplência, investidores, metas e comparativo mensal — pronto para colar numa conversa com Claude e receber análise estratégica.</div>
       </div>
     </div>
     <button class="pdf-btn ia" onclick="gerarBriefingIA()">🤖 Gerar Briefing</button>
@@ -11800,6 +11800,71 @@ function gerarBriefingIA(){
   // Monta lista de contratos ativos resumida
   const listAtivos=ativos.slice(0,15).map(e=>`- ${e.nome} | ${_pdfFmt(e.capital)} | ${((e.taxa||0)*100).toFixed(1)}% a.m. | Venc: ${e.proxVenc?new Date(e.proxVenc).toLocaleDateString('pt-BR'):'—'}`).join('\n')||'  Nenhum.';
 
+  // ── Investidores (captação de terceiros) ──
+  try{ invCarregarLocal(); }catch(e){}
+  const invLista=(typeof _invLista!=='undefined'?_invLista:[])||[];
+  const invPagamentos=(typeof _invPagamentos!=='undefined'?_invPagamentos:[])||[];
+  const invAtivos=invLista.filter(i=>i.status!=='encerrado');
+  const invTotalCaptado=invAtivos.reduce((s,i)=>s+(i.valor||0),0);
+  const invTaxaMedia=invAtivos.length?(invAtivos.reduce((s,i)=>s+(i.taxa||0),0)/invAtivos.length):0;
+  const invJurosPagos=invPagamentos.reduce((s,p)=>s+(p.valor||0),0);
+  const carteiraAtivaN=window._totalCapAtivo||0;
+  const invPctCarteira=carteiraAtivaN?(invTotalCaptado/carteiraAtivaN*100):0;
+  const spread=(parseFloat(taxaMedia)||0)-invTaxaMedia;
+
+  // ── Metas — progresso e ritmo ──
+  const metaD=window._metasDados||null;
+  const metaCfg=(typeof metasConfigGet==='function')?metasConfigGet():{};
+  let blocoMetas='  Nenhuma meta definida na aba Metas.';
+  if(metaD && metaCfg && metaCfg.valorAlvo){
+    const pctConcl=Math.min(100, metaD.naRua/metaCfg.valorAlvo*100);
+    let diag='Sem dados suficientes para diagnóstico de ritmo.';
+    if(metaCfg.dataAlvo){
+      const hj=new Date();hj.setHours(0,0,0,0);
+      const dAlvo=new Date(metaCfg.dataAlvo+'T00:00:00');
+      const diffDias=(dAlvo-hj)/86400000;
+      if(metaD.naRua>=metaCfg.valorAlvo) diag='Meta já batida — hora de definir uma meta maior.';
+      else if(diffDias<=0) diag=`Prazo da meta (${dAlvo.toLocaleDateString('pt-BR')}) já venceu.`;
+      else if(metaD.taxaMediaGlobal>0){
+        const mesesRestantesF=diffDias/30;
+        const mesesNecessarios=Math.log(metaCfg.valorAlvo/metaD.naRua)/Math.log(1+metaD.taxaMediaGlobal);
+        diag=mesesNecessarios<=mesesRestantesF
+          ? `No ritmo atual, bate a meta em ~${mesesNecessarios.toFixed(1)} meses — adiantado em relação ao prazo (${dAlvo.toLocaleDateString('pt-BR')}).`
+          : `No ritmo atual, bateria a meta em ~${mesesNecessarios.toFixed(1)} meses — atrasado em relação ao prazo (${dAlvo.toLocaleDateString('pt-BR')}).`;
+      }
+    }
+    blocoMetas=`Meta de Exposição:       ${_pdfFmt(metaCfg.valorAlvo)}
+Exposição Atual:          ${_pdfFmt(metaD.naRua)} (${pctConcl.toFixed(0)}% concluído)
+Meta de Contratos Ativos: ${metaCfg.clientesAlvo||'—'}
+Contratos Ativos Hoje:    ${metaD.contratosAtivos}
+Diagnóstico de Ritmo:     ${diag}`;
+  }
+
+  // ── Comparativo mensal (mês atual vs. anterior) ──
+  let blocoComparativo='  Dados insuficientes para montar o comparativo mensal.';
+  try{
+    if(window._histDados){
+      const {emps:hEmps,pags:hPags,clientes:hClientes}=window._histDados;
+      const meses=historicoConstruir(hEmps,hPags,hClientes); // [0]=mês atual, [1]=mês anterior
+      if(meses.length){
+        const atual=meses[0], anterior=meses[1]||null;
+        const lin=(label,campo,isMoeda)=>{
+          const vA=atual[campo]||0, vB=anterior?(anterior[campo]||0):0;
+          const fA=isMoeda?_pdfFmt(vA):vA;
+          const fB=anterior?(isMoeda?_pdfFmt(vB):vB):'—';
+          return `${label.padEnd(24,' ')} ${String(fA).padEnd(16,' ')} ${fB}`;
+        };
+        blocoComparativo=`                         ${atual.label.padEnd(16,' ')} ${anterior?anterior.label:'(sem mês anterior)'}
+${lin('Novos Contratos:','novosContratosQtd')}
+${lin('Capital Emprestado:','novosContratosCapital',true)}
+${lin('Juros Recebidos:','jurosRecebidos',true)}
+${lin('Amortização Recebida:','amortRecebida',true)}
+${lin('Contratos Quitados:','quitadosQtd')}
+${lin('Resultado de Caixa:','caixaResultado',true)}`;
+      }
+    }
+  }catch(e){}
+
   const texto=`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 BRIEFING DO NEGÓCIO — CAPITAL INVESTIMENTOS
 Data: ${hoje}
@@ -11845,7 +11910,27 @@ ${listAtivos}
 ${ativos.length>15?`... e mais ${ativos.length-15} contrato(s) não listados acima.`:''}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-5. CONTEXTO DO NEGÓCIO
+5. INVESTIDORES — CAPTAÇÃO DE TERCEIROS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Investidores Ativos:      ${invAtivos.length}
+Capital Captado:          ${_pdfFmt(invTotalCaptado)}
+% da Carteira c/ Capital de Terceiros: ${invPctCarteira.toFixed(1)}%
+Taxa Média Paga a Investidores: ${invTaxaMedia.toFixed(2)}% a.m.
+Spread (taxa cliente − taxa investidor): ${spread.toFixed(2)}% a.m.
+Juros Pagos a Investidores (histórico): ${_pdfFmt(invJurosPagos)}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. METAS — PROGRESSO E RITMO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${blocoMetas}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. COMPARATIVO MENSAL (MÊS ATUAL VS. ANTERIOR)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${blocoComparativo}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. CONTEXTO DO NEGÓCIO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 - Modelo: Crédito privado direto, operação individual
 - Localização: São Paulo, SP — clientes da região metropolitana
@@ -11854,7 +11939,7 @@ ${ativos.length>15?`... e mais ${ativos.length-15} contrato(s) não listados aci
 - Canal de captação: Indicação e relacionamento pessoal
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-6. PERGUNTAS SUGERIDAS PARA ANÁLISE
+9. PERGUNTAS SUGERIDAS PARA ANÁLISE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 1. Quais são os 3 maiores riscos da minha operação agora?
 2. Devo aumentar, manter ou reduzir minha taxa de juros?
@@ -11863,6 +11948,8 @@ ${ativos.length>15?`... e mais ${ativos.length-15} contrato(s) não listados aci
 5. Como posso escalar esse negócio de forma estruturada?
 6. Minha carteira está diversificada o suficiente?
 7. O ROI atual está bom para o risco que estou tomando?
+8. Meu spread com investidores está saudável ou devo renegociar taxas?
+9. O ritmo atual (comparando os últimos meses) está melhorando ou piorando?
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 FIM DO BRIEFING — Gerado em ${hoje}
