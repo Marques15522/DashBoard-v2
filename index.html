@@ -777,6 +777,7 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   <div class="nav-tab" data-tab="investidores" data-label="Investidores"><span class="tab-icon">🏛️</span><span class="tab-label">Investidores</span></div>
   <div class="nav-tab" data-tab="whatsapp" data-label="WhatsApp"><span class="tab-icon">📱</span><span class="tab-label">WhatsApp</span></div>
   <div class="nav-tab" data-tab="pdfs" data-label="PDFs"><span class="tab-icon">🖨️</span><span class="tab-label">PDFs</span></div>
+  <div class="nav-tab" data-tab="briefing" data-label="Relatório IA"><span class="tab-icon">🤖</span><span class="tab-label">Relatório IA</span></div>
 </nav>
 
 <!-- CONTENT AREA -->
@@ -11274,22 +11275,7 @@ function gerarRelatorioIA(){
     </div>
   </div>
 
-  <!-- 3: Briefing IA -->
-  <div class="pdf-card ia">
-    <div class="pdf-card-header">
-      <div class="pdf-card-icon">🤖</div>
-      <div>
-        <div class="pdf-card-title">Briefing para IA</div>
-        <div class="pdf-card-sub">Relatório completo e em tempo real — carteira, inadimplência, investidores, metas e comparativo mensal — pronto para colar numa conversa com Claude e receber análise estratégica.</div>
-      </div>
-    </div>
-    <button class="pdf-btn ia" onclick="gerarBriefingIA()">🤖 Gerar Briefing</button>
-    <div class="pdf-card-tags">
-      <span class="pdf-tag blue">Estratégia</span>
-      <span class="pdf-tag blue">Claude AI</span>
-      <span class="pdf-tag blue">Análise</span>
-    </div>
-  </div>
+  <!-- 3: Briefing IA agora tem aba própria — ver "Relatório IA" -->
 
 </div>
 
@@ -11307,6 +11293,52 @@ function gerarRelatorioIA(){
 </div>
 
 </div><!-- /tab-pdfs -->
+
+<div id="tab-briefing" class="tab-panel">
+<style>
+.brf-hero{display:flex;align-items:center;gap:20px;padding:28px 32px;background:linear-gradient(135deg,rgba(72,149,239,0.10),rgba(155,93,229,0.05));border:1px solid rgba(72,149,239,0.25);border-radius:18px;margin-bottom:24px;}
+.brf-hero-icon{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;box-shadow:0 4px 20px rgba(72,149,239,0.3);}
+.brf-hero-title{font-family:'Cormorant Garamond', serif;font-size:1.5rem;letter-spacing:0.06em;color:var(--text);}
+.brf-hero-sub{font-family:'Cormorant Garamond', serif;font-size:0.92rem;color:var(--muted);margin-top:4px;max-width:640px;line-height:1.5;}
+.brf-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;align-items:start;}
+@media (max-width:900px){.brf-grid{grid-template-columns:1fr;}}
+.brf-card{background:var(--s2);border:1px solid var(--border);border-radius:16px;padding:24px;}
+.brf-card-title{font-family:'Cormorant Garamond', serif;font-size:1.05rem;letter-spacing:0.06em;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.brf-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-family:'Cormorant Garamond', serif;font-size:0.92rem;color:var(--muted);line-height:1.5;}
+.brf-item:last-child{border-bottom:none;}
+.brf-item b{color:var(--text);font-weight:600;}
+.brf-btn-big{width:100%;padding:16px 20px;border-radius:12px;border:1px solid rgba(72,149,239,0.5);background:linear-gradient(135deg,rgba(72,149,239,0.22),rgba(155,93,229,0.14));color:var(--blue);font-family:'Cormorant Garamond', serif;font-size:1.05rem;font-weight:700;letter-spacing:0.04em;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:10px;}
+.brf-btn-big:hover{box-shadow:0 6px 20px rgba(72,149,239,0.25);background:rgba(72,149,239,0.28);}
+.brf-note{margin-top:14px;font-family:'Cormorant Garamond', serif;font-size:0.86rem;color:var(--muted);text-align:center;line-height:1.5;}
+</style>
+
+<div class="brf-hero">
+  <div class="brf-hero-icon">🤖</div>
+  <div>
+    <div class="brf-hero-title">Relatório para Claude</div>
+    <div class="brf-hero-sub">Gera um relatório executivo com os dados do negócio em tempo real — pronto para anexar numa conversa com o Claude e receber diagnóstico e recomendações estratégicas.</div>
+  </div>
+</div>
+
+<div class="brf-grid">
+  <div class="brf-card">
+    <div class="brf-card-title">📋 O que entra no relatório</div>
+    <div class="brf-item">💼 <div><b>Resumo executivo</b> — capital em carteira, exposição total, lucro realizado, ROI, ticket médio, meta mensal.</div></div>
+    <div class="brf-item">📁 <div><b>Composição da carteira</b> — contratos ativos, quitados, clientes ativos, prazo médio, inadimplência.</div></div>
+    <div class="brf-item">⚠️ <div><b>Inadimplência</b> — lista detalhada dos contratos em atraso.</div></div>
+    <div class="brf-item">🏛️ <div><b>Investidores</b> — capital captado, % da carteira financiado por terceiros, spread entre a taxa cobrada e a taxa paga.</div></div>
+    <div class="brf-item">🏆 <div><b>Metas</b> — progresso da meta de exposição e diagnóstico de ritmo.</div></div>
+    <div class="brf-item">🗓️ <div><b>Comparativo mensal</b> — mês atual vs. mês anterior lado a lado.</div></div>
+  </div>
+  <div class="brf-card">
+    <div class="brf-card-title">🚀 Gerar agora</div>
+    <button class="brf-btn-big" onclick="gerarBriefingIA()">🤖 Gerar Relatório para Claude</button>
+    <div class="brf-note">Abre em uma nova aba, pronto para imprimir/salvar como PDF.<br>Depois é só anexar o PDF numa conversa com o Claude.</div>
+  </div>
+</div>
+
+</div><!-- /tab-briefing -->
+
 
 <script>
 // ════════════════════════════════════════════════════
@@ -11791,15 +11823,6 @@ function gerarBriefingIA(){
   const quitados=emps.filter(e=>e.status==='quitado');
   const taxaMedia=ativos.length?((ativos.reduce((s,e)=>s+e.taxa,0)/ativos.length)*100).toFixed(2):0;
 
-  // Monta lista de contratos em atraso
-  const listAtraso=atrasados.map(e=>{
-    const dias=e.proxVenc?Math.floor((new Date()-e.proxVenc)/86400000):0;
-    return `- ${e.nome} | Capital: ${_pdfFmt(e.capital)} | Taxa: ${((e.taxa||0)*100).toFixed(1)}% a.m. | ${dias} dia(s) em atraso`;
-  }).join('\n') || '  Nenhum contrato em atraso.';
-
-  // Monta lista de contratos ativos resumida
-  const listAtivos=ativos.slice(0,15).map(e=>`- ${e.nome} | ${_pdfFmt(e.capital)} | ${((e.taxa||0)*100).toFixed(1)}% a.m. | Venc: ${e.proxVenc?new Date(e.proxVenc).toLocaleDateString('pt-BR'):'—'}`).join('\n')||'  Nenhum.';
-
   // ── Investidores (captação de terceiros) ──
   try{ invCarregarLocal(); }catch(e){}
   const invLista=(typeof _invLista!=='undefined'?_invLista:[])||[];
@@ -11815,182 +11838,262 @@ function gerarBriefingIA(){
   // ── Metas — progresso e ritmo ──
   const metaD=window._metasDados||null;
   const metaCfg=(typeof metasConfigGet==='function')?metasConfigGet():{};
-  let blocoMetas='  Nenhuma meta definida na aba Metas.';
+  let metaTemDados=false, metaPctConcl=0, metaDiag='Defina uma meta na aba Metas para ver o diagnóstico de ritmo.', metaBadge='SEM META', metaBadgeCor='#888';
   if(metaD && metaCfg && metaCfg.valorAlvo){
-    const pctConcl=Math.min(100, metaD.naRua/metaCfg.valorAlvo*100);
-    let diag='Sem dados suficientes para diagnóstico de ritmo.';
+    metaTemDados=true;
+    metaPctConcl=Math.min(100, metaD.naRua/metaCfg.valorAlvo*100);
     if(metaCfg.dataAlvo){
       const hj=new Date();hj.setHours(0,0,0,0);
       const dAlvo=new Date(metaCfg.dataAlvo+'T00:00:00');
       const diffDias=(dAlvo-hj)/86400000;
-      if(metaD.naRua>=metaCfg.valorAlvo) diag='Meta já batida — hora de definir uma meta maior.';
-      else if(diffDias<=0) diag=`Prazo da meta (${dAlvo.toLocaleDateString('pt-BR')}) já venceu.`;
+      if(metaD.naRua>=metaCfg.valorAlvo){ metaDiag='Meta já batida — hora de definir uma meta maior.'; metaBadge='META BATIDA'; metaBadgeCor='#059669'; }
+      else if(diffDias<=0){ metaDiag=`Prazo da meta (${dAlvo.toLocaleDateString('pt-BR')}) já venceu.`; metaBadge='PRAZO VENCIDO'; metaBadgeCor='#ef476f'; }
       else if(metaD.taxaMediaGlobal>0){
         const mesesRestantesF=diffDias/30;
         const mesesNecessarios=Math.log(metaCfg.valorAlvo/metaD.naRua)/Math.log(1+metaD.taxaMediaGlobal);
-        diag=mesesNecessarios<=mesesRestantesF
-          ? `No ritmo atual, bate a meta em ~${mesesNecessarios.toFixed(1)} meses — adiantado em relação ao prazo (${dAlvo.toLocaleDateString('pt-BR')}).`
-          : `No ritmo atual, bateria a meta em ~${mesesNecessarios.toFixed(1)} meses — atrasado em relação ao prazo (${dAlvo.toLocaleDateString('pt-BR')}).`;
+        if(mesesNecessarios<=mesesRestantesF){
+          metaDiag=`No ritmo atual, bate a meta em ~${mesesNecessarios.toFixed(1)} meses — adiantado em relação ao prazo (${dAlvo.toLocaleDateString('pt-BR')}).`;
+          metaBadge='NO RITMO'; metaBadgeCor='#059669';
+        }else{
+          metaDiag=`No ritmo atual, bateria a meta em ~${mesesNecessarios.toFixed(1)} meses — atrasado em relação ao prazo (${dAlvo.toLocaleDateString('pt-BR')}).`;
+          metaBadge='ABAIXO DO RITMO'; metaBadgeCor='#c9922a';
+        }
       }
     }
-    blocoMetas=`Meta de Exposição:       ${_pdfFmt(metaCfg.valorAlvo)}
-Exposição Atual:          ${_pdfFmt(metaD.naRua)} (${pctConcl.toFixed(0)}% concluído)
-Meta de Contratos Ativos: ${metaCfg.clientesAlvo||'—'}
-Contratos Ativos Hoje:    ${metaD.contratosAtivos}
-Diagnóstico de Ritmo:     ${diag}`;
   }
 
   // ── Comparativo mensal (mês atual vs. anterior) ──
-  let blocoComparativo='  Dados insuficientes para montar o comparativo mensal.';
+  let mesAtual=null, mesAnterior=null;
   try{
     if(window._histDados){
       const {emps:hEmps,pags:hPags,clientes:hClientes}=window._histDados;
       const meses=historicoConstruir(hEmps,hPags,hClientes); // [0]=mês atual, [1]=mês anterior
-      if(meses.length){
-        const atual=meses[0], anterior=meses[1]||null;
-        const lin=(label,campo,isMoeda)=>{
-          const vA=atual[campo]||0, vB=anterior?(anterior[campo]||0):0;
-          const fA=isMoeda?_pdfFmt(vA):vA;
-          const fB=anterior?(isMoeda?_pdfFmt(vB):vB):'—';
-          return `${label.padEnd(24,' ')} ${String(fA).padEnd(16,' ')} ${fB}`;
-        };
-        blocoComparativo=`                         ${atual.label.padEnd(16,' ')} ${anterior?anterior.label:'(sem mês anterior)'}
-${lin('Novos Contratos:','novosContratosQtd')}
-${lin('Capital Emprestado:','novosContratosCapital',true)}
-${lin('Juros Recebidos:','jurosRecebidos',true)}
-${lin('Amortização Recebida:','amortRecebida',true)}
-${lin('Contratos Quitados:','quitadosQtd')}
-${lin('Resultado de Caixa:','caixaResultado',true)}`;
-      }
+      mesAtual=meses[0]||null; mesAnterior=meses[1]||null;
     }
   }catch(e){}
+  const cmpLinha=(label,campo,isMoeda)=>{
+    if(!mesAtual) return '';
+    const vA=mesAtual[campo]||0, vB=mesAnterior?(mesAnterior[campo]||0):null;
+    const fA=isMoeda?_pdfFmt(vA):vA;
+    const fB=vB===null?'—':(isMoeda?_pdfFmt(vB):vB);
+    const delta=(vB!==null && vB!==0)?(((vA-vB)/Math.abs(vB))*100):null;
+    const deltaHtml=delta===null?'':`<span class="tag ${delta>=0?'ok':'bad'}" style="margin-left:6px">${delta>=0?'▲':'▼'} ${Math.abs(delta).toFixed(0)}%</span>`;
+    return `<tr><td>${label}</td><td><strong>${fA}</strong>${deltaHtml}</td><td>${fB}</td></tr>`;
+  };
 
-  const texto=`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-BRIEFING DO NEGÓCIO — CAPITAL INVESTIMENTOS
-Data: ${hoje}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-INSTRUÇÃO PARA A IA:
-Leia todos os dados abaixo sobre meu negócio de crédito privado.
-Após ler, me dê um diagnóstico completo da situação atual e
-recomendações estratégicas priorizadas. Identifique riscos e
-oportunidades. Seja direto e objetivo.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. RESUMO EXECUTIVO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Capital em Carteira:      ${d.capital}
-Exposição Total (c/ juros): ${d.naRua}
-Lucro Realizado:          ${d.realizado}
-ROI da Carteira:          ${d.roi}
-Ticket Médio por Contrato: ${d.ticket}
-A Receber (próx. 7 dias): ${d.semana}
-Taxa Média da Carteira:   ${taxaMedia}% a.m.
-Meta Mensal:              R$ ${d.meta}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-2. CARTEIRA — COMPOSIÇÃO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Contratos Ativos:         ${ativos.length}
-Contratos em Atraso:      ${atrasados.length}
-Contratos Quitados:       ${quitados.length}
-Clientes Ativos:          ${d.cliAtivos}
-Prazo Médio:              ${d.prazo} meses
-Inadimplência:            ${d.inadim}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-3. CONTRATOS EM ATRASO (INADIMPLÊNCIA)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${listAtraso}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-4. CONTRATOS ATIVOS (AMOSTRA — ATÉ 15)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${listAtivos}
-${ativos.length>15?`... e mais ${ativos.length-15} contrato(s) não listados acima.`:''}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-5. INVESTIDORES — CAPTAÇÃO DE TERCEIROS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Investidores Ativos:      ${invAtivos.length}
-Capital Captado:          ${_pdfFmt(invTotalCaptado)}
-% da Carteira c/ Capital de Terceiros: ${invPctCarteira.toFixed(1)}%
-Taxa Média Paga a Investidores: ${invTaxaMedia.toFixed(2)}% a.m.
-Spread (taxa cliente − taxa investidor): ${spread.toFixed(2)}% a.m.
-Juros Pagos a Investidores (histórico): ${_pdfFmt(invJurosPagos)}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-6. METAS — PROGRESSO E RITMO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${blocoMetas}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-7. COMPARATIVO MENSAL (MÊS ATUAL VS. ANTERIOR)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${blocoComparativo}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-8. CONTEXTO DO NEGÓCIO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Modelo: Crédito privado direto, operação individual
-- Localização: São Paulo, SP — clientes da região metropolitana
-- Operação: Gerenciada digitalmente com dashboard estratégico
-- Tipo de cliente: Pessoa física, público de baixa-média renda
-- Canal de captação: Indicação e relacionamento pessoal
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-9. PERGUNTAS SUGERIDAS PARA ANÁLISE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. Quais são os 3 maiores riscos da minha operação agora?
-2. Devo aumentar, manter ou reduzir minha taxa de juros?
-3. Como devo priorizar a cobrança dos inadimplentes?
-4. Qual o capital ideal para operar com segurança no meu perfil?
-5. Como posso escalar esse negócio de forma estruturada?
-6. Minha carteira está diversificada o suficiente?
-7. O ROI atual está bom para o risco que estou tomando?
-8. Meu spread com investidores está saudável ou devo renegociar taxas?
-9. O ritmo atual (comparando os últimos meses) está melhorando ou piorando?
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-FIM DO BRIEFING — Gerado em ${hoje}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+  // texto puro (para copiar/colar, caso prefira a texto a anexar o PDF)
+  const textoPuro=[
+    `BRIEFING DO NEGÓCIO — CAPITAL INVESTIMENTOS — ${hoje}`,
+    ``,`RESUMO EXECUTIVO`,
+    `Capital em Carteira: ${d.capital} | Exposição Total: ${d.naRua} | Lucro Realizado: ${d.realizado} | ROI: ${d.roi}`,
+    `Ticket Médio: ${d.ticket} | A Receber (7d): ${d.semana} | Taxa Média: ${taxaMedia}% a.m. | Meta Mensal: R$ ${d.meta}`,
+    ``,`CARTEIRA: ${ativos.length} ativos, ${atrasados.length} em atraso, ${quitados.length} quitados, ${d.cliAtivos} clientes ativos, prazo médio ${d.prazo} meses, inadimplência ${d.inadim}`,
+    ``,`CONTRATOS EM ATRASO:`,
+    (atrasados.map(e=>{const dias=e.proxVenc?Math.floor((new Date()-e.proxVenc)/86400000):0;return `- ${e.nome} | ${_pdfFmt(e.capital)} | ${((e.taxa||0)*100).toFixed(1)}% a.m. | ${dias}d em atraso`;}).join('\n')||'Nenhum.'),
+    ``,`INVESTIDORES: ${invAtivos.length} ativos | Captado: ${_pdfFmt(invTotalCaptado)} | ${invPctCarteira.toFixed(1)}% da carteira | Taxa média paga: ${invTaxaMedia.toFixed(2)}% a.m. | Spread: ${spread.toFixed(2)}% a.m.`,
+    ``,`METAS: ${metaTemDados?`${_pdfFmt(metaD.naRua)} de ${_pdfFmt(metaCfg.valorAlvo)} (${metaPctConcl.toFixed(0)}%) — ${metaDiag}`:'Sem meta definida.'}`,
+    ``,`COMPARATIVO MENSAL (${mesAtual?mesAtual.label:'—'} vs ${mesAnterior?mesAnterior.label:'—'}): novos contratos, capital emprestado, juros, amortização, quitados e resultado de caixa — ver seção visual do relatório.`,
+    ``,`Perguntas sugeridas: maiores riscos; ajuste de taxa; priorização de cobrança; capital ideal; escalabilidade; diversificação; ROI vs risco; saúde do spread; tendência mensal.`
+  ].join('\n');
 
   const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
-  <title>Briefing para IA — Capital Investimentos</title>
+  <title>Relatório para Claude — Capital Investimentos</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:'Courier New',monospace;background:#fff;color:#1a1a2e;font-size:10pt;line-height:1.7;}
-    .page{max-width:800px;margin:0 auto;padding:36px;}
-    .header{border-bottom:3px solid #4895ef;padding-bottom:16px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end;}
-    .brand{font-size:16pt;font-weight:800;color:#1a1a2e;font-family:'Segoe UI',sans-serif;}
-    .brand span{color:#4895ef;}
-    .doc-tag{font-size:8pt;color:#4895ef;font-family:'Segoe UI',sans-serif;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;}
-    .instr{background:#eff6ff;border:1.5px solid #93c5fd;border-radius:8px;padding:14px 18px;margin-bottom:24px;font-family:'Segoe UI',sans-serif;font-size:10pt;color:#1e3a5f;line-height:1.6;}
-    .instr strong{display:block;font-size:10pt;margin-bottom:4px;color:#1e40af;}
-    pre{background:#f8faff;border:1px solid #e0e7ff;border-radius:10px;padding:24px;font-size:9.5pt;line-height:1.75;white-space:pre-wrap;word-break:break-word;color:#1a1a2e;}
-    .copy-hint{font-family:'Segoe UI',sans-serif;font-size:8.5pt;color:#666;margin-top:16px;text-align:center;}
-    .footer{margin-top:28px;border-top:1px solid #eee;padding-top:12px;font-family:'Segoe UI',sans-serif;font-size:8pt;color:#bbb;display:flex;justify-content:space-between;}
-    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#1a1a2e;font-size:10.5pt;}
+    .page{max-width:820px;margin:0 auto;padding:36px;}
+    .cover{text-align:center;padding:44px 0 36px;border-bottom:2px solid #4895ef;margin-bottom:28px;}
+    .cover-tag{font-size:8pt;font-weight:700;letter-spacing:0.25em;color:#4895ef;text-transform:uppercase;margin-bottom:12px;}
+    .cover-title{font-size:26pt;font-weight:800;color:#1a1a2e;line-height:1.15;margin-bottom:8px;}
+    .cover-title span{color:#4895ef;}
+    .cover-sub{font-size:11pt;color:#666;margin-bottom:20px;}
+    .cover-date{font-size:9pt;color:#999;}
+    .instr{background:#eff6ff;border:1.5px solid #93c5fd;border-radius:10px;padding:14px 20px;margin-bottom:26px;font-size:9.5pt;color:#1e3a5f;line-height:1.6;}
+    .instr strong{display:block;font-size:9.5pt;margin-bottom:4px;color:#1e40af;}
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:10px;}
+    .kpi-box{border:1px solid #e8e8f0;border-radius:10px;padding:14px 16px;background:#fafafe;}
+    .kpi-box.accent{border-color:#4895ef;background:linear-gradient(135deg,#eff6ff,#f5faff);}
+    .kpi-box.red{border-color:#ef476f;background:#fff8fa;}
+    .kpi-box.green{border-color:#06d6a0;background:#f0fdfb;}
+    .kpi-lbl{font-size:7.3pt;font-weight:700;letter-spacing:0.08em;color:#888;text-transform:uppercase;margin-bottom:4px;}
+    .kpi-val{font-size:14.5pt;font-weight:800;color:#1a1a2e;}
+    .kpi-val.blue{color:#2f6fce;}
+    .kpi-val.red{color:#ef476f;}
+    .kpi-val.green{color:#059669;}
+    .kpi-sub{font-size:7.5pt;color:#aaa;margin-top:2px;}
+    .section{margin-bottom:26px;}
+    .section-title{font-size:9pt;font-weight:700;letter-spacing:0.14em;color:#4895ef;text-transform:uppercase;border-bottom:1.5px solid #cfe2fb;padding-bottom:6px;margin-bottom:14px;}
+    table{width:100%;border-collapse:collapse;font-size:9.3pt;}
+    th{background:#1a1a2e;color:#fff;padding:8px 12px;text-align:left;font-size:7.8pt;letter-spacing:0.06em;font-weight:600;}
+    td{padding:7px 12px;border-bottom:1px solid #eee;}
+    tr:nth-child(even) td{background:#fafafe;}
+    .tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:7.3pt;font-weight:700;}
+    .tag.ok{background:#dcfce7;color:#166534;}
+    .tag.warn{background:#fef9c3;color:#854d0e;}
+    .tag.bad{background:#fee2e2;color:#991b1b;}
+    .empty-row{padding:14px 12px;color:#999;font-style:italic;font-size:9pt;}
+    .highlight{background:linear-gradient(135deg,#1a1a2e,#232345);color:#fff;border-radius:12px;padding:20px 24px;margin:6px 0 22px;}
+    .highlight-title{font-size:9.5pt;font-weight:700;color:#8fc1ff;margin-bottom:4px;letter-spacing:0.06em;display:flex;justify-content:space-between;align-items:center;}
+    .highlight-badge{font-size:7.5pt;font-weight:800;letter-spacing:0.08em;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,0.12);}
+    .highlight-text{font-size:9.5pt;color:rgba(255,255,255,0.85);line-height:1.6;margin-top:8px;}
+    .qa-list{list-style:none;}
+    .qa-list li{padding:9px 0 9px 26px;position:relative;font-size:9.5pt;border-bottom:1px solid #f0f0f5;line-height:1.5;}
+    .qa-list li:last-child{border-bottom:none;}
+    .qa-list li::before{content:'❯';position:absolute;left:4px;color:#4895ef;font-weight:700;}
+    .footer{margin-top:30px;border-top:1px solid #eee;padding-top:14px;display:flex;justify-content:space-between;font-size:8pt;color:#bbb;}
+    .rawtext{margin-top:24px;}
+    .rawtext summary{cursor:pointer;font-size:8.5pt;color:#888;margin-bottom:8px;}
+    .rawtext pre{background:#f8faff;border:1px solid #e0e7ff;border-radius:10px;padding:16px;font-size:8pt;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:#444;font-family:'Courier New',monospace;}
+    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;} .rawtext{display:none;}}
   </style></head><body><div class="page">
-  <div class="header">
-    <div class="brand">Capital <span>Investimentos</span></div>
-    <div class="doc-tag">🤖 Briefing para IA · ${hoje}</div>
+
+  <div class="cover">
+    <div class="cover-tag">Gerado automaticamente · Para análise com IA</div>
+    <div class="cover-title">Relatório para <span>Claude</span></div>
+    <div class="cover-sub">Visão completa do negócio para diagnóstico e recomendações estratégicas</div>
+    <div class="cover-date">Emitido em ${hoje}</div>
   </div>
+
   <div class="instr">
     <strong>📋 Como usar este documento:</strong>
-    Copie o texto abaixo e cole numa nova conversa com o Claude (claude.ai).
-    A IA lerá todos os dados do seu negócio e fornecerá análise estratégica
-    personalizada, identificando riscos, oportunidades e recomendações de ação.
+    Anexe este PDF (ou imprima/salve e envie o arquivo) numa conversa com o Claude.
+    Peça um diagnóstico da situação atual e recomendações estratégicas priorizadas,
+    identificando riscos e oportunidades.
   </div>
-  <pre>${texto.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
-  <div class="copy-hint">💡 Imprima ou copie o texto acima · Gerado automaticamente pelo Dashboard Estratégico</div>
+
+  <div class="section">
+    <div class="section-title">💼 Resumo Executivo</div>
+    <div class="kpi-grid">
+      <div class="kpi-box accent"><div class="kpi-lbl">Capital em Carteira</div><div class="kpi-val blue">${d.capital}</div></div>
+      <div class="kpi-box"><div class="kpi-lbl">Exposição Total</div><div class="kpi-val">${d.naRua}</div></div>
+      <div class="kpi-box green"><div class="kpi-lbl">Lucro Realizado</div><div class="kpi-val green">${d.realizado}</div></div>
+      <div class="kpi-box"><div class="kpi-lbl">ROI da Carteira</div><div class="kpi-val">${d.roi}</div></div>
+      <div class="kpi-box"><div class="kpi-lbl">Ticket Médio</div><div class="kpi-val">${d.ticket}</div></div>
+      <div class="kpi-box"><div class="kpi-lbl">A Receber (7 dias)</div><div class="kpi-val">${d.semana}</div></div>
+      <div class="kpi-box"><div class="kpi-lbl">Taxa Média</div><div class="kpi-val">${taxaMedia}% a.m.</div></div>
+      <div class="kpi-box"><div class="kpi-lbl">Meta Mensal</div><div class="kpi-val">R$ ${d.meta}</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📁 Carteira — Composição</div>
+    <table>
+      <thead><tr><th>Indicador</th><th>Valor</th><th>Observação</th></tr></thead>
+      <tbody>
+        <tr><td>Contratos Ativos</td><td><strong>${ativos.length}</strong></td><td>Em andamento no momento</td></tr>
+        <tr><td>Contratos Quitados</td><td><strong>${quitados.length}</strong></td><td>Histórico de crédito recuperado</td></tr>
+        <tr><td>Contratos em Atraso</td><td><strong style="color:#ef476f">${atrasados.length}</strong></td><td>${atrasados.length===0?'<span class="tag ok">✅ Carteira Limpa</span>':'<span class="tag bad">⚠️ Requer Ação</span>'}</td></tr>
+        <tr><td>Clientes Ativos</td><td><strong>${d.cliAtivos}</strong></td><td>Base de tomadores ativos</td></tr>
+        <tr><td>Prazo Médio</td><td><strong>${d.prazo} meses</strong></td><td>por contrato</td></tr>
+        <tr><td>Inadimplência</td><td><strong>${d.inadim}</strong></td><td>${atrasados.length===0?'<span class="tag ok">Excelente</span>':atrasados.length<=2?'<span class="tag warn">Monitorar</span>':'<span class="tag bad">Atenção</span>'}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚠️ Contratos em Atraso</div>
+    <table>
+      <thead><tr><th>Cliente</th><th>Capital</th><th>Taxa</th><th>Dias em Atraso</th></tr></thead>
+      <tbody>
+        ${atrasados.length?atrasados.map(e=>{const dias=e.proxVenc?Math.floor((new Date()-e.proxVenc)/86400000):0;return `<tr><td>${e.nome}</td><td>${_pdfFmt(e.capital)}</td><td>${((e.taxa||0)*100).toFixed(1)}% a.m.</td><td><span class="tag ${dias>15?'bad':'warn'}">${dias} dia(s)</span></td></tr>`;}).join(''):'<tr><td colspan="4" class="empty-row">✅ Nenhum contrato em atraso — carteira limpa.</td></tr>'}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📄 Contratos Ativos (amostra — até 15)</div>
+    <table>
+      <thead><tr><th>Cliente</th><th>Capital</th><th>Taxa</th><th>Vencimento</th></tr></thead>
+      <tbody>
+        ${ativos.length?ativos.slice(0,15).map(e=>`<tr><td>${e.nome}</td><td>${_pdfFmt(e.capital)}</td><td>${((e.taxa||0)*100).toFixed(1)}% a.m.</td><td>${e.proxVenc?new Date(e.proxVenc).toLocaleDateString('pt-BR'):'—'}</td></tr>`).join(''):'<tr><td colspan="4" class="empty-row">Nenhum contrato ativo.</td></tr>'}
+      </tbody>
+    </table>
+    ${ativos.length>15?`<div style="font-size:8pt;color:#999;margin-top:8px">... e mais ${ativos.length-15} contrato(s) não listados acima.</div>`:''}
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏛️ Investidores — Captação de Terceiros</div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi-box accent"><div class="kpi-lbl">Capital Captado</div><div class="kpi-val blue">${_pdfFmt(invTotalCaptado)}</div><div class="kpi-sub">${invAtivos.length} investidor(es) ativo(s)</div></div>
+      <div class="kpi-box"><div class="kpi-lbl">% da Carteira</div><div class="kpi-val">${invPctCarteira.toFixed(1)}%</div><div class="kpi-sub">financiado por terceiros</div></div>
+      <div class="kpi-box ${spread>=0?'green':'red'}"><div class="kpi-lbl">Spread</div><div class="kpi-val ${spread>=0?'green':'red'}">${spread.toFixed(2)}%</div><div class="kpi-sub">cliente (${taxaMedia}%) − investidor (${invTaxaMedia.toFixed(2)}%)</div></div>
+    </div>
+    <table>
+      <tbody>
+        <tr><td>Taxa Média Paga a Investidores</td><td><strong>${invTaxaMedia.toFixed(2)}% a.m.</strong></td></tr>
+        <tr><td>Juros Pagos a Investidores (histórico)</td><td><strong>${_pdfFmt(invJurosPagos)}</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="highlight">
+    <div class="highlight-title"><span>🏆 Metas — Progresso e Ritmo</span>${metaTemDados?`<span class="highlight-badge" style="color:${metaBadgeCor}">${metaBadge}</span>`:''}</div>
+    ${metaTemDados?`
+    <div class="highlight-text">
+      Exposição atual: <strong style="color:#8fc1ff">${_pdfFmt(metaD.naRua)}</strong> de meta <strong style="color:#8fc1ff">${_pdfFmt(metaCfg.valorAlvo)}</strong> (${metaPctConcl.toFixed(0)}% concluído)<br>
+      Meta de Contratos Ativos: ${metaCfg.clientesAlvo||'—'} · Contratos Ativos Hoje: ${metaD.contratosAtivos}<br>
+      ${metaDiag}
+    </div>`:`<div class="highlight-text">${metaDiag}</div>`}
+  </div>
+
+  <div class="section">
+    <div class="section-title">🗓️ Comparativo Mensal (mês atual vs. anterior)</div>
+    <table>
+      <thead><tr><th>Indicador</th><th>${mesAtual?mesAtual.label:'Mês Atual'}</th><th>${mesAnterior?mesAnterior.label:'Mês Anterior'}</th></tr></thead>
+      <tbody>
+        ${mesAtual?[
+          cmpLinha('Novos Contratos','novosContratosQtd'),
+          cmpLinha('Capital Emprestado','novosContratosCapital',true),
+          cmpLinha('Juros Recebidos','jurosRecebidos',true),
+          cmpLinha('Amortização Recebida','amortRecebida',true),
+          cmpLinha('Contratos Quitados','quitadosQtd'),
+          cmpLinha('Resultado de Caixa','caixaResultado',true)
+        ].join(''):'<tr><td colspan="3" class="empty-row">Dados insuficientes para montar o comparativo mensal.</td></tr>'}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🧭 Contexto do Negócio</div>
+    <table>
+      <tbody>
+        <tr><td>Modelo</td><td>Crédito privado direto, operação individual</td></tr>
+        <tr><td>Localização</td><td>São Paulo, SP — clientes da região metropolitana</td></tr>
+        <tr><td>Operação</td><td>Gerenciada digitalmente com dashboard estratégico</td></tr>
+        <tr><td>Tipo de Cliente</td><td>Pessoa física, público de baixa-média renda</td></tr>
+        <tr><td>Canal de Captação</td><td>Indicação e relacionamento pessoal</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">❓ Perguntas Sugeridas para Análise</div>
+    <ul class="qa-list">
+      <li>Quais são os 3 maiores riscos da minha operação agora?</li>
+      <li>Devo aumentar, manter ou reduzir minha taxa de juros?</li>
+      <li>Como devo priorizar a cobrança dos inadimplentes?</li>
+      <li>Qual o capital ideal para operar com segurança no meu perfil?</li>
+      <li>Como posso escalar esse negócio de forma estruturada?</li>
+      <li>Minha carteira está diversificada o suficiente?</li>
+      <li>O ROI atual está bom para o risco que estou tomando?</li>
+      <li>Meu spread com investidores está saudável ou devo renegociar taxas?</li>
+      <li>O ritmo atual (comparando os últimos meses) está melhorando ou piorando?</li>
+    </ul>
+  </div>
+
+  <details class="rawtext">
+    <summary>📋 Ver versão em texto puro (para copiar e colar, se preferir não anexar o PDF)</summary>
+    <pre>${textoPuro.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+  </details>
+
   <div class="footer">
-    <span>Capital Investimentos · Briefing para Claude AI</span>
+    <span>Capital Investimentos · Relatório para Claude AI</span>
     <span>${hoje}</span>
   </div>
+
 </div></body></html>`;
 
-  _pdfOpen(html,'briefing-ia.pdf');
+  _pdfOpen(html,'relatorio-claude.pdf');
 }
 
 // ════════════════════════════════════════════════════
