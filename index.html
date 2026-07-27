@@ -4563,7 +4563,11 @@ function metasHistoricoAtualizar(naRua, contratosAtivos, clientesAtivos){
   let hist=[];
   try{ hist=JSON.parse(localStorage.getItem(METAS_HIST_KEY))||[]; }catch(e){ hist=[]; }
   const ultimo=hist[hist.length-1];
-  if(!ultimo || Number(ultimo.naRua)!==Number(naRua)){
+  const diaAtual=new Date().toISOString().slice(0,10);
+  const diaUltimo=ultimo ? new Date(ultimo.ts||(ultimo.data+'T12:00:00')).toISOString().slice(0,10) : null;
+  // grava um ponto novo se o valor mudou OU se ainda não há registro do dia de hoje
+  // (evita que o gráfico fique "parado" em dias sem movimentação real de capital)
+  if(!ultimo || Number(ultimo.naRua)!==Number(naRua) || diaUltimo!==diaAtual){
     hist.push({ts:new Date().toISOString(), naRua, contratosAtivos, clientesAtivos});
     if(hist.length>3000) hist=hist.slice(-3000);
     try{ localStorage.setItem(METAS_HIST_KEY, JSON.stringify(hist)); }catch(e){}
