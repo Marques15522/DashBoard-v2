@@ -3279,6 +3279,7 @@ function render(empRows,pagRows){
     c.recorrente=c.qtdContratos>1;
   });
   const clientes=Object.values(cliMap);
+  window._clientesPorNome=cliMap;
   const cliAtivos=clientes.filter(c=>c.ativo);
   const cliInativos=clientes.filter(c=>!c.ativo);
   const cliRecorr=clientes.filter(c=>c.recorrente);
