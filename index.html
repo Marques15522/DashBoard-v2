@@ -247,6 +247,18 @@ body.fs-mode #fs-wrapper #main{flex:1;overflow-y:auto;}
 .pstat{display:flex;flex-direction:column;gap:1px;}
 .pstat-lbl{font-family:'Source Sans 3',sans-serif;font-size:0.74rem;font-weight:600;color:var(--muted);}
 .pstat-val{font-family:'Source Sans 3',sans-serif;font-size:0.88rem;font-weight:600;}
+.profile-card{cursor:pointer;transition:border-color .15s,transform .15s;}
+.profile-card:hover{border-color:var(--gold2);transform:translateY(-1px);}
+.p-avatar{overflow:hidden;position:relative;}
+.p-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.cli-modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,8,18,0.92);z-index:1150;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.cli-modal-overlay.open{display:flex;}
+.cli-modal{background:var(--s1);border:1px solid var(--border2);border-radius:16px;width:min(680px,96vw);padding:28px;margin:auto;position:relative;}
+.cli-avatar-lg{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond', serif;font-size:1.8rem;color:#07090e;flex-shrink:0;position:relative;overflow:hidden;cursor:pointer;}
+.cli-avatar-lg img{width:100%;height:100%;object-fit:cover;}
+.cli-avatar-lg .cli-avatar-edit{position:absolute;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;font-size:0.64rem;color:#fff;opacity:0;transition:opacity .15s;text-align:center;letter-spacing:0.03em;padding:4px;}
+.cli-avatar-lg:hover .cli-avatar-edit{opacity:1;}
+.cli-stat-box{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
 .scenario-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
 .sc-card{border-radius:10px;padding:16px;text-align:center;}
 .sc-card.ot{background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.2);}
@@ -2275,6 +2287,14 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   </div>
 </div>
 
+<!-- MODAL PERFIL DO CLIENTE (aba Clientes) -->
+<div class="cli-modal-overlay" id="cli-modal-overlay" onclick="if(event.target===this)cliModalFechar()">
+  <div class="cli-modal" onclick="event.stopPropagation()">
+    <button onclick="cliModalFechar()" style="position:absolute;top:16px;right:18px;background:transparent;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;line-height:1">✕</button>
+    <div id="cli-modal-body"></div>
+  </div>
+</div>
+
 <!-- ═══════════════ INVESTIDORES ═══════════════ -->
 <div id="tab-investidores" class="tab-panel">
 <style>
@@ -4035,7 +4055,7 @@ function render(empRows,pagRows){
 
   // CLUSTERIZAÇÃO
   function cluster(c){if(empresaEhMarcada(c.nome))return{lbl:'Empresa',cls:'cl-empresa'};const sc=calcScore(c);if(!c.ativo)return{lbl:'Inativo',cls:'cl-inativo'};if(sc<20&&c.ticketMedio>ticket*1.2)return{lbl:'Premium',cls:'cl-premium'};if(sc>=50)return{lbl:'Alto Risco',cls:'cl-risco'};if(c.recorrente)return{lbl:'Regular Fiel',cls:'cl-regular'};return{lbl:'Regular',cls:'cl-regular'};}
-  _h('profileGrid',clientes.map(c=>{const cl=cluster(c);const ini=c.nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();const sc=calcScore(c);const corSc=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';const capTotal=c.contratos.reduce((s,e)=>s+e.capital,0);const roi=capTotal>0?c.totalJuros/capTotal:0;const corRoi=roi>0.3?'var(--gold)':roi>0.15?'var(--green)':'var(--blue)';const nomeAttr=c.nome.replace(/"/g,'&quot;');const ehEmpresa=empresaEhMarcada(c.nome);return`<div class="profile-card"><div class="profile-top"><div class="p-avatar">${ini}</div><div class="p-name">${c.nome}</div><div class="p-cluster ${cl.cls}">${cl.lbl}</div></div><div style="margin:6px 0 2px"><button class="p-empresa-toggle ${ehEmpresa?'on':''}" data-nome="${nomeAttr}" onclick="empresaToggle(this.dataset.nome)">🏢 ${ehEmpresa?'É empresa ✓':'Marcar como empresa'}</button></div><div class="p-stats"><div class="pstat"><div class="pstat-lbl">Capital Total</div><div class="pstat-val" style="color:var(--gold)">${fmt(c.totalCap)}</div></div><div class="pstat"><div class="pstat-lbl">Lucro Recebido</div><div class="pstat-val" style="color:var(--green)">${fmt(c.totalPago)}</div></div><div class="pstat"><div class="pstat-lbl">Lucro Previsto (total)</div><div class="pstat-val" style="color:var(--gold2)">${fmt(c.totalJuros)}</div></div><div class="pstat"><div class="pstat-lbl">Contratos</div><div class="pstat-val">${c.qtdContratos}</div></div><div class="pstat"><div class="pstat-lbl">Score Risco</div><div class="pstat-val" style="color:${corSc}">${sc}</div></div><div class="pstat"><div class="pstat-lbl">Relacionamento</div><div class="pstat-val" style="color:var(--blue)">${c.mesesRelac}m</div></div><div class="pstat"><div class="pstat-lbl">Status</div><div class="pstat-val" style="color:${c.ativo?'var(--green)':'var(--muted)'}">${c.ativo?'ATIVO':'INATIVO'}</div></div></div><div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font-size:0.86rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase">Já Recebido / Total do Contrato</div><div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:'Cormorant Garamond', serif;font-size:1.1rem;color:var(--green);line-height:1">${fmt(c.totalPago)}</span><span style="font-family:'DM Mono',monospace;font-size:0.92rem;color:var(--muted)">/ ${fmt(c.totalJuros)}</span></div></div></div>`;}).join(''));
+  _h('profileGrid',clientes.map(c=>{const cl=cluster(c);c.clusterLbl=cl.lbl;c.clusterCls=cl.cls;const ini=c.nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();const sc=calcScore(c);c.scoreRisco=sc;const corSc=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';const capTotal=c.contratos.reduce((s,e)=>s+e.capital,0);const roi=capTotal>0?c.totalJuros/capTotal:0;const corRoi=roi>0.3?'var(--gold)':roi>0.15?'var(--green)':'var(--blue)';const nomeAttr=c.nome.replace(/"/g,'&quot;');const ehEmpresa=empresaEhMarcada(c.nome);const fotoCli=clienteFotoGet(c.nome);return`<div class="profile-card" onclick="cliModalAbrir('${nomeAttr.replace(/'/g,"\\'")}')"><div class="profile-top"><div class="p-avatar">${fotoCli?`<img src="${fotoCli}" alt="">`:ini}</div><div class="p-name">${c.nome}</div><div class="p-cluster ${cl.cls}">${cl.lbl}</div></div><div style="margin:6px 0 2px"><button class="p-empresa-toggle ${ehEmpresa?'on':''}" data-nome="${nomeAttr}" onclick="event.stopPropagation();empresaToggle(this.dataset.nome)">🏢 ${ehEmpresa?'É empresa ✓':'Marcar como empresa'}</button></div><div class="p-stats"><div class="pstat"><div class="pstat-lbl">Capital Total</div><div class="pstat-val" style="color:var(--gold)">${fmt(c.totalCap)}</div></div><div class="pstat"><div class="pstat-lbl">Lucro Recebido</div><div class="pstat-val" style="color:var(--green)">${fmt(c.totalPago)}</div></div><div class="pstat"><div class="pstat-lbl">Lucro Previsto (total)</div><div class="pstat-val" style="color:var(--gold2)">${fmt(c.totalJuros)}</div></div><div class="pstat"><div class="pstat-lbl">Contratos</div><div class="pstat-val">${c.qtdContratos}</div></div><div class="pstat"><div class="pstat-lbl">Score Risco</div><div class="pstat-val" style="color:${corSc}">${sc}</div></div><div class="pstat"><div class="pstat-lbl">Relacionamento</div><div class="pstat-val" style="color:var(--blue)">${c.mesesRelac}m</div></div><div class="pstat"><div class="pstat-lbl">Status</div><div class="pstat-val" style="color:${c.ativo?'var(--green)':'var(--muted)'}">${c.ativo?'ATIVO':'INATIVO'}</div></div></div><div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font-size:0.86rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase">Já Recebido / Total do Contrato</div><div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:'Cormorant Garamond', serif;font-size:1.1rem;color:var(--green);line-height:1">${fmt(c.totalPago)}</span><span style="font-family:'DM Mono',monospace;font-size:0.92rem;color:var(--muted)">/ ${fmt(c.totalJuros)}</span></div></div></div>`;}).join(''));
   try{ clientesRenderTiposChart(clientes, cluster); }catch(e){ console.warn('clientesRenderTiposChart:', e); }
 
   // HISTÓRICO PAGAMENTOS
@@ -4862,6 +4882,151 @@ function empresaToggle(nome){
   if(m[nome]) delete m[nome]; else m[nome]=true;
   try{ localStorage.setItem(CLIENTES_EMPRESA_KEY, JSON.stringify(m)); }catch(e){}
   if(window._lastEmpRows) render(window._lastEmpRows, window._lastPagRows);
+}
+
+// ── FOTO DE PERFIL DO CLIENTE ───────────────────────────
+const CLIENTES_FOTO_KEY='clientesFotoV1';
+function clienteFotoMapaGet(){
+  try{ return JSON.parse(localStorage.getItem(CLIENTES_FOTO_KEY))||{}; }catch(e){ return {}; }
+}
+function clienteFotoGet(nome){ return (clienteFotoMapaGet())[nome]||null; }
+function clienteFotoSet(nome,dataUrl){
+  const m=clienteFotoMapaGet(); m[nome]=dataUrl;
+  try{ localStorage.setItem(CLIENTES_FOTO_KEY, JSON.stringify(m)); }
+  catch(e){ alert('Não foi possível salvar a foto (armazenamento local cheio).'); }
+}
+function clienteFotoRemover(nome){
+  const m=clienteFotoMapaGet(); delete m[nome];
+  try{ localStorage.setItem(CLIENTES_FOTO_KEY, JSON.stringify(m)); }catch(e){}
+}
+function clienteFotoUpload(nome,inputEl){
+  const file=inputEl.files&&inputEl.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new Image();
+    img.onload=function(){
+      const size=220;
+      const canvas=document.createElement('canvas');
+      canvas.width=size;canvas.height=size;
+      const ctx=canvas.getContext('2d');
+      const scale=Math.max(size/img.width,size/img.height);
+      const w=img.width*scale,h=img.height*scale;
+      ctx.drawImage(img,(size-w)/2,(size-h)/2,w,h);
+      const dataUrl=canvas.toDataURL('image/jpeg',0.85);
+      clienteFotoSet(nome,dataUrl);
+      inputEl.value='';
+      cliModalAbrir(nome);
+      if(window._lastEmpRows) render(window._lastEmpRows, window._lastPagRows);
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function clienteFotoRemoverClick(nome){
+  clienteFotoRemover(nome);
+  cliModalAbrir(nome);
+  if(window._lastEmpRows) render(window._lastEmpRows, window._lastPagRows);
+}
+
+// ── MODAL DE PERFIL DO CLIENTE ──────────────────────────
+function cliModalAbrir(nome){
+  const c=(window._clientesPorNome||{})[nome];
+  if(!c) return;
+  const fmtDate=d=>d instanceof Date && !isNaN(d) ? d.toLocaleDateString('pt-BR') : '—';
+  const foto=clienteFotoGet(c.nome);
+  const ini=c.nome.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const sc=c.scoreRisco||0;
+  const corSc=sc<30?'var(--green)':sc<60?'var(--gold2)':'var(--red)';
+  const nomeEsc=c.nome.replace(/'/g,"\\'");
+
+  const pagsCli=(_ctPags||[]).filter(p=>(c.empIds||[]).includes(p.id)).sort((a,b)=>(a.data||0)-(b.data||0));
+  const contratosCli=[...c.contratos].sort((a,b)=>(b.data||0)-(a.data||0));
+
+  const statBox=(lbl,val,cor)=>`<div class="cli-stat-box"><div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">${lbl}</div><div style="font-family:'Cormorant Garamond', serif;font-size:1.12rem;color:${cor}">${val}</div></div>`;
+
+  document.getElementById('cli-modal-body').innerHTML=`
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;padding-right:20px">
+      <div class="cli-avatar-lg" onclick="document.getElementById('cli-foto-input').click()">
+        ${foto?`<img src="${foto}" alt="">`:ini}
+        <div class="cli-avatar-edit">📷 Trocar foto</div>
+      </div>
+      <input type="file" id="cli-foto-input" accept="image/*" style="display:none" onchange="clienteFotoUpload('${nomeEsc}',this)">
+      <div style="flex:1;min-width:0">
+        <div style="font-family:'Cormorant Garamond', serif;font-size:1.3rem;color:var(--gold)">${c.nome}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px">
+          <span class="p-cluster ${c.clusterCls||''}" style="font-size:0.76rem">${c.clusterLbl||'—'}</span>
+          <span class="badge ${c.ativo?'ok':'muted'}">${c.ativo?'ATIVO':'INATIVO'}</span>
+          ${c.recorrente?'<span class="badge blue">↩ RECORRENTE</span>':''}
+          ${c.temAtraso?'<span class="badge bad">⚠️ ATRASO</span>':''}
+        </div>
+        ${c.tel?`<div style="font-size:0.84rem;color:var(--muted);margin-top:6px">📞 ${c.tel}</div>`:''}
+      </div>
+      ${foto?`<button onclick="clienteFotoRemoverClick('${nomeEsc}')" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:6px 10px;font-size:0.74rem;cursor:pointer;white-space:nowrap">Remover foto</button>`:''}
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px">
+      ${statBox('Capital em Aberto',fmt(c.totalCap),'var(--gold)')}
+      ${statBox('Lucro Recebido',fmt(c.totalPago),'var(--green)')}
+      ${statBox('Lucro Previsto',fmt(c.totalJuros),'var(--gold2)')}
+      ${statBox('Contratos',c.qtdContratos,'var(--text)')}
+      ${statBox('Score de Risco',sc,corSc)}
+      ${statBox('Relacionamento',(c.mesesRelac||0)+'m','var(--blue)')}
+    </div>
+
+    <div style="font-size:0.84rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">📈 Lucro Recebido vs. Capital Emprestado (acumulado)</div>
+    <div class="chart-wrap tall" style="margin-bottom:22px"><canvas id="cli-modal-chart"></canvas></div>
+
+    <div style="font-size:0.84rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 8px">🗂️ Histórico de Contratos</div>
+    ${contratosCli.length?contratosCli.map(e=>{
+      const corSt=e.status==='ativo'?'var(--green)':e.status==='atraso'?'var(--red)':'var(--muted)';
+      const stLbl=e.status==='ativo'?'● Em Dia':e.status==='atraso'?'⚠ Atraso':'✓ Quitado';
+      return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <span style="font-size:0.8rem;color:var(--muted)">${e.id} · ${fmtDate(e.data)}</span>
+          <span style="font-size:0.78rem;color:${corSt}">${stLbl}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:0.86rem">
+          <span>Capital: <strong style="color:var(--gold)">${fmt(e.capital)}</strong></span>
+          <span>Taxa: ${(e.taxa*100).toFixed(1)}% a.m.</span>
+          <span>Juros: <strong style="color:var(--green)">${fmt(e.jTotal)}</strong></span>
+          ${e.status!=='quitado'?`<span>Saldo: <strong style="color:${e.saldo>0?'var(--red)':'var(--muted)'}">${fmt(e.saldo)}</strong></span>`:''}
+        </div>
+      </div>`;
+    }).join(''):'<div style="font-size:0.84rem;color:var(--muted);padding:8px 0">Nenhum contrato registrado.</div>'}
+
+    <div style="font-size:0.84rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 8px">💵 Histórico de Pagamentos</div>
+    ${pagsCli.length?`<div>${pagsCli.slice().reverse().map(p=>`<div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--muted);padding:5px 0;border-bottom:1px dashed var(--border)"><span>${fmtDate(p.data)} · ${p.tipo||'Pagamento'}${p.diasAtraso>0?' · '+p.diasAtraso+'d atraso':''}</span><span style="color:var(--text)">${fmt(p.valor)}</span></div>`).join('')}</div>`:'<div style="font-size:0.84rem;color:var(--muted);padding:8px 0">Nenhum pagamento registrado ainda.</div>'}
+  `;
+
+  document.getElementById('cli-modal-overlay').classList.add('open');
+
+  destroyChart('cliModal');
+  const eventos=new Set();
+  contratosCli.forEach(e=>{ if(e.data) eventos.add(+e.data); });
+  pagsCli.forEach(p=>{ if(p.data) eventos.add(+p.data); });
+  const datasOrd=[...eventos].sort((a,b)=>a-b).map(t=>new Date(t));
+  let capAcum=0,lucroAcum=0;
+  const capSerie=[],lucroSerie=[];
+  datasOrd.forEach(d=>{
+    contratosCli.forEach(e=>{ if(e.data && +e.data===+d) capAcum+=e.capital; });
+    pagsCli.forEach(p=>{ if(p.data && +p.data===+d) lucroAcum+=(p.juros||0)+(p.multa||0); });
+    capSerie.push(capAcum);
+    lucroSerie.push(lucroAcum);
+  });
+  const canvas=document.getElementById('cli-modal-chart');
+  if(canvas && datasOrd.length){
+    charts.cliModal=new Chart(canvas.getContext('2d'),{type:'line',data:{labels:datasOrd.map(d=>d.toLocaleDateString('pt-BR')),datasets:[
+      {label:'Capital Emprestado (acum.)',data:capSerie,borderColor:'#c9922a',backgroundColor:'rgba(201,146,42,0.08)',stepped:true,fill:true,pointRadius:2,borderWidth:2},
+      {label:'Lucro Recebido (acum.)',data:lucroSerie,borderColor:'#06d6a0',backgroundColor:'rgba(6,214,160,0.12)',stepped:true,fill:true,pointRadius:2,borderWidth:2}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},tooltip:{...TOOLTIP,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.raw)}}},scales:{x:{grid:{display:false},ticks:{color:'#5a6282',font:{family:'DM Mono',size:8},maxRotation:45,minRotation:0}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},callback:v=>fmt(v)},beginAtZero:true}}}});
+  } else if(canvas){
+    canvas.parentElement.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.86rem">Sem dados suficientes para o gráfico ainda.</div>';
+  }
+}
+function cliModalFechar(){
+  document.getElementById('cli-modal-overlay').classList.remove('open');
+  destroyChart('cliModal');
 }
 function _shadeRgba(rgbaStr, pct){
   // escurece/clareia uma cor rgba(...) em `pct`% (negativo escurece)
