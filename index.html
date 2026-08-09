@@ -9854,6 +9854,13 @@ async function cxRender(pagsExternas) {
 
   // ─ Histórico ─
   cxRenderHistorico(todos);
+
+  // Saldo de caixa só fica disponível após o await acima — reatualiza os cards
+  // que dependem dele (Central de Comando e Padrões de Demanda) pra não mostrarem R$0
+  if(window._lastEmps && window._lastEmps.length){
+    try { cmdRender(window._lastEmps, window._cxPagsCache||[]); } catch(e){ console.warn('cmdRender (pós-caixa):', e); }
+    try { demandaRender(window._lastEmps); } catch(e){ console.warn('demandaRender (pós-caixa):', e); }
+  }
 }
 
 function cxRenderHistorico(todosParam) {
