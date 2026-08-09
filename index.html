@@ -1287,6 +1287,29 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
 
   </div><!-- /.cmd2-bottom -->
 
+  <!-- ══ PADRÕES DE DEMANDA ══ -->
+  <div class="cmd2-section"><span class="dot"></span> PADRÕES DE DEMANDA <span class="line"></span></div>
+  <div class="cmd2-bottom-card" style="margin-top:0;position:relative;z-index:1">
+    <div class="cmd2-bottom-card-header">
+      <div class="cmd2-bottom-card-title">📆 Quando os Clientes Mais Pedem Dinheiro</div>
+      <div class="cmd2-bottom-card-badge">LIQUIDEZ</div>
+    </div>
+    <div class="cmd2-bottom-card-body" style="padding:12px 14px;max-height:none;overflow-y:visible">
+      <div id="demanda-alerta" style="margin-bottom:12px"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div>
+          <div style="font-size:0.82rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px">Por dia da semana</div>
+          <div style="height:170px"><canvas id="chartDemandaSemana"></canvas></div>
+        </div>
+        <div>
+          <div style="font-size:0.82rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px">Por período do mês</div>
+          <div style="height:170px"><canvas id="chartDemandaFaixaMes"></canvas></div>
+        </div>
+      </div>
+      <div id="demanda-resumo" style="margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+    </div>
+  </div>
+
   <!-- IDs fantasma: mantém o JS funcionando sem quebrar nada -->
   <span id="kpi-top-entra" style="display:none"></span>
   <span id="kpi-top-entra-sub" style="display:none"></span>
@@ -4539,6 +4562,7 @@ function render(empRows,pagRows){
 
   // CENTRAL DE COMANDO — atualiza com os dados já processados
   try { cmdRender(emps, pags); } catch(e){ console.warn('cmdRender:', e); }
+  try { demandaRender(emps); } catch(e){ console.warn('demandaRender:', e); }
 
   // CACHE GLOBAL para Relatórios
   window._relCache = { emps, clientes, abertos, atrasado, hoje, totalCap,
@@ -4866,6 +4890,103 @@ function historicoRenderTabela(meses){
       </div>
     </td></tr>`;
   }).join('');
+}
+
+// ── PADRÕES DE DEMANDA (sazonalidade de pedidos) ─────────
+const DEMANDA_DIAS_SEMANA=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+function demandaAnalise(emps){
+  const comData=emps.filter(e=>e.data instanceof Date);
+  const porDiaSemana=DEMANDA_DIAS_SEMANA.map((label,idx)=>({idx,label,qtd:0,capital:0,datasSet:new Set()}));
+  const faixasDef=[[1,5],[6,10],[11,15],[16,20],[21,25],[26,31]];
+  const porFaixaMes=faixasDef.map(([ini,fim])=>({label:`${String(ini).padStart(2,'0')}–${String(fim).padStart(2,'0')}`,ini,fim,qtd:0,capital:0,datasSet:new Set()}));
+
+  comData.forEach(e=>{
+    const dow=e.data.getDay();
+    const dia=e.data.getDate();
+    const dKey=e.data.toDateString();
+    const ds=porDiaSemana[dow];
+    ds.qtd++; ds.capital+=e.capital; ds.datasSet.add(dKey);
+    const faixa=porFaixaMes.find(f=>dia>=f.ini&&dia<=f.fim)||porFaixaMes[porFaixaMes.length-1];
+    faixa.qtd++; faixa.capital+=e.capital; faixa.datasSet.add(dKey);
+  });
+
+  porDiaSemana.forEach(d=>{ d.dias=d.datasSet.size; d.capitalMedioPorDia=d.dias?d.capital/d.dias:0; d.ticketMedio=d.qtd?d.capital/d.qtd:0; delete d.datasSet; });
+  porFaixaMes.forEach(f=>{ f.dias=f.datasSet.size; f.capitalMedioPorDia=f.dias?f.capital/f.dias:0; f.ticketMedio=f.qtd?f.capital/f.qtd:0; delete f.datasSet; });
+
+  return {porDiaSemana, porFaixaMes, totalContratos:comData.length};
+}
+function demandaProximaOcorrencia(diaSemanaIdx, hoje){
+  const d=new Date(hoje);
+  for(let i=0;i<7;i++){ if(d.getDay()===diaSemanaIdx) return new Date(d); d.setDate(d.getDate()+1); }
+  return null;
+}
+function demandaRender(emps){
+  const fmt=v=>'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const _h=(id,v)=>{const el=document.getElementById(id); if(el) el.innerHTML=v;};
+  const {porDiaSemana, porFaixaMes, totalContratos}=demandaAnalise(emps);
+
+  if(totalContratos<8){
+    _h('demanda-alerta', `<div style="background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-size:0.86rem;color:var(--muted)">📊 Ainda não há contratos suficientes pra identificar um padrão confiável (mínimo 8). Essa análise fica mais precisa conforme você for usando o dashboard.</div>`);
+    destroyChart('demandaSemana'); destroyChart('demandaFaixaMes');
+    _h('demanda-resumo','');
+    return;
+  }
+
+  const corBarras=arr=>{
+    const max=Math.max(...arr.map(x=>x.capital));
+    return arr.map(x=>x.capital===max&&max>0?'rgba(201,146,42,0.85)':'rgba(72,149,239,0.55)');
+  };
+  const c1=document.getElementById('chartDemandaSemana'), c2=document.getElementById('chartDemandaFaixaMes');
+  if(c1){
+    destroyChart('demandaSemana');
+    charts.demandaSemana=new Chart(c1.getContext('2d'),{type:'bar',data:{labels:porDiaSemana.map(d=>d.label.slice(0,3)),datasets:[{label:'Capital',data:porDiaSemana.map(d=>d.capital),backgroundColor:corBarras(porDiaSemana),borderRadius:5,borderSkipped:false}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>{const d=porDiaSemana[ctx.dataIndex];return [' '+fmt(d.capital)+' em '+d.qtd+' contrato(s)',' média/dia com pedido: '+fmt(d.capitalMedioPorDia)];}}}},scales:{x:{grid:{display:false},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},callback:v=>fmt(v)},beginAtZero:true}}}});
+  }
+  if(c2){
+    destroyChart('demandaFaixaMes');
+    charts.demandaFaixaMes=new Chart(c2.getContext('2d'),{type:'bar',data:{labels:porFaixaMes.map(f=>f.label),datasets:[{label:'Capital',data:porFaixaMes.map(f=>f.capital),backgroundColor:corBarras(porFaixaMes),borderRadius:5,borderSkipped:false}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TOOLTIP,callbacks:{label:ctx=>{const f=porFaixaMes[ctx.dataIndex];return [' '+fmt(f.capital)+' em '+f.qtd+' contrato(s)',' média/dia com pedido: '+fmt(f.capitalMedioPorDia)];}}}},scales:{x:{grid:{display:false},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9}}},y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},callback:v=>fmt(v)},beginAtZero:true}}}});
+  }
+
+  const picoDia=[...porDiaSemana].sort((a,b)=>b.capital-a.capital)[0];
+  const picoFaixa=[...porFaixaMes].sort((a,b)=>b.capital-a.capital)[0];
+  const ticketGeral=porDiaSemana.reduce((s,d)=>s+d.capital,0)/Math.max(1,totalContratos);
+  _h('demanda-resumo', `
+    <div style="text-align:center;background:var(--s2);border-radius:7px;padding:8px 6px">
+      <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">📌 Dia de pico</div>
+      <div style="font-family:'Cormorant Garamond', serif;font-size:1.05rem;color:var(--gold2)">${picoDia.label}</div>
+      <div style="font-size:0.78rem;color:var(--muted2)">${fmt(picoDia.capitalMedioPorDia)}/dia em média</div>
+    </div>
+    <div style="text-align:center;background:var(--s2);border-radius:7px;padding:8px 6px">
+      <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">📌 Período do mês</div>
+      <div style="font-family:'Cormorant Garamond', serif;font-size:1.05rem;color:var(--gold2)">${picoFaixa.label}</div>
+      <div style="font-size:0.78rem;color:var(--muted2)">${fmt(picoFaixa.capitalMedioPorDia)}/dia em média</div>
+    </div>
+    <div style="text-align:center;background:var(--s2);border-radius:7px;padding:8px 6px">
+      <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">🎫 Ticket médio geral</div>
+      <div style="font-family:'Cormorant Garamond', serif;font-size:1.05rem;color:var(--gold2)">${fmt(ticketGeral)}</div>
+      <div style="font-size:0.78rem;color:var(--muted2)">${totalContratos} contrato(s) analisados</div>
+    </div>
+  `);
+
+  // ALERTA DE LIQUIDEZ PREVENTIVA — cruza dia de pico com caixa disponível hoje
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const capDisp=(typeof window._cxSaldoAtual==='number')?window._cxSaldoAtual:0;
+  const proxData=demandaProximaOcorrencia(picoDia.idx, hoje);
+  if(proxData){
+    const diasAte=Math.round((proxData-hoje)/86400000);
+    const quando=diasAte===0?'Hoje é':diasAte===1?'Amanhã é':`Em ${diasAte} dias é`;
+    const faltaCobrir=picoDia.capitalMedioPorDia-capDisp;
+    let alertaHtml;
+    if(faltaCobrir>0){
+      alertaHtml=`<div style="background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.25);border-radius:7px;padding:10px 12px;font-size:0.86rem;color:var(--text);line-height:1.6">⚠️ <strong>Alerta de Liquidez Preventiva</strong> — ${quando} <strong>${picoDia.label}</strong>, seu dia de maior demanda histórica (média de ${fmt(picoDia.capitalMedioPorDia)} pedidos nos dias em que há contrato). Seu caixa disponível hoje é de ${fmt(capDisp)} — considere reforçar a liquidez em ${fmt(faltaCobrir)} pra não perder oportunidade.</div>`;
+    } else {
+      alertaHtml=`<div style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:7px;padding:10px 12px;font-size:0.86rem;color:var(--text);line-height:1.6">✅ ${quando} <strong>${picoDia.label}</strong>, seu dia de maior demanda histórica. Seu caixa disponível (${fmt(capDisp)}) já cobre a média esperada (${fmt(picoDia.capitalMedioPorDia)}).</div>`;
+    }
+    _h('demanda-alerta', alertaHtml);
+  } else {
+    _h('demanda-alerta','');
+  }
 }
 
 // ── TIPOS DE CLIENTES (Empresa + clusterização) ─────────
