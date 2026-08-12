@@ -1348,12 +1348,13 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
       </div>
       <div class="sim-form">
         <div class="sim-field"><label class="sim-label">📋 Contratos Ativos Alvo</label><input class="sim-input" id="mt-clientes-alvo" type="number" placeholder="15" oninput="metasSalvar()"></div>
+        <div class="sim-field"><label class="sim-label">👤 Nº de Clientes Alvo</label><input class="sim-input" id="mt-clientes-count-alvo" type="number" placeholder="10" oninput="metasSalvar()"></div>
       </div>
       <div style="font-size:0.82rem;color:var(--muted2);margin-top:10px;line-height:1.6">As metas ficam salvas neste dispositivo (não sincronizam entre PC e celular).</div>
     </div>
   </div>
 
-  <div class="grid-4" id="mt-kpis"></div>
+  <div class="grid-5" id="mt-kpis"></div>
 
   <div class="card" id="mt-sugestao-card">
     <div class="card-header"><div><div class="card-title">💡 Diagnóstico do Ritmo</div><div class="card-desc">Comparação entre o ritmo atual de reinvestimento e o necessário para bater a meta no prazo</div></div><div class="card-badge" id="mt-sugestao-badge">STATUS</div></div>
@@ -1361,7 +1362,7 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   </div>
 
   <div class="card">
-    <div class="card-header"><div><div class="card-title">📈 Realizado vs. Cenários de Projeção</div><div class="card-desc">Exposição total: histórico registrado a partir de hoje vs. cenário pleno (taxa média atual dos contratos) vs. cenário mínimo necessário para bater a meta no prazo</div></div><div class="card-badge">PROJEÇÃO</div></div>
+    <div class="card-header"><div><div class="card-title">📈 Realizado vs. Cenários de Projeção</div><div class="card-desc">Exposição total: histórico registrado, provável futuro (ritmo real recente, ponderado) vs. cenário pleno (taxa média atual dos contratos) vs. cenário mínimo necessário para bater a meta no prazo</div></div><div class="card-badge">PROJEÇÃO</div></div>
     <div class="chart-wrap tall" style="height:320px"><canvas id="chartMetas"></canvas></div>
   </div>
 </div>
@@ -4598,16 +4599,18 @@ function metasConfigSet(cfg){
 }
 function metasPopulateInputs(){
   const cfg=metasConfigGet();
-  const ev=document.getElementById('mt-valor-alvo'), ed=document.getElementById('mt-data-alvo'), ec=document.getElementById('mt-clientes-alvo');
+  const ev=document.getElementById('mt-valor-alvo'), ed=document.getElementById('mt-data-alvo'), ec=document.getElementById('mt-clientes-alvo'), ecc=document.getElementById('mt-clientes-count-alvo');
   if(ev && cfg.valorAlvo) ev.value=cfg.valorAlvo;
   if(ed && cfg.dataAlvo) ed.value=cfg.dataAlvo;
   if(ec && cfg.clientesAlvo) ec.value=cfg.clientesAlvo;
+  if(ecc && cfg.clientesCountAlvo) ecc.value=cfg.clientesCountAlvo;
 }
 function metasSalvar(){
   const cfg={
     valorAlvo: parseFloat(document.getElementById('mt-valor-alvo').value)||0,
     dataAlvo: document.getElementById('mt-data-alvo').value||'',
-    clientesAlvo: parseInt(document.getElementById('mt-clientes-alvo').value)||0
+    clientesAlvo: parseInt(document.getElementById('mt-clientes-alvo').value)||0,
+    clientesCountAlvo: parseInt(document.getElementById('mt-clientes-count-alvo').value)||0
   };
   metasConfigSet(cfg);
   metasRenderAll();
@@ -4626,6 +4629,35 @@ function metasHistoricoAtualizar(naRua, contratosAtivos, clientesAtivos){
     try{ localStorage.setItem(METAS_HIST_KEY, JSON.stringify(hist)); }catch(e){}
   }
   return hist;
+}
+// Calcula a taxa de crescimento mensal "provável" com base no ritmo REAL recente
+// (não na taxa dos contratos, e sim no que de fato aconteceu com a exposição total),
+// dando mais peso a intervalos mais recentes do histórico (média ponderada por recência).
+function metasCalcularTaxaProvavel(hist){
+  if(!hist || hist.length<2) return null;
+  const pontos = hist.filter(h=>h.naRua>0).map(h=>({t:new Date(h.ts||(h.data+'T12:00:00')).getTime(), y:h.naRua})).sort((a,b)=>a.t-b.t);
+  if(pontos.length<2) return null;
+  const intervalos=[];
+  for(let i=1;i<pontos.length;i++){
+    const dtDias=(pontos[i].t-pontos[i-1].t)/86400000;
+    if(dtDias<=0 || pontos[i-1].y<=0) continue;
+    const taxaDiaria=Math.pow(pontos[i].y/pontos[i-1].y, 1/dtDias)-1;
+    intervalos.push({taxaDiaria, t:pontos[i].t, dtDias});
+  }
+  if(!intervalos.length) return null;
+  const agora=Date.now();
+  const HALFLIFE_DIAS=20; // peso cai pela metade a cada 20 dias de distância de hoje
+  let somaPeso=0, somaPesoTaxa=0;
+  intervalos.forEach(iv=>{
+    const diasAtras=(agora-iv.t)/86400000;
+    const pesoRecencia=Math.pow(0.5, Math.max(diasAtras,0)/HALFLIFE_DIAS);
+    const peso=pesoRecencia*iv.dtDias; // intervalos mais longos carregam mais informação real
+    somaPeso+=peso;
+    somaPesoTaxa+=peso*iv.taxaDiaria;
+  });
+  if(somaPeso<=0) return null;
+  const taxaDiariaPonderada=somaPesoTaxa/somaPeso;
+  return Math.pow(1+taxaDiariaPonderada, 30)-1; // equivalente mensal
 }
 function metasAtualizar(naRua, taxaMediaGlobal, contratosAtivos, clientesAtivos){
   window._metasDados={naRua, taxaMediaGlobal, contratosAtivos, clientesAtivos};
@@ -4648,7 +4680,8 @@ function metasRenderKpis(d,cfg){
     <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Exposição Atual</div><div class="kpi-val" style="color:var(--gold)">${fmt(d.naRua)}</div><div class="kpi-sub">principal + juros em aberto</div></div>
     <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Meta de Valor</div><div class="kpi-val" style="color:var(--green)">${cfg.valorAlvo?fmt(cfg.valorAlvo):'—'}</div><div class="kpi-sub">${cfg.valorAlvo?pctConcluido.toFixed(0)+'% concluído':'defina a meta acima'}</div></div>
     <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Contratos Ativos</div><div class="kpi-val" style="color:var(--blue)">${d.contratosAtivos}${cfg.clientesAlvo?' / '+cfg.clientesAlvo:''}</div><div class="kpi-sub">meta de contratos simultâneos</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--purple)"></div><div class="kpi-lbl">Taxa Média Atual</div><div class="kpi-val" style="color:var(--purple)">${pct(d.taxaMediaGlobal)}</div><div class="kpi-sub">usada no cenário pleno</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--purple)"></div><div class="kpi-lbl">Clientes Ativos</div><div class="kpi-val" style="color:var(--purple)">${d.clientesAtivos}${cfg.clientesCountAlvo?' / '+cfg.clientesCountAlvo:''}</div><div class="kpi-sub">meta de nº de clientes</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--gold2)"></div><div class="kpi-lbl">Taxa Média Atual</div><div class="kpi-val" style="color:var(--gold2)">${pct(d.taxaMediaGlobal)}</div><div class="kpi-sub">usada no cenário pleno</div></div>
   `;
 }
 function metasRenderSugestao(d,cfg){
@@ -4674,8 +4707,31 @@ function metasRenderSugestao(d,cfg){
   }
   const mesesRestantesF=diffDias/30;
   const taxaAtual=d.taxaMediaGlobal;
+
+  // Ritmo PROVÁVEL — baseado no que de fato aconteceu com a exposição total recentemente
+  // (ponderado por recência), não na taxa média teórica dos contratos.
+  let hist=[];
+  try{ hist=JSON.parse(localStorage.getItem(METAS_HIST_KEY))||[]; }catch(e){ hist=[]; }
+  const taxaProvavel=metasCalcularTaxaProvavel(hist);
+  let blocoProvavel='';
+  if(taxaProvavel===null){
+    blocoProvavel=`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">🔮 <strong>Futuro provável:</strong> ainda não há histórico suficiente registrado para estimar o ritmo real. A projeção aparece aqui assim que houver mais pontos de movimentação.</div>`;
+  } else if(taxaProvavel<=0){
+    blocoProvavel=`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">🔮 <strong>Futuro provável:</strong> pelo ritmo real recente (ponderado pelos dias mais próximos de hoje), a exposição está <strong style="color:var(--red)">estagnada ou caindo</strong> (~${pct(taxaProvavel)}/mês) — nesse passo a meta de ${fmt(cfg.valorAlvo)} não seria atingida até ${dataAlvo.toLocaleDateString('pt-BR')}. Vale revisar captação, renovações ou o ritmo de novos contratos agora, enquanto ainda dá tempo de mudar o rumo.</div>`;
+  } else {
+    const mesesProvavel=Math.log(cfg.valorAlvo/d.naRua)/Math.log(1+taxaProvavel);
+    const valorNoPrazo=d.naRua*Math.pow(1+taxaProvavel, mesesRestantesF);
+    if(mesesProvavel<=mesesRestantesF){
+      const diffProv=mesesRestantesF-mesesProvavel;
+      blocoProvavel=`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">🔮 <strong>Futuro provável:</strong> pelo ritmo real recente (~<strong style="color:var(--green)">${pct(taxaProvavel)}</strong>/mês, ponderado pelos dias mais próximos de hoje), você deve bater a meta em <strong>~${mesesProvavel.toFixed(1)} meses</strong> — cerca de <strong style="color:var(--green)">${diffProv.toFixed(1)} mês(es) antes do prazo</strong>. Nesse ritmo, a estimativa de exposição na data-limite é de <strong>${fmt(valorNoPrazo)}</strong>.</div>`;
+    } else {
+      const atrasoProv=mesesProvavel-mesesRestantesF;
+      blocoProvavel=`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">🔮 <strong>Futuro provável:</strong> pelo ritmo real recente (~<strong style="color:var(--gold2)">${pct(taxaProvavel)}</strong>/mês, ponderado pelos dias mais próximos de hoje), a meta só seria batida em ~${mesesProvavel.toFixed(1)} meses — <strong style="color:var(--red)">${atrasoProv.toFixed(1)} mês(es) depois do prazo</strong>. Na data-limite (${dataAlvo.toLocaleDateString('pt-BR')}), a exposição provável estimada é de apenas <strong>${fmt(valorNoPrazo)}</strong> de ${fmt(cfg.valorAlvo)}. Ainda dá tempo de mudar o rumo: acelerar captação, reduzir inadimplência ou girar o capital mais rápido.</div>`;
+    }
+  }
+
   if(!taxaAtual || taxaAtual<=0){
-    box.innerHTML='Sem contratos ativos suficientes para estimar uma taxa média de reinvestimento. Assim que houver contratos ativos, o diagnóstico aparece aqui automaticamente.';
+    box.innerHTML='Sem contratos ativos suficientes para estimar uma taxa média de reinvestimento. Assim que houver contratos ativos, o diagnóstico aparece aqui automaticamente.'+blocoProvavel;
     badge.textContent='SEM DADOS'; badge.style.color='var(--muted)';
     return;
   }
@@ -4683,11 +4739,11 @@ function metasRenderSugestao(d,cfg){
   const mesesNecessarios=Math.log(cfg.valorAlvo/d.naRua)/Math.log(1+taxaAtual);
   if(mesesNecessarios<=mesesRestantesF){
     const diff=mesesRestantesF-mesesNecessarios;
-    box.innerHTML=`✅ Muito bem, continue assim! No ritmo atual (taxa média de <strong style="color:var(--green)">${pct(taxaAtual)}</strong>/mês reinvestindo o lucro), você deve bater a meta de ${fmt(cfg.valorAlvo)} em <strong>~${mesesNecessarios.toFixed(1)} meses</strong> — cerca de <strong style="color:var(--green)">${diff.toFixed(1)} mês(es) antes do prazo</strong> (${dataAlvo.toLocaleDateString('pt-BR')}).`;
+    box.innerHTML=`✅ Muito bem, continue assim! No ritmo atual (taxa média de <strong style="color:var(--green)">${pct(taxaAtual)}</strong>/mês reinvestindo o lucro), você deve bater a meta de ${fmt(cfg.valorAlvo)} em <strong>~${mesesNecessarios.toFixed(1)} meses</strong> — cerca de <strong style="color:var(--green)">${diff.toFixed(1)} mês(es) antes do prazo</strong> (${dataAlvo.toLocaleDateString('pt-BR')}).`+blocoProvavel;
     badge.textContent='NO RITMO'; badge.style.color='var(--green)';
   } else {
     const atraso=mesesNecessarios-mesesRestantesF;
-    box.innerHTML=`⚠️ No ritmo atual (taxa média de <strong style="color:var(--gold2)">${pct(taxaAtual)}</strong>/mês), você bateria a meta em ~${mesesNecessarios.toFixed(1)} meses — isso é <strong style="color:var(--red)">${atraso.toFixed(1)} mês(es) depois do prazo</strong>. Para chegar em dia, a taxa média de reinvestimento precisaria subir para ~<strong>${pct(taxaNecessaria)}</strong>/mês, ou você precisa captar mais capital/clientes para acelerar o giro.`;
+    box.innerHTML=`⚠️ No ritmo atual (taxa média de <strong style="color:var(--gold2)">${pct(taxaAtual)}</strong>/mês), você bateria a meta em ~${mesesNecessarios.toFixed(1)} meses — isso é <strong style="color:var(--red)">${atraso.toFixed(1)} mês(es) depois do prazo</strong>. Para chegar em dia, a taxa média de reinvestimento precisaria subir para ~<strong>${pct(taxaNecessaria)}</strong>/mês, ou você precisa captar mais capital/clientes para acelerar o giro.`+blocoProvavel;
     badge.textContent='ABAIXO DO RITMO'; badge.style.color='var(--gold2)';
   }
 }
@@ -4715,20 +4771,25 @@ function metasRenderChart(d,cfg){
   const taxaNecessaria = cfg.valorAlvo ? Math.pow(Math.max(cfg.valorAlvo,1)/Math.max(d.naRua,1), 1/mesesRestantesF)-1 : 0;
   const nMeses = Math.max(1, Math.min(Math.ceil(diffDias/30), 36));
 
-  const pleno=[], minimo=[];
+  const taxaProvavel=metasCalcularTaxaProvavel(hist);
+
+  const pleno=[], minimo=[], provavel=[];
   for(let i=0;i<=nMeses;i++){
     let dt=new Date(agora); dt.setDate(dt.getDate()+Math.round(i*30));
     if(dt>dataAlvo) dt=new Date(dataAlvo);
     pleno.push({x:dt.getTime(), y:d.naRua*Math.pow(1+taxaAtual, i)});
     if(cfg.valorAlvo) minimo.push({x:dt.getTime(), y:d.naRua*Math.pow(1+taxaNecessaria, i)});
+    if(taxaProvavel!==null) provavel.push({x:dt.getTime(), y:d.naRua*Math.pow(1+Math.max(taxaProvavel,-0.99), i)});
   }
 
   try{
-    charts.metas=new Chart(canvas.getContext('2d'),{type:'line',data:{datasets:[
+    const datasets=[
       {label:'Realizado',data:realizado,borderColor:'rgba(201,146,42,0.95)',backgroundColor:'rgba(201,146,42,0.20)',borderWidth:3,pointRadius:realizado.length<60?3:0,pointBackgroundColor:'rgba(201,146,42,0.95)',fill:true,tension:0.15},
+      {label:'Provável (ritmo real ponderado)',data:provavel,borderColor:'rgba(239,109,44,0.95)',backgroundColor:'rgba(239,109,44,0.14)',borderWidth:2,borderDash:[8,3],pointRadius:0,fill:true,tension:0.2},
       {label:'Cenário Pleno (taxa atual)',data:pleno,borderColor:'rgba(6,214,160,0.9)',backgroundColor:'rgba(6,214,160,0.14)',borderWidth:2,borderDash:[6,4],pointRadius:0,fill:true,tension:0.2},
       {label:'Cenário Mínimo (necessário)',data:minimo,borderColor:'rgba(240,180,41,0.9)',backgroundColor:'rgba(240,180,41,0.12)',borderWidth:2,borderDash:[2,3],pointRadius:0,fill:true,tension:0.2}
-    ]},options:{responsive:true,maintainAspectRatio:false,
+    ];
+    charts.metas=new Chart(canvas.getContext('2d'),{type:'line',data:{datasets},options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},
         tooltip:{...TOOLTIP,callbacks:{
           title:ctx=>new Date(ctx[0].parsed.x).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}),
