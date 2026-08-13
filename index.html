@@ -1362,8 +1362,13 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   </div>
 
   <div class="card">
-    <div class="card-header"><div><div class="card-title">📈 Realizado vs. Cenários de Projeção</div><div class="card-desc">Exposição total: histórico registrado, provável futuro (ritmo real recente, ponderado) vs. cenário pleno (taxa média atual dos contratos) vs. cenário mínimo necessário para bater a meta no prazo</div></div><div class="card-badge">PROJEÇÃO</div></div>
-    <div class="chart-wrap tall" style="height:320px"><canvas id="chartMetas"></canvas></div>
+    <div class="card-header"><div><div class="card-title">📈 Realizado vs. Cenários de Projeção</div><div class="card-desc">Exposição total por mês: histórico registrado, provável futuro (ritmo real recente, ponderado) vs. cenário pleno (taxa média atual dos contratos) vs. cenário mínimo necessário para bater a meta no prazo</div></div><div class="card-badge">PROJEÇÃO</div></div>
+    <div class="chart-wrap tall" style="height:380px"><canvas id="chartMetas"></canvas></div>
+  </div>
+
+  <div class="card" id="mt-checkpoints-card">
+    <div class="card-header"><div><div class="card-title">🗓️ Checkpoints Mensais</div><div class="card-desc">Marco necessário a cada mês para bater a meta no prazo, comparado ao ritmo provável — revise sempre que fechar o mês</div></div><div class="card-badge">MÊS A MÊS</div></div>
+    <div id="mt-checkpoints-body"></div>
   </div>
 </div>
 
@@ -4671,6 +4676,7 @@ function metasRenderAll(){
   metasRenderKpis(d,cfg);
   metasRenderSugestao(d,cfg);
   metasRenderChart(d,cfg);
+  metasRenderCheckpoints(d,cfg);
 }
 function metasRenderKpis(d,cfg){
   const el=document.getElementById('mt-kpis');
@@ -4747,59 +4753,115 @@ function metasRenderSugestao(d,cfg){
     badge.textContent='ABAIXO DO RITMO'; badge.style.color='var(--gold2)';
   }
 }
+function metasMonthKey(dt){ return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0'); }
+function metasMonthLabel(key){ const [y,m]=key.split('-').map(Number); return new Date(y,m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}); }
+// Monta a grade mensal (mês a mês) usada tanto pelo gráfico quanto pelos checkpoints:
+// séries de Realizado (até o mês atual) e das projeções Provável/Pleno/Mínimo (do mês atual em diante).
+function metasMontarGradeMensal(d,cfg){
+  let hist=[];
+  try{ hist=JSON.parse(localStorage.getItem(METAS_HIST_KEY))||[]; }catch(e){ hist=[]; }
+  const agora=new Date();
+  const dataAlvo = cfg.dataAlvo ? new Date(cfg.dataAlvo+'T00:00:00') : new Date(agora.getFullYear(),agora.getMonth()+6,1);
+  const diffDias=Math.max((dataAlvo-agora)/86400000, 1);
+  const mesesRestantesF=Math.max(diffDias/30, 1/30);
+  const taxaAtual=d.taxaMediaGlobal||0;
+  const taxaNecessaria = cfg.valorAlvo ? Math.pow(Math.max(cfg.valorAlvo,1)/Math.max(d.naRua,1), 1/mesesRestantesF)-1 : 0;
+  const taxaProvavel=metasCalcularTaxaProvavel(hist);
+
+  // último valor conhecido por mês (naRua)
+  const histPorMes={};
+  hist.forEach(h=>{
+    const dt=new Date(h.ts||(h.data+'T12:00:00'));
+    const key=metasMonthKey(dt);
+    if(!histPorMes[key] || dt.getTime()>=histPorMes[key].t){ histPorMes[key]={t:dt.getTime(), y:h.naRua}; }
+  });
+  const currentKey=metasMonthKey(agora);
+  histPorMes[currentKey]={t:agora.getTime(), y:d.naRua}; // valor ao vivo, sempre o mais atual
+
+  const chavesConhecidas=Object.keys(histPorMes).sort();
+  const inicioKey = chavesConhecidas.length ? chavesConhecidas[0] : currentKey;
+  const [iy,im]=inicioKey.split('-').map(Number);
+  const [fy,fm]=metasMonthKey(dataAlvo).split('-').map(Number);
+  let cursor=new Date(iy,im-1,1);
+  const fim=new Date(fy,fm-1,1);
+  const mesesKeys=[];
+  while(cursor<=fim && mesesKeys.length<31){
+    mesesKeys.push(metasMonthKey(cursor));
+    cursor.setMonth(cursor.getMonth()+1);
+  }
+  if(!mesesKeys.length) mesesKeys.push(currentKey);
+  const idxAgora=Math.max(mesesKeys.indexOf(currentKey), 0);
+
+  let ultimoValor=null;
+  const realizadoSerie=mesesKeys.map((key,i)=>{
+    if(i>idxAgora) return null;
+    if(histPorMes[key]) ultimoValor=histPorMes[key].y;
+    return ultimoValor;
+  });
+  const serieProjetada=(taxa)=>mesesKeys.map((key,i)=>{
+    if(i<idxAgora) return null;
+    return d.naRua*Math.pow(1+Math.max(taxa,-0.99), i-idxAgora);
+  });
+  const plenoSerie=serieProjetada(taxaAtual);
+  const minimoSerie=cfg.valorAlvo ? serieProjetada(taxaNecessaria) : mesesKeys.map(()=>null);
+  const provavelSerie=taxaProvavel!==null ? serieProjetada(taxaProvavel) : mesesKeys.map(()=>null);
+
+  return {mesesKeys, labels:mesesKeys.map(metasMonthLabel), idxAgora, realizadoSerie, plenoSerie, minimoSerie, provavelSerie, taxaAtual, taxaNecessaria, taxaProvavel, currentKey};
+}
 function metasRenderChart(d,cfg){
   const canvas=document.getElementById('chartMetas');
   if(!canvas) return;
   destroyChart('metas');
-  const agora=new Date();
-
-  // REALIZADO — todos os pontos de mudança real registrados, em tempo real (sem agrupar por mês)
-  let hist=[];
-  try{ hist=JSON.parse(localStorage.getItem(METAS_HIST_KEY))||[]; }catch(e){ hist=[]; }
-  const realizado=hist.map(h=>({x:new Date(h.ts||(h.data+'T12:00:00')).getTime(), y:h.naRua}));
-  if(!realizado.length || realizado[realizado.length-1].y!==d.naRua){
-    realizado.push({x:agora.getTime(), y:d.naRua});
-  } else {
-    realizado[realizado.length-1]={x:agora.getTime(), y:d.naRua}; // estica a linha até agora
-  }
-
-  // CENÁRIOS — projeção mensal a partir de agora até a data da meta
-  const dataAlvo = cfg.dataAlvo ? new Date(cfg.dataAlvo+'T00:00:00') : new Date(agora.getFullYear(),agora.getMonth()+6,1);
-  const diffDias=Math.max((dataAlvo-agora)/86400000, 1);
-  const mesesRestantesF=diffDias/30;
-  const taxaAtual=d.taxaMediaGlobal||0;
-  const taxaNecessaria = cfg.valorAlvo ? Math.pow(Math.max(cfg.valorAlvo,1)/Math.max(d.naRua,1), 1/mesesRestantesF)-1 : 0;
-  const nMeses = Math.max(1, Math.min(Math.ceil(diffDias/30), 36));
-
-  const taxaProvavel=metasCalcularTaxaProvavel(hist);
-
-  const pleno=[], minimo=[], provavel=[];
-  for(let i=0;i<=nMeses;i++){
-    let dt=new Date(agora); dt.setDate(dt.getDate()+Math.round(i*30));
-    if(dt>dataAlvo) dt=new Date(dataAlvo);
-    pleno.push({x:dt.getTime(), y:d.naRua*Math.pow(1+taxaAtual, i)});
-    if(cfg.valorAlvo) minimo.push({x:dt.getTime(), y:d.naRua*Math.pow(1+taxaNecessaria, i)});
-    if(taxaProvavel!==null) provavel.push({x:dt.getTime(), y:d.naRua*Math.pow(1+Math.max(taxaProvavel,-0.99), i)});
-  }
-
+  const g=metasMontarGradeMensal(d,cfg);
   try{
     const datasets=[
-      {label:'Realizado',data:realizado,borderColor:'rgba(201,146,42,0.95)',backgroundColor:'rgba(201,146,42,0.20)',borderWidth:3,pointRadius:realizado.length<60?3:0,pointBackgroundColor:'rgba(201,146,42,0.95)',fill:true,tension:0.15},
-      {label:'Provável (ritmo real ponderado)',data:provavel,borderColor:'rgba(239,109,44,0.95)',backgroundColor:'rgba(239,109,44,0.14)',borderWidth:2,borderDash:[8,3],pointRadius:0,fill:true,tension:0.2},
-      {label:'Cenário Pleno (taxa atual)',data:pleno,borderColor:'rgba(6,214,160,0.9)',backgroundColor:'rgba(6,214,160,0.14)',borderWidth:2,borderDash:[6,4],pointRadius:0,fill:true,tension:0.2},
-      {label:'Cenário Mínimo (necessário)',data:minimo,borderColor:'rgba(240,180,41,0.9)',backgroundColor:'rgba(240,180,41,0.12)',borderWidth:2,borderDash:[2,3],pointRadius:0,fill:true,tension:0.2}
+      {label:'Realizado',data:g.realizadoSerie,borderColor:'rgba(201,146,42,0.95)',backgroundColor:'rgba(201,146,42,0.20)',borderWidth:3,pointRadius:4,pointBackgroundColor:'rgba(201,146,42,0.95)',fill:true,tension:0.25,spanGaps:true},
+      {label:'Provável (ritmo real ponderado)',data:g.provavelSerie,borderColor:'rgba(239,109,44,0.95)',backgroundColor:'rgba(239,109,44,0.12)',borderWidth:2.5,borderDash:[8,3],pointRadius:3,pointBackgroundColor:'rgba(239,109,44,0.95)',fill:false,tension:0.25,spanGaps:true},
+      {label:'Cenário Pleno (taxa atual)',data:g.plenoSerie,borderColor:'rgba(6,214,160,0.9)',backgroundColor:'rgba(6,214,160,0.10)',borderWidth:2,borderDash:[6,4],pointRadius:2,pointBackgroundColor:'rgba(6,214,160,0.9)',fill:false,tension:0.25,spanGaps:true},
+      {label:'Cenário Mínimo (necessário)',data:g.minimoSerie,borderColor:'rgba(240,180,41,0.9)',backgroundColor:'rgba(240,180,41,0.08)',borderWidth:2,borderDash:[2,3],pointRadius:2,pointBackgroundColor:'rgba(240,180,41,0.9)',fill:false,tension:0.25,spanGaps:true}
     ];
-    charts.metas=new Chart(canvas.getContext('2d'),{type:'line',data:{datasets},options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{color:'#5a6282',font:{family:'DM Mono',size:9},boxWidth:10,boxHeight:10}},
-        tooltip:{...TOOLTIP,callbacks:{
-          title:ctx=>new Date(ctx[0].parsed.x).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}),
+    charts.metas=new Chart(canvas.getContext('2d'),{type:'line',data:{labels:g.labels,datasets},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#c3cae0',font:{family:'DM Mono',size:12},boxWidth:12,boxHeight:12,padding:16}},
+        tooltip:{...TOOLTIP,titleFont:{family:'DM Mono',size:13},bodyFont:{family:'DM Mono',size:13},callbacks:{
           label:ctx=>' '+ctx.dataset.label+': '+(ctx.parsed.y==null?'—':fmt(ctx.parsed.y))
         }}},
       scales:{
-        x:{type:'linear',grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:9},maxRotation:0,autoSkip:true,callback:v=>new Date(v).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}},
-        y:{grid:{color:'#1a2035'},ticks:{color:'#5a6282',font:{family:'DM Mono',size:10},callback:v=>fmt(v)}}
+        x:{grid:{color:'#1a2035'},ticks:{color:'#c3cae0',font:{family:'DM Mono',size:12},maxRotation:0,autoSkip:true}},
+        y:{grid:{color:'#1a2035'},ticks:{color:'#c3cae0',font:{family:'DM Mono',size:12},callback:v=>fmt(v)}}
       }}});
   }catch(e){ console.warn('metasRenderChart:', e); }
+}
+// Checkpoints mensais — divisão automática da meta geral em marcos por mês, do mês atual até o prazo.
+function metasRenderCheckpoints(d,cfg){
+  const body=document.getElementById('mt-checkpoints-body');
+  if(!body) return;
+  if(!cfg.valorAlvo || !cfg.dataAlvo){
+    body.innerHTML='<div style="color:var(--muted2);font-size:0.9rem;padding:8px 0">Defina o valor e a data da meta acima para gerar os checkpoints mensais.</div>';
+    return;
+  }
+  const g=metasMontarGradeMensal(d,cfg);
+  const linhas=[];
+  for(let i=g.idxAgora;i<g.mesesKeys.length;i++){
+    const minimo=g.minimoSerie[i];
+    const provavel=g.provavelSerie[i];
+    const ehAtual=i===g.idxAgora;
+    let statusIcone='—', statusCor='var(--muted2)';
+    if(provavel!=null && minimo!=null){
+      if(provavel>=minimo){ statusIcone='✅ no ritmo'; statusCor='var(--green)'; }
+      else{ statusIcone='⚠️ abaixo'; statusCor='var(--red)'; }
+    }
+    linhas.push(`<tr${ehAtual?' style="background:rgba(201,146,42,0.08)"':''}>
+      <td>${ehAtual?'👉 ':''}${g.labels[i]}</td>
+      <td>${minimo!=null?fmt(minimo):'—'}</td>
+      <td>${provavel!=null?fmt(provavel):'—'}</td>
+      <td style="color:${statusCor}">${statusIcone}</td>
+    </tr>`);
+  }
+  body.innerHTML=`<div class="table-wrap"><table class="sim-table" style="font-size:0.95rem">
+    <thead><tr><th>Mês</th><th>Marco necessário</th><th>Provável (ritmo real)</th><th>Status</th></tr></thead>
+    <tbody>${linhas.join('')}</tbody>
+  </table></div>
+  <div style="font-size:0.85rem;color:var(--muted2);margin-top:10px;line-height:1.6">"Marco necessário" é o valor mínimo de exposição para seguir no prazo da meta. "Provável" é a estimativa pelo ritmo real recente (ponderado). Revise este quadro ao fechar cada mês para decidir se precisa acelerar.</div>`;
 }
 
 // ── HISTÓRICO MENSAL ─────────────────────────────────────
