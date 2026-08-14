@@ -1363,6 +1363,12 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
 
   <div class="card">
     <div class="card-header"><div><div class="card-title">📈 Realizado vs. Cenários de Projeção</div><div class="card-desc">Exposição total por mês: histórico registrado, provável futuro (ritmo real recente, ponderado) vs. cenário pleno (taxa média atual dos contratos) vs. cenário mínimo necessário para bater a meta no prazo</div></div><div class="card-badge">PROJEÇÃO</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="ct-filter-btn active" data-mh="1" onclick="metasSelecionarHorizonte(1,this)">📍 Daqui a 1 mês</button>
+      <button class="ct-filter-btn" data-mh="3" onclick="metasSelecionarHorizonte(3,this)">📍 Daqui a 3 meses</button>
+      <button class="ct-filter-btn" data-mh="6" onclick="metasSelecionarHorizonte(6,this)">📍 Daqui a 6 meses</button>
+    </div>
+    <div id="mt-horizonte-texto" style="font-family:'Cormorant Garamond', serif;font-size:1.02rem;line-height:1.65;color:var(--text);margin-bottom:16px;padding:14px 16px;background:var(--s2);border:1px solid var(--border);border-radius:10px"></div>
     <div class="chart-wrap tall" style="height:380px"><canvas id="chartMetas"></canvas></div>
   </div>
 
@@ -4642,11 +4648,18 @@ function metasCalcularTaxaProvavel(hist){
   if(!hist || hist.length<2) return null;
   const pontos = hist.filter(h=>h.naRua>0).map(h=>({t:new Date(h.ts||(h.data+'T12:00:00')).getTime(), y:h.naRua})).sort((a,b)=>a.t-b.t);
   if(pontos.length<2) return null;
+  // Intervalo mínimo de 0.75 dia: registros a poucos minutos/horas de distância um do outro
+  // não carregam sinal real de ritmo mensal — dividir por um dt quase zero é o que fazia a
+  // taxa diária explodir (e, composta por 30 dias e depois por vários meses, virava um número
+  // absurdo tipo "-597%/mês" ou "R$ 13 milhões" no gráfico).
+  const DT_MIN_DIAS=0.75;
+  const DIARIA_MIN=-0.15, DIARIA_MAX=0.15; // trava de segurança: no máximo ±15%/dia no cálculo do ritmo
   const intervalos=[];
   for(let i=1;i<pontos.length;i++){
     const dtDias=(pontos[i].t-pontos[i-1].t)/86400000;
-    if(dtDias<=0 || pontos[i-1].y<=0) continue;
-    const taxaDiaria=Math.pow(pontos[i].y/pontos[i-1].y, 1/dtDias)-1;
+    if(dtDias<DT_MIN_DIAS || pontos[i-1].y<=0) continue;
+    let taxaDiaria=Math.pow(pontos[i].y/pontos[i-1].y, 1/dtDias)-1;
+    taxaDiaria=Math.min(DIARIA_MAX, Math.max(DIARIA_MIN, taxaDiaria)); // clampa outliers pontuais
     intervalos.push({taxaDiaria, t:pontos[i].t, dtDias});
   }
   if(!intervalos.length) return null;
@@ -4662,7 +4675,10 @@ function metasCalcularTaxaProvavel(hist){
   });
   if(somaPeso<=0) return null;
   const taxaDiariaPonderada=somaPesoTaxa/somaPeso;
-  return Math.pow(1+taxaDiariaPonderada, 30)-1; // equivalente mensal
+  const taxaMensal=Math.pow(1+taxaDiariaPonderada, 30)-1; // equivalente mensal
+  // Trava final de segurança (rede de proteção mesmo se algo escapar dos clamps acima):
+  // limita o ritmo "provável" a algo entre -95%/mês e +300%/mês, faixa já bem generosa.
+  return Math.min(3, Math.max(-0.95, taxaMensal));
 }
 function metasAtualizar(naRua, taxaMediaGlobal, contratosAtivos, clientesAtivos){
   window._metasDados={naRua, taxaMediaGlobal, contratosAtivos, clientesAtivos};
@@ -4677,6 +4693,73 @@ function metasRenderAll(){
   metasRenderSugestao(d,cfg);
   metasRenderChart(d,cfg);
   metasRenderCheckpoints(d,cfg);
+  metasRenderProjecao(d,cfg);
+}
+// Troca o horizonte selecionado (1/3/6 meses) e re-renderiza a projeção + destaque no gráfico.
+function metasSelecionarHorizonte(n, btnEl){
+  window._metasHorizonte=n;
+  document.querySelectorAll('#tab-metas .ct-filter-btn[data-mh]').forEach(b=>b.classList.remove('active'));
+  if(btnEl) btnEl.classList.add('active');
+  if(!window._metasDados) return;
+  metasRenderProjecao(window._metasDados, metasConfigGet());
+}
+// Callout "onde vou chegar em N meses" + destaque do ponto correspondente no gráfico.
+function metasRenderProjecao(d,cfg){
+  const box=document.getElementById('mt-horizonte-texto');
+  if(!box) return;
+  const n=window._metasHorizonte||1;
+  if(!cfg.valorAlvo || !cfg.dataAlvo){
+    box.innerHTML='Defina o valor alvo e a data limite acima para ver a projeção.';
+    metasDestacarPontoGrafico(null);
+    return;
+  }
+  const g=metasMontarGradeMensal(d,cfg);
+  const dataHorizonte=new Date(Date.now()+n*30*86400000);
+  const dataStr=dataHorizonte.toLocaleDateString('pt-BR');
+
+  const valorNecessario=d.naRua*Math.pow(1+g.taxaNecessaria, n);
+
+  if(g.taxaProvavel===null){
+    box.innerHTML=`📍 <strong>Em ${dataStr}</strong> (daqui a ${n} ${n===1?'mês':'meses'}): ainda não há histórico suficiente para estimar seu ritmo real. Para seguir no prazo da meta, sua exposição precisaria estar em <strong style="color:var(--gold2)">${fmt(valorNecessario)}</strong> nesse ponto.`;
+    metasDestacarPontoGrafico(g, null);
+    return;
+  }
+
+  const valorProvavel=d.naRua*Math.pow(1+Math.max(g.taxaProvavel,-0.99), n);
+  const diff=valorProvavel-valorNecessario;
+  const noRitmo=diff>=0;
+
+  box.innerHTML=`📍 <strong>Em ${dataStr}</strong> (daqui a ${n} ${n===1?'mês':'meses'}), se o ritmo real recente continuar (~<strong style="color:${g.taxaProvavel>=0?'var(--green)':'var(--red)'}">${pct(g.taxaProvavel)}</strong>/mês), sua exposição deve estar em <strong style="color:var(--gold)">${fmt(valorProvavel)}</strong>.<br>
+  Para bater a meta de ${fmt(cfg.valorAlvo)} até ${new Date(cfg.dataAlvo+'T00:00:00').toLocaleDateString('pt-BR')}, nesse ponto você precisaria ter <strong style="color:var(--gold2)">${fmt(valorNecessario)}</strong>.<br>
+  ${noRitmo
+    ? `✅ Nesse ritmo, você estaria <strong style="color:var(--green)">${fmt(Math.abs(diff))} acima</strong> do necessário.`
+    : `⚠️ Nesse ritmo, faltariam <strong style="color:var(--red)">${fmt(Math.abs(diff))}</strong> para estar no marco necessário.`}`;
+
+  metasDestacarPontoGrafico(g, n);
+}
+// Destaca no gráfico o ponto (mês) correspondente ao horizonte selecionado, nas linhas
+// "Provável" e "Cenário Mínimo", aumentando o raio e trocando a cor do ponto.
+function metasDestacarPontoGrafico(g, n){
+  const chart=charts.metas;
+  if(!chart) return;
+  const total=chart.data.labels.length;
+  const baseRadius={provavel:3, minimo:2};
+  const dsProvavel=chart.data.datasets.find(ds=>ds.label==='Provável (ritmo real ponderado)');
+  const dsMinimo=chart.data.datasets.find(ds=>ds.label==='Cenário Mínimo (necessário)');
+  if(!dsProvavel || !dsMinimo) return;
+  let idxAlvo=-1;
+  if(g && n!=null){
+    idxAlvo=Math.min(g.idxAgora+n, total-1);
+  }
+  const montarRadius=(base)=>Array.from({length:total},(_,i)=>i===idxAlvo?9:base);
+  const montarCor=(corDestaque, corBase)=>Array.from({length:total},(_,i)=>i===idxAlvo?corDestaque:corBase);
+  dsProvavel.pointRadius=montarRadius(baseRadius.provavel);
+  dsProvavel.pointHoverRadius=montarRadius(baseRadius.provavel+2);
+  dsProvavel.pointBackgroundColor=montarCor('#ffd166','rgba(239,109,44,0.95)');
+  dsMinimo.pointRadius=montarRadius(baseRadius.minimo);
+  dsMinimo.pointHoverRadius=montarRadius(baseRadius.minimo+2);
+  dsMinimo.pointBackgroundColor=montarCor('#ffd166','rgba(240,180,41,0.9)');
+  chart.update();
 }
 function metasRenderKpis(d,cfg){
   const el=document.getElementById('mt-kpis');
