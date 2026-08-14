@@ -5835,10 +5835,15 @@ function ctRender() {
   if (hint) hint.style.display = _ctBusca ? 'block' : 'none';
   if (_ctBusca) {
     const b = _ctBusca;
+    const bDigitos = b.replace(/\D/g,'');
     lista = lista.filter(e => {
       const cpf = ((_pastas||{})[e.idCliente]||{}).cpf || '';
-      return ctNormalizar(e.nome).includes(b) || ctNormalizar(e.id).includes(b) ||
-             ctNormalizar(e.idCliente).includes(b) || cpf.replace(/\D/g,'').includes(b.replace(/\D/g,'')) || cpf.includes(b);
+      const bateNome = ctNormalizar(e.nome).includes(b);
+      const bateId = ctNormalizar(e.id).includes(b) || ctNormalizar(e.idCliente).includes(b);
+      // Só compara dígitos de CPF se a busca realmente tiver algum dígito — senão
+      // "".includes("") sempre dá true e todo contrato aparecia como resultado.
+      const bateCpf = bDigitos.length>0 && cpf.replace(/\D/g,'').includes(bDigitos);
+      return bateNome || bateId || bateCpf;
     });
   }
 
