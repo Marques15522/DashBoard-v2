@@ -4781,13 +4781,16 @@ function metasRenderSugestao(d,cfg){
   try{ hist=JSON.parse(localStorage.getItem(METAS_HIST_KEY))||[]; }catch(e){ hist=[]; }
   const taxaProvavel=metasCalcularTaxaProvavel(hist);
   let blocoProvavel='';
+  let statusProvavelNoRitmo=null; // true=no ritmo, false=atrasado, null=sem dado
   if(taxaProvavel===null){
     blocoProvavel=`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">🔮 <strong>Futuro provável:</strong> ainda não há histórico suficiente registrado para estimar o ritmo real. A projeção aparece aqui assim que houver mais pontos de movimentação.</div>`;
   } else if(taxaProvavel<=0){
+    statusProvavelNoRitmo=false;
     blocoProvavel=`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">🔮 <strong>Futuro provável:</strong> pelo ritmo real recente (ponderado pelos dias mais próximos de hoje), a exposição está <strong style="color:var(--red)">estagnada ou caindo</strong> (~${pct(taxaProvavel)}/mês) — nesse passo a meta de ${fmt(cfg.valorAlvo)} não seria atingida até ${dataAlvo.toLocaleDateString('pt-BR')}. Vale revisar captação, renovações ou o ritmo de novos contratos agora, enquanto ainda dá tempo de mudar o rumo.</div>`;
   } else {
     const mesesProvavel=Math.log(cfg.valorAlvo/d.naRua)/Math.log(1+taxaProvavel);
     const valorNoPrazo=d.naRua*Math.pow(1+taxaProvavel, mesesRestantesF);
+    statusProvavelNoRitmo = mesesProvavel<=mesesRestantesF;
     if(mesesProvavel<=mesesRestantesF){
       const diffProv=mesesRestantesF-mesesProvavel;
       blocoProvavel=`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">🔮 <strong>Futuro provável:</strong> pelo ritmo real recente (~<strong style="color:var(--green)">${pct(taxaProvavel)}</strong>/mês, ponderado pelos dias mais próximos de hoje), você deve bater a meta em <strong>~${mesesProvavel.toFixed(1)} meses</strong> — cerca de <strong style="color:var(--green)">${diffProv.toFixed(1)} mês(es) antes do prazo</strong>. Nesse ritmo, a estimativa de exposição na data-limite é de <strong>${fmt(valorNoPrazo)}</strong>.</div>`;
@@ -4804,13 +4807,23 @@ function metasRenderSugestao(d,cfg){
   }
   const taxaNecessaria=Math.pow(cfg.valorAlvo/d.naRua, 1/mesesRestantesF)-1;
   const mesesNecessarios=Math.log(cfg.valorAlvo/d.naRua)/Math.log(1+taxaAtual);
+  const statusAtualNoRitmo = mesesNecessarios<=mesesRestantesF;
+  // Nota de reconciliação: as duas leituras medem coisas diferentes e podem discordar —
+  // isso não é bug, é sinal. "Taxa média" é o retorno teórico dos contratos ativos SE tudo
+  // for reinvestido; "ritmo real" é o que de fato aconteceu com a exposição total (afetado
+  // por saques, inadimplência, capital que saiu e não voltou a ser emprestado, etc).
+  let notaDivergencia='';
+  if(statusProvavelNoRitmo!==null && statusAtualNoRitmo!==statusProvavelNoRitmo){
+    notaDivergencia=`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:0.92em;color:var(--muted2)">⚖️ <strong>Por que os dois números não batem:</strong> a "taxa média" (${pct(taxaAtual)}/mês) é o retorno teórico dos contratos ativos, assumindo que todo o lucro seja reinvestido na rua. Já o "ritmo real" (${taxaProvavel!==null?pct(taxaProvavel):'—'}/mês) mostra o que de fato aconteceu com sua exposição total recentemente. Quando o real fica bem abaixo do teórico, normalmente é sinal de que o lucro está saindo da operação (retiradas, inadimplência, capital parado) em vez de ser reinvestido em novos contratos.</div>`;
+  }
+
   if(mesesNecessarios<=mesesRestantesF){
     const diff=mesesRestantesF-mesesNecessarios;
-    box.innerHTML=`✅ Muito bem, continue assim! No ritmo atual (taxa média de <strong style="color:var(--green)">${pct(taxaAtual)}</strong>/mês reinvestindo o lucro), você deve bater a meta de ${fmt(cfg.valorAlvo)} em <strong>~${mesesNecessarios.toFixed(1)} meses</strong> — cerca de <strong style="color:var(--green)">${diff.toFixed(1)} mês(es) antes do prazo</strong> (${dataAlvo.toLocaleDateString('pt-BR')}).`+blocoProvavel;
+    box.innerHTML=`✅ Muito bem, continue assim! No ritmo atual (taxa média de <strong style="color:var(--green)">${pct(taxaAtual)}</strong>/mês reinvestindo o lucro), você deve bater a meta de ${fmt(cfg.valorAlvo)} em <strong>~${mesesNecessarios.toFixed(1)} meses</strong> — cerca de <strong style="color:var(--green)">${diff.toFixed(1)} mês(es) antes do prazo</strong> (${dataAlvo.toLocaleDateString('pt-BR')}).`+blocoProvavel+notaDivergencia;
     badge.textContent='NO RITMO'; badge.style.color='var(--green)';
   } else {
     const atraso=mesesNecessarios-mesesRestantesF;
-    box.innerHTML=`⚠️ No ritmo atual (taxa média de <strong style="color:var(--gold2)">${pct(taxaAtual)}</strong>/mês), você bateria a meta em ~${mesesNecessarios.toFixed(1)} meses — isso é <strong style="color:var(--red)">${atraso.toFixed(1)} mês(es) depois do prazo</strong>. Para chegar em dia, a taxa média de reinvestimento precisaria subir para ~<strong>${pct(taxaNecessaria)}</strong>/mês, ou você precisa captar mais capital/clientes para acelerar o giro.`+blocoProvavel;
+    box.innerHTML=`⚠️ No ritmo atual (taxa média de <strong style="color:var(--gold2)">${pct(taxaAtual)}</strong>/mês), você bateria a meta em ~${mesesNecessarios.toFixed(1)} meses — isso é <strong style="color:var(--red)">${atraso.toFixed(1)} mês(es) depois do prazo</strong>. Para chegar em dia, a taxa média de reinvestimento precisaria subir para ~<strong>${pct(taxaNecessaria)}</strong>/mês, ou você precisa captar mais capital/clientes para acelerar o giro.`+blocoProvavel+notaDivergencia;
     badge.textContent='ABAIXO DO RITMO'; badge.style.color='var(--gold2)';
   }
 }
@@ -4909,7 +4922,25 @@ function metasMontarGradeHorizonte(d,cfg,n){
     if(taxaProvavel===null) return null;
     return d.naRua*Math.pow(1+Math.max(taxaProvavel,-0.99), i-idxAgora);
   });
-  const metaSerie=cfg.valorAlvo ? mesesKeys.map(()=>cfg.valorAlvo) : mesesKeys.map(()=>null);
+
+  // Linha da Meta: não é mais uma reta fixa — começa no valor real que você tinha no início
+  // deste mês e sobe, mês a mês, até o valor necessário pra bater a meta no prazo estipulado.
+  // Assim dá pra comparar visualmente a "escada" que precisa subir com a projeção real.
+  let metaSerie=mesesKeys.map(()=>null);
+  if(cfg.valorAlvo && cfg.dataAlvo){
+    const inicioMesDate=new Date(agora.getFullYear(), agora.getMonth(), 1);
+    const pontosOrdenados=hist.filter(h=>h.naRua>0).map(h=>({t:new Date(h.ts||(h.data+'T12:00:00')).getTime(), y:h.naRua})).sort((a,b)=>a.t-b.t);
+    const dentroDoMes=pontosOrdenados.filter(p=>p.t>=inicioMesDate.getTime());
+    const antesDoMes=pontosOrdenados.filter(p=>p.t<inicioMesDate.getTime());
+    const inicioMesValor = dentroDoMes.length ? dentroDoMes[0].y : (antesDoMes.length ? antesDoMes[antesDoMes.length-1].y : d.naRua);
+    const dataAlvoObj=new Date(cfg.dataAlvo+'T00:00:00');
+    const mesesTotalNecessario=Math.max((dataAlvoObj-inicioMesDate)/86400000/30, 1/30);
+    const taxaNecessariaMes=Math.pow(Math.max(cfg.valorAlvo,1)/Math.max(inicioMesValor,1), 1/mesesTotalNecessario)-1;
+    metaSerie=mesesKeys.map((key,i)=>{
+      if(i<idxAgora) return null;
+      return inicioMesValor*Math.pow(1+taxaNecessariaMes, i-idxAgora);
+    });
+  }
 
   return {mesesKeys, labels:mesesKeys.map(metasMonthLabel), idxAgora, projecaoSerie, metaSerie, taxaProvavel};
 }
@@ -4921,7 +4952,7 @@ function metasRenderChart(d,cfg){
   const g=metasMontarGradeHorizonte(d,cfg,n);
   try{
     const datasets=[
-      {label:'Meta estipulada',data:g.metaSerie,borderColor:'rgba(180,186,214,0.32)',backgroundColor:'transparent',borderWidth:1.5,borderDash:[5,5],pointRadius:0,pointHoverRadius:0,fill:false,tension:0,spanGaps:true,order:2},
+      {label:'Meta (ritmo necessário)',data:g.metaSerie,borderColor:'rgba(180,186,214,0.4)',backgroundColor:'transparent',borderWidth:1.75,borderDash:[5,5],pointRadius:0,pointHoverRadius:3,fill:false,tension:0.15,spanGaps:true,order:2},
       {label:'Projeção (ritmo real)',data:g.projecaoSerie,borderColor:'rgba(201,146,42,0.95)',backgroundColor:'rgba(201,146,42,0.18)',borderWidth:3,pointRadius:(ctx)=>ctx.dataIndex===g.idxAgora?6:2,pointBackgroundColor:(ctx)=>ctx.dataIndex===g.idxAgora?'#ffd166':'rgba(201,146,42,0.95)',pointBorderColor:(ctx)=>ctx.dataIndex===g.idxAgora?'#ffd166':'rgba(201,146,42,0.95)',fill:true,tension:0.3,spanGaps:true,order:1}
     ];
     charts.metas=new Chart(canvas.getContext('2d'),{type:'line',data:{labels:g.labels,datasets},options:{responsive:true,maintainAspectRatio:false,
