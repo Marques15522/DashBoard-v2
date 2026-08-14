@@ -2311,6 +2311,7 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
     <input id="ct-busca" type="text" placeholder="🔍 Buscar por nome, ID ou CPF..." oninput="ctBuscar(this.value)"
       style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.88rem;padding:7px 12px;outline:none;flex:1;min-width:180px;max-width:320px">
   </div>
+  <div id="ct-busca-hint" style="display:none;font-size:0.82rem;color:var(--gold2);margin:-8px 0 12px 2px">🔎 Buscando em todos os status (ignorando o filtro selecionado acima)</div>
 
   <!-- Cards + Modal -->
   <div id="ct-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px"></div>
@@ -5799,8 +5800,12 @@ function ctFiltrar(f, btn) {
 }
 
 function ctBuscar(v) {
-  _ctBusca = v.toLowerCase().trim();
+  _ctBusca = ctNormalizar(v).trim();
   ctRender();
+}
+// Remove acentuação e caixa pra busca não ser sensível a acento (ex: "jose" encontra "José").
+function ctNormalizar(s){
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 }
 
 function ctOrdenar(campo) {
@@ -5817,18 +5822,23 @@ function ctRender() {
   if (!cards) return;
 
   // Filtra
-  let lista = _ctEmps.filter(e => {
+  // Enquanto há um termo de busca, ela vale para TODOS os contratos, independente do
+  // filtro de status (Ativos/Atrasados/Todos/Quitados) selecionado nos botões acima —
+  // senão buscar um cliente cujo contrato está num status diferente do filtro dava "nada encontrado".
+  let lista = _ctBusca ? _ctEmps.slice() : _ctEmps.filter(e => {
     if (_ctFiltro === 'ativos')    return e.status === 'ativo';
     if (_ctFiltro === 'atrasados') return e.status === 'atraso';
     if (_ctFiltro === 'quitados')  return e.status === 'quitado';
     return true;
   });
+  const hint=document.getElementById('ct-busca-hint');
+  if (hint) hint.style.display = _ctBusca ? 'block' : 'none';
   if (_ctBusca) {
     const b = _ctBusca;
     lista = lista.filter(e => {
       const cpf = ((_pastas||{})[e.idCliente]||{}).cpf || '';
-      return e.nome.toLowerCase().includes(b) || e.id.toLowerCase().includes(b) ||
-             e.idCliente.toLowerCase().includes(b) || cpf.replace(/\D/g,'').includes(b.replace(/\D/g,'')) || cpf.includes(b);
+      return ctNormalizar(e.nome).includes(b) || ctNormalizar(e.id).includes(b) ||
+             ctNormalizar(e.idCliente).includes(b) || cpf.replace(/\D/g,'').includes(b.replace(/\D/g,'')) || cpf.includes(b);
     });
   }
 
