@@ -5837,13 +5837,20 @@ function ctRender() {
     const b = _ctBusca;
     const bDigitos = b.replace(/\D/g,'');
     lista = lista.filter(e => {
-      const cpf = ((_pastas||{})[e.idCliente]||{}).cpf || '';
-      const bateNome = ctNormalizar(e.nome).includes(b);
-      const bateId = ctNormalizar(e.id).includes(b) || ctNormalizar(e.idCliente).includes(b);
-      // Só compara dígitos de CPF se a busca realmente tiver algum dígito — senão
-      // "".includes("") sempre dá true e todo contrato aparecia como resultado.
-      const bateCpf = bDigitos.length>0 && cpf.replace(/\D/g,'').includes(bDigitos);
-      return bateNome || bateId || bateCpf;
+      // Blindado: se um contrato tiver algum dado fora do padrão (nome nulo, cliente sem
+      // pasta cadastrada, etc.) e isso lançar um erro, ANTES o filtro inteiro quebrava e o
+      // JavaScript acabava mostrando a lista SEM FILTRAR NADA. Agora isolamos por contrato:
+      // um registro problemático só afeta ele mesmo, nunca a busca inteira.
+      try {
+        const cpf = ((_pastas||{})[e.idCliente]||{}).cpf || '';
+        const bateNome = ctNormalizar(e.nome).includes(b);
+        const bateId = ctNormalizar(e.id).includes(b) || ctNormalizar(e.idCliente).includes(b);
+        const bateCpf = bDigitos.length>0 && cpf.replace(/\D/g,'').includes(bDigitos);
+        return bateNome || bateId || bateCpf;
+      } catch(err) {
+        console.warn('ctBuscar: contrato com dado inesperado, usando comparação simples', e && e.id, err);
+        return ctNormalizar(e && e.nome).includes(b) || ctNormalizar(e && e.id).includes(b);
+      }
     });
   }
 
