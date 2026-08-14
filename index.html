@@ -562,6 +562,17 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
 .pasta-stat-lbl{font-size:0.85rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-top:2px;}
 /* ── CONTRATOS ── */
 .ct-filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border2);color:var(--muted);background:transparent;font-family:'DM Mono',monospace;font-size:0.86rem;cursor:pointer;letter-spacing:0.06em;transition:all 0.18s;}
+.mt-hzn-btn{padding:10px 20px;border-radius:24px;border:1px solid var(--border2);color:var(--muted);background:transparent;font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:600;cursor:pointer;letter-spacing:0.05em;transition:all 0.18s;}
+.mt-hzn-btn:hover{border-color:var(--gold);color:var(--gold);}
+.mt-hzn-btn.active{background:rgba(201,146,42,0.14);border-color:var(--gold);color:var(--gold2);}
+@keyframes mtSubindoPop{
+  0%{opacity:0;transform:translateY(10px) scale(0.9);}
+  15%{opacity:1;transform:translateY(0) scale(1.05);}
+  30%{transform:scale(1);}
+  80%{opacity:1;transform:translateY(-4px);}
+  100%{opacity:0;transform:translateY(-16px);}
+}
+.mt-subindo-badge{position:absolute;top:-14px;right:14px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1408;font-family:'DM Mono',monospace;font-weight:700;font-size:0.95rem;padding:6px 14px;border-radius:16px;box-shadow:0 4px 14px rgba(201,146,42,0.4);animation:mtSubindoPop 1.4s ease-out forwards;pointer-events:none;z-index:5;}
 .ct-filter-btn:hover{border-color:var(--gold);color:var(--gold);}
 .ct-filter-btn.active{background:rgba(201,146,42,0.12);border-color:rgba(201,146,42,0.4);color:var(--gold);}
 .ct-th{padding:10px 12px;text-align:left;color:var(--muted);font-size:0.86rem;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);}
@@ -1363,12 +1374,15 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
 
   <div class="card">
     <div class="card-header"><div><div class="card-title">📈 Realizado vs. Cenários de Projeção</div><div class="card-desc">Exposição total por mês: histórico registrado, provável futuro (ritmo real recente, ponderado) vs. cenário pleno (taxa média atual dos contratos) vs. cenário mínimo necessário para bater a meta no prazo</div></div><div class="card-badge">PROJEÇÃO</div></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-      <button class="ct-filter-btn active" data-mh="1" onclick="metasSelecionarHorizonte(1,this)">📍 Daqui a 1 mês</button>
-      <button class="ct-filter-btn" data-mh="3" onclick="metasSelecionarHorizonte(3,this)">📍 Daqui a 3 meses</button>
-      <button class="ct-filter-btn" data-mh="6" onclick="metasSelecionarHorizonte(6,this)">📍 Daqui a 6 meses</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="mt-hzn-btn active" data-mh="1" onclick="metasSelecionarHorizonte(1,this)">📍 Daqui a 1 mês</button>
+      <button class="mt-hzn-btn" data-mh="3" onclick="metasSelecionarHorizonte(3,this)">📍 Daqui a 3 meses</button>
+      <button class="mt-hzn-btn" data-mh="6" onclick="metasSelecionarHorizonte(6,this)">📍 Daqui a 6 meses</button>
     </div>
-    <div id="mt-horizonte-texto" style="font-family:'Cormorant Garamond', serif;font-size:1.02rem;line-height:1.65;color:var(--text);margin-bottom:16px;padding:14px 16px;background:var(--s2);border:1px solid var(--border);border-radius:10px"></div>
+    <div style="position:relative">
+      <div id="mt-horizonte-texto" style="font-family:'Cormorant Garamond', serif;font-size:1.28rem;line-height:1.75;color:var(--text);margin-bottom:16px;padding:18px 20px;background:var(--s2);border:1px solid var(--border);border-radius:10px"></div>
+      <div id="mt-subindo-wrap"></div>
+    </div>
     <div class="chart-wrap tall" style="height:380px"><canvas id="chartMetas"></canvas></div>
   </div>
 
@@ -4697,11 +4711,24 @@ function metasRenderAll(){
 }
 // Troca o horizonte selecionado (1/3/6 meses) e re-renderiza a projeção + destaque no gráfico.
 function metasSelecionarHorizonte(n, btnEl){
+  const anterior=window._metasHorizonteValorProvavel;
   window._metasHorizonte=n;
-  document.querySelectorAll('#tab-metas .ct-filter-btn[data-mh]').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#tab-metas .mt-hzn-btn[data-mh]').forEach(b=>b.classList.remove('active'));
   if(btnEl) btnEl.classList.add('active');
   if(!window._metasDados) return;
   metasRenderProjecao(window._metasDados, metasConfigGet());
+  metasMostrarBadgeSubindo();
+}
+// Badge animado "📈 Subindo" que aparece toda vez que o horizonte é trocado.
+function metasMostrarBadgeSubindo(){
+  const wrap=document.getElementById('mt-subindo-wrap');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  const badge=document.createElement('div');
+  badge.className='mt-subindo-badge';
+  badge.textContent='📈 Subindo...';
+  wrap.appendChild(badge);
+  setTimeout(()=>{ if(badge.parentNode) badge.parentNode.removeChild(badge); }, 1450);
 }
 // Callout "onde vou chegar em N meses" + destaque do ponto correspondente no gráfico.
 function metasRenderProjecao(d,cfg){
