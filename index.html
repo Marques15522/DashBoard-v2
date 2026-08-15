@@ -3106,7 +3106,7 @@ function doGet(e) {
     </div>`;
   document.body.appendChild(modal);
 }
-const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18,unidade:19,obs:20};
+const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,parcelasPagas:16,status:17,proxVenc:18,unidade:19,obs:20};
 function getUnidade(row){
   const u=String(row[CE.unidade]||'').trim().toLowerCase();
   if(u==='quinzenal') return 'quinzenal';
@@ -3275,7 +3275,26 @@ function render(empRows,pagRows){
       const vencContrato=parseDate(r[CE.vencContrato]);
       const statusRaw=parseStatus(r[CE.status]);
       const status=corrigirStatus(statusRaw, proxVenc, parseNum(r[CE.saldo]));
-      return {id:String(r[CE.id]).trim(),idCliente:String(r[CE.clienteId]||'').trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital:parseNum(r[CE.cap]),data:parseDate(r[CE.data]),taxa:parseTaxa(r[CE.taxa]),prazo:parseNum(r[CE.prazo]),tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal:parseNum(r[CE.jTotal]),saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status,proxVenc,vencContrato,unidade:getUnidade(r)};
+      const capital=parseNum(r[CE.cap]);
+      const taxa=parseTaxa(r[CE.taxa]);
+      const prazo=parseNum(r[CE.prazo]);
+      const jTotal=parseNum(r[CE.jTotal]);
+      const parcelasPagas=parseNum(r[CE.parcelasPagas]);
+      // Exposição real do contrato HOJE — separado do "Juros Total" contratado (que soma
+      // todas as parcelas futuras). Para bullet (1 parcela) os dois coincidem. Para parcelado
+      // (parcela fixa: capital/prazo de amortização + juros constante sobre o capital
+      // original a cada parcela), a exposição real é só o capital ainda não amortizado +
+      // o juros da parcela em aberto — não o total das parcelas que ainda nem venceram.
+      const prazoN=Math.max(prazo||1,1);
+      let capitalRestante=capital, jurosAtual=jTotal;
+      if(prazoN>1){
+        const parcPagasN=Math.min(Math.max(parcelasPagas||0,0), prazoN);
+        const amortPeriodo=capital/prazoN;
+        const jurosPeriodo=capital*taxa;
+        capitalRestante=Math.max(0, capital-parcPagasN*amortPeriodo);
+        jurosAtual=parcPagasN<prazoN ? jurosPeriodo : 0;
+      }
+      return {id:String(r[CE.id]).trim(),idCliente:String(r[CE.clienteId]||'').trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital,data:parseDate(r[CE.data]),taxa,prazo,tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal,saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),parcelasPagas,capitalRestante,jurosAtual,status,proxVenc,vencContrato,unidade:getUnidade(r)};
     })
     .filter(e=>e.status!==null&&e.capital>0);
 
@@ -3352,10 +3371,14 @@ function render(empRows,pagRows){
   // SCORE RISCO — definido após concentração (usa totalCapAtivo)
 
   // KPIs
-  const naRua = totalCap + totalJuros;
+  // Exposição real: capital ainda não amortizado + juros só da parcela em aberto de cada
+  // contrato — não o valor cheio do contrato (capital + todas as parcelas futuras somadas).
+  const capitalRestanteTotal=abertos.reduce((s,e)=>s+e.capitalRestante,0);
+  const jurosAtualTotal=abertos.reduce((s,e)=>s+e.jurosAtual,0);
+  const naRua = capitalRestanteTotal + jurosAtualTotal;
   const _s=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   const _h=(id,v)=>{const e=document.getElementById(id);if(e)e.innerHTML=v;};
-  _h('kpi-na-rua-sub','principal <b style="color:var(--gold)">'+fmt(totalCap)+'</b> + juros <b style="color:var(--green)">'+fmt(totalJuros)+'</b>');
+  _h('kpi-na-rua-sub','principal em aberto <b style="color:var(--gold)">'+fmt(capitalRestanteTotal)+'</b> + juros da parcela atual <b style="color:var(--green)">'+fmt(jurosAtualTotal)+'</b>');
   _s('kpi-na-rua',fmt(naRua));
   _s('kpi-capital',fmt(totalCap));
   _s('kpi-cap-sub',abertos.length+' contratos ativos');
