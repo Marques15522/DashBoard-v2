@@ -3106,7 +3106,7 @@ function doGet(e) {
     </div>`;
   document.body.appendChild(modal);
 }
-const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,parcelasPagas:16,status:17,proxVenc:18,unidade:19,obs:20};
+const CE={id:0,clienteId:1,nome:2,cpf:3,tel:4,cap:5,data:6,taxa:7,prazo:8,vencContrato:9,tipoJuros:10,jTotal:11,saldo:14,jProx:15,status:17,proxVenc:18,unidade:19,obs:20};
 function getUnidade(row){
   const u=String(row[CE.unidade]||'').trim().toLowerCase();
   if(u==='quinzenal') return 'quinzenal';
@@ -3279,22 +3279,7 @@ function render(empRows,pagRows){
       const taxa=parseTaxa(r[CE.taxa]);
       const prazo=parseNum(r[CE.prazo]);
       const jTotal=parseNum(r[CE.jTotal]);
-      const parcelasPagas=parseNum(r[CE.parcelasPagas]);
-      // Exposição real do contrato HOJE — separado do "Juros Total" contratado (que soma
-      // todas as parcelas futuras). Para bullet (1 parcela) os dois coincidem. Para parcelado
-      // (parcela fixa: capital/prazo de amortização + juros constante sobre o capital
-      // original a cada parcela), a exposição real é só o capital ainda não amortizado +
-      // o juros da parcela em aberto — não o total das parcelas que ainda nem venceram.
-      const prazoN=Math.max(prazo||1,1);
-      let capitalRestante=capital, jurosAtual=jTotal;
-      if(prazoN>1){
-        const parcPagasN=Math.min(Math.max(parcelasPagas||0,0), prazoN);
-        const amortPeriodo=capital/prazoN;
-        const jurosPeriodo=capital*taxa;
-        capitalRestante=Math.max(0, capital-parcPagasN*amortPeriodo);
-        jurosAtual=parcPagasN<prazoN ? jurosPeriodo : 0;
-      }
-      return {id:String(r[CE.id]).trim(),idCliente:String(r[CE.clienteId]||'').trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital,data:parseDate(r[CE.data]),taxa,prazo,tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal,saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),parcelasPagas,capitalRestante,jurosAtual,status,proxVenc,vencContrato,unidade:getUnidade(r)};
+      return {id:String(r[CE.id]).trim(),idCliente:String(r[CE.clienteId]||'').trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital,data:parseDate(r[CE.data]),taxa,prazo,tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal,saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status,proxVenc,vencContrato,unidade:getUnidade(r)};
     })
     .filter(e=>e.status!==null&&e.capital>0);
 
@@ -3308,6 +3293,32 @@ function render(empRows,pagRows){
       const diasAtraso=parseNum(r[CP.diasAtraso]);
       return{id:String(r[CP.id]).trim(),tipo:String(r[CP.tipo]||''),valor,data:parseDate(r[CP.data]),juros,amort,multa,diasAtraso};
     });
+
+  // Parcelas pagas por contrato: contadas automaticamente pelos pagamentos já lançados na
+  // aba Pagamentos (um pagamento registrado = uma parcela abatida), em vez de depender de
+  // uma coluna preenchida manualmente. Assim, ao lançar o pagamento do cliente na data de
+  // vencimento, a parcela é abatida sozinha.
+  const pagsPorContrato={};
+  pags.forEach(p=>{ pagsPorContrato[p.id]=(pagsPorContrato[p.id]||0)+1; });
+  emps.forEach(e=>{
+    // Exposição real do contrato HOJE — separado do "Juros Total" contratado (que soma
+    // todas as parcelas futuras). Para bullet (1 parcela) os dois coincidem. Para parcelado
+    // (parcela fixa: capital/prazo de amortização + juros constante sobre o capital
+    // original a cada parcela), a exposição real é só o capital ainda não amortizado +
+    // o juros da parcela em aberto — não o total das parcelas que ainda nem venceram.
+    const prazoN=Math.max(e.prazo||1,1);
+    const parcelasPagas=Math.min(pagsPorContrato[e.id]||0, prazoN);
+    e.parcelasPagas=parcelasPagas;
+    if(prazoN>1){
+      const amortPeriodo=e.capital/prazoN;
+      const jurosPeriodo=e.capital*e.taxa;
+      e.capitalRestante=Math.max(0, e.capital-parcelasPagas*amortPeriodo);
+      e.jurosAtual=parcelasPagas<prazoN ? jurosPeriodo : 0;
+    } else {
+      e.capitalRestante=e.capital;
+      e.jurosAtual=e.jTotal;
+    }
+  });
 
   const ativos=emps.filter(e=>e.status==='ativo');
   const atrasado=emps.filter(e=>e.status==='atraso');
