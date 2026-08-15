@@ -1019,9 +1019,9 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
 
     <!-- COLUNA ESQUERDA -->
     <div class="cmd2-col">
-      <div class="kpi-sm" style="border-color:rgba(201,146,42,0.2);background:linear-gradient(135deg,rgba(201,146,42,0.06) 0%,var(--s1) 80%)">
+      <div class="kpi-sm" onclick="expoModalAbrir()" style="cursor:pointer;border-color:rgba(201,146,42,0.2);background:linear-gradient(135deg,rgba(201,146,42,0.06) 0%,var(--s1) 80%)">
         <div class="kpi-sm-accent" style="background:linear-gradient(90deg,var(--gold),var(--gold2))"></div>
-        <div class="kpi-sm-lbl">Exposição Total</div>
+        <div class="kpi-sm-lbl">Exposição Total <span style="font-size:0.8em;color:var(--muted)">🔍 ver detalhamento</span></div>
         <div class="kpi-sm-val" id="kpi-na-rua" style="color:var(--gold)">—</div>
         <div class="kpi-sm-sub" id="kpi-na-rua-sub">—</div>
       </div>
@@ -2327,6 +2327,14 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   </div>
 </div>
 
+<!-- Modal de detalhamento da Exposição Total -->
+<div id="expo-modal-overlay" onclick="expoModalFechar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center">
+  <div id="expo-modal" onclick="event.stopPropagation()" style="background:var(--s1);border:1px solid var(--border2);border-radius:14px;padding:28px;width:100%;max-width:640px;max-height:88vh;overflow-y:auto;position:relative;margin:16px">
+    <button onclick="expoModalFechar()" style="position:absolute;top:14px;right:16px;background:transparent;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;line-height:1">✕</button>
+    <div id="expo-modal-body"></div>
+  </div>
+</div>
+
 <!-- MODAL PERFIL DO CLIENTE (aba Clientes) -->
 <div class="cli-modal-overlay" id="cli-modal-overlay" onclick="if(event.target===this)cliModalFechar()">
   <div class="cli-modal" onclick="event.stopPropagation()">
@@ -3307,16 +3315,25 @@ function render(empRows,pagRows){
     // original a cada parcela), a exposição real é só o capital ainda não amortizado +
     // o juros da parcela em aberto — não o total das parcelas que ainda nem venceram.
     const prazoN=Math.max(e.prazo||1,1);
-    const parcelasPagas=Math.min(pagsPorContrato[e.id]||0, prazoN);
+    const parcelasPagas=pagsPorContrato[e.id]||0;
     e.parcelasPagas=parcelasPagas;
     if(prazoN>1){
       const amortPeriodo=e.capital/prazoN;
       const jurosPeriodo=e.capital*e.taxa;
-      e.capitalRestante=Math.max(0, e.capital-parcelasPagas*amortPeriodo);
+      e.capitalRestante=Math.max(0, e.capital-Math.min(parcelasPagas,prazoN)*amortPeriodo);
       e.jurosAtual=parcelasPagas<prazoN ? jurosPeriodo : 0;
     } else {
       e.capitalRestante=e.capital;
       e.jurosAtual=e.jTotal;
+    }
+    // Rede de segurança: contrato ainda ATIVO/ATRASO nunca pode ter exposição calculada
+    // como zero — se isso acontecer (ex: contrato "rolou" além do prazo nominal, tipo
+    // renegociação, e por isso já teve mais pagamentos do que o prazo original previa),
+    // é sinal de que o modelo padrão de parcela fixa não se aplica a esse contrato. Nesse
+    // caso confiamos no "Saldo Restante" que você mesmo mantém na planilha para ele.
+    if(e.status!=='quitado' && (e.capitalRestante+e.jurosAtual)<=0 && e.saldo>0){
+      e.capitalRestante=e.saldo;
+      e.jurosAtual=0;
     }
   });
 
@@ -6218,6 +6235,64 @@ function ctModalAbrir(id) {
 
 function ctModalFechar() {
   document.getElementById('ct-modal-overlay').style.display = 'none';
+}
+// Modal de detalhamento da Exposição Total: mostra contrato por contrato quanto cada um
+// está contribuindo (capital ainda não amortizado + juros da parcela em aberto), pra dar
+// pra conferir a conta na mão.
+function expoModalAbrir(){
+  const emps=window._lastEmps||[];
+  const abertos=emps.filter(e=>e.status!=='quitado');
+  const linhas=abertos.map(e=>({
+    id:e.id, nome:e.nome||'—', status:e.status,
+    capitalRestante:e.capitalRestante??e.capital, jurosAtual:e.jurosAtual??e.jTotal,
+    exposicao:(e.capitalRestante??e.capital)+(e.jurosAtual??e.jTotal),
+    prazo:e.prazo, parcelasPagas:e.parcelasPagas||0
+  })).sort((a,b)=>b.exposicao-a.exposicao);
+  const total=linhas.reduce((s,l)=>s+l.exposicao,0);
+  const totalCapital=linhas.reduce((s,l)=>s+l.capitalRestante,0);
+  const totalJuros=linhas.reduce((s,l)=>s+l.jurosAtual,0);
+  const statusLabel=s=>s==='ativo'?'● Em Dia':s==='atraso'?'⚠ Atraso':s;
+  const statusCor=s=>s==='ativo'?'var(--green)':s==='atraso'?'var(--red)':'var(--muted)';
+  const linhasHtml=linhas.map(l=>`
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 6px;font-size:0.86rem;color:var(--muted)">${l.id}</td>
+      <td style="padding:9px 6px;font-size:0.86rem">${l.nome}</td>
+      <td style="padding:9px 6px;font-size:0.82rem;color:${statusCor(l.status)}">${statusLabel(l.status)}</td>
+      <td style="padding:9px 6px;font-size:0.82rem;color:var(--muted);text-align:center">${l.prazo>1?l.parcelasPagas+'/'+l.prazo:'—'}</td>
+      <td style="padding:9px 6px;font-size:0.86rem;text-align:right;color:var(--gold2)">${fmt(l.capitalRestante)}</td>
+      <td style="padding:9px 6px;font-size:0.86rem;text-align:right;color:var(--green)">${fmt(l.jurosAtual)}</td>
+      <td style="padding:9px 6px;font-size:0.88rem;text-align:right;font-weight:600;color:var(--gold)">${fmt(l.exposicao)}</td>
+    </tr>`).join('');
+  document.getElementById('expo-modal-body').innerHTML=`
+    <div style="margin-bottom:16px">
+      <div style="font-family:'Cormorant Garamond', serif;font-size:1.3rem;color:var(--gold)">🔍 Detalhamento da Exposição Total</div>
+      <div style="font-size:0.86rem;color:var(--muted);margin-top:2px">Capital ainda não amortizado + juros da parcela em aberto, contrato por contrato</div>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="border-bottom:2px solid var(--border2)">
+          <th style="padding:6px;text-align:left;font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">ID</th>
+          <th style="padding:6px;text-align:left;font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">Cliente</th>
+          <th style="padding:6px;text-align:left;font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">Status</th>
+          <th style="padding:6px;text-align:center;font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">Parcelas</th>
+          <th style="padding:6px;text-align:right;font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">Capital</th>
+          <th style="padding:6px;text-align:right;font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">Juros</th>
+          <th style="padding:6px;text-align:right;font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">Exposição</th>
+        </tr></thead>
+        <tbody>${linhasHtml}</tbody>
+        <tfoot><tr style="border-top:2px solid var(--border2)">
+          <td colspan="4" style="padding:10px 6px;font-size:0.88rem;color:var(--text);font-weight:600">TOTAL</td>
+          <td style="padding:10px 6px;text-align:right;font-weight:700;color:var(--gold2)">${fmt(totalCapital)}</td>
+          <td style="padding:10px 6px;text-align:right;font-weight:700;color:var(--green)">${fmt(totalJuros)}</td>
+          <td style="padding:10px 6px;text-align:right;font-weight:700;color:var(--gold);font-size:1.02rem">${fmt(total)}</td>
+        </tr></tfoot>
+      </table>
+    </div>
+    <div style="margin-top:14px;font-size:0.82rem;color:var(--muted);line-height:1.6">💡 A coluna "Parcelas" mostra quantas já foram pagas (contadas automaticamente pelos pagamentos lançados) sobre o total do prazo. Contratos de 1 parcela não têm essa contagem porque capital e juros não amortizam por partes.</div>`;
+  document.getElementById('expo-modal-overlay').style.display='flex';
+}
+function expoModalFechar(){
+  document.getElementById('expo-modal-overlay').style.display='none';
 }
 
 function waRender(clientes,abertos,atrasado,hoje){
