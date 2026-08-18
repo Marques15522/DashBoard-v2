@@ -9321,11 +9321,26 @@ function pastaSalvar(){
     _pendingSaveIds = _pendingSaveIds || new Set();
     _pendingSaveIds.add(id);
     await dossieSyncCarregar();
+    // Confere se o servidor REALMENTE confirmou este ID (o POST é no-cors — não dá pra saber
+    // se deu certo só por não ter dado erro). Se ainda não apareceu, tenta mais uma vez antes de avisar.
+    if (!_pastas[id] || !_pastas[id].synced) {
+      await dossieSyncSalvar(_pastas[id]);
+      await new Promise(r => setTimeout(r, 3000));
+      await dossieSyncCarregar();
+    }
     _pendingSaveIds && _pendingSaveIds.delete(id);
     const agora = new Date().toLocaleTimeString('pt-BR');
-    syncStatusUpdate('✅ Sincronizado às ' + agora, 'var(--green)');
+    if (_pastas[id] && _pastas[id].synced) {
+      syncStatusUpdate('✅ Sincronizado às ' + agora, 'var(--green)');
+    } else {
+      syncStatusUpdate('⚠️ Salvo localmente — NÃO confirmado no servidor ainda', 'var(--red)');
+      pastaRender();
+      alert('⚠️ Atenção: o dossiê de "' + nome + '" foi salvo neste aparelho, mas o servidor ainda não confirmou o recebimento.\n\nEle NÃO vai aparecer em outros dispositivos até isso ser confirmado. Tente clicar em "🔄 Sincronizar" daqui a alguns minutos. Se continuar assim, pode ser que a URL do Apps Script esteja com problema.');
+    }
   }).catch(()=>{
     syncStatusUpdate('⚠️ Salvo localmente — sem conexão com servidor', 'var(--muted)');
+    pastaRender();
+    alert('⚠️ Atenção: o dossiê de "' + nome + '" foi salvo neste aparelho, mas não foi possível conectar ao servidor. Ele NÃO vai aparecer em outros dispositivos até você sincronizar com sucesso.');
   });
   pastaModalClose();
   pastaRender();
@@ -9373,6 +9388,7 @@ function pastaRender(){
             ${p.tipoRenda?`<span class="badge blue">${tipoLabel[p.tipoRenda]||p.tipoRenda}</span>`:''}
             ${totalD>0?`<span class="badge ok">${totalD} doc${totalD>1?'s':''}</span>`:'<span class="badge muted">Sem docs</span>'}
             ${(p.cpf&&p.tel&&totalD>0)?`<span class="badge ok">✓ Completa</span>`:''}
+            ${!p.synced?`<span class="badge" style="color:#ef476f;background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.25)" title="Ainda não confirmado pelo servidor — pode não aparecer em outros dispositivos">⏳ Só neste aparelho</span>`:''}
           </div>
         </div>
       </div>
