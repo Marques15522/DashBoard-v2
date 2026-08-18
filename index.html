@@ -1693,6 +1693,7 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
       <button onclick="mostrarAppsScript()" style="background:rgba(155,93,229,0.1);border:1px solid rgba(155,93,229,0.3);color:var(--purple);border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.84rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">📋 Ver Código</button>
       <button onclick="dossieConfigurarURL()" style="background:rgba(201,146,42,0.1);border:1px solid rgba(201,146,42,0.3);color:var(--gold2);border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.84rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">⚙️ Configurar URL</button>
       <button onclick="dossieSyncManual()" id="sync-btn" style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.25);color:var(--green);border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.84rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">🔄 Sincronizar</button>
+      <button onclick="pastaVerificarDuplicados()" style="background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.25);color:#ef476f;border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.84rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">🧹 Verificar Duplicados</button>
     </div>
     <div class="pasta-stats-strip" id="pasta-stats-strip">
       <div class="pasta-stat-box"><div class="pasta-stat-val" id="ps-total" style="color:var(--gold)">0</div><div class="pasta-stat-lbl">Pastas Abertas</div></div>
@@ -9388,6 +9389,106 @@ function pastaRender(){
       </div>
     </div>`;
   }).join('');
+}
+
+// ════════════════════════════════════════════════════════
+// DETECÇÃO E MESCLAGEM DE PASTAS DUPLICADAS
+// Agrupa por CPF (só dígitos) quando existe; senão por nome normalizado.
+// ════════════════════════════════════════════════════════
+function pastaNormNome(nome){ return (nome||'').trim().toLowerCase().replace(/\s+/g,' '); }
+function pastaNormCPF(cpf){ return (cpf||'').replace(/\D/g,''); }
+
+function pastaDetectarGrupos(){
+  const porCpf={}, porNome={};
+  Object.values(_pastas).forEach(p=>{
+    const cpf=pastaNormCPF(p.cpf);
+    if(cpf){
+      (porCpf[cpf]=porCpf[cpf]||[]).push(p);
+    } else {
+      const n=pastaNormNome(p.nome);
+      (porNome[n]=porNome[n]||[]).push(p);
+    }
+  });
+  const grupos=[];
+  Object.values(porCpf).forEach(g=>{ if(g.length>1) grupos.push(g); });
+  Object.values(porNome).forEach(g=>{ if(g.length>1) grupos.push(g); });
+  return grupos;
+}
+
+// Mescla um grupo de pastas duplicadas em uma só, mantendo o máximo de dado possível.
+// Critério de "vencedora": mais recente (updatedAt) entre as sincronizadas (synced:true);
+// se nenhuma estiver sincronizada, a mais recente entre todas.
+function pastaMesclarGrupo(grupo){
+  const sincronizadas=grupo.filter(p=>p.synced);
+  const base=sincronizadas.length?sincronizadas:grupo;
+  const vencedora=[...base].sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
+  const perdedoras=grupo.filter(p=>p.id!==vencedora.id);
+
+  const merged=JSON.parse(JSON.stringify(vencedora));
+  // Preenche campos vazios da vencedora com dados das perdedoras (não sobrescreve o que já existe)
+  perdedoras.forEach(p=>{
+    Object.keys(p).forEach(k=>{
+      if(k==='id'||k==='docs'||k==='updatedAt'||k==='synced')return;
+      if((merged[k]===''||merged[k]===undefined||merged[k]===null) && p[k]!==''&&p[k]!==undefined&&p[k]!==null){
+        merged[k]=p[k];
+      }
+    });
+    // Une documentos, evitando duplicar pelo nome do arquivo dentro do mesmo tipo
+    Object.entries(p.docs||{}).forEach(([tipo,lista])=>{
+      merged.docs=merged.docs||{};
+      merged.docs[tipo]=merged.docs[tipo]||[];
+      (lista||[]).forEach(doc=>{
+        const jaTem=merged.docs[tipo].some(d=>d.name===doc.name);
+        if(!jaTem) merged.docs[tipo].push(doc);
+      });
+    });
+  });
+  merged.updatedAt=Date.now();
+  merged.synced=false; // precisa subir a versão mesclada de novo
+
+  return { merged, perdedorasIds: perdedoras.map(p=>p.id) };
+}
+
+async function pastaVerificarDuplicados(){
+  const grupos=pastaDetectarGrupos();
+  if(!grupos.length){ alert('✅ Nenhuma pasta duplicada encontrada.'); return; }
+
+  const resumo=grupos.map(g=>'• '+g[0].nome+' — '+g.length+' cópias (IDs: '+g.map(p=>p.id).join(', ')+')').join('\n');
+  const ok=confirm(
+    '🧹 Encontradas '+grupos.length+' pasta(s) duplicada(s):\n\n'+resumo+
+    '\n\nAo mesclar, cada grupo vira UMA pasta só — mantendo a versão mais recente e completando ' +
+    'campos vazios e documentos com as demais cópias. As cópias extras serão removidas ' +
+    '(localmente e do servidor, se sincronizado).\n\nDeseja mesclar agora?'
+  );
+  if(!ok) return;
+
+  pararSyncPolling();
+  let totalMescladas=0;
+  for(const grupo of grupos){
+    const { merged, perdedorasIds } = pastaMesclarGrupo(grupo);
+    _pastas[merged.id]=merged;
+    for(const idPerdedora of perdedorasIds){
+      delete _pastas[idPerdedora];
+      try{ localStorage.removeItem('pastas_docs_'+idPerdedora); }catch(e){}
+      _deletedIds.add(idPerdedora);
+      try{ await dossieSyncExcluir(idPerdedora); }catch(e){}
+    }
+    totalMescladas++;
+  }
+  pastaSalvarLocal();
+  pastaRender();
+  syncStatusUpdate('⏳ Reenviando pastas mescladas...', 'var(--gold2)');
+  try{
+    for(const grupo of grupos){
+      const id=Object.keys(_pastas).find(id=>grupo.some(g=>g.id===id));
+      if(id && _pastas[id]) await dossieSyncSalvar(_pastas[id]);
+    }
+    syncStatusUpdate('✅ '+totalMescladas+' grupo(s) mesclado(s) e sincronizado(s)', 'var(--green)');
+  }catch(e){
+    syncStatusUpdate('⚠️ Mesclado localmente — sync falhou', 'var(--muted)');
+  }
+  iniciarSyncPolling();
+  alert('✅ '+totalMescladas+' grupo(s) de pastas duplicadas foram mesclados em uma só cada.');
 }
 
 async function pastaExcluir(id){
