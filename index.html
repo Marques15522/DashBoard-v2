@@ -2921,14 +2921,23 @@ async function dossieSyncCarregar() {
               }
             }
           }
+          pMerged.synced = true; // confirmado pelo servidor
           _pastas[id] = pMerged;
           novos++;
+        } else if (pLocal) {
+          // Servidor tem a pasta mas a versão local é mais nova (ainda não subiu) —
+          // mesmo assim, o fato de o ID constar em idsServidor já confirma que ela existe lá.
+          pLocal.synced = true;
         }
       }
 
-      // Remove localmente IDs que sumiram do servidor
+      // Remove localmente IDs que sumiram do servidor —
+      // MAS nunca apaga uma pasta que ainda não teve sua criação confirmada pelo servidor
+      // (synced !== true). Isso evita apagar dossiês recém-criados que ainda não subiram
+      // (ex.: falha de rede, Apps Script lento, ou reload antes do envio terminar).
       Object.keys(_pastas).forEach(id => {
-        if (!idsServidor.has(id) && !_deletedIds.has(id) && !(_pendingSaveIds && _pendingSaveIds.has(id))) {
+        const aindaNaoConfirmada = !_pastas[id].synced;
+        if (!idsServidor.has(id) && !_deletedIds.has(id) && !(_pendingSaveIds && _pendingSaveIds.has(id)) && !aindaNaoConfirmada) {
           delete _pastas[id];
           try { localStorage.removeItem('pastas_docs_' + id); } catch(e) {}
         }
@@ -9066,6 +9075,10 @@ function pastaCarregar(){
     if(s){
       _pastas=JSON.parse(s);
       Object.keys(_pastas).forEach(id=>{
+        // Compatibilidade: pastas salvas antes desta versão não têm o campo "synced".
+        // Como já sobreviveram a sincronizações anteriores, tratamos como confirmadas —
+        // só pastas NOVAS (criadas por pastaSalvar) começam com synced:false.
+        if(_pastas[id].synced===undefined) _pastas[id].synced=true;
         // Tenta carregar docs da chave separada (formato novo)
         try{
           const d=localStorage.getItem('pastas_docs_'+id);
@@ -9291,7 +9304,11 @@ function pastaSalvar(){
     obs:gv('pf-obs'),
     scoreCredito,
     docs:JSON.parse(JSON.stringify(_pastaDocs)),
-    updatedAt:Date.now()
+    updatedAt:Date.now(),
+    // Só vira true quando o servidor CONFIRMA que recebeu esta pasta (ver dossieSyncCarregar).
+    // Enquanto for false/undefined, a rotina de limpeza do sync nunca pode apagar esta pasta,
+    // mesmo que ela ainda não apareça na lista do servidor ou a página seja recarregada.
+    synced:false
   };
   pastaSalvarLocal();
   // 1. Sobe para o servidor
