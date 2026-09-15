@@ -422,14 +422,14 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
 .f90-legenda{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;font-size:0.80rem;color:var(--muted);align-items:center;}
 .f90-legenda span{display:inline-flex;align-items:center;gap:5px;}
 .f90-legenda .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
-.f90-sem-strip{display:flex;gap:7px;overflow-x:auto;padding:2px 2px 10px;}
-.f90-sem-chip{flex:0 0 84px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:11px 6px 9px;text-align:center;transition:transform 0.15s,border-color 0.15s;animation:fadeUp 0.4s ease both;}
+.f90-sem-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:2px 2px 10px;}
+.f90-sem-chip{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:18px 14px;text-align:center;transition:transform 0.15s,border-color 0.15s;animation:fadeUp 0.4s ease both;}
 .f90-sem-chip:hover{transform:translateY(-2px);}
-.f90-sem-chip .sem-lbl{font-family:'Source Sans 3',sans-serif;font-size:0.70rem;font-weight:700;letter-spacing:0.06em;color:var(--muted2);text-transform:uppercase;margin-bottom:3px;}
-.f90-sem-chip .sem-data{font-family:'DM Mono',monospace;font-size:0.76rem;color:var(--muted);margin-bottom:7px;}
-.f90-sem-chip .sem-val{font-family:'Cormorant Garamond', serif;font-size:1.05rem;margin-bottom:6px;line-height:1;}
-.f90-sem-chip .sem-badge{font-family:'Source Sans 3',sans-serif;font-size:0.66rem;font-weight:700;letter-spacing:0.04em;padding:2px 6px;border-radius:10px;white-space:nowrap;display:inline-block;}
-.f90-oport-item{padding:12px 14px;background:var(--s2);border-radius:8px;margin-bottom:7px;border-left:3px solid var(--gold2);}
+.f90-sem-chip .sem-lbl{font-family:'Source Sans 3',sans-serif;font-size:0.82rem;font-weight:700;letter-spacing:0.07em;color:var(--muted2);text-transform:uppercase;margin-bottom:6px;}
+.f90-sem-chip .sem-data{font-family:'DM Mono',monospace;font-size:0.98rem;color:var(--muted);margin-bottom:14px;}
+.f90-sem-chip .sem-val{font-family:'Cormorant Garamond', serif;font-size:1.7rem;margin-bottom:12px;line-height:1;}
+.f90-sem-chip .sem-badge{font-family:'Source Sans 3',sans-serif;font-size:0.78rem;font-weight:700;letter-spacing:0.05em;padding:5px 12px;border-radius:20px;white-space:nowrap;display:inline-block;}
+.f90-oport-item{padding:20px 22px;background:var(--s2);border-radius:12px;margin-bottom:12px;border-left:4px solid var(--gold2);}
 /* ── HISTORICO COBRANÇA WA ── */
 .wa-hist-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.86rem;}
 .wa-hist-item:last-child{border-bottom:none;}
@@ -8174,9 +8174,9 @@ function f90RenderOportunidades(semanas, media, hoje){
     else if(diasParaAgir<=6){urgCor='var(--gold2)';urgTxt=`🎯 FECHAR ATÉ ${dataAlvo.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} (em ${diasParaAgir}d)`;}
     else{urgCor='var(--blue)';urgTxt=`🗓️ FECHAR ATÉ ${dataAlvo.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} (em ${diasParaAgir}d)`;}
     return`<div class="f90-oport-item" style="border-left-color:${urgCor}">
-      <div style="font-size:0.94rem;color:${urgCor};font-weight:600">${urgTxt}</div>
-      <div style="font-size:0.84rem;color:var(--muted);margin-top:4px">Janela aceitável: ${janIni.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${janFim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} · contrato de ${prazo}d</div>
-      <div style="font-size:0.80rem;color:var(--muted2);margin-top:2px">Cobre a semana ${o.i+1} (${o.s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}–${o.s.fim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}) · ${o.n.icon} ${o.n.label} · ${fmt(o.s.total)} previstos hoje</div>
+      <div style="font-size:1.15rem;color:${urgCor};font-weight:600">${urgTxt}</div>
+      <div style="font-size:0.94rem;color:var(--muted);margin-top:8px">Janela aceitável: ${janIni.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${janFim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} · contrato de ${prazo}d</div>
+      <div style="font-size:0.90rem;color:var(--muted2);margin-top:6px">Cobre a semana ${o.i+1} (${o.s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}–${o.s.fim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}) · ${o.n.icon} ${o.n.label} · ${fmt(o.s.total)} previstos hoje</div>
     </div>`;
   }).join('');
 }
