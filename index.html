@@ -429,7 +429,7 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
 .f90-sem-chip .sem-data{font-family:'DM Mono',monospace;font-size:0.76rem;color:var(--muted);margin-bottom:7px;}
 .f90-sem-chip .sem-val{font-family:'Cormorant Garamond', serif;font-size:1.05rem;margin-bottom:6px;line-height:1;}
 .f90-sem-chip .sem-badge{font-family:'Source Sans 3',sans-serif;font-size:0.66rem;font-weight:700;letter-spacing:0.04em;padding:2px 6px;border-radius:10px;white-space:nowrap;display:inline-block;}
-.f90-oport-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;background:var(--s2);border-radius:8px;margin-bottom:6px;border-left:3px solid var(--gold2);}
+.f90-oport-item{padding:12px 14px;background:var(--s2);border-radius:8px;margin-bottom:7px;border-left:3px solid var(--gold2);}
 /* ── HISTORICO COBRANÇA WA ── */
 .wa-hist-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.86rem;}
 .wa-hist-item:last-child{border-bottom:none;}
@@ -2292,7 +2292,19 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
     </div>
     <div class="f90-sem-strip" id="fluxo90-semanas-strip"></div>
     <div style="height:1px;background:var(--border);margin:6px 0 14px"></div>
-    <div class="f90-mes-title" style="margin-bottom:10px">💡 OPORTUNIDADES DE PROSPECÇÃO</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+      <div class="f90-mes-title">📅 DATAS PARA FECHAR NOVOS CONTRATOS</div>
+      <div style="display:flex;align-items:center;gap:7px">
+        <span style="font-family:'Source Sans 3',sans-serif;font-size:0.78rem;color:var(--muted)">Prazo do contrato:</span>
+        <select id="f90-prazo-select" onchange="f90SetPrazo(this.value)" style="background:var(--s2);border:1px solid var(--border2);color:var(--gold2);border-radius:6px;padding:4px 8px;font-family:'DM Mono',monospace;font-size:0.82rem;cursor:pointer">
+          <option value="15">15 dias</option>
+          <option value="30" selected>30 dias</option>
+          <option value="45">45 dias</option>
+          <option value="60">60 dias</option>
+        </select>
+      </div>
+    </div>
+    <div class="card-desc" style="margin:-4px 0 12px">Data em que você precisa iniciar um contrato novo para o juros cair bem no meio de uma semana fraca.</div>
     <div id="fluxo90-oportunidades"></div>
   </div>
 
@@ -8112,7 +8124,13 @@ function simPDF(){
 // ════════════════════════════════════════════════════════
 // FLUXO 90 DIAS
 // ════════════════════════════════════════════════════════
-let _f90Vencimentos=[], _f90Semanas=[], _f90ChartMode='bar', _f90Hoje=null;
+let _f90Vencimentos=[], _f90Semanas=[], _f90ChartMode='bar', _f90Hoje=null, _f90Prazo=30;
+
+function f90SetPrazo(v){
+  _f90Prazo=parseInt(v,10)||30;
+  const mediaSemanal=_f90Semanas.reduce((a,s)=>a+s.total,0)/(_f90Semanas.length||1);
+  f90RenderOportunidades(_f90Semanas, mediaSemanal, _f90Hoje);
+}
 
 const F90_NIVEIS={
   alta:{label:'ALTA',icon:'🟢',cor:'var(--green)',bg:'rgba(6,214,160,0.09)',bd:'rgba(6,214,160,0.35)',barra:'rgba(6,214,160,0.75)'},
@@ -8140,20 +8158,25 @@ function f90RenderStrip(semanas, media){
 }
 function f90RenderOportunidades(semanas, media, hoje){
   const el=document.getElementById('fluxo90-oportunidades');
+  const prazo=_f90Prazo||30;
   const oport=semanas.map((s,i)=>({s,i,n:f90Classifica(s,media)})).filter(o=>o.n.label==='BAIXA'||o.n.label==='SEM RECEITA');
   if(!oport.length){el.innerHTML=`<div style="color:var(--muted);font-size:0.90rem;padding:18px 0;text-align:center">Nenhuma semana fraca no radar — fluxo bem distribuído nos próximos 90 dias.</div>`;return;}
   el.innerHTML=oport.map(o=>{
-    const dias=Math.floor((o.s.ini-hoje)/86400000);
-    const quando=dias<=6?'esta semana':`em ${dias} dia(s)`;
-    return`<div class="f90-oport-item" style="border-left-color:${o.n.cor}">
-      <div>
-        <div style="font-size:0.90rem;color:var(--text)">Semana ${o.i+1} · ${o.s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${o.s.fim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</div>
-        <div style="font-size:0.84rem;color:var(--muted);margin-top:2px">${o.n.icon} ${o.n.label} · ${fmt(o.s.total)} em juros previstos</div>
-      </div>
-      <div style="text-align:right;flex-shrink:0">
-        <div style="font-size:0.84rem;color:${o.n.cor}">${quando}</div>
-        <div style="font-size:0.76rem;color:var(--muted2);margin-top:2px">🎯 boa janela p/ novo contrato</div>
-      </div>
+    // Data em que um contrato precisa ser iniciado p/ o juros cair no meio da semana fraca
+    const meioSemana=new Date(o.s.ini);meioSemana.setDate(meioSemana.getDate()+3);
+    const dataAlvo=new Date(meioSemana);dataAlvo.setDate(dataAlvo.getDate()-prazo);
+    const janIni=new Date(o.s.ini);janIni.setDate(janIni.getDate()-prazo);
+    const janFim=new Date(o.s.fim);janFim.setDate(janFim.getDate()-prazo);
+    const diasParaAgir=Math.floor((dataAlvo-hoje)/86400000);
+    let urgCor,urgTxt;
+    if(diasParaAgir<0){urgCor='var(--red)';urgTxt=`⏰ PRAZO IDEAL JÁ PASSOU (era ${dataAlvo.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}) — feche o quanto antes`;}
+    else if(diasParaAgir===0){urgCor='var(--gold2)';urgTxt='🎯 FECHAR HOJE';}
+    else if(diasParaAgir<=6){urgCor='var(--gold2)';urgTxt=`🎯 FECHAR ATÉ ${dataAlvo.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} (em ${diasParaAgir}d)`;}
+    else{urgCor='var(--blue)';urgTxt=`🗓️ FECHAR ATÉ ${dataAlvo.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} (em ${diasParaAgir}d)`;}
+    return`<div class="f90-oport-item" style="border-left-color:${urgCor}">
+      <div style="font-size:0.94rem;color:${urgCor};font-weight:600">${urgTxt}</div>
+      <div style="font-size:0.84rem;color:var(--muted);margin-top:4px">Janela aceitável: ${janIni.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${janFim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} · contrato de ${prazo}d</div>
+      <div style="font-size:0.80rem;color:var(--muted2);margin-top:2px">Cobre a semana ${o.i+1} (${o.s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}–${o.s.fim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}) · ${o.n.icon} ${o.n.label} · ${fmt(o.s.total)} previstos hoje</div>
     </div>`;
   }).join('');
 }
