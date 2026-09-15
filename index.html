@@ -418,6 +418,18 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
 .f90-saldo-row:last-child{border-bottom:none;}
 .f90-saldo-bar-bg{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
 .f90-saldo-bar-fill{height:100%;border-radius:2px;transition:width 0.8s ease;}
+
+.f90-legenda{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;font-size:0.80rem;color:var(--muted);align-items:center;}
+.f90-legenda span{display:inline-flex;align-items:center;gap:5px;}
+.f90-legenda .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.f90-sem-strip{display:flex;gap:7px;overflow-x:auto;padding:2px 2px 10px;}
+.f90-sem-chip{flex:0 0 84px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:11px 6px 9px;text-align:center;transition:transform 0.15s,border-color 0.15s;animation:fadeUp 0.4s ease both;}
+.f90-sem-chip:hover{transform:translateY(-2px);}
+.f90-sem-chip .sem-lbl{font-family:'Source Sans 3',sans-serif;font-size:0.70rem;font-weight:700;letter-spacing:0.06em;color:var(--muted2);text-transform:uppercase;margin-bottom:3px;}
+.f90-sem-chip .sem-data{font-family:'DM Mono',monospace;font-size:0.76rem;color:var(--muted);margin-bottom:7px;}
+.f90-sem-chip .sem-val{font-family:'Cormorant Garamond', serif;font-size:1.05rem;margin-bottom:6px;line-height:1;}
+.f90-sem-chip .sem-badge{font-family:'Source Sans 3',sans-serif;font-size:0.66rem;font-weight:700;letter-spacing:0.04em;padding:2px 6px;border-radius:10px;white-space:nowrap;display:inline-block;}
+.f90-oport-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;background:var(--s2);border-radius:8px;margin-bottom:6px;border-left:3px solid var(--gold2);}
 /* ── HISTORICO COBRANÇA WA ── */
 .wa-hist-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.86rem;}
 .wa-hist-item:last-child{border-bottom:none;}
@@ -2269,10 +2281,19 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
     <div class="chart-wrap xtall"><canvas id="chartFluxo90"></canvas></div>
   </div>
 
-  <!-- Timeline visual por mês -->
+  <!-- Semana a semana: alta x baixa -->
   <div class="card">
-    <div class="card-header"><div><div class="card-title">🗓️ Timeline — Distribuição por Mês</div><div class="card-desc">Visão mensal do fluxo esperado com semanas em destaque</div></div><div class="card-badge">MESES</div></div>
-    <div id="fluxo90-timeline"></div>
+    <div class="card-header"><div><div class="card-title">🎯 Semana a Semana — Alta x Baixa de Juros</div><div class="card-desc">Identifique as semanas fracas para saber quando prospectar novos contratos</div></div><div class="card-badge">AÇÃO</div></div>
+    <div class="f90-legenda">
+      <span><span class="dot" style="background:var(--green)"></span>Alta</span>
+      <span><span class="dot" style="background:var(--blue)"></span>Normal</span>
+      <span><span class="dot" style="background:var(--gold2)"></span>Baixa</span>
+      <span><span class="dot" style="background:var(--red)"></span>Sem receita</span>
+    </div>
+    <div class="f90-sem-strip" id="fluxo90-semanas-strip"></div>
+    <div style="height:1px;background:var(--border);margin:6px 0 14px"></div>
+    <div class="f90-mes-title" style="margin-bottom:10px">💡 OPORTUNIDADES DE PROSPECÇÃO</div>
+    <div id="fluxo90-oportunidades"></div>
   </div>
 
   <!-- Concentração + Lista -->
@@ -8093,6 +8114,50 @@ function simPDF(){
 // ════════════════════════════════════════════════════════
 let _f90Vencimentos=[], _f90Semanas=[], _f90ChartMode='bar', _f90Hoje=null;
 
+const F90_NIVEIS={
+  alta:{label:'ALTA',icon:'🟢',cor:'var(--green)',bg:'rgba(6,214,160,0.09)',bd:'rgba(6,214,160,0.35)',barra:'rgba(6,214,160,0.75)'},
+  normal:{label:'NORMAL',icon:'🔵',cor:'var(--blue)',bg:'rgba(72,149,239,0.07)',bd:'rgba(72,149,239,0.28)',barra:'rgba(72,149,239,0.55)'},
+  baixa:{label:'BAIXA',icon:'🟡',cor:'var(--gold2)',bg:'rgba(240,180,41,0.09)',bd:'rgba(240,180,41,0.35)',barra:'rgba(240,180,41,0.75)'},
+  vazia:{label:'SEM RECEITA',icon:'⚠️',cor:'var(--red)',bg:'rgba(239,71,111,0.09)',bd:'rgba(239,71,111,0.35)',barra:'rgba(239,71,111,0.55)'}
+};
+function f90Classifica(s, media){
+  if(s.total===0) return F90_NIVEIS.vazia;
+  if(media<=0) return F90_NIVEIS.normal;
+  if(s.total>=media*1.25) return F90_NIVEIS.alta;
+  if(s.total<=media*0.6) return F90_NIVEIS.baixa;
+  return F90_NIVEIS.normal;
+}
+function f90RenderStrip(semanas, media){
+  document.getElementById('fluxo90-semanas-strip').innerHTML=semanas.map((s,i)=>{
+    const n=f90Classifica(s,media);
+    return`<div class="f90-sem-chip" style="background:${n.bg};border-color:${n.bd}" title="${s.itens.length} vencimento(s)">
+      <div class="sem-lbl">S${i+1}</div>
+      <div class="sem-data">${s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</div>
+      <div class="sem-val" style="color:${n.cor}">${s.total>0?fmt(s.total):'—'}</div>
+      <div class="sem-badge" style="color:${n.cor};background:${n.bg};border:1px solid ${n.bd}">${n.icon} ${n.label}</div>
+    </div>`;
+  }).join('');
+}
+function f90RenderOportunidades(semanas, media, hoje){
+  const el=document.getElementById('fluxo90-oportunidades');
+  const oport=semanas.map((s,i)=>({s,i,n:f90Classifica(s,media)})).filter(o=>o.n.label==='BAIXA'||o.n.label==='SEM RECEITA');
+  if(!oport.length){el.innerHTML=`<div style="color:var(--muted);font-size:0.90rem;padding:18px 0;text-align:center">Nenhuma semana fraca no radar — fluxo bem distribuído nos próximos 90 dias.</div>`;return;}
+  el.innerHTML=oport.map(o=>{
+    const dias=Math.floor((o.s.ini-hoje)/86400000);
+    const quando=dias<=6?'esta semana':`em ${dias} dia(s)`;
+    return`<div class="f90-oport-item" style="border-left-color:${o.n.cor}">
+      <div>
+        <div style="font-size:0.90rem;color:var(--text)">Semana ${o.i+1} · ${o.s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${o.s.fim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</div>
+        <div style="font-size:0.84rem;color:var(--muted);margin-top:2px">${o.n.icon} ${o.n.label} · ${fmt(o.s.total)} em juros previstos</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:0.84rem;color:${o.n.cor}">${quando}</div>
+        <div style="font-size:0.76rem;color:var(--muted2);margin-top:2px">🎯 boa janela p/ novo contrato</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 function f90SetChart(mode){
   _f90ChartMode=mode;
   document.getElementById('f90-btn-bar').classList.toggle('active',mode==='bar');
@@ -8111,7 +8176,7 @@ function f90RenderChart(){
       data:{
         labels,
         datasets:[
-          {label:'Juros',data:semanas.map(s=>s.total),backgroundColor:semanas.map(s=>s.total===Math.max(...semanas.map(x=>x.total),1)?'rgba(239,71,111,0.8)':'rgba(201,146,42,0.75)'),borderRadius:5,borderSkipped:false},
+          {label:'Juros',data:semanas.map(s=>s.total),backgroundColor:semanas.map(s=>f90Classifica(s,totalPrev/(semanas.length||1)).barra),borderRadius:5,borderSkipped:false},
           {label:'Capital',data:semanas.map(s=>s.cap),backgroundColor:'rgba(72,149,239,0.35)',borderRadius:5,borderSkipped:false}
         ]
       },
@@ -8216,38 +8281,10 @@ function renderFluxo90(abertos, hoje){
   // Gráfico
   f90RenderChart();
 
-  // Timeline por mês
-  const meses=[];
-  for(let m=0;m<3;m++){
-    const mesIni=new Date(hoje);mesIni.setDate(mesIni.getDate()+m*30);
-    const mesFim=new Date(mesIni);mesFim.setDate(mesIni.getDate()+29);
-    const semsMes=semanas.filter(s=>s.ini>=mesIni&&s.ini<=mesFim);
-    const totalMes=semsMes.reduce((a,s)=>a+s.total+s.cap,0);
-    const maxMes=Math.max(...semsMes.map(s=>s.total+s.cap),1);
-    meses.push({mesIni,mesFim,semsMes,totalMes,maxMes});
-  }
-  document.getElementById('fluxo90-timeline').innerHTML=meses.map(m=>{
-    const nomeMes=m.mesIni.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-    const bars=m.semsMes.map((s,si)=>{
-      const pct=m.maxMes>0?((s.total+s.cap)/m.maxMes*100):0;
-      const hasItems=s.itens.length>0;
-      const barCor=hasItems?(s.total+s.cap===m.maxMes?'var(--red)':'var(--gold)'):'var(--border2)';
-      return`<div class="f90-week-bar-wrap" title="${s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${fmt(s.total+s.cap)} | ${s.itens.length} vcto(s)">
-        <div class="f90-week-bar-bg" style="height:50px">
-          <div class="f90-week-bar-fill" style="height:${pct}%;background:${barCor};opacity:0.8"></div>
-        </div>
-        <div class="f90-week-bar-lbl">${s.ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}<br>${hasItems?fmt(s.total+s.cap):'-'}</div>
-      </div>`;
-    }).join('');
-    return`<div style="margin-bottom:${meses.indexOf(m)<2?'20px':'0'}">
-      <div class="f90-mes-header">
-        <div class="f90-mes-title">${nomeMes.toUpperCase()}</div>
-        <div class="f90-mes-total" style="color:var(--gold2)">${fmt(m.totalMes)} esperado · ${m.semsMes.reduce((a,s)=>a+s.itens.length,0)} contrato(s)</div>
-      </div>
-      <div class="f90-week-bars">${bars||'<div style="color:var(--muted);font-size:0.86rem">Sem dados neste mês</div>'}</div>
-      <div style="height:1px;background:var(--border);margin-top:4px"></div>
-    </div>`;
-  }).join('');
+  // Semana a semana: alta x baixa + oportunidades
+  const mediaSemanal=totalPrev/(semanas.length||1);
+  f90RenderStrip(semanas, mediaSemanal);
+  f90RenderOportunidades(semanas, mediaSemanal, hoje);
 
   // Semanas de risco (concentração)
   const semOrdenadas=[...semanas].sort((a,b)=>b.total-a.total).slice(0,5);
