@@ -8008,10 +8008,11 @@ function simPDF(){
   .footer-brand{font-size:0.90rem;font-weight:600;color:#c9922a;}
   .footer-txt{font-size:0.88rem;color:#aaa;text-align:right;line-height:1.6;}
   .badge-tipo{display:inline-block;background:#e8f4ec;color:#1a7f5a;border:1px solid #a8d8b8;border-radius:4px;font-size:0.86rem;padding:2px 8px;font-weight:600;letter-spacing:0.05em;vertical-align:middle;margin-left:6px;}
+  @page{size:A4;margin:9mm;}
   @media print{body{padding:0;}button{display:none!important;}}
 </style>
 </head><body>
-<div class="page">
+<div class="page" id="fitPage">
 
   <!-- HEADER -->
   <div class="header">
@@ -8132,7 +8133,25 @@ function simPDF(){
   w.document.write(html);
   w.document.close();
   const s=w.document.createElement('script');
-  s.textContent='window.onload=()=>setTimeout(()=>window.print(),300);';
+  // Encolhe o documento inteiro (mantendo as proporções) o suficiente para caber
+  // em uma única página A4, mesmo quando o prazo gera uma tabela de parcelas longa.
+  s.textContent=`
+    function fitToOnePage(){
+      var el=document.getElementById('fitPage');
+      if(!el)return;
+      var pxPerMm=96/25.4, marginMm=9;
+      var pageHeightPx=(297-marginMm*2)*pxPerMm;
+      var pageWidthPx=(210-marginMm*2)*pxPerMm;
+      var scale=Math.min(1, pageHeightPx/el.scrollHeight, pageWidthPx/el.scrollWidth);
+      if(scale<1){
+        el.style.maxWidth='none';
+        el.style.transformOrigin='top left';
+        el.style.transform='scale('+scale+')';
+        el.style.width=(100/scale)+'%';
+      }
+    }
+    window.onload=function(){ fitToOnePage(); setTimeout(function(){window.print();},300); };
+  `;
   w.document.body.appendChild(s);
 }
 
