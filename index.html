@@ -3331,7 +3331,7 @@ function render(empRows,pagRows){
       const taxa=parseTaxa(r[CE.taxa]);
       const prazo=parseNum(r[CE.prazo]);
       const jTotal=parseNum(r[CE.jTotal]);
-      return {id:String(r[CE.id]).trim(),idCliente:String(r[CE.clienteId]||'').trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),capital,data:parseDate(r[CE.data]),taxa,prazo,tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal,saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status,proxVenc,vencContrato,unidade:getUnidade(r)};
+      return {id:String(r[CE.id]).trim(),idCliente:String(r[CE.clienteId]||'').trim(),nome:String(r[CE.nome]||'').trim(),tel:String(r[CE.tel]||'').trim(),cpf:String(r[CE.cpf]||'').trim(),capital,data:parseDate(r[CE.data]),taxa,prazo,tipoJuros:String(r[CE.tipoJuros]||'').trim(),jTotal,saldo:parseNum(r[CE.saldo]),jProx:parseNum(r[CE.jProx]),status,proxVenc,vencContrato,unidade:getUnidade(r)};
     })
     .filter(e=>e.status!==null&&e.capital>0);
 
@@ -3404,7 +3404,7 @@ function render(empRows,pagRows){
   const cliMap={};
   emps.forEach(e=>{
     const k=e.nome||e.id;
-    if(!cliMap[k])cliMap[k]={nome:k,contratos:[],totalCap:0,totalJuros:0,totalPago:0,temAtraso:false,soQuitados:true,tel:'',empIds:[],idCliente:''};
+    if(!cliMap[k])cliMap[k]={nome:k,contratos:[],totalCap:0,totalJuros:0,totalPago:0,temAtraso:false,soQuitados:true,tel:'',cpf:'',empIds:[],idCliente:''};
     cliMap[k].contratos.push(e);
     cliMap[k].empIds.push(e.id);
     if(e.idCliente&&!cliMap[k].idCliente)cliMap[k].idCliente=e.idCliente;
@@ -3413,6 +3413,7 @@ function render(empRows,pagRows){
     if(e.status==='atraso')cliMap[k].temAtraso=true;
     if(e.status!=='quitado')cliMap[k].soQuitados=false;
     if(e.tel&&!cliMap[k].tel)cliMap[k].tel=String(e.tel).replace(/\D/g,'');
+    if(e.cpf&&!cliMap[k].cpf)cliMap[k].cpf=e.cpf;
   });
   pags.forEach(p=>{
     const e=emps.find(x=>x.id===p.id);if(!e)return;
@@ -7695,16 +7696,28 @@ function simClienteInput() {
     return;
   }
 
-  // Busca clientes nas pastas cujo nome contém o texto digitado (sem duplicatas por nome)
+  // Busca clientes nas pastas E também nos contratos já lançados (para achar CPF/telefone
+  // mesmo de clientes que nunca tiveram uma "pasta" (dossiê) criada). Pasta tem prioridade
+  // quando o mesmo nome existe nos dois lugares, pois tem ficha cadastral mais completa.
   const pastas = Object.values(_pastas || {});
+  const porContrato = Object.values(window._clientesPorNome || {});
   const seen = new Set();
-  const matches = pastas.filter(p => {
-    if (!p.nome) return false;
-    const key = p.nome.toLowerCase().trim();
-    if (!key.includes(query)) return false;
-    if (seen.has(key)) return false;
+  const pool = [];
+  pastas.forEach(p => {
+    const key = (p.nome||'').toLowerCase().trim();
+    if (!key || seen.has(key)) return;
     seen.add(key);
-    return true;
+    pool.push(p);
+  });
+  porContrato.forEach(c => {
+    const key = (c.nome||'').toLowerCase().trim();
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    pool.push({ nome: c.nome, cpf: c.cpf||'', telefone: c.tel||'', _semPasta: true });
+  });
+  const matches = pool.filter(p => {
+    if (!p.nome) return false;
+    return p.nome.toLowerCase().includes(query);
   }).slice(0, 6);
 
   if (matches.length === 0) {
@@ -7728,22 +7741,21 @@ function simClienteInput() {
       e.stopPropagation();
       document.getElementById('sim-cliente').value = p.nome;
       dropdown.style.display = 'none';
-      simClienteSelecionar(p.id);
+      simClienteSelecionar(p);
     });
     item.addEventListener('mouseover', function() { this.style.background = 'rgba(255,255,255,0.04)'; });
     item.addEventListener('mouseout', function() { this.style.background = ''; });
     dropdown.appendChild(item);
   });
 
-  // Se só tem 1 match exato, já exibe o score
+  // Se só tem 1 match exato, já exibe o score e preenche CPF/telefone sozinho
   if (matches.length === 1 && matches[0].nome.toLowerCase() === query) {
-    simClienteSelecionar(matches[0].id);
+    simClienteSelecionar(matches[0]);
     dropdown.style.display = 'none';
   }
 }
 
-function simClienteSelecionar(id) {
-  const pasta = (_pastas || {})[id];
+function simClienteSelecionar(pasta) {
   if (!pasta) return;
 
   // Preenche o campo nome
@@ -7851,11 +7863,24 @@ function simClienteSelecionar(id) {
   }
 }
 
-// Fecha dropdown ao perder foco (com delay para deixar o clique executar primeiro)
+// Fecha dropdown ao perder foco (com delay para deixar o clique executar primeiro).
+// Rede de segurança: se o campo já tem um nome que bate exatamente com um cliente
+// cadastrado (pasta ou contrato) mas o CPF/telefone ainda não foram preenchidos
+// (ex: nome colado, ou campo perdeu o foco antes do auto-preenchimento disparar),
+// tenta preencher CPF/telefone aqui também.
 document.getElementById('sim-cliente').addEventListener('blur', () => {
   setTimeout(() => {
     const dd = document.getElementById('sim-cliente-dropdown-portal');
     if (dd) dd.style.display = 'none';
+    const nomeAtual = (document.getElementById('sim-cliente').value || '').toLowerCase().trim();
+    const cpfVazio = !(document.getElementById('sim-cpf').value || '').trim();
+    const telVazio = !(document.getElementById('sim-tel').value || '').trim();
+    if (nomeAtual && (cpfVazio || telVazio)) {
+      const pastaMatch = Object.values(_pastas || {}).find(p => (p.nome||'').toLowerCase().trim() === nomeAtual);
+      const contratoMatch = (window._clientesPorNome || {})[Object.keys(window._clientesPorNome || {}).find(k => k.toLowerCase().trim() === nomeAtual)];
+      if (pastaMatch) simClienteSelecionar(pastaMatch);
+      else if (contratoMatch) simClienteSelecionar({ nome: contratoMatch.nome, cpf: contratoMatch.cpf||'', telefone: contratoMatch.tel||'', _semPasta: true });
+    }
   }, 300);
 });
 
