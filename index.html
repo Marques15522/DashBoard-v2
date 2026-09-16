@@ -8133,24 +8133,34 @@ function simPDF(){
   w.document.write(html);
   w.document.close();
   const s=w.document.createElement('script');
-  // Encolhe o documento inteiro (mantendo as proporções) o suficiente para caber
-  // em uma única página A4, mesmo quando o prazo gera uma tabela de parcelas longa.
+  // Na TELA o documento fica exatamente como antes (nada é alterado).
+  // Só no momento em que a impressão de fato começa (onbeforeprint) é que
+  // aplicamos "zoom" (que reduz o espaço ocupado no layout de verdade,
+  // ao contrário de "transform: scale" que só encolhe visualmente e não
+  // resolve a paginação) o suficiente pra caber em uma única página A4.
+  // Depois de imprimir, o zoom é desfeito (onafterprint).
   s.textContent=`
-    function fitToOnePage(){
+    function medirEscalaNecessaria(){
       var el=document.getElementById('fitPage');
-      if(!el)return;
+      if(!el)return 1;
       var pxPerMm=96/25.4, marginMm=9;
       var pageHeightPx=(297-marginMm*2)*pxPerMm;
       var pageWidthPx=(210-marginMm*2)*pxPerMm;
-      var scale=Math.min(1, pageHeightPx/el.scrollHeight, pageWidthPx/el.scrollWidth);
-      if(scale<1){
-        el.style.maxWidth='none';
-        el.style.transformOrigin='top left';
-        el.style.transform='scale('+scale+')';
-        el.style.width=(100/scale)+'%';
-      }
+      return Math.min(1, pageHeightPx/el.scrollHeight, pageWidthPx/el.scrollWidth);
     }
-    window.onload=function(){ fitToOnePage(); setTimeout(function(){window.print();},300); };
+    var _printScale=1;
+    window.onload=function(){
+      _printScale=medirEscalaNecessaria();
+      setTimeout(function(){window.print();},300);
+    };
+    window.onbeforeprint=function(){
+      var el=document.getElementById('fitPage');
+      if(el && _printScale<1) el.style.zoom=_printScale;
+    };
+    window.onafterprint=function(){
+      var el=document.getElementById('fitPage');
+      if(el) el.style.zoom=1;
+    };
   `;
   w.document.body.appendChild(s);
 }
