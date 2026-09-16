@@ -4202,9 +4202,23 @@ function render(empRows,pagRows){
   const iniMesAt=new Date(anoAt,mesAt,1);
   const iniMesAn=new Date(anoAn,mesAn,1);
   const fimMesAn=new Date(anoAn,mesAn+1,0,23,59,59);
+  // Data real de encerramento de um contrato quitado: usamos o ÚLTIMO pagamento
+  // registrado (aba Pagamentos), não o vencContrato (que é só a data PREVISTA de
+  // término no momento da criação). Sem isso, um contrato quitado antecipadamente
+  // (ex: criado com prazo até dezembro mas pago integralmente em julho) continua
+  // sendo contado como "ativo" em agosto, setembro etc. até chegar em dezembro —
+  // inflando os meses passados no Comparativo Mensal.
+  const ultimoPagtoPorId={};
+  pags.forEach(p=>{
+    if(!p.data)return;
+    if(!ultimoPagtoPorId[p.id]||p.data>ultimoPagtoPorId[p.id])ultimoPagtoPorId[p.id]=p.data;
+  });
   function ativoEm(e,iniMes,fimMes){
     if(!e.data||e.data>fimMes)return false;
-    if(e.status==='quitado'&&e.vencContrato&&e.vencContrato<iniMes)return false;
+    if(e.status==='quitado'){
+      const fimReal=ultimoPagtoPorId[e.id]||e.vencContrato||e.data;
+      if(fimReal<iniMes)return false;
+    }
     return true;
   }
   // Mês atual: apenas contratos realmente ativos (não quitados)
