@@ -2624,6 +2624,11 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
     <div class="pag-modal-title">💳 Registrar Pagamento</div>
     <div class="pag-modal-sub" id="pag-modal-cliente">—</div>
 
+    <div class="pag-field" id="pag-contrato-box" style="display:none">
+      <label class="pag-label">📄 Contrato</label>
+      <select class="pag-input" id="pag-contrato-sel" onchange="pagTrocarContrato(this.value)"></select>
+    </div>
+
     <div class="pag-field">
       <label class="pag-label">Tipo de Pagamento</label>
       <select class="pag-input" id="pag-tipo" onchange="pagAtualizarCampos()">
@@ -2674,6 +2679,11 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
   <div class="pag-modal" style="border-color:rgba(240,180,41,0.4);">
     <div class="pag-modal-title" style="color:var(--gold2);">🔄 Registrar Renegociação</div>
     <div class="pag-modal-sub" id="reneg-modal-cliente">—</div>
+
+    <div class="pag-field" id="reneg-contrato-box" style="display:none">
+      <label class="pag-label">📄 Contrato</label>
+      <select class="pag-input" id="reneg-contrato-sel" onchange="renegTrocarContrato(this.value)"></select>
+    </div>
 
     <div class="pag-field">
       <label class="pag-label">Tipo de Renegociação</label>
@@ -6471,8 +6481,8 @@ function waCard(c){
     <textarea class="wa-textarea" id="${tid}_prev">${tplApply(tpls[def].txt, c)}</textarea>
     <div class="wa-btns">
       <a class="wa-btn-send" href="#" onclick="waEnviar('${tid}');return false;"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> ABRIR WHATSAPP</a>
-      <button class="wa-btn-pago" onclick="pagModalOpen('${empIdSafe}','${cliIdSafe}','${nomeSafe}',${saldoNum},${jurosNum},${multaNum},${diasNum})">💳</button>
-      <button class="wa-btn-reneg" onclick="renegModalOpen('${empIdSafe}','${cliIdSafe}','${nomeSafe}','')">🔄</button>
+      <button class="wa-btn-pago" onclick="pagAbrirCliente('${nomeSafe}')">💳</button>
+      <button class="wa-btn-reneg" onclick="renegAbrirCliente('${nomeSafe}')">🔄</button>
       <button class="wa-btn-copy" id="${tid}_copy" onclick="waCopy('${tid}')">📋</button>
     </div>
   </div>
@@ -8485,7 +8495,7 @@ function pagModalOpen(idEmp, idCli, nome, saldo, juros, multa, dias) {
   multa = multa||0; dias = dias||0;
   _pagEmpAtual = { idEmprestimo: idEmp||'', idCliente: idCli||'', nome: nome||idEmp||'', saldo: saldo||0, juros: juros||0, multa: multa, dias: dias };
   const totalSugerido = Number(saldo||0) + Number(juros||0) + multa;
-  let subTxt = (nome||idEmp) + ' — Saldo: R$ ' + Number(saldo||0).toFixed(2).replace('.',',');
+  let subTxt = (nome||idEmp) + (idEmp&&nome?' · '+idEmp:'') + ' — Saldo: R$ ' + Number(saldo||0).toFixed(2).replace('.',',');
   if(dias>0) subTxt += ' · ' + dias + ' dias atraso · Multa: R$ ' + multa.toFixed(2).replace('.',',');
   document.getElementById('pag-modal-cliente').textContent = subTxt;
   document.getElementById('pag-data').value = new Date().toISOString().slice(0,10);
@@ -8522,6 +8532,87 @@ function pagModalClose() {
   document.getElementById('pag-modal-overlay').classList.remove('open');
 }
 
+// ── ESCOLHA DO CONTRATO (botões 💳 e 🔄 do cartão do cliente) ──────────
+// Antes: o botão usava SEMPRE o 1º contrato da lista do cliente (podia ser um contrato
+// antigo ou já quitado) — o pagamento caía no ID errado. Agora: se o cliente tem só 1
+// contrato em aberto, usa ele; se tem 2 ou mais, o modal obriga a escolher qual.
+let _pagContratosLista = [];
+let _renegContratosLista = [];
+function _cliPorNome(nome){ return (_waCli||[]).find(x=>x.nome===nome); }
+function _contratosAbertosCli(c){
+  return (c.contratos||[]).filter(e=>e.status!=='quitado').sort((a,b)=>{
+    const da=a.proxVenc?a.proxVenc.getTime():8.64e15, db=b.proxVenc?b.proxVenc.getTime():8.64e15;
+    return da-db;
+  });
+}
+function _dadosContratoPag(e){
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const dias=(e.status==='atraso'&&e.proxVenc)?Math.max(0,Math.floor((hoje-e.proxVenc)/86400000)):0;
+  return { saldo:e.saldo||e.capital||0, juros:e.jProx||e.jTotal||0, multa:dias*30, dias:dias };
+}
+function _fmtDataBR(d){ return d instanceof Date && !isNaN(d) ? d.toLocaleDateString('pt-BR') : '—'; }
+function _isoLocal(d){
+  if(!(d instanceof Date)||isNaN(d)) return '';
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function _rotuloContrato(e){
+  const st=e.status==='atraso'?'⚠ atraso':'em dia';
+  return e.id+' · aberto em '+_fmtDataBR(e.data)+' · R$ '+Math.round(e.capital).toLocaleString('pt-BR')+' · '+st+' · vence '+_fmtDataBR(e.proxVenc);
+}
+function _preencherSeletorContrato(selId, boxId, lista){
+  const box=document.getElementById(boxId), sel=document.getElementById(selId);
+  if(lista.length<2){ box.style.display='none'; sel.innerHTML=''; return; }
+  sel.innerHTML='<option value="">— escolha o contrato —</option>'+lista.map(e=>'<option value="'+e.id+'">'+_rotuloContrato(e)+'</option>').join('');
+  sel.value='';
+  box.style.display='block';
+}
+
+function pagAbrirCliente(nome){
+  const c=_cliPorNome(nome);
+  if(!c){ alert('Cliente não encontrado.'); return; }
+  const ab=_contratosAbertosCli(c);
+  if(!ab.length){ alert('Este cliente não tem contrato em aberto para registrar pagamento.'); return; }
+  _pagContratosLista=ab;
+  const idCli=ab[0].idCliente||c.idCliente||'';
+  if(ab.length===1){
+    const e=ab[0], d=_dadosContratoPag(e);
+    pagModalOpen(e.id, idCli, c.nome, d.saldo, d.juros, d.multa, d.dias);
+    _preencherSeletorContrato('pag-contrato-sel','pag-contrato-box',[]);
+  } else {
+    pagModalOpen('', idCli, c.nome, 0, 0, 0, 0);
+    document.getElementById('pag-modal-cliente').textContent = c.nome+' — escolha o contrato abaixo';
+    _preencherSeletorContrato('pag-contrato-sel','pag-contrato-box',ab);
+  }
+}
+function pagTrocarContrato(id){
+  const e=_pagContratosLista.find(x=>x.id===id);
+  if(!e){ _pagEmpAtual.idEmprestimo=''; return; }
+  const d=_dadosContratoPag(e);
+  pagModalOpen(e.id, e.idCliente||_pagEmpAtual.idCliente||'', _pagEmpAtual.nome, d.saldo, d.juros, d.multa, d.dias);
+}
+
+function renegAbrirCliente(nome){
+  const c=_cliPorNome(nome);
+  if(!c){ alert('Cliente não encontrado.'); return; }
+  const ab=_contratosAbertosCli(c);
+  if(!ab.length){ alert('Este cliente não tem contrato em aberto para renegociar.'); return; }
+  _renegContratosLista=ab;
+  const idCli=ab[0].idCliente||c.idCliente||'';
+  if(ab.length===1){
+    renegModalOpen(ab[0].id, idCli, c.nome, _isoLocal(ab[0].proxVenc));
+    _preencherSeletorContrato('reneg-contrato-sel','reneg-contrato-box',[]);
+  } else {
+    renegModalOpen('', idCli, c.nome, '');
+    document.getElementById('reneg-modal-cliente').textContent = c.nome+' — escolha o contrato abaixo';
+    _preencherSeletorContrato('reneg-contrato-sel','reneg-contrato-box',ab);
+  }
+}
+function renegTrocarContrato(id){
+  const e=_renegContratosLista.find(x=>x.id===id);
+  if(!e){ _renegEmpAtual.idEmprestimo=''; return; }
+  renegModalOpen(e.id, e.idCliente||_renegEmpAtual.idCliente||'', _renegEmpAtual.nome, _isoLocal(e.proxVenc));
+}
+
 function pagAtualizarCampos() {
   const tipo = document.getElementById('pag-tipo').value;
   const total = parseFloat(document.getElementById('pag-valor').value) || 0;
@@ -8543,6 +8634,7 @@ function pagAtualizarCampos() {
 async function pagSalvar() {
   const valor = parseFloat(document.getElementById('pag-valor').value) || 0;
   if (!valor) { alert('Informe o valor recebido.'); return; }
+  if (!_pagEmpAtual.idEmprestimo) { alert('Escolha o contrato ao qual este pagamento pertence.'); return; }
 
   const scriptUrl = localStorage.getItem('pag_script_url') || '';
   if (!scriptUrl) { alert('Configure a URL do Apps Script primeiro.'); return; }
@@ -8611,6 +8703,7 @@ function renegModalClose() {
 async function renegSalvar() {
   const vencNovo = document.getElementById('reneg-venc-novo').value;
   if (!vencNovo) { alert('Informe o novo vencimento.'); return; }
+  if (!_renegEmpAtual.idEmprestimo) { alert('Escolha o contrato que será renegociado.'); return; }
 
   const scriptUrl = localStorage.getItem('pag_script_url') || '';
   if (!scriptUrl) { alert('Configure a URL do Apps Script primeiro (registre um pagamento antes).'); return; }
