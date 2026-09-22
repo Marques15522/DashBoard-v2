@@ -8,6 +8,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script>if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';</script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Source+Sans+3:wght@400;500;600;700&family=DM+Mono:ital,wght@0,400;0,500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#07090e;--s1:#0c0f18;--s2:#111521;--s3:#161b2a;--border:#1a2035;--border2:#212840;--gold:#c9922a;--gold2:#e8b84b;--gold3:#f5d080;--green:#06d6a0;--red:#ef476f;--blue:#4895ef;--purple:#9b5de5;--text:#dde1f0;--muted:#b8c2dc;--muted2:#8a93b8;}
@@ -553,6 +555,17 @@ footer{text-align:center;padding:28px;font-family:'Source Sans 3',sans-serif;fon
 .docs-upload-icon{font-size:1.4rem;margin-bottom:6px;}
 .docs-upload-txt{font-size:0.84rem;color:var(--muted);}
 .docs-list{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.extrato-diag-box{border-radius:10px;padding:12px 14px;margin-top:6px;border:1px solid var(--border2);background:var(--s2);}
+.extrato-diag-box.limpo{border-color:rgba(6,214,160,0.35);background:rgba(6,214,160,0.06);}
+.extrato-diag-box.atencao{border-color:rgba(240,180,41,0.4);background:rgba(240,180,41,0.07);}
+.extrato-diag-box.grave{border-color:rgba(239,71,111,0.45);background:rgba(239,71,111,0.07);}
+.extrato-diag-title{font-family:'Cormorant Garamond', serif;font-size:0.98rem;letter-spacing:0.03em;margin-bottom:6px;}
+.extrato-diag-cat{margin-top:8px;}
+.extrato-diag-cat-lbl{font-size:0.82rem;color:var(--muted2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+.extrato-diag-chip{display:inline-block;font-size:0.86rem;background:var(--s3,var(--s2));border:1px solid var(--border2);border-radius:6px;padding:2px 8px;margin:2px 4px 2px 0;}
+.extrato-diag-chip.grave{color:var(--red);border-color:rgba(239,71,111,0.4);}
+.extrato-diag-chip.atencao{color:var(--gold2);border-color:rgba(240,180,41,0.4);}
+.extrato-diag-snippet{font-size:0.8rem;color:var(--muted);margin-top:2px;font-style:italic;}
 .doc-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--s3);border:1px solid var(--border);border-radius:8px;}
 .doc-icon{font-size:0.9rem;flex-shrink:0;}
 .doc-name{font-size:0.86rem;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -1947,6 +1960,16 @@ html.cm-on #cm-mobile{display:block}
         </div>
         <input id="pf-upload-holerite" type="file" accept="image/*,.pdf" multiple style="display:none" onchange="pastaAddDoc('holerite',this)">
         <div class="docs-list" id="pf-docs-holerite"></div>
+      </div>
+      <div>
+        <div style="font-size:0.88rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">🔎 Extrato Bancário (leitura automática)</div>
+        <div class="docs-upload-area" onclick="document.getElementById('pf-upload-extrato').click()">
+          <div class="docs-upload-icon">🏦</div>
+          <div class="docs-upload-txt">PDF do extrato — a IA procura outros empréstimos, apostas e sinais de alerta</div>
+        </div>
+        <input id="pf-upload-extrato" type="file" accept="application/pdf,.pdf" multiple style="display:none" onchange="extratoAnalisar(this);pastaAddDoc('extrato',this)">
+        <div class="docs-list" id="pf-docs-extrato"></div>
+        <div id="extrato-diagnostico" style="margin-top:10px"></div>
       </div>
       <div>
         <div style="font-size:0.88rem;color:var(--muted2);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px">Foto da Frente do Imóvel</div>
@@ -9404,6 +9427,7 @@ function iccGerarPDF(){
 let _pastas = {};
 let _pastaEditId = null;
 let _pastaViewId = null;
+let _pastaExtratoResultado = null;
 let _pastaDocs = {rg:[], holerite:[], foto:[], outro:[]};
 const PASTA_COLORS = ['#c9922a','#06d6a0','#4895ef','#9b5de5','#e8b84b','#ef476f','#f5d080','#128c7e'];
 function pastaColor(nome){if(!nome)return PASTA_COLORS[0];let h=0;for(let c of nome)h=(h*31+c.charCodeAt(0))%PASTA_COLORS.length;return PASTA_COLORS[Math.abs(h)];}
@@ -9483,19 +9507,22 @@ function maskCPF(el){
 
 function analiseAbrir(id){
   _pastaEditId = id;
-  const docKeys=['rg-frente','rg-verso','selfie-rg','holerite','imovel','empresa-foto','outro'];
+  _pastaExtratoResultado = null;
+  const docKeys=['rg-frente','rg-verso','selfie-rg','holerite','extrato','imovel','empresa-foto','outro'];
   _pastaDocs = {};
   docKeys.forEach(t=>{ _pastaDocs[t]=[]; });
   docKeys.forEach(t=>{
     const el=document.getElementById('pf-docs-'+t); if(el) el.innerHTML='';
     const inp=document.getElementById('pf-upload-'+t); if(inp) inp.value='';
   });
+  const diagEl=document.getElementById('extrato-diagnostico'); if(diagEl) diagEl.innerHTML='';
   if(id && _pastas[id]){
     const p=_pastas[id];
     document.getElementById('analise-titulo').textContent='✏️ Editar Análise — '+p.nome;
     document.getElementById('pf-nome').value=p.nome||'';
     if(g('pf-valor-solicitado'))g('pf-valor-solicitado').value=p.valorSolicitado||'';
     if(g('pf-prazo-solicitado'))g('pf-prazo-solicitado').value=p.prazoSolicitado||'';
+    if(p.extratoDiagnostico){ _pastaExtratoResultado=p.extratoDiagnostico; extratoRenderDiagnostico(p.extratoDiagnostico); }
     document.getElementById('pf-cpf').value=p.cpf||'';
     document.getElementById('pf-tel').value=p.tel||'';
     if(g('pf-tel2'))g('pf-tel2').value=p.tel2||'';
@@ -9589,8 +9616,8 @@ function pastaAddDoc(tipo, input){
 function pastaRenderDocs(tipo){
   const el=document.getElementById('pf-docs-'+tipo);
   if(!el) return;
-  const typeLabels={'rg-frente':'RG Frente','rg-verso':'RG Verso','selfie-rg':'Selfie RG','holerite':'Holerite','imovel':'Imóvel','empresa-foto':'Empresa','outro':'Outro'};
-  const typeChip={'rg-frente':'doc-chip-rg','rg-verso':'doc-chip-rg','selfie-rg':'doc-chip-foto','holerite':'doc-chip-holerite','imovel':'doc-chip-foto','empresa-foto':'doc-chip-foto','outro':'doc-chip-outro'};
+  const typeLabels={'rg-frente':'RG Frente','rg-verso':'RG Verso','selfie-rg':'Selfie RG','holerite':'Holerite','extrato':'Extrato','imovel':'Imóvel','empresa-foto':'Empresa','outro':'Outro'};
+  const typeChip={'rg-frente':'doc-chip-rg','rg-verso':'doc-chip-rg','selfie-rg':'doc-chip-foto','holerite':'doc-chip-holerite','extrato':'doc-chip-holerite','imovel':'doc-chip-foto','empresa-foto':'doc-chip-foto','outro':'doc-chip-outro'};
   el.innerHTML=_pastaDocs[tipo].map((d,i)=>{
     const isImg=d.mime&&d.mime.startsWith('image/');
     const kb=Math.round((d.size||0)/1024);
@@ -9610,14 +9637,161 @@ function pastaRenderDocs(tipo){
     </div>`;
   }).join('');
 }
-function pastaDelDoc(tipo,idx){_pastaDocs[tipo].splice(idx,1);pastaRenderDocs(tipo);}
+function pastaDelDoc(tipo,idx){
+  _pastaDocs[tipo].splice(idx,1);
+  pastaRenderDocs(tipo);
+  if(tipo==='extrato'&&_pastaDocs.extrato.length===0){
+    _pastaExtratoResultado=null;
+    const diagEl=document.getElementById('extrato-diagnostico'); if(diagEl) diagEl.innerHTML='';
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// LEITURA AUTOMÁTICA DE EXTRATO BANCÁRIO
+// Extrai o texto do PDF (client-side, com pdf.js) e procura por
+// sinais de: outras empresas de crédito, agiotas, apostas/jogos e
+// outros alertas (negativação, cheque especial, cobrança, etc).
+// Não usa nenhuma API externa — roda 100% no navegador.
+// ════════════════════════════════════════════════════════
+const EXTRATO_PADROES = {
+  financeiras: {
+    label: '💳 Outras empresas de crédito / financeiras',
+    classe: 'atencao',
+    termos: ['crefisa','banco pan','bmg','agibank','banco original','daycoval','simplic','lendico','geru','creditas','uy3','banco bari','in company','in.company','trigg','zippi','portoseg','omni financeira','omni s.a','presto','money plus','bv financeira','banco bv','recovery','ativos s.a','crediare','banco c6 consig','paraná banco','banco pine','banco safra financiamentos','meu cash card','banco bs2','confidence câmbio','grand cred','credifit','rico crédito','empréstimo consignado','crédito consignado','financeira','crédito pessoal online','banco do brasil consignado','caixa consignado','picpay empréstimo','nubank empréstimo','mercado pago crédito','will bank crédito','pagbank empréstimo']
+  },
+  apostas: {
+    label: '🎰 Apostas / casas de jogos',
+    classe: 'grave',
+    termos: ['bet365','betano','sportingbet','blaze','estrela bet','kto','betfair','rivalo','f12bet','f12.bet','pixbet','betnacional','esportiva bet','esportes da sorte','vaidebet','br4bet','novibet','superbet','bateu bet','aposta ganha','betsul','betwarrior','mr jack bet','jogo do tigrinho','fortune tiger','fortune ox','fortune rabbit','cassino','casino','roleta','stake.com','1xbet','betmotion','sportybet','betvip','7games','7k bet','lotogreen','betaki','bravobet','onabet','multibet','bullsbet','galera bet','betfast','mcgames','jonbet']
+  },
+  agiota: {
+    label: '⚠️ Possível empréstimo informal (agiota)',
+    classe: 'grave',
+    termos: ['pagamento de juros','juros do empréstimo','agiota','empréstimo particular','empréstimo pessoal recebido','devolução de empréstimo','pgto emprestimo','pgto empréstimo']
+  },
+  alertas: {
+    label: '🚩 Outros alertas no extrato',
+    classe: 'atencao',
+    termos: ['cheque especial','saldo negativo','iof sobre atraso','multa por atraso','protesto','spc','serasa','insuficiência de fundos','insuficiencia de fundos','negativado','cobrança extrajudicial','juros rotativo','rotativo do cartão','anuidade em atraso','devolvido por falta de fundos','débito não autorizado','conta bloqueada']
+  }
+};
+function analisarExtrato(textoOriginal){
+  const texto = (textoOriginal||'').toLowerCase().replace(/\s+/g,' ');
+  const achados = {financeiras:[], apostas:[], agiota:[], alertas:[]};
+  Object.keys(EXTRATO_PADROES).forEach(cat=>{
+    EXTRATO_PADROES[cat].termos.forEach(termo=>{
+      const idx = texto.indexOf(termo.toLowerCase());
+      if(idx>-1){
+        const inicio=Math.max(0,idx-40), fim=Math.min(texto.length,idx+termo.length+40);
+        achados[cat].push({termo, trecho:'…'+texto.slice(inicio,fim).trim()+'…'});
+      }
+    });
+  });
+  const totalGrave = achados.apostas.length + achados.agiota.length;
+  const totalAtencao = achados.financeiras.length + achados.alertas.length;
+  let nivel = 'limpo';
+  if(totalGrave>0) nivel='grave';
+  else if(totalAtencao>0) nivel='atencao';
+  return {achados, nivel, totalGrave, totalAtencao, geradoEm:new Date().toISOString()};
+}
+function extratoDiagHTML(resultado){
+  if(!resultado) return '';
+  if(resultado.carregando) return `<div class="extrato-diag-box atencao"><div class="extrato-diag-title">🔎 Lendo o extrato...</div></div>`;
+  if(resultado.erro) return `<div class="extrato-diag-box atencao"><div class="extrato-diag-title">⚠️ Não foi possível analisar</div>${resultado.erro}</div>`;
+  const {achados,nivel,totalGrave,totalAtencao}=resultado;
+  let titulo;
+  if(nivel==='grave') titulo='🔴 Atenção: sinais graves encontrados no extrato';
+  else if(nivel==='atencao') titulo='🟡 Alguns pontos de atenção no extrato';
+  else titulo='✅ Nenhum sinal de alerta encontrado no extrato';
+  let html=`<div class="extrato-diag-box ${nivel}"><div class="extrato-diag-title">${titulo}</div>`;
+  if(totalGrave===0&&totalAtencao===0){
+    html+=`<div style="font-size:0.86rem;color:var(--muted)">Não encontramos menções a outras financeiras, agiotas, apostas ou negativação no texto do extrato. Isso não garante que o cliente está limpo — apenas que não achamos essas palavras-chave.</div>`;
+  } else {
+    ['apostas','agiota','financeiras','alertas'].forEach(cat=>{
+      if(!achados[cat].length) return;
+      const cfg=EXTRATO_PADROES[cat];
+      html+=`<div class="extrato-diag-cat"><div class="extrato-diag-cat-lbl">${cfg.label} (${achados[cat].length})</div>`;
+      achados[cat].slice(0,8).forEach(a=>{
+        html+=`<span class="extrato-diag-chip ${cfg.classe}">${a.termo}</span>`;
+      });
+      html+=`<div class="extrato-diag-snippet">${achados[cat][0].trecho}</div></div>`;
+    });
+  }
+  html+=`</div>`;
+  return html;
+}
+function extratoRenderDiagnostico(resultado){
+  const el=document.getElementById('extrato-diagnostico');
+  if(!el) return;
+  el.innerHTML=extratoDiagHTML(resultado);
+}
+function extratoAnalisar(input){
+  const files=Array.from(input.files||[]);
+  const pdfs=files.filter(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name));
+  if(!files.length) return;
+  if(!pdfs.length){
+    _pastaExtratoResultado={erro:'Envie o extrato em PDF (texto selecionável) para a leitura automática funcionar.'};
+    extratoRenderDiagnostico(_pastaExtratoResultado);
+    return;
+  }
+  if(typeof pdfjsLib==='undefined'){
+    _pastaExtratoResultado={erro:'Biblioteca de leitura de PDF não carregou (verifique a conexão com a internet) — o arquivo foi salvo, mas sem análise automática.'};
+    extratoRenderDiagnostico(_pastaExtratoResultado);
+    return;
+  }
+  extratoRenderDiagnostico({carregando:true});
+  const textos=[]; let pendentes=pdfs.length; let houveErro=false;
+  pdfs.forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=async e=>{
+      try{
+        const typedarray=new Uint8Array(e.target.result);
+        const pdf=await pdfjsLib.getDocument({data:typedarray}).promise;
+        let texto='';
+        for(let i=1;i<=pdf.numPages;i++){
+          const page=await pdf.getPage(i);
+          const content=await page.getTextContent();
+          texto+=content.items.map(it=>it.str).join(' ')+'\n';
+        }
+        textos.push(texto);
+      }catch(err){
+        console.error('Erro lendo PDF do extrato:',err);
+        houveErro=true;
+      }
+      pendentes--;
+      if(pendentes===0){
+        const textoCompleto=textos.join('\n');
+        if(!textoCompleto.trim()){
+          _pastaExtratoResultado={erro:'Não consegui ler texto deste PDF — pode ser um extrato escaneado (imagem). Tente exportar o extrato em PDF com texto selecionável direto do app do banco.'};
+        } else {
+          _pastaExtratoResultado=analisarExtrato(textoCompleto);
+          if(houveErro) _pastaExtratoResultado.avisoParcial=true;
+        }
+        extratoRenderDiagnostico(_pastaExtratoResultado);
+      }
+    };
+    reader.onerror=()=>{
+      pendentes--;
+      if(pendentes===0){
+        _pastaExtratoResultado={erro:'Não foi possível ler o arquivo enviado.'};
+        extratoRenderDiagnostico(_pastaExtratoResultado);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  });
+}
 
 function pastaSalvar(){
   const nome=document.getElementById('pf-nome').value.trim();
   if(!nome){alert('Informe o nome do cliente.');return;}
   const id=_pastaEditId||('pasta_'+Date.now());
   const tipoRenda=document.getElementById('pf-tipo-renda').value;
-  const {total:scoreCredito}=calcScoreCredito();
+  const {total:scoreCreditoBruto}=calcScoreCredito();
+  let scoreCredito=scoreCreditoBruto;
+  if(_pastaExtratoResultado&&!_pastaExtratoResultado.erro&&!_pastaExtratoResultado.carregando){
+    if(_pastaExtratoResultado.totalGrave>0) scoreCredito=Math.max(0,scoreCredito-200);
+    else if(_pastaExtratoResultado.totalAtencao>0) scoreCredito=Math.max(0,scoreCredito-80);
+  }
   const valorSolicitado=gn('pf-valor-solicitado');
   const prazoSolicitado=gn('pf-prazo-solicitado');
   const rec=calcRecomendacaoCredito(scoreCredito,valorSolicitado,prazoSolicitado);
@@ -9625,6 +9799,7 @@ function pastaSalvar(){
     id,nome,
     valorSolicitado,prazoSolicitado,
     limiteSeguro:rec.limiteSeguro,prazoSeguroMeses:rec.prazoSeguroMeses,
+    extratoDiagnostico:_pastaExtratoResultado&&!_pastaExtratoResultado.erro&&!_pastaExtratoResultado.carregando?_pastaExtratoResultado:(_pastas[id]?_pastas[id].extratoDiagnostico:null),
     taxaSugerida:rec.taxaSug,lucroProjetado:rec.lucroProjetado,decisaoCredito:rec.decisao,
     cpf:gv('pf-cpf'),
     tel:gv('pf-tel'),
@@ -9971,6 +10146,10 @@ function pastaViewOpen(id){
     html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">💵 Lucro Projetado</div><div class="pasta-view-val" style="color:${lucroCor}">${p.lucroProjetado!=null?(p.lucroProjetado>=0?fmt(p.lucroProjetado):'-'+fmt(Math.abs(p.lucroProjetado))):'—'}</div></div>`;
     html+=`</div>`;
   }
+  // Diagnóstico automático do extrato bancário
+  if(p.extratoDiagnostico){
+    html+=`<div class="pasta-view-section">🔎 DIAGNÓSTICO DO EXTRATO BANCÁRIO</div>${extratoDiagHTML(p.extratoDiagnostico)}`;
+  }
   // Contato
   html+=`<div class="pasta-view-section">CONTATO & LOCALIZAÇÃO</div><div class="pasta-view-grid">`;
   html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">📞 Telefone</div><div class="pasta-view-val">${p.tel||'—'}</div></div>`;
@@ -10194,8 +10373,16 @@ function pastaScoreAuto(){
   const wrapV=g('pf-veiculo-det-wrap');
   if(wrapV)wrapV.style.display=veiculo==='sim'?'':'none';
 
-  const {total,criterios}=calcScoreCredito();
+  const {total:totalBruto,criterios}=calcScoreCredito();
   if(!g('score-num'))return;
+
+  // Penalidade por sinais encontrados no extrato bancário (apostas, agiota, outras financeiras, etc.)
+  let total=totalBruto, extratoPenalidadeMsg='';
+  const ex=_pastaExtratoResultado;
+  if(ex&&!ex.erro&&!ex.carregando){
+    if(ex.totalGrave>0){ total=Math.max(0,total-200); extratoPenalidadeMsg='\n🔴 O extrato bancário mostra sinais de apostas e/ou empréstimo informal — score reduzido por causa disso.'; }
+    else if(ex.totalAtencao>0){ total=Math.max(0,total-80); extratoPenalidadeMsg='\n🟡 O extrato bancário mostra outras financeiras/alertas — score levemente reduzido.'; }
+  }
 
   // Círculo SVG
   const circ=226;
@@ -10210,7 +10397,8 @@ function pastaScoreAuto(){
   const renda=gv('pf-tipo-renda')==='empresario'?gn('pf-prolabore'):gn('pf-salario');
   const valSolic=gn('pf-valor-solicitado')||0;
   const prazoSolic=gn('pf-prazo-solicitado')||0;
-  const {decisao,classe,titulo,corpo,limiteSeguro,prazoSeguroMeses,lucroProjetado}=calcRecomendacaoCredito(total,valSolic,prazoSolic,renda);
+  const {decisao,classe,titulo,corpo:corpoBase,limiteSeguro,prazoSeguroMeses,lucroProjetado}=calcRecomendacaoCredito(total,valSolic,prazoSolic,renda);
+  const corpo=corpoBase+extratoPenalidadeMsg;
 
   if(g('score-limite-seguro')) g('score-limite-seguro').textContent=limiteSeguro>0?'R$ '+limiteSeguro.toLocaleString('pt-BR'):'—';
   if(g('score-prazo-seguro')) g('score-prazo-seguro').textContent=prazoSeguroMeses>0?prazoSeguroMeses+(prazoSeguroMeses===1?' mês':' meses'):'—';
