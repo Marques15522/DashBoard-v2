@@ -1728,46 +1728,18 @@ html.cm-on #cm-mobile{display:block}
       <div class="card-badge">ANÁLISE</div>
     </div>
 
-    <div class="pasta-form-section">IDENTIFICAÇÃO</div>
+    <div class="pasta-form-section">DADOS BÁSICOS</div>
     <div class="pasta-form-grid">
-      <div class="pasta-field"><label class="pasta-label">👤 Nome Completo *</label><input class="pasta-input" id="pf-nome" type="text" placeholder="Nome completo do cliente" oninput="pastaScoreAuto()"></div>
+      <div class="pasta-field"><label class="pasta-label">👤 Nome completo *</label><input class="pasta-input" id="pf-nome" type="text" placeholder="Nome completo do cliente" oninput="pastaScoreAuto()"></div>
       <div class="pasta-field"><label class="pasta-label">🪪 CPF</label><input class="pasta-input" id="pf-cpf" type="text" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)"></div>
-      <div class="pasta-field"><label class="pasta-label">📞 Telefone</label><input class="pasta-input" id="pf-tel" type="text" placeholder="(00) 00000-0000"></div>
-      <div class="pasta-field"><label class="pasta-label">📞 Telefone 2 / Recado</label><input class="pasta-input" id="pf-tel2" type="text" placeholder="Contato alternativo"></div>
-      <div class="pasta-field"><label class="pasta-label">📅 Data de Nascimento</label><input class="pasta-input" id="pf-nasc" type="date" onchange="pastaScoreAuto()"></div>
-      <div class="pasta-field"><label class="pasta-label">💍 Estado Civil</label>
-        <select class="pasta-select" id="pf-estado-civil" onchange="pastaScoreAuto()">
-          <option value="">Selecione...</option>
-          <option value="solteiro">Solteiro(a)</option>
-          <option value="casado">Casado(a)</option>
-          <option value="uniao">União Estável</option>
-          <option value="divorciado">Divorciado(a)</option>
-          <option value="viuvo">Viúvo(a)</option>
-        </select>
-      </div>
-      <div class="pasta-field"><label class="pasta-label">👩 Nome da Mãe</label><input class="pasta-input" id="pf-mae" type="text" placeholder="Nome completo da mãe"></div>
-    </div>
-
-    <div class="pasta-form-section">🎯 PEDIDO DE EMPRÉSTIMO</div>
-    <div class="pasta-form-grid">
-      <div class="pasta-field"><label class="pasta-label">💰 Valor Pretendido pelo Cliente (R$)</label><input class="pasta-input" id="pf-valor-solicitado" type="number" placeholder="0" oninput="pastaScoreAuto()"></div>
-      <div class="pasta-field"><label class="pasta-label">📅 Prazo Pretendido (meses)</label><input class="pasta-input" id="pf-prazo-solicitado" type="number" placeholder="1" min="1" oninput="pastaScoreAuto()"></div>
+      <div class="pasta-field"><label class="pasta-label">📞 Número de telefone</label><input class="pasta-input" id="pf-tel" type="text" placeholder="(00) 00000-0000"></div>
+      <div class="pasta-field"><label class="pasta-label">📷 Instagram</label><input class="pasta-input" id="pf-instagram" type="text" placeholder="@usuario"></div>
     </div>
 
     <div class="pasta-form-section">MORADIA</div>
     <div class="pasta-form-grid">
-      <div class="pasta-field"><label class="pasta-label">🏠 Situação de Moradia</label>
-        <select class="pasta-select" id="pf-moradia" onchange="pastaScoreAuto()">
-          <option value="">Selecione...</option>
-          <option value="proprio">Imóvel Próprio (quitado)</option>
-          <option value="financiado">Imóvel Financiado</option>
-          <option value="alugado">Alugado</option>
-          <option value="familiar">Com familiares (sem custo)</option>
-          <option value="cedido">Cedido / Funcional</option>
-        </select>
-      </div>
-      <div class="pasta-field"><label class="pasta-label">💸 Valor do Aluguel (R$)</label><input class="pasta-input" id="pf-aluguel" type="number" placeholder="0 se próprio" oninput="pastaScoreAuto()"></div>
-      <div class="pasta-field"><label class="pasta-label">📅 Há quanto tempo mora aqui?</label>
+      <div class="pasta-field"><label class="pasta-label">🏠 Endereço completo</label><input class="pasta-input" id="pf-endereco" type="text" placeholder="Rua, número, bairro, cidade"></div>
+      <div class="pasta-field"><label class="pasta-label">📅 Há quanto tempo mora nesse endereço?</label>
         <select class="pasta-select" id="pf-tempo-moradia" onchange="pastaScoreAuto()">
           <option value="">Selecione...</option>
           <option value="menos6">Menos de 6 meses</option>
@@ -1776,22 +1748,33 @@ html.cm-on #cm-mobile{display:block}
           <option value="mais3">Mais de 3 anos</option>
         </select>
       </div>
-      <div class="pasta-field"><label class="pasta-label">🏠 Endereço Completo</label><input class="pasta-input" id="pf-endereco" type="text" placeholder="Rua, número, bairro, cidade"></div>
+      <div class="pasta-field"><label class="pasta-label">🏠 Casa própria, alugada ou de familiar?</label>
+        <select class="pasta-select" id="pf-moradia" onchange="pastaScoreAuto()">
+          <option value="">Selecione...</option>
+          <option value="proprio">Própria</option>
+          <option value="alugado">Alugada</option>
+          <option value="familiar">De familiar</option>
+        </select>
+      </div>
+      <div class="pasta-field"><label class="pasta-label">👪 Com quem você mora?</label><input class="pasta-input" id="pf-com-quem-mora" type="text" placeholder="Ex: sozinho, com os pais, com esposa e filhos..."></div>
+      <div class="pasta-field"><label class="pasta-label">👶 Tem filhos? Se sim, quantos?</label><input class="pasta-input" id="pf-filhos" type="text" placeholder="Ex: não / sim, 2"></div>
     </div>
 
-    <div class="pasta-form-section">SITUAÇÃO PROFISSIONAL</div>
+    <div class="pasta-form-section">RENDA REAL</div>
     <div class="pasta-form-grid">
-      <div class="pasta-field"><label class="pasta-label">⚙️ Tipo de Renda</label>
+      <div class="pasta-field"><label class="pasta-label">🏢 Onde trabalha? (nome da empresa)</label><input class="pasta-input" id="pf-empresa" type="text" placeholder="Nome da empresa / do próprio negócio"></div>
+      <div class="pasta-field"><label class="pasta-label">📍 Endereço completo da empresa</label><input class="pasta-input" id="pf-empresa-endereco" type="text" placeholder="Rua, número, bairro, cidade"></div>
+      <div class="pasta-field"><label class="pasta-label">⚙️ CLT, Autônomo ou Empresário(a)?</label>
         <select class="pasta-select" id="pf-tipo-renda" onchange="pastaTipoRendaChange();pastaScoreAuto()">
-          <option value="empregado">Empregado CLT / Funcionário</option>
-          <option value="empresario">Empresário / Sócio</option>
-          <option value="autonomo">Autônomo / Freelancer</option>
-          <option value="aposentado">Aposentado / Pensionista</option>
+          <option value="empregado">CLT / Funcionário(a)</option>
+          <option value="autonomo">Autônomo(a)</option>
+          <option value="empresario">Empresário(a)</option>
+          <option value="aposentado">Aposentado(a) / Pensionista</option>
           <option value="outro">Outro</option>
         </select>
       </div>
-      <div class="pasta-field"><label class="pasta-label">💼 Cargo / Função</label><input class="pasta-input" id="pf-cargo" type="text" placeholder="Ex: Gerente, Vendedor, Diretor..."></div>
-      <div class="pasta-field"><label class="pasta-label">📅 Tempo no emprego/atividade atual</label>
+      <div class="pasta-field"><label class="pasta-label">💼 Qual a sua função na empresa?</label><input class="pasta-input" id="pf-cargo" type="text" placeholder="Ex: Gerente, Vendedor, Diretor..."></div>
+      <div class="pasta-field"><label class="pasta-label">📅 Há quanto tempo está nesse emprego/negócio atual?</label>
         <select class="pasta-select" id="pf-tempo-emprego" onchange="pastaScoreAuto()">
           <option value="">Selecione...</option>
           <option value="menos3">Menos de 3 meses</option>
@@ -1801,94 +1784,77 @@ html.cm-on #cm-mobile{display:block}
           <option value="mais3">Mais de 3 anos</option>
         </select>
       </div>
-      <div class="pasta-field"><label class="pasta-label">📱 Telefone do Trabalho</label><input class="pasta-input" id="pf-tel-trabalho" type="text" placeholder="Número fixo do trabalho"></div>
+      <div class="pasta-field"><label class="pasta-label">💰 Qual a sua renda líquida mensal? (R$)</label><input class="pasta-input" id="pf-salario" type="number" placeholder="0" oninput="pastaScoreAuto()"></div>
+      <div class="pasta-field"><label class="pasta-label">📊 Sua renda é fixa todo mês ou varia bastante?</label>
+        <select class="pasta-select" id="pf-renda-variavel" onchange="pastaScoreAuto()">
+          <option value="">Selecione...</option>
+          <option value="fixa">Fixa</option>
+          <option value="varia">Varia bastante</option>
+        </select>
+      </div>
     </div>
-    <!-- Empregado -->
-    <div id="pf-bloco-emp" class="pasta-form-grid">
-      <div class="pasta-field"><label class="pasta-label">🏢 Empresa onde trabalha</label><input class="pasta-input" id="pf-empresa" type="text" placeholder="Nome da empresa"></div>
-      <div class="pasta-field"><label class="pasta-label">💰 Salário / Renda Mensal (R$)</label><input class="pasta-input" id="pf-salario" type="number" placeholder="0" oninput="pastaScoreAuto()"></div>
-    </div>
-    <!-- Empresário -->
-    <div id="pf-bloco-emp2" style="display:none" class="pasta-form-grid">
-      <div class="pasta-field"><label class="pasta-label">🏭 Nome da Empresa</label><input class="pasta-input" id="pf-emp-nome" type="text" placeholder="Razão social ou nome fantasia"></div>
-      <div class="pasta-field"><label class="pasta-label">📍 Endereço da Empresa</label><input class="pasta-input" id="pf-emp-end" type="text" placeholder="Rua, número, cidade"></div>
-      <div class="pasta-field"><label class="pasta-label">📊 Faturamento Mensal Estimado (R$)</label><input class="pasta-input" id="pf-faturamento" type="number" placeholder="0" oninput="pastaScoreAuto()"></div>
-      <div class="pasta-field"><label class="pasta-label">💰 Retirada / Pró-labore Mensal (R$)</label><input class="pasta-input" id="pf-prolabore" type="number" placeholder="0" oninput="pastaScoreAuto()"></div>
+    <div id="pf-bloco-faturamento" style="display:none" class="pasta-form-grid">
+      <div class="pasta-field"><label class="pasta-label">📊 Faturamento médio dos últimos 3 meses (R$)</label><input class="pasta-input" id="pf-faturamento" type="number" placeholder="0" oninput="pastaScoreAuto()"></div>
     </div>
 
     <div class="pasta-form-section">COMPROMETIMENTO FINANCEIRO</div>
     <div class="pasta-form-grid">
-      <div class="pasta-field"><label class="pasta-label">💳 Tem outros empréstimos em aberto?</label>
-        <select class="pasta-select" id="pf-outros-emp" onchange="pastaScoreAuto()">
-          <option value="nao">Não</option>
-          <option value="sim_baixo">Sim — menos de 20% da renda</option>
-          <option value="sim_medio">Sim — entre 20% e 40% da renda</option>
-          <option value="sim_alto">Sim — mais de 40% da renda</option>
-        </select>
-      </div>
-      <div class="pasta-field"><label class="pasta-label">💳 Tem financiamento de veículo/imóvel?</label>
-        <select class="pasta-select" id="pf-financiamento" onchange="pastaScoreAuto()">
-          <option value="nao">Não</option>
-          <option value="sim">Sim</option>
-        </select>
-      </div>
-      <div class="pasta-field"><label class="pasta-label">❌ Já teve nome negativado?</label>
-        <select class="pasta-select" id="pf-negativado" onchange="pastaScoreAuto()">
-          <option value="nunca">Nunca</option>
-          <option value="passado">Sim, no passado (resolvido)</option>
-          <option value="atual">Sim, atualmente</option>
-        </select>
-      </div>
-      <div class="pasta-field"><label class="pasta-label">🎯 Finalidade do empréstimo</label>
-        <select class="pasta-select" id="pf-finalidade" onchange="pastaScoreAuto()">
-          <option value="">Selecione...</option>
-          <option value="emergencia">Emergência médica / familiar</option>
-          <option value="capital">Capital de giro / negócio</option>
-          <option value="reforma">Reforma / investimento</option>
-          <option value="consumo">Consumo / compras</option>
-          <option value="pagar_divida">Pagar outra dívida</option>
-          <option value="outro">Outro</option>
-        </select>
-      </div>
-      <div class="pasta-field"><label class="pasta-label">🚗 Possui veículo próprio?</label>
-        <select class="pasta-select" id="pf-veiculo" onchange="pastaScoreAuto()">
-          <option value="nao">Não</option>
-          <option value="sim">Sim</option>
-        </select>
-      </div>
-      <div class="pasta-field" id="pf-veiculo-det-wrap" style="display:none"><label class="pasta-label">🚗 Dados do veículo (placa/modelo/ano)</label><input class="pasta-input" id="pf-veiculo-det" type="text" placeholder="Ex: ABC-1234 / Gol 2020"></div>
+      <div class="pasta-field"><label class="pasta-label">💸 Quanto você paga de aluguel/financiamento por mês? (R$)</label><input class="pasta-input" id="pf-aluguel" type="number" placeholder="0 se não paga" oninput="pastaScoreAuto()"></div>
+      <div class="pasta-field"><label class="pasta-label">💳 Tem outro empréstimo/financiamento em aberto? Quanto paga por mês nele? (R$)</label><input class="pasta-input" id="pf-outros-emp-valor" type="number" placeholder="0 se não tiver" oninput="pastaScoreAuto()"></div>
     </div>
 
-    <div class="pasta-form-section">REFERÊNCIAS PESSOAIS</div>
+    <div class="pasta-form-section">FINALIDADE DO EMPRÉSTIMO</div>
+    <div class="pasta-form-grid">
+      <div class="pasta-field single"><label class="pasta-label">🎯 Pra que exatamente vai usar esse dinheiro?</label><textarea class="pasta-input" id="pf-finalidade" rows="2" style="resize:vertical" placeholder="Descreva com as palavras do cliente" oninput="pastaScoreAuto()"></textarea></div>
+      <div class="pasta-field"><label class="pasta-label">💰 Quanto quer pegar emprestado? (R$)</label><input class="pasta-input" id="pf-valor-solicitado" type="number" placeholder="0" oninput="pastaScoreAuto()"></div>
+      <div class="pasta-field"><label class="pasta-label">📅 Em quantos meses pretende pagar?</label><input class="pasta-input" id="pf-prazo-solicitado" type="number" placeholder="1" min="1" oninput="pastaScoreAuto()"></div>
+    </div>
+
+    <div class="pasta-form-section">GARANTIAS</div>
+    <div class="pasta-form-grid">
+      <div class="pasta-field"><label class="pasta-label">🔑 Tem algo para deixar de garantia? (veículo, objeto de valor)</label><input class="pasta-input" id="pf-garantia" type="text" placeholder="Descreva a garantia, se houver"></div>
+      <div class="pasta-field"><label class="pasta-label">✍️ Tem alguém que pode assinar como fiador?</label><input class="pasta-input" id="pf-fiador" type="text" placeholder="Nome do fiador, se houver"></div>
+    </div>
+
+    <div class="pasta-form-section">HISTÓRICO</div>
+    <div class="pasta-form-grid">
+      <div class="pasta-field single"><label class="pasta-label">📋 Já pegou empréstimo na Capital Investimentos antes? Como foi o pagamento? Houve renegociação?</label><textarea class="pasta-input" id="pf-hist-capital" rows="2" style="resize:vertical" placeholder="Descreva o histórico, se houver"></textarea></div>
+      <div class="pasta-field single"><label class="pasta-label">🤝 Já fez empréstimo informal antes? Se sim, com quem?</label><textarea class="pasta-input" id="pf-hist-informal" rows="2" style="resize:vertical" placeholder="Descreva, se houver"></textarea></div>
+    </div>
+
+    <div class="pasta-form-section">REFERÊNCIAS</div>
     <div class="pasta-form-grid">
       <div class="pasta-field"><label class="pasta-label">👤 Referência 1 — Nome</label><input class="pasta-input" id="pf-ref1-nome" type="text" placeholder="Nome completo"></div>
       <div class="pasta-field"><label class="pasta-label">📞 Referência 1 — Telefone</label><input class="pasta-input" id="pf-ref1-tel" type="text" placeholder="(00) 00000-0000"></div>
-      <div class="pasta-field"><label class="pasta-label">🔗 Referência 1 — Grau</label>
+      <div class="pasta-field"><label class="pasta-label">🔗 O que ela é de você?</label>
         <select class="pasta-select" id="pf-ref1-grau">
           <option value="">Selecione...</option>
-          <option value="familiar">Familiar</option>
+          <option value="familiar">Familiar (não mora junto)</option>
           <option value="amigo">Amigo próximo</option>
           <option value="colega">Colega de trabalho</option>
           <option value="vizinho">Vizinho</option>
         </select>
       </div>
+      <div class="pasta-field"><label class="pasta-label">📅 Há quanto tempo ela te conhece?</label><input class="pasta-input" id="pf-ref1-tempo" type="text" placeholder="Ex: 10 anos"></div>
       <div class="pasta-field"><label class="pasta-label">👤 Referência 2 — Nome</label><input class="pasta-input" id="pf-ref2-nome" type="text" placeholder="Nome completo"></div>
       <div class="pasta-field"><label class="pasta-label">📞 Referência 2 — Telefone</label><input class="pasta-input" id="pf-ref2-tel" type="text" placeholder="(00) 00000-0000"></div>
-      <div class="pasta-field"><label class="pasta-label">🔗 Referência 2 — Grau</label>
+      <div class="pasta-field"><label class="pasta-label">🔗 O que ela é de você?</label>
         <select class="pasta-select" id="pf-ref2-grau">
           <option value="">Selecione...</option>
-          <option value="familiar">Familiar</option>
+          <option value="familiar">Familiar (não mora junto)</option>
           <option value="amigo">Amigo próximo</option>
           <option value="colega">Colega de trabalho</option>
           <option value="vizinho">Vizinho</option>
         </select>
       </div>
+      <div class="pasta-field"><label class="pasta-label">📅 Há quanto tempo ela te conhece?</label><input class="pasta-input" id="pf-ref2-tempo" type="text" placeholder="Ex: 10 anos"></div>
     </div>
 
     <div class="pasta-form-section">OBSERVAÇÕES</div>
     <div class="pasta-form-grid single">
-      <div class="pasta-field"><label class="pasta-label">📝 Observações Gerais</label><textarea class="pasta-input" id="pf-obs" rows="3" style="resize:vertical" placeholder="Anotações relevantes sobre o cliente, garantias, referencias, etc."></textarea></div>
+      <div class="pasta-field"><label class="pasta-label">📝 Observações Gerais</label><textarea class="pasta-input" id="pf-obs" rows="3" style="resize:vertical" placeholder="Anotações extras que não couberam acima"></textarea></div>
     </div>
+
 
     <!-- SCORE AUTOMÁTICO -->
     <div class="score-panel" id="score-panel">
