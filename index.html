@@ -828,6 +828,7 @@ html.cm-on #cm-mobile{display:block}
   <div class="sidebar-divider"></div>
   <div class="sidebar-section-lbl">Gestão</div>
   <div class="nav-tab" data-tab="risco" data-label="Risco & Alertas"><span class="tab-icon">⚠️</span><span class="tab-label">Risco & Alertas</span></div>
+  <div class="nav-tab" data-tab="analise" data-label="Análise"><span class="tab-icon">🧠</span><span class="tab-label">Análise</span></div>
   <div class="nav-tab" data-tab="clientes" data-label="Clientes"><span class="tab-icon">👤</span><span class="tab-label">Clientes</span></div>
   <div class="nav-tab" data-tab="comparativo" data-label="Comparativos"><span class="tab-icon">📈</span><span class="tab-label">Comparativos</span></div>
   <div class="sidebar-divider"></div>
@@ -1703,69 +1704,16 @@ html.cm-on #cm-mobile{display:block}
 </div>
 
 <!-- CLIENTES -->
-<div id="tab-clientes" class="tab-panel">
-  <div class="section-label">PERFIL DA BASE DE CLIENTES</div>
-  <div class="grid-4">
-    <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Clientes Ativos</div><div class="kpi-val" id="cli-ativos-n" style="color:var(--green)">—</div><div class="kpi-sub">com contrato aberto</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--muted)"></div><div class="kpi-lbl">Clientes Inativos</div><div class="kpi-val" id="cli-inativos-n" style="color:var(--muted)">—</div><div class="kpi-sub">somente quitados</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Recorrência</div><div class="kpi-val" id="cli-recorrencia" style="color:var(--gold)">—</div><div class="kpi-sub">repetem empréstimo</div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Tempo Médio Relac.</div><div class="kpi-val" id="cli-tempo-rel" style="color:var(--blue)">—</div><div class="kpi-sub">meses em média</div></div>
-  </div>
-  <div class="grid-2">
-    <div class="card"><div class="card-header"><div><div class="card-title">💰 Lucro por Cliente</div><div class="card-desc">Juros totais gerados por cliente</div></div><div class="card-badge">RESULTADO</div></div><div class="chart-wrap xtall"><canvas id="chartLucroCliente"></canvas></div></div>
-    <div class="card"><div class="card-header"><div><div class="card-title">🎫 Ticket Médio por Cliente</div><div class="card-desc">Valor médio emprestado por cliente</div></div><div class="card-badge">TICKET</div></div><div class="chart-wrap xtall"><canvas id="chartTicketCliente"></canvas></div></div>
-  </div>
-  <div class="section-label">CLUSTERIZAÇÃO DE CLIENTES</div>
-  <div class="card"><div class="card-header"><div><div class="card-title">🥧 Tipos de Clientes</div><div class="card-desc">Distribuição percentual: Premium · Regular Fiel · Regular · Alto Risco · Inativo · Empresa</div></div><div class="card-badge">%</div></div>
-    <div class="tc-wrap">
-      <div class="tc-chart-box"><canvas id="chartTiposClientes"></canvas></div>
-      <div class="tc-legend" id="tiposClientesLegend"></div>
-    </div>
-  </div>
-  <div class="card"><div class="card-header"><div><div class="card-title">🧩 Perfil de Clientes</div><div class="card-desc">Agrupamento automático por comportamento: Premium · Regular Fiel · Alto Risco · Inativo</div></div><div class="card-badge">IA</div></div><div class="profile-grid" id="profileGrid"></div></div>
-  <div class="card"><div class="card-header"><div><div class="card-title">📋 Histórico de Pagamentos por Cliente</div><div class="card-desc">Pontualidade e volume registrado</div></div><div class="card-badge">HISTÓRICO</div></div><div class="hist-list" id="histList"></div></div>
-
-  <!-- PASTAS DE CLIENTES -->
-  <div class="section-label" style="margin-top:28px">🗂️ PASTAS DE CLIENTES — DADOS PESSOAIS & DOCUMENTOS</div>
+<div id="tab-analise" class="tab-panel">
+  <div class="section-label">🧠 ANÁLISE DE CRÉDITO — CLIENTE NOVO</div>
   <div class="card">
     <div class="card-header">
       <div>
-        <div class="card-title">🗂️ Dossiê de Clientes</div>
-        <div class="card-desc">Cadastro completo com dados pessoais, profissionais e documentos. Clique em um cliente da planilha para pré-preencher automaticamente.</div>
+        <div class="card-title" id="analise-titulo">📁 Nova Análise de Cliente</div>
+        <div class="pasta-modal-sub" style="margin-bottom:0">Preencha os dados do cliente. Ao salvar, o dossiê é criado automaticamente na aba Clientes. Campos com * são obrigatórios — o score é calculado em tempo real.</div>
       </div>
-      <div class="card-badge">PASTAS</div>
+      <div class="card-badge">ANÁLISE</div>
     </div>
-    <div class="pasta-search-bar">
-      <input class="pasta-search-input" id="pasta-search" type="text" placeholder="🔍 Buscar pasta por nome, CPF ou telefone..." oninput="pastaSearchChange()">
-      <button class="pasta-new-btn" onclick="pastaModalOpen(null)">＋ Nova Pasta</button>
-    </div>
-    <!-- BARRA DE SYNC -->
-    <div id="sync-bar" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;flex-wrap:wrap;">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:0.84rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">🔗 Sincronização — fotos e documentos incluídos</div>
-        <div id="sync-status-txt" style="font-size:0.88rem;color:var(--muted)">Não configurada — dados salvos só neste dispositivo</div>
-      </div>
-      <button onclick="mostrarAppsScript()" style="background:rgba(155,93,229,0.1);border:1px solid rgba(155,93,229,0.3);color:var(--purple);border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.84rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">📋 Ver Código</button>
-      <button onclick="dossieConfigurarURL()" style="background:rgba(201,146,42,0.1);border:1px solid rgba(201,146,42,0.3);color:var(--gold2);border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.84rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">⚙️ Configurar URL</button>
-      <button onclick="dossieSyncManual()" id="sync-btn" style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.25);color:var(--green);border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.84rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">🔄 Sincronizar</button>
-      <button onclick="pastaVerificarDuplicados()" style="background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.25);color:#ef476f;border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.84rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">🧹 Verificar Duplicados</button>
-    </div>
-    <div class="pasta-stats-strip" id="pasta-stats-strip">
-      <div class="pasta-stat-box"><div class="pasta-stat-val" id="ps-total" style="color:var(--gold)">0</div><div class="pasta-stat-lbl">Pastas Abertas</div></div>
-      <div class="pasta-stat-box"><div class="pasta-stat-val" id="ps-docs" style="color:var(--blue)">0</div><div class="pasta-stat-lbl">Documentos</div></div>
-      <div class="pasta-stat-box"><div class="pasta-stat-val" id="ps-completas" style="color:var(--green)">0</div><div class="pasta-stat-lbl">Pastas Completas</div></div>
-    </div>
-    <div class="pasta-grid" id="pasta-grid">
-      <div class="pasta-empty">Nenhuma pasta cadastrada. Clique em <strong>+ Nova Pasta</strong> para começar.</div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL CRIAR/EDITAR PASTA -->
-<div class="pasta-modal-overlay" id="pasta-modal-overlay" onclick="if(event.target===this)pastaModalClose()">
-  <div class="pasta-modal">
-    <div class="pasta-modal-title" id="pasta-modal-titulo">📁 Nova Pasta de Cliente</div>
-    <div class="pasta-modal-sub">Preencha os dados do cliente. Campos com * são obrigatórios. O score é calculado automaticamente.</div>
 
     <div class="pasta-form-section">IDENTIFICAÇÃO</div>
     <div class="pasta-form-grid">
@@ -1785,6 +1733,12 @@ html.cm-on #cm-mobile{display:block}
         </select>
       </div>
       <div class="pasta-field"><label class="pasta-label">👩 Nome da Mãe</label><input class="pasta-input" id="pf-mae" type="text" placeholder="Nome completo da mãe"></div>
+    </div>
+
+    <div class="pasta-form-section">🎯 PEDIDO DE EMPRÉSTIMO</div>
+    <div class="pasta-form-grid">
+      <div class="pasta-field"><label class="pasta-label">💰 Valor Pretendido pelo Cliente (R$)</label><input class="pasta-input" id="pf-valor-solicitado" type="number" placeholder="0" oninput="pastaScoreAuto()"></div>
+      <div class="pasta-field"><label class="pasta-label">📅 Prazo Pretendido (meses)</label><input class="pasta-input" id="pf-prazo-solicitado" type="number" placeholder="1" min="1" oninput="pastaScoreAuto()"></div>
     </div>
 
     <div class="pasta-form-section">MORADIA</div>
@@ -1943,6 +1897,11 @@ html.cm-on #cm-mobile{display:block}
           <div class="score-recomend" id="score-recomend" style="color:var(--muted)">Complete o formulário para ver a análise de crédito.</div>
         </div>
       </div>
+      <div class="pasta-stats-strip" style="margin-top:2px">
+        <div class="pasta-stat-box"><div class="pasta-stat-val" id="score-limite-seguro" style="color:var(--gold)">—</div><div class="pasta-stat-lbl">Limite Seguro</div></div>
+        <div class="pasta-stat-box"><div class="pasta-stat-val" id="score-prazo-seguro" style="color:var(--blue)">—</div><div class="pasta-stat-lbl">Prazo Seguro</div></div>
+        <div class="pasta-stat-box"><div class="pasta-stat-val" id="score-lucro-projetado" style="color:var(--green)">—</div><div class="pasta-stat-lbl">Lucro Projetado</div></div>
+      </div>
       <div class="score-bars" id="score-bars"></div>
       <div class="score-rec-box atencao" id="score-rec-box" style="display:none">
         <div class="score-rec-title" id="score-rec-title"></div>
@@ -2019,8 +1978,66 @@ html.cm-on #cm-mobile{display:block}
     </div>
 
     <div class="pasta-modal-footer">
-      <button class="pasta-btn-cancel-modal" onclick="pastaModalClose()">Cancelar</button>
-      <button class="pasta-btn-save-modal" onclick="pastaSalvar()">💾 SALVAR PASTA</button>
+      <button class="pasta-btn-cancel-modal" onclick="analiseLimpar()">Limpar Formulário</button>
+      <button class="pasta-btn-save-modal" onclick="pastaSalvar()">💾 SALVAR E ENVIAR PARA CLIENTES</button>
+    </div>
+  </div>
+</div>
+
+<div id="tab-clientes" class="tab-panel">
+  <div class="section-label">PERFIL DA BASE DE CLIENTES</div>
+  <div class="grid-4">
+    <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Clientes Ativos</div><div class="kpi-val" id="cli-ativos-n" style="color:var(--green)">—</div><div class="kpi-sub">com contrato aberto</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--muted)"></div><div class="kpi-lbl">Clientes Inativos</div><div class="kpi-val" id="cli-inativos-n" style="color:var(--muted)">—</div><div class="kpi-sub">somente quitados</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Recorrência</div><div class="kpi-val" id="cli-recorrencia" style="color:var(--gold)">—</div><div class="kpi-sub">repetem empréstimo</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Tempo Médio Relac.</div><div class="kpi-val" id="cli-tempo-rel" style="color:var(--blue)">—</div><div class="kpi-sub">meses em média</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-header"><div><div class="card-title">💰 Lucro por Cliente</div><div class="card-desc">Juros totais gerados por cliente</div></div><div class="card-badge">RESULTADO</div></div><div class="chart-wrap xtall"><canvas id="chartLucroCliente"></canvas></div></div>
+    <div class="card"><div class="card-header"><div><div class="card-title">🎫 Ticket Médio por Cliente</div><div class="card-desc">Valor médio emprestado por cliente</div></div><div class="card-badge">TICKET</div></div><div class="chart-wrap xtall"><canvas id="chartTicketCliente"></canvas></div></div>
+  </div>
+  <div class="section-label">CLUSTERIZAÇÃO DE CLIENTES</div>
+  <div class="card"><div class="card-header"><div><div class="card-title">🥧 Tipos de Clientes</div><div class="card-desc">Distribuição percentual: Premium · Regular Fiel · Regular · Alto Risco · Inativo · Empresa</div></div><div class="card-badge">%</div></div>
+    <div class="tc-wrap">
+      <div class="tc-chart-box"><canvas id="chartTiposClientes"></canvas></div>
+      <div class="tc-legend" id="tiposClientesLegend"></div>
+    </div>
+  </div>
+  <div class="card"><div class="card-header"><div><div class="card-title">🧩 Perfil de Clientes</div><div class="card-desc">Agrupamento automático por comportamento: Premium · Regular Fiel · Alto Risco · Inativo</div></div><div class="card-badge">IA</div></div><div class="profile-grid" id="profileGrid"></div></div>
+  <div class="card"><div class="card-header"><div><div class="card-title">📋 Histórico de Pagamentos por Cliente</div><div class="card-desc">Pontualidade e volume registrado</div></div><div class="card-badge">HISTÓRICO</div></div><div class="hist-list" id="histList"></div></div>
+
+  <!-- PASTAS DE CLIENTES -->
+  <div class="section-label" style="margin-top:28px">🗂️ PASTAS DE CLIENTES — DADOS PESSOAIS & DOCUMENTOS</div>
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">🗂️ Dossiê de Clientes</div>
+        <div class="card-desc">Cadastro completo com dados pessoais, profissionais e documentos, criado na aba 🧠 Análise. Clique em uma pasta para ver, editar ou baixar documentos.</div>
+      </div>
+      <div class="card-badge">PASTAS</div>
+    </div>
+    <div class="pasta-search-bar">
+      <input class="pasta-search-input" id="pasta-search" type="text" placeholder="🔍 Buscar pasta por nome, CPF ou telefone..." oninput="pastaSearchChange()">
+      <button class="pasta-new-btn" onclick="analiseAbrir(null)">＋ Nova Análise</button>
+    </div>
+    <!-- BARRA DE SYNC -->
+    <div id="sync-bar" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:0.84rem;color:var(--muted);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px">🔗 Sincronização — fotos e documentos incluídos</div>
+        <div id="sync-status-txt" style="font-size:0.88rem;color:var(--muted)">Não configurada — dados salvos só neste dispositivo</div>
+      </div>
+      <button onclick="mostrarAppsScript()" style="background:rgba(155,93,229,0.1);border:1px solid rgba(155,93,229,0.3);color:var(--purple);border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.84rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">📋 Ver Código</button>
+      <button onclick="dossieConfigurarURL()" style="background:rgba(201,146,42,0.1);border:1px solid rgba(201,146,42,0.3);color:var(--gold2);border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.84rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">⚙️ Configurar URL</button>
+      <button onclick="dossieSyncManual()" id="sync-btn" style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.25);color:var(--green);border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.84rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">🔄 Sincronizar</button>
+      <button onclick="pastaVerificarDuplicados()" style="background:rgba(239,71,111,0.08);border:1px solid rgba(239,71,111,0.25);color:#ef476f;border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:0.84rem;cursor:pointer;letter-spacing:0.06em;white-space:nowrap">🧹 Verificar Duplicados</button>
+    </div>
+    <div class="pasta-stats-strip" id="pasta-stats-strip">
+      <div class="pasta-stat-box"><div class="pasta-stat-val" id="ps-total" style="color:var(--gold)">0</div><div class="pasta-stat-lbl">Pastas Abertas</div></div>
+      <div class="pasta-stat-box"><div class="pasta-stat-val" id="ps-docs" style="color:var(--blue)">0</div><div class="pasta-stat-lbl">Documentos</div></div>
+      <div class="pasta-stat-box"><div class="pasta-stat-val" id="ps-completas" style="color:var(--green)">0</div><div class="pasta-stat-lbl">Pastas Completas</div></div>
+    </div>
+    <div class="pasta-grid" id="pasta-grid">
+      <div class="pasta-empty">Nenhuma pasta cadastrada. Vá até a aba <strong>🧠 Análise</strong> para criar a primeira.</div>
     </div>
   </div>
 </div>
@@ -9464,7 +9481,7 @@ function maskCPF(el){
   el.value=v;
 }
 
-function pastaModalOpen(id){
+function analiseAbrir(id){
   _pastaEditId = id;
   const docKeys=['rg-frente','rg-verso','selfie-rg','holerite','imovel','empresa-foto','outro'];
   _pastaDocs = {};
@@ -9475,8 +9492,10 @@ function pastaModalOpen(id){
   });
   if(id && _pastas[id]){
     const p=_pastas[id];
-    document.getElementById('pasta-modal-titulo').textContent='✏️ Editar Pasta — '+p.nome;
+    document.getElementById('analise-titulo').textContent='✏️ Editar Análise — '+p.nome;
     document.getElementById('pf-nome').value=p.nome||'';
+    if(g('pf-valor-solicitado'))g('pf-valor-solicitado').value=p.valorSolicitado||'';
+    if(g('pf-prazo-solicitado'))g('pf-prazo-solicitado').value=p.prazoSolicitado||'';
     document.getElementById('pf-cpf').value=p.cpf||'';
     document.getElementById('pf-tel').value=p.tel||'';
     if(g('pf-tel2'))g('pf-tel2').value=p.tel2||'';
@@ -9519,16 +9538,21 @@ function pastaModalOpen(id){
       docKeys.forEach(t=>pastaRenderDocs(t));
     }
   } else {
-    document.getElementById('pasta-modal-titulo').textContent='📁 Nova Pasta de Cliente';
-    ['pf-nome','pf-cpf','pf-tel','pf-tel2','pf-nasc','pf-mae','pf-endereco','pf-cargo','pf-empresa','pf-salario','pf-emp-nome','pf-emp-end','pf-faturamento','pf-prolabore','pf-aluguel','pf-tel-trabalho','pf-veiculo-det','pf-ref1-nome','pf-ref1-tel','pf-ref2-nome','pf-ref2-tel','pf-obs'].forEach(id=>{
+    document.getElementById('analise-titulo').textContent='📁 Nova Análise de Cliente';
+    ['pf-nome','pf-cpf','pf-tel','pf-tel2','pf-nasc','pf-mae','pf-endereco','pf-cargo','pf-empresa','pf-salario','pf-emp-nome','pf-emp-end','pf-faturamento','pf-prolabore','pf-aluguel','pf-tel-trabalho','pf-veiculo-det','pf-ref1-nome','pf-ref1-tel','pf-ref2-nome','pf-ref2-tel','pf-obs','pf-valor-solicitado','pf-prazo-solicitado'].forEach(id=>{
       const el=document.getElementById(id);if(el)el.value='';
     });
     document.getElementById('pf-tipo-renda').value='empregado';
     pastaTipoRendaChange();
   }
-  document.getElementById('pasta-modal-overlay').classList.add('open');
+  if(typeof showTab==='function') showTab('analise');
+  pastaScoreAuto();
+  const view=document.getElementById('view')||document.querySelector('.tab-content-area');
+  if(view) view.scrollTop=0;
 }
-function pastaModalClose(){document.getElementById('pasta-modal-overlay').classList.remove('open');}
+function analiseLimpar(){ analiseAbrir(null); }
+// mantido por compatibilidade — não há mais overlay/modal de criação
+function pastaModalClose(){}
 
 function pastaAddDoc(tipo, input){
   const files=Array.from(input.files);
@@ -9594,8 +9618,14 @@ function pastaSalvar(){
   const id=_pastaEditId||('pasta_'+Date.now());
   const tipoRenda=document.getElementById('pf-tipo-renda').value;
   const {total:scoreCredito}=calcScoreCredito();
+  const valorSolicitado=gn('pf-valor-solicitado');
+  const prazoSolicitado=gn('pf-prazo-solicitado');
+  const rec=calcRecomendacaoCredito(scoreCredito,valorSolicitado,prazoSolicitado);
   _pastas[id]={
     id,nome,
+    valorSolicitado,prazoSolicitado,
+    limiteSeguro:rec.limiteSeguro,prazoSeguroMeses:rec.prazoSeguroMeses,
+    taxaSugerida:rec.taxaSug,lucroProjetado:rec.lucroProjetado,decisaoCredito:rec.decisao,
     cpf:gv('pf-cpf'),
     tel:gv('pf-tel'),
     tel2:gv('pf-tel2'),
@@ -9664,7 +9694,7 @@ function pastaSalvar(){
     pastaRender();
     alert('⚠️ Atenção: o dossiê de "' + nome + '" foi salvo neste aparelho, mas não foi possível conectar ao servidor. Ele NÃO vai aparecer em outros dispositivos até você sincronizar com sucesso.');
   });
-  pastaModalClose();
+  if(typeof showTab==='function') showTab('clientes');
   pastaRender();
 }
 
@@ -9687,7 +9717,7 @@ function pastaRender(){
   const pd=document.getElementById('ps-docs');if(pd)pd.textContent=totalDocs;
   const pc=document.getElementById('ps-completas');if(pc)pc.textContent=completas;
   if(!filtered.length){
-    grid.innerHTML=`<div class="pasta-empty">${q?'Nenhuma pasta encontrada para "'+q+'"':'Nenhuma pasta cadastrada. Clique em <strong>+ Nova Pasta</strong> para começar.'}</div>`;
+    grid.innerHTML=`<div class="pasta-empty">${q?'Nenhuma pasta encontrada para "'+q+'"':'Nenhuma pasta cadastrada. Vá até a aba <strong>🧠 Análise</strong> para criar a primeira.'}</div>`;
     return;
   }
   const tipoLabel={empregado:'CLT',empresario:'Empresário',autonomo:'Autônomo',aposentado:'Aposentado',outro:'Outro'};
@@ -9722,7 +9752,7 @@ function pastaRender(){
       </div>
       <div class="pasta-card-footer">
         <button class="pasta-btn-ver" onclick="event.stopPropagation();pastaViewOpen('${p.id}')">👁 Ver</button>
-        <button class="pasta-btn-edit" onclick="event.stopPropagation();pastaModalOpen('${p.id}')">✏️ Editar</button>
+        <button class="pasta-btn-edit" onclick="event.stopPropagation();analiseAbrir('${p.id}')">✏️ Editar</button>
         <button class="pasta-btn-del" onclick="event.stopPropagation();pastaExcluir('${p.id}')">🗑</button>
       </div>
     </div>`;
@@ -9929,6 +9959,18 @@ function pastaViewOpen(id){
     </div>` : ''}
   </div>`;
 
+  // Pedido de empréstimo e recomendação (preenchidos na aba Análise)
+  if(p.valorSolicitado||p.limiteSeguro||p.lucroProjetado!=null){
+    const lucroCor=(p.lucroProjetado||0)>=0?'var(--green)':'var(--red)';
+    html+=`<div class="pasta-view-section">🎯 PEDIDO DE EMPRÉSTIMO & RECOMENDAÇÃO</div><div class="pasta-view-grid">`;
+    html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">💰 Valor Pedido</div><div class="pasta-view-val">${p.valorSolicitado?fmt(p.valorSolicitado):'—'}</div></div>`;
+    html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">📅 Prazo Pedido</div><div class="pasta-view-val">${p.prazoSolicitado?p.prazoSolicitado+(p.prazoSolicitado===1?' mês':' meses'):'—'}</div></div>`;
+    html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">✅ Limite Seguro</div><div class="pasta-view-val" style="color:var(--gold2)">${p.limiteSeguro?fmt(p.limiteSeguro):'—'}</div></div>`;
+    html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">⏳ Prazo Seguro</div><div class="pasta-view-val" style="color:var(--blue)">${p.prazoSeguroMeses?p.prazoSeguroMeses+(p.prazoSeguroMeses===1?' mês':' meses'):'—'}</div></div>`;
+    html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">📈 Taxa Sugerida</div><div class="pasta-view-val">${p.taxaSugerida||'—'}</div></div>`;
+    html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">💵 Lucro Projetado</div><div class="pasta-view-val" style="color:${lucroCor}">${p.lucroProjetado!=null?(p.lucroProjetado>=0?fmt(p.lucroProjetado):'-'+fmt(Math.abs(p.lucroProjetado))):'—'}</div></div>`;
+    html+=`</div>`;
+  }
   // Contato
   html+=`<div class="pasta-view-section">CONTATO & LOCALIZAÇÃO</div><div class="pasta-view-grid">`;
   html+=`<div class="pasta-view-field"><div class="pasta-view-lbl">📞 Telefone</div><div class="pasta-view-val">${p.tel||'—'}</div></div>`;
@@ -9980,7 +10022,7 @@ function pastaViewOpen(id){
   document.getElementById('pasta-view-overlay').classList.add('open');
 }
 function pastaViewClose(){document.getElementById('pasta-view-overlay').classList.remove('open');}
-function pastaViewEditar(){pastaViewClose();pastaModalOpen(_pastaViewId);}
+function pastaViewEditar(){pastaViewClose();analiseAbrir(_pastaViewId);}
 function pastaViewDoc(dataEnc,nameEnc){
   const data=decodeURIComponent(dataEnc),name=decodeURIComponent(nameEnc);
   const a=document.createElement('a');a.href=data;a.download=name;a.click();
@@ -10012,12 +10054,11 @@ async function pastaDownloadDoc(pastaId, tipo, idx) {
 
 // Pré-preencher pasta a partir de cliente da planilha
 function pastaAbrirParaCliente(nome, tel, cpf){
-  pastaModalOpen(null);
+  analiseAbrir(null);
   if(nome)document.getElementById('pf-nome').value=nome;
   if(tel)document.getElementById('pf-tel').value=tel;
   if(cpf)document.getElementById('pf-cpf').value=cpf;
-  // scroll ao modal
-  document.getElementById('pasta-modal-overlay').scrollTop=0;
+  pastaScoreAuto();
 }
 
 // ── SCORE DE CRÉDITO ─────────────────────────────────────
@@ -10087,6 +10128,67 @@ function calcScoreCredito(){
   return{total:Math.min(total,1000),criterios};
 }
 
+// ── RECOMENDAÇÃO DE CRÉDITO: limite seguro, prazo seguro, taxa e lucro projetado ──
+// renda: renda/faturamento mensal declarado. valSolic/prazoSolic: o que o cliente pediu (podem vir zerados).
+function calcRecomendacaoCredito(total,valSolic,prazoSolic,renda){
+  renda=renda||0; valSolic=valSolic||0; prazoSolic=prazoSolic||0;
+  function _calcTaxaSug(sc,val){
+    if(sc>=750){ if(val>=1500)return'20% a 25%'; if(val>=500)return'25% a 30%'; return'35% a 40%'; }
+    if(sc>=600){ if(val>=1500)return'25% a 30%'; if(val>=500)return'30% a 40%'; return'40% a 60%'; }
+    if(sc>=450){ if(val>=1500)return'30% a 35%'; if(val>=500)return'40% a 50%'; return'60% a 80%'; }
+    if(sc>=250){ if(val>=1500)return'35%+'; if(val>=500)return'50%+'; return'80%+'; }
+    return'—';
+  }
+  // taxa média mensal (número) usada só para projetar o lucro — mesmas faixas da taxa sugerida em texto
+  function _calcTaxaNumerica(sc,val){
+    if(sc>=750){ if(val>=1500)return 0.225; if(val>=500)return 0.275; return 0.375; }
+    if(sc>=600){ if(val>=1500)return 0.275; if(val>=500)return 0.35;  return 0.50;  }
+    if(sc>=450){ if(val>=1500)return 0.325; if(val>=500)return 0.45;  return 0.70;  }
+    if(sc>=250){ if(val>=1500)return 0.35;  if(val>=500)return 0.50;  return 0.80;  }
+    return 0;
+  }
+  let decisao,classe,titulo,corpo,pctLimite,taxaSug,prazoSeguroMeses,probDefault;
+  if(total>=750){
+    decisao='✅ APROVADO';classe='aprovado';pctLimite=50;prazoSeguroMeses=6;probDefault=0.03;
+    taxaSug=_calcTaxaSug(total,valSolic);
+    titulo='💚 CRÉDITO RECOMENDADO';
+    corpo=`Score excelente. Cliente de baixo risco. Você pode emprestar com segurança.\n• Limite sugerido: até ${renda>0?'R$ '+Math.round(renda*pctLimite/100).toLocaleString('pt-BR'):'50% da renda declarada'}\n• Taxa recomendada: ${taxaSug} a.m.\n• Prazo seguro: até 6 meses`;
+  } else if(total>=600){
+    decisao='✅ APROVADO';classe='aprovado';pctLimite=35;prazoSeguroMeses=4;probDefault=0.08;
+    taxaSug=_calcTaxaSug(total,valSolic);
+    titulo='💚 CRÉDITO APROVADO COM ATENÇÃO';
+    corpo=`Bom perfil, risco controlado. Empréstimo viável com limites moderados.\n• Limite sugerido: até ${renda>0?'R$ '+Math.round(renda*pctLimite/100).toLocaleString('pt-BR'):'35% da renda declarada'}\n• Taxa recomendada: ${taxaSug} a.m.\n• Prazo seguro: até 4 meses`;
+  } else if(total>=450){
+    decisao='⚠️ ATENÇÃO';classe='atencao';pctLimite=20;prazoSeguroMeses=2;probDefault=0.20;
+    taxaSug=_calcTaxaSug(total,valSolic);
+    titulo='🟡 CRÉDITO COM RESTRIÇÕES';
+    corpo=`Perfil de risco médio. Empreste com cautela e exija garantias.\n• Limite sugerido: até ${renda>0?'R$ '+Math.round(renda*pctLimite/100).toLocaleString('pt-BR'):'20% da renda declarada'}\n• Taxa recomendada: ${taxaSug} a.m. (compensa o risco)\n• Prazo seguro: até 2 meses\n• Exija 2 referências confirmadas e comprovante de renda`;
+  } else if(total>=250){
+    decisao='🔴 ALTO RISCO';classe='reprovado';pctLimite=10;prazoSeguroMeses=1;probDefault=0.40;
+    taxaSug=_calcTaxaSug(total,valSolic);
+    titulo='🔴 EMPRÉSTIMO DE ALTO RISCO';
+    corpo=`Perfil preocupante. Se decidir emprestar, proteja-se ao máximo.\n• Limite máximo: ${renda>0?'R$ '+Math.round(renda*pctLimite/100).toLocaleString('pt-BR'):'valor mínimo'}\n• Taxa mínima: ${taxaSug} a.m.\n• Prazo: máximo 1 mês\n• Exija avalista, garantia real ou cheque caução`;
+  } else {
+    decisao='🚫 REPROVADO';classe='reprovado';pctLimite=0;prazoSeguroMeses=0;probDefault=0.65;taxaSug='—';
+    titulo='🚫 NÃO RECOMENDADO';
+    corpo='Score muito baixo. Alta probabilidade de inadimplência. Recomendamos não realizar este empréstimo nas condições atuais.';
+  }
+  const limiteSeguro=renda>0?Math.round(renda*pctLimite/100):0;
+  // lucro projetado (valor esperado): usa o valor/prazo pedido pelo cliente quando informado,
+  // senão usa o limite e o prazo seguros como referência. Juros simples (mesmo modelo dos contratos).
+  const valorBase=valSolic>0?valSolic:limiteSeguro;
+  const prazoBase=prazoSolic>0?prazoSolic:(prazoSeguroMeses||1);
+  const taxaNum=_calcTaxaNumerica(total,valorBase);
+  const jurosTotal=valorBase*taxaNum*prazoBase;
+  const lucroProjetado=valorBase>0?Math.round((1-probDefault)*jurosTotal-probDefault*valorBase):0;
+  // avisos se o pedido do cliente ultrapassa o que seria seguro
+  const avisos=[];
+  if(valSolic>0&&limiteSeguro>0&&valSolic>limiteSeguro) avisos.push(`⚠️ O valor pedido (R$ ${Math.round(valSolic).toLocaleString('pt-BR')}) está acima do limite seguro (R$ ${limiteSeguro.toLocaleString('pt-BR')}).`);
+  if(prazoSolic>0&&prazoSeguroMeses>0&&prazoSolic>prazoSeguroMeses) avisos.push(`⚠️ O prazo pedido (${prazoSolic} ${prazoSolic===1?'mês':'meses'}) é maior que o prazo seguro (${prazoSeguroMeses} ${prazoSeguroMeses===1?'mês':'meses'}).`);
+  if(avisos.length) corpo+='\n'+avisos.join('\n');
+  return{decisao,classe,titulo,corpo,pctLimite,taxaSug,prazoSeguroMeses,limiteSeguro,lucroProjetado,probDefault};
+}
+
 function pastaScoreAuto(){
   const veiculo=gv('pf-veiculo');
   const wrapV=g('pf-veiculo-det-wrap');
@@ -10105,44 +10207,17 @@ function pastaScoreAuto(){
   g('score-num').style.color=cor;
 
   // Decisão
-  let decisao,recomend,classe,titulo,corpo;
   const renda=gv('pf-tipo-renda')==='empresario'?gn('pf-prolabore'):gn('pf-salario');
-  // Limite sugerido = % da renda conforme score
-  // Taxa: mínimo 20%, varia por score + valor solicitado
   const valSolic=gn('pf-valor-solicitado')||0;
-  function _calcTaxaSug(sc,val){
-    if(sc>=750){ if(val>=1500)return'20% a 25%'; if(val>=500)return'25% a 30%'; return'35% a 40%'; }
-    if(sc>=600){ if(val>=1500)return'25% a 30%'; if(val>=500)return'30% a 40%'; return'40% a 60%'; }
-    if(sc>=450){ if(val>=1500)return'30% a 35%'; if(val>=500)return'40% a 50%'; return'60% a 80%'; }
-    if(sc>=250){ if(val>=1500)return'35%+'; if(val>=500)return'50%+'; return'80%+'; }
-    return'—';
-  }
-  let pctLimite,taxaSug;
-  if(total>=750){
-    decisao='✅ APROVADO';classe='aprovado';
-    pctLimite=50;taxaSug=_calcTaxaSug(total,valSolic);
-    titulo='💚 CRÉDITO RECOMENDADO';
-    corpo=`Score excelente. Cliente de baixo risco. Você pode emprestar com segurança.\n• Limite sugerido: até ${renda>0?'R$ '+Math.round(renda*pctLimite/100).toLocaleString('pt-BR'):'50% da renda declarada'}\n• Taxa recomendada: ${taxaSug} a.m.\n• Prazo seguro: até 6 meses`;
-  } else if(total>=600){
-    decisao='✅ APROVADO';classe='aprovado';
-    pctLimite=35;taxaSug=_calcTaxaSug(total,valSolic);
-    titulo='💚 CRÉDITO APROVADO COM ATENÇÃO';
-    corpo=`Bom perfil, risco controlado. Empréstimo viável com limites moderados.\n• Limite sugerido: até ${renda>0?'R$ '+Math.round(renda*pctLimite/100).toLocaleString('pt-BR'):'35% da renda declarada'}\n• Taxa recomendada: ${taxaSug} a.m.\n• Prazo seguro: até 4 meses`;
-  } else if(total>=450){
-    decisao='⚠️ ATENÇÃO';classe='atencao';
-    pctLimite=20;taxaSug=_calcTaxaSug(total,valSolic);
-    titulo='🟡 CRÉDITO COM RESTRIÇÕES';
-    corpo=`Perfil de risco médio. Empreste com cautela e exija garantias.\n• Limite sugerido: até ${renda>0?'R$ '+Math.round(renda*pctLimite/100).toLocaleString('pt-BR'):'20% da renda declarada'}\n• Taxa recomendada: ${taxaSug} a.m. (compensa o risco)\n• Prazo seguro: até 2 meses\n• Exija 2 referências confirmadas e comprovante de renda`;
-  } else if(total>=250){
-    decisao='🔴 ALTO RISCO';classe='reprovado';
-    pctLimite=10;taxaSug=_calcTaxaSug(total,valSolic);
-    titulo='🔴 EMPRÉSTIMO DE ALTO RISCO';
-    corpo=`Perfil preocupante. Se decidir emprestar, proteja-se ao máximo.\n• Limite máximo: ${renda>0?'R$ '+Math.round(renda*pctLimite/100).toLocaleString('pt-BR'):'valor mínimo'}\n• Taxa mínima: ${taxaSug} a.m.\n• Prazo: máximo 1 mês\n• Exija avalista, garantia real ou cheque caução`;
-  } else {
-    decisao='🚫 REPROVADO';classe='reprovado';
-    pctLimite=0;taxaSug='—';
-    titulo='🚫 NÃO RECOMENDADO';
-    corpo='Score muito baixo. Alta probabilidade de inadimplência. Recomendamos não realizar este empréstimo nas condições atuais.';
+  const prazoSolic=gn('pf-prazo-solicitado')||0;
+  const {decisao,classe,titulo,corpo,limiteSeguro,prazoSeguroMeses,lucroProjetado}=calcRecomendacaoCredito(total,valSolic,prazoSolic,renda);
+
+  if(g('score-limite-seguro')) g('score-limite-seguro').textContent=limiteSeguro>0?'R$ '+limiteSeguro.toLocaleString('pt-BR'):'—';
+  if(g('score-prazo-seguro')) g('score-prazo-seguro').textContent=prazoSeguroMeses>0?prazoSeguroMeses+(prazoSeguroMeses===1?' mês':' meses'):'—';
+  if(g('score-lucro-projetado')){
+    const lp=g('score-lucro-projetado');
+    lp.textContent=(lucroProjetado>=0?'R$ ':'-R$ ')+Math.abs(lucroProjetado).toLocaleString('pt-BR');
+    lp.style.color=lucroProjetado>=0?'var(--green)':'var(--red)';
   }
 
   g('score-decisao').textContent=decisao;
