@@ -1619,6 +1619,9 @@ html.cm-on #cm-mobile{display:block}
     <div class="kpi"><div class="kpi-accent" style="background:var(--gold)"></div><div class="kpi-lbl">Resultado (mês)</div><div class="kpi-val" id="cx-resultado-mes" style="color:var(--gold)">—</div><div class="kpi-sub">entradas − saídas</div></div>
     <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Saldo Acumulado</div><div class="kpi-val" id="cx-saldo-total" style="color:var(--blue)">—</div><div class="kpi-sub">histórico completo</div></div>
   </div>
+  <div style="display:flex;justify-content:flex-end;margin:-6px 0 14px">
+    <button onclick="cxAjustarSaldo()" title="Corrige o saldo quando algum lançamento não foi anotado" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:0.84rem;cursor:pointer;letter-spacing:0.05em" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border2)'">🛠 Ajustar saldo real</button>
+  </div>
 
   <div class="grid-2">
     <!-- LANÇAR SAÍDA -->
@@ -1636,6 +1639,7 @@ html.cm-on #cm-mobile{display:block}
             <option value="operacional">🏢 Despesa Operacional (aluguel, celular…)</option>
             <option value="pessoal">👤 Despesa Pessoal</option>
             <option value="retirada">💰 Retirada de Lucro</option>
+            <option value="ajuste">🛠 Ajuste de Saldo</option>
           </select>
         </div>
         <div>
@@ -1691,7 +1695,12 @@ html.cm-on #cm-mobile{display:block}
           <option value="operacional">🏢 Operacional</option>
           <option value="pessoal">👤 Pessoal</option>
           <option value="retirada">💰 Retirada</option>
+          <option value="ajuste">🛠 Ajuste de Saldo</option>
         </select>
+        <input type="date" id="cx-filtro-data-de" onchange="cxRenderHistorico()" title="Data inicial" style="background:var(--s2);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.86rem;padding:5px 8px;outline:none">
+        <span style="color:var(--muted);font-size:0.82rem">até</span>
+        <input type="date" id="cx-filtro-data-ate" onchange="cxRenderHistorico()" title="Data final" style="background:var(--s2);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.86rem;padding:5px 8px;outline:none">
+        <button onclick="cxLimparFiltroData()" title="Limpar filtro de data" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:5px 10px;font-family:'DM Mono',monospace;font-size:0.86rem;cursor:pointer">✕ datas</button>
         <button onclick="cxExportar()" style="background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:0.86rem;cursor:pointer;letter-spacing:0.06em" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border2)'">⬇ Exportar CSV</button>
         <button onclick="cxMigrarParaPlanilha()" style="background:transparent;border:1px solid rgba(72,149,239,0.5);color:var(--blue);border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:0.86rem;cursor:pointer;letter-spacing:0.06em">☁️ Enviar lançamentos antigos p/ planilha</button>
       </div>
@@ -10710,6 +10719,7 @@ const CX_CAT_LABELS = {
   entrada_manual: { icon:'💵', label:'Entrada Manual',      cor:'rgba(6,214,160,0.8)'  },
   entrada_auto:   { icon:'🏦', label:'Juros Recebidos',     cor:'rgba(72,149,239,0.7)' },
   entrada_capital:{ icon:'💰', label:'Capital Recebido',    cor:'rgba(155,93,229,0.7)' },
+  ajuste:         { icon:'🛠', label:'Ajuste de Saldo',      cor:'rgba(240,180,41,0.6)' },
 };
 
 function cxLoad() {
@@ -10946,38 +10956,102 @@ async function cxRender(pagsExternas) {
   }
 }
 
+function cxLimparFiltroData(){
+  const de = document.getElementById('cx-filtro-data-de');
+  const ate = document.getElementById('cx-filtro-data-ate');
+  if(de) de.value = '';
+  if(ate) ate.value = '';
+  cxRenderHistorico();
+}
+
+function cxToggleMes(mesKey){
+  const body = document.getElementById('cx-mes-body-'+mesKey);
+  const arrow = document.getElementById('cx-mes-arrow-'+mesKey);
+  if(!body) return;
+  const abrir = body.style.display === 'none';
+  body.style.display = abrir ? '' : 'none';
+  if(arrow) arrow.style.transform = abrir ? 'rotate(90deg)' : 'rotate(0deg)';
+  if(!window._cxMesesAbertos) window._cxMesesAbertos = new Set();
+  if(abrir) window._cxMesesAbertos.add(mesKey); else window._cxMesesAbertos.delete(mesKey);
+}
+
 function cxRenderHistorico(todosParam) {
-  const filtro = document.getElementById('cx-filtro-cat')?.value || 'todos';
+  const filtro  = document.getElementById('cx-filtro-cat')?.value || 'todos';
+  const dataDe  = document.getElementById('cx-filtro-data-de')?.value || '';
+  const dataAte = document.getElementById('cx-filtro-data-ate')?.value || '';
   const lancamentos = cxLoad();
   const pags = window._cxPagsCache || [];
   const autoEntradas = cxAutoEntradas(pags);
 
   let todos = [...autoEntradas, ...lancamentos].sort((a,b)=>(b.data||'').localeCompare(a.data||''));
   if(filtro !== 'todos') todos = todos.filter(l=>l.categoria===filtro);
+  if(dataDe)  todos = todos.filter(l => (l.data||'') >= dataDe);
+  if(dataAte) todos = todos.filter(l => (l.data||'') <= dataAte);
 
   const fmt2 = v => 'R$ '+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   const el = document.getElementById('cx-historico-list');
   if(!todos.length) { el.innerHTML = '<div style="color:var(--muted);font-size:0.92rem;padding:16px 0;text-align:center">Nenhum lançamento encontrado.</div>'; return; }
 
-  el.innerHTML = todos.map(l => {
-    const isEnt = l.tipo === 'entrada';
-    const info = CX_CAT_LABELS[l.categoria] || {icon:'•', label:l.categoria, cor:'var(--muted)'};
-    const corVal = isEnt ? 'var(--green)' : 'var(--red)';
-    const sinal  = isEnt ? '+' : '−';
-    const dataFmt = l.data ? new Date(l.data+'T12:00:00').toLocaleDateString('pt-BR') : '—';
-    const delBtn  = l._auto ? '' : `<button onclick="cxDeletar(${l.id})" title="Excluir" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.85rem;padding:2px 5px;border-radius:4px;transition:color 0.2s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕</button>`;
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 4px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
-        <span style="font-size:1rem;flex-shrink:0">${info.icon}</span>
-        <div style="min-width:0">
-          <div style="font-size:0.90rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.descricao}</div>
-          <div style="font-size:0.88rem;color:var(--muted);margin-top:1px">${info.label} · ${dataFmt}${l._auto?' · <span style="color:var(--muted2)">automático</span>':''}</div>
+  // Agrupa por mês — "todos" já vem ordenado do mais recente pro mais antigo
+  const grupos = [];
+  const idxPorMes = {};
+  todos.forEach(l => {
+    const mesKey = (l.data||'').slice(0,7) || 'sem-data';
+    if(!(mesKey in idxPorMes)){ idxPorMes[mesKey] = grupos.length; grupos.push({ mesKey, itens: [] }); }
+    grupos[idxPorMes[mesKey]].itens.push(l);
+  });
+
+  // Por padrão só o mês mais recente vem aberto; o estado de cada mês é lembrado entre re-renders
+  if(!window._cxMesesAbertos) window._cxMesesAbertos = new Set(grupos[0] ? [grupos[0].mesKey] : []);
+
+  el.innerHTML = grupos.map(g => {
+    const entradasMes = g.itens.filter(l=>l.tipo==='entrada').reduce((s,l)=>s+l.valor,0);
+    const saidasMes   = g.itens.filter(l=>l.tipo==='saida').reduce((s,l)=>s+l.valor,0);
+    const resultMes   = entradasMes - saidasMes;
+    const corRes = resultMes >= 0 ? 'var(--green)' : 'var(--red)';
+    let mesLabel = 'Sem data';
+    if(g.mesKey !== 'sem-data'){
+      const [y,m] = g.mesKey.split('-');
+      mesLabel = new Date(+y, +m-1, 1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+      mesLabel = mesLabel.charAt(0).toUpperCase()+mesLabel.slice(1);
+    }
+    const aberto = window._cxMesesAbertos.has(g.mesKey);
+    const itensHtml = g.itens.map(l => {
+      const isEnt = l.tipo === 'entrada';
+      const info = CX_CAT_LABELS[l.categoria] || {icon:'•', label:l.categoria, cor:'var(--muted)'};
+      const corVal = isEnt ? 'var(--green)' : 'var(--red)';
+      const sinal  = isEnt ? '+' : '−';
+      const dataFmt = l.data ? new Date(l.data+'T12:00:00').toLocaleDateString('pt-BR') : '—';
+      const delBtn  = l._auto ? '' : `<button onclick="cxDeletar(${l.id})" title="Excluir" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.85rem;padding:2px 5px;border-radius:4px;transition:color 0.2s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕</button>`;
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 4px 10px 26px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <span style="font-size:1rem;flex-shrink:0">${info.icon}</span>
+          <div style="min-width:0">
+            <div style="font-size:0.90rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.descricao}</div>
+            <div style="font-size:0.88rem;color:var(--muted);margin-top:1px">${info.label} · ${dataFmt}${l._auto?' · <span style="color:var(--muted2)">automático</span>':''}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          <span style="font-family:'Cormorant Garamond', serif;font-size:1rem;color:${corVal}">${sinal} ${fmt2(l.valor)}</span>
+          ${delBtn}
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div>
+      <div onclick="cxToggleMes('${g.mesKey}')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--border2);cursor:pointer;user-select:none;gap:10px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="cx-mes-arrow-${g.mesKey}" style="display:inline-block;transition:transform 0.2s;transform:rotate(${aberto?90:0}deg);color:var(--muted)">▸</span>
+          <span style="font-family:'Cormorant Garamond', serif;font-size:1.05rem;color:var(--text)">${mesLabel}</span>
+          <span style="font-size:0.82rem;color:var(--muted)">(${g.itens.length})</span>
+        </div>
+        <div style="display:flex;gap:12px;font-size:0.86rem">
+          <span style="color:var(--green)">+${fmt2(entradasMes)}</span>
+          <span style="color:var(--red)">−${fmt2(saidasMes)}</span>
+          <span style="color:${corRes}">= ${fmt2(resultMes)}</span>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-        <span style="font-family:'Cormorant Garamond', serif;font-size:1rem;color:${corVal}">${sinal} ${fmt2(l.valor)}</span>
-        ${delBtn}
-      </div>
+      <div id="cx-mes-body-${g.mesKey}" style="display:${aberto?'':'none'}">${itensHtml}</div>
     </div>`;
   }).join('');
 }
@@ -10990,6 +11064,40 @@ function cxDeletar(id) {
   if(scriptUrl){
     fetch(scriptUrl, { method:'POST', body: JSON.stringify({ action:'excluirLancamentoCaixa', id }) }).catch(()=>{});
   }
+  cxRender();
+}
+
+// Corrige o saldo do caixa quando algum lançamento não foi anotado — em vez de
+// reescrever o histórico, registra um único lançamento de "Ajuste de Saldo"
+// com a diferença entre o que está calculado e o que você realmente tem em mãos.
+function cxAjustarSaldo() {
+  const lancamentos = cxLoad();
+  const pags = window._cxPagsCache || [];
+  const autoEntradas = cxAutoEntradas(pags);
+  const todos = [...autoEntradas, ...lancamentos];
+  const saldoAtual = todos.reduce((s,l) => l.tipo==='entrada' ? s+l.valor : s-l.valor, 0);
+  const fmt2 = v => 'R$ '+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  const input = prompt(`Saldo calculado atualmente: ${fmt2(saldoAtual)}\n\nDigite o valor que você REALMENTE tem em caixa hoje:`, saldoAtual.toFixed(2).replace('.', ','));
+  if(input === null) return;
+  const valorReal = parseFloat(String(input).trim().replace(/\./g,'').replace(',', '.'));
+  if(isNaN(valorReal) || valorReal < 0) { alert('Valor inválido.'); return; }
+
+  const diff = valorReal - saldoAtual;
+  if(Math.abs(diff) < 0.005) { alert('O saldo já está correto — nenhum ajuste necessário.'); return; }
+
+  const hoje = cxFmtData(new Date());
+  const novo = { id: Date.now(), tipo: diff>0?'entrada':'saida', categoria:'ajuste', descricao:'Ajuste de saldo (correção manual)', valor: Math.abs(diff), data: hoje };
+  const lista = cxLoad();
+  lista.push(novo);
+  cxSave(lista);
+
+  const scriptUrl = localStorage.getItem('pag_script_url') || '';
+  if(scriptUrl){
+    fetch(scriptUrl, { method:'POST', body: JSON.stringify({ action:'registrarLancamentoCaixa', ...novo }) }).catch(()=>{});
+  }
+
+  alert(`✅ Ajuste registrado: ${diff>0?'+':'−'} ${fmt2(diff)}\nNovo saldo: ${fmt2(valorReal)}`);
   cxRender();
 }
 
