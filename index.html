@@ -3006,6 +3006,12 @@ async function dossieSyncCarregar() {
           // Pasta do servidor é mais nova — baixa docs faltantes
           const pMerged = { ...pSheet };
           pMerged.docs = pMerged.docs || {};
+          // campos do formulário novo que o servidor pode não devolver: preserva o valor local
+          if (pLocal) {
+            ['instagram','empresaEndereco','comQuemMora','filhos','rendaVariavel','outrosEmpValor','garantia','fiador','histCapital','histInformal','ref1Tempo','ref2Tempo'].forEach(k => {
+              if (pMerged[k] === undefined && pLocal[k] !== undefined) pMerged[k] = pLocal[k];
+            });
+          }
 
           // Para cada doc que tem fileId mas não tem data local, baixa do servidor
           for (const tipo of Object.keys(pMerged.docs)) {
@@ -9467,9 +9473,12 @@ setTimeout(() => {
 }, 500);
 
 function pastaTipoRendaChange(){
-  const v=document.getElementById('pf-tipo-renda').value;
-  document.getElementById('pf-bloco-emp').style.display=v==='empresario'?'none':'grid';
-  document.getElementById('pf-bloco-emp2').style.display=v==='empresario'?'grid':'none';
+  const sel=document.getElementById('pf-tipo-renda'); if(!sel) return;
+  const emp=sel.value==='empresario';
+  // formulário atual: só existe o bloco de faturamento (os blocos antigos pf-bloco-emp/emp2 foram removidos)
+  const bf=document.getElementById('pf-bloco-faturamento'); if(bf) bf.style.display=emp?'grid':'none';
+  const b1=document.getElementById('pf-bloco-emp'); if(b1) b1.style.display=emp?'none':'grid';
+  const b2=document.getElementById('pf-bloco-emp2'); if(b2) b2.style.display=emp?'grid':'none';
 }
 
 function maskCPF(el){
@@ -9491,64 +9500,44 @@ function analiseAbrir(id){
     const inp=document.getElementById('pf-upload-'+t); if(inp) inp.value='';
   });
   const diagEl=document.getElementById('extrato-diagnostico'); if(diagEl) diagEl.innerHTML='';
+  // preenche só campos que existem no formulário atual (nunca lança erro por campo ausente)
+  const set=(fid,val)=>{ const el=document.getElementById(fid); if(el) el.value=(val===undefined||val===null)?'':val; };
+  const tit=document.getElementById('analise-titulo');
   if(id && _pastas[id]){
     const p=_pastas[id];
-    document.getElementById('analise-titulo').textContent='✏️ Editar Análise — '+p.nome;
-    document.getElementById('pf-nome').value=p.nome||'';
-    if(g('pf-valor-solicitado'))g('pf-valor-solicitado').value=p.valorSolicitado||'';
-    if(g('pf-prazo-solicitado'))g('pf-prazo-solicitado').value=p.prazoSolicitado||'';
-    if(p.extratoDiagnostico){ _pastaExtratoResultado=p.extratoDiagnostico; extratoRenderDiagnostico(p.extratoDiagnostico); }
-    document.getElementById('pf-cpf').value=p.cpf||'';
-    document.getElementById('pf-tel').value=p.tel||'';
-    if(g('pf-tel2'))g('pf-tel2').value=p.tel2||'';
-    if(g('pf-nasc'))g('pf-nasc').value=p.nasc||'';
-    if(g('pf-estado-civil'))g('pf-estado-civil').value=p.estadoCivil||'';
-    if(g('pf-mae'))g('pf-mae').value=p.mae||'';
-    document.getElementById('pf-endereco').value=p.endereco||'';
-    if(g('pf-moradia'))g('pf-moradia').value=p.moradia||'';
-    if(g('pf-aluguel'))g('pf-aluguel').value=p.aluguel||'';
-    if(g('pf-tempo-moradia'))g('pf-tempo-moradia').value=p.tempoMoradia||'';
-    document.getElementById('pf-tipo-renda').value=p.tipoRenda||'empregado';
-    document.getElementById('pf-cargo').value=p.cargo||'';
-    if(g('pf-tempo-emprego'))g('pf-tempo-emprego').value=p.tempoEmprego||'';
-    if(g('pf-tel-trabalho'))g('pf-tel-trabalho').value=p.telTrabalho||'';
-    document.getElementById('pf-empresa').value=p.empresa||'';
-    document.getElementById('pf-salario').value=p.salario||'';
-    document.getElementById('pf-emp-nome').value=p.empNome||'';
-    document.getElementById('pf-emp-end').value=p.empEnd||'';
-    document.getElementById('pf-faturamento').value=p.faturamento||'';
-    document.getElementById('pf-prolabore').value=p.prolabore||'';
-    if(g('pf-outros-emp'))g('pf-outros-emp').value=p.outrosEmp||'nao';
-    if(g('pf-financiamento'))g('pf-financiamento').value=p.financiamento||'nao';
-    if(g('pf-negativado'))g('pf-negativado').value=p.negativado||'nunca';
-    if(g('pf-finalidade'))g('pf-finalidade').value=p.finalidade||'';
-    if(g('pf-veiculo'))g('pf-veiculo').value=p.veiculo||'nao';
-    if(g('pf-veiculo-det'))g('pf-veiculo-det').value=p.veiculoDet||'';
-    if(g('pf-ref1-nome'))g('pf-ref1-nome').value=p.ref1Nome||'';
-    if(g('pf-ref1-tel'))g('pf-ref1-tel').value=p.ref1Tel||'';
-    if(g('pf-ref1-grau'))g('pf-ref1-grau').value=p.ref1Grau||'';
-    if(g('pf-ref2-nome'))g('pf-ref2-nome').value=p.ref2Nome||'';
-    if(g('pf-ref2-tel'))g('pf-ref2-tel').value=p.ref2Tel||'';
-    if(g('pf-ref2-grau'))g('pf-ref2-grau').value=p.ref2Grau||'';
-    document.getElementById('pf-obs').value=p.obs||'';
+    if(tit) tit.textContent='✏️ Editar Análise — '+p.nome;
+    if(p.extratoDiagnostico){ _pastaExtratoResultado=p.extratoDiagnostico; try{ extratoRenderDiagnostico(p.extratoDiagnostico); }catch(e){ console.warn(e); } }
+    set('pf-nome',p.nome); set('pf-cpf',p.cpf); set('pf-tel',p.tel); set('pf-instagram',p.instagram);
+    set('pf-endereco',p.endereco); set('pf-tempo-moradia',p.tempoMoradia); set('pf-moradia',p.moradia);
+    set('pf-com-quem-mora',p.comQuemMora); set('pf-filhos',p.filhos);
+    set('pf-empresa',p.empresa); set('pf-empresa-endereco',p.empresaEndereco);
+    set('pf-tipo-renda',p.tipoRenda||'empregado'); set('pf-cargo',p.cargo); set('pf-tempo-emprego',p.tempoEmprego);
+    set('pf-salario',p.salario||''); set('pf-renda-variavel',p.rendaVariavel); set('pf-faturamento',p.faturamento||'');
+    set('pf-aluguel',p.aluguel||''); set('pf-outros-emp-valor',p.outrosEmpValor||'');
+    set('pf-finalidade',p.finalidade); set('pf-valor-solicitado',p.valorSolicitado||''); set('pf-prazo-solicitado',p.prazoSolicitado||'');
+    set('pf-garantia',p.garantia); set('pf-fiador',p.fiador); set('pf-hist-capital',p.histCapital); set('pf-hist-informal',p.histInformal);
+    set('pf-ref1-nome',p.ref1Nome); set('pf-ref1-tel',p.ref1Tel); set('pf-ref1-grau',p.ref1Grau); set('pf-ref1-tempo',p.ref1Tempo);
+    set('pf-ref2-nome',p.ref2Nome); set('pf-ref2-tel',p.ref2Tel); set('pf-ref2-grau',p.ref2Grau); set('pf-ref2-tempo',p.ref2Tempo);
+    set('pf-obs',p.obs);
     pastaTipoRendaChange();
     // re-carregar docs
     if(p.docs){
       _pastaDocs=JSON.parse(JSON.stringify(p.docs));
-      // garante que todas as chaves existam
       docKeys.forEach(t=>{ if(!_pastaDocs[t]) _pastaDocs[t]=[]; });
       docKeys.forEach(t=>pastaRenderDocs(t));
     }
   } else {
-    document.getElementById('analise-titulo').textContent='📁 Nova Análise de Cliente';
-    ['pf-nome','pf-cpf','pf-tel','pf-tel2','pf-nasc','pf-mae','pf-endereco','pf-cargo','pf-empresa','pf-salario','pf-emp-nome','pf-emp-end','pf-faturamento','pf-prolabore','pf-aluguel','pf-tel-trabalho','pf-veiculo-det','pf-ref1-nome','pf-ref1-tel','pf-ref2-nome','pf-ref2-tel','pf-obs','pf-valor-solicitado','pf-prazo-solicitado'].forEach(id=>{
-      const el=document.getElementById(id);if(el)el.value='';
+    if(tit) tit.textContent='📁 Nova Análise de Cliente';
+    document.querySelectorAll('#tab-analise [id^="pf-"]').forEach(el=>{
+      const tg=el.tagName;
+      if(tg==='SELECT') el.selectedIndex=0;
+      else if(tg==='INPUT'||tg==='TEXTAREA') el.value='';
     });
-    document.getElementById('pf-tipo-renda').value='empregado';
+    set('pf-tipo-renda','empregado');
     pastaTipoRendaChange();
   }
   if(typeof showTab==='function') showTab('analise');
-  pastaScoreAuto();
+  try{ pastaScoreAuto(); }catch(e){ console.warn('pastaScoreAuto:',e); }
   const view=document.getElementById('view')||document.querySelector('.tab-content-area');
   if(view) view.scrollTop=0;
 }
@@ -9760,6 +9749,11 @@ function pastaSalvar(){
   const nome=document.getElementById('pf-nome').value.trim();
   if(!nome){alert('Informe o nome do cliente.');return;}
   const id=_pastaEditId||('pasta_'+Date.now());
+  // Campo que não existe mais no formulário mantém o valor já salvo (não apaga dados antigos do dossiê).
+  const _prev=_pastas[id]||{};
+  const _key=fid=>fid.replace(/^pf-/,'').replace(/-([a-z0-9])/g,(m,c)=>c.toUpperCase());
+  const gv=fid=>{const el=document.getElementById(fid); if(el) return el.value; const v=_prev[_key(fid)]; return v==null?'':v;};
+  const gn=fid=>{const el=document.getElementById(fid); if(el) return parseFloat(el.value)||0; return parseFloat(_prev[_key(fid)])||0;};
   const tipoRenda=document.getElementById('pf-tipo-renda').value;
   const {total:scoreCreditoBruto}=calcScoreCredito();
   let scoreCredito=scoreCreditoBruto;
@@ -9790,8 +9784,9 @@ function pastaSalvar(){
     cargo:gv('pf-cargo'),
     tempoEmprego:gv('pf-tempo-emprego'),
     telTrabalho:gv('pf-tel-trabalho'),
-    empresa:tipoRenda!=='empresario'?gv('pf-empresa'):'',
-    salario:tipoRenda!=='empresario'?gn('pf-salario'):0,
+    empresa:gv('pf-empresa'),
+    empresaEndereco:gv('pf-empresa-endereco'),
+    salario:gn('pf-salario'),
     empNome:tipoRenda==='empresario'?gv('pf-emp-nome'):'',
     empEnd:tipoRenda==='empresario'?gv('pf-emp-end'):'',
     faturamento:tipoRenda==='empresario'?gn('pf-faturamento'):0,
@@ -9802,8 +9797,17 @@ function pastaSalvar(){
     finalidade:gv('pf-finalidade'),
     veiculo:gv('pf-veiculo'),
     veiculoDet:gv('pf-veiculo-det'),
-    ref1Nome:gv('pf-ref1-nome'),ref1Tel:gv('pf-ref1-tel'),ref1Grau:gv('pf-ref1-grau'),
-    ref2Nome:gv('pf-ref2-nome'),ref2Tel:gv('pf-ref2-tel'),ref2Grau:gv('pf-ref2-grau'),
+    ref1Nome:gv('pf-ref1-nome'),ref1Tel:gv('pf-ref1-tel'),ref1Grau:gv('pf-ref1-grau'),ref1Tempo:gv('pf-ref1-tempo'),
+    ref2Nome:gv('pf-ref2-nome'),ref2Tel:gv('pf-ref2-tel'),ref2Grau:gv('pf-ref2-grau'),ref2Tempo:gv('pf-ref2-tempo'),
+    instagram:gv('pf-instagram'),
+    comQuemMora:gv('pf-com-quem-mora'),
+    filhos:gv('pf-filhos'),
+    rendaVariavel:gv('pf-renda-variavel'),
+    outrosEmpValor:gn('pf-outros-emp-valor'),
+    garantia:gv('pf-garantia'),
+    fiador:gv('pf-fiador'),
+    histCapital:gv('pf-hist-capital'),
+    histInformal:gv('pf-hist-informal'),
     obs:gv('pf-obs'),
     scoreCredito,
     docs:JSON.parse(JSON.stringify(_pastaDocs)),
@@ -9875,7 +9879,7 @@ function pastaRender(){
     const color=pastaColor(p.nome);
     const totalD=Object.values(p.docs||{}).flat().length;
     const renda=p.tipoRenda==='empresario'?fmt(p.faturamento||0)+'/mês fat.':p.salario?fmt(p.salario)+'/mês':'—';
-    const local=p.tipoRenda==='empresario'?(p.empEnd||p.empNome||'—'):(p.empresa||'—');
+    const local=p.empresa||p.empNome||p.empEnd||'—';
     const { total: scoreFinal, temHistorico } = calcScoreFinal(p);
     return `<div class="pasta-card" onclick="pastaViewOpen('${p.id}')">
       <div class="pasta-card-top">
