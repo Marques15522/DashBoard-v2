@@ -10802,6 +10802,11 @@ const CX_CAT_LABELS = {
   ajuste:         { icon:'🛠', label:'Ajuste de Saldo',      cor:'rgba(240,180,41,0.6)' },
 };
 
+// Caixa refeito do zero em 19/10/2026: só contam contratos criados e pagamentos recebidos
+// a partir desta data (mesma data da célula B2 da aba "Extrato Caixa" na planilha).
+const CX_INICIO = '2026-10-19';
+// Limpa uma única vez o caixa antigo guardado neste aparelho
+try { if(localStorage.getItem('cx_reset_v2')!=='1'){ localStorage.removeItem(CX_KEY); localStorage.setItem('cx_reset_v2','1'); } } catch(e){}
 function cxLoad() {
   try { return JSON.parse(localStorage.getItem(CX_KEY) || '[]'); } catch(e) { return []; }
 }
@@ -10838,9 +10843,20 @@ function cxFmtData(d) {
 
 function cxAutoEntradas(pags) {
   const entradas = [];
+  // SAÍDA automática: cada contrato novo lança o capital emprestado, identificado pelo ID do contrato
+  (window._lastEmps || []).forEach(e => {
+    const data = cxFmtData(e.data);
+    if (!data || data < CX_INICIO || !(e.capital > 0)) return;
+    entradas.push({
+      id: 'auto_emp_' + e.id,
+      tipo: 'saida', categoria: 'capital',
+      descricao: 'Empréstimo concedido — ' + e.id + ' — ' + (e.nome || ''),
+      valor: e.capital, data, _auto: true,
+    });
+  });
   pags.forEach(p => {
     const data = cxFmtData(p.data);
-    if (!data) return;
+    if (!data || data < CX_INICIO) return;
     if (p.juros > 0) {
       entradas.push({
         id: 'auto_juros_' + (p.id||'') + '_' + (p.data ? p.data.getTime() : 0),
