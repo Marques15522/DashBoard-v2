@@ -7925,6 +7925,45 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
 });
 
 // ── AUTOCOMPLETE + SCORE DO CLIENTE NO SIMULADOR ──────────────────────────
+// ── HELPERS: busca unificada de cliente (pasta + contratos) ──
+function _normNome(n){
+  return String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+}
+function _contratoCliPorNome(nome){
+  const k=_normNome(nome); if(!k) return null;
+  const m=window._clientesPorNome||{};
+  for(const key in m){ if(_normNome(key)===k || _normNome(m[key].nome)===k) return m[key]; }
+  return null;
+}
+function _compGet(nome){
+  if(_comportamento[(nome||'').toLowerCase().trim()]) return _comportamento[(nome||'').toLowerCase().trim()];
+  const k=_normNome(nome);
+  for(const key in _comportamento){ if(_normNome(key)===k) return _comportamento[key]; }
+  return undefined;
+}
+// Junta dados da pasta (dossiê) com os do contrato: CPF/telefone vêm de onde existirem
+function _simMerge(pasta){
+  const c=_contratoCliPorNome(pasta.nome)||{};
+  return Object.assign({}, pasta, {
+    cpf: pasta.cpf || c.cpf || '',
+    telefone: pasta.telefone || pasta.tel || c.tel || '',
+    idCliente: pasta.idCliente || c.idCliente || ''
+  });
+}
+function _simPoolClientes(){
+  const seen=new Set(), pool=[];
+  Object.values(_pastas||{}).forEach(p=>{
+    const key=_normNome(p.nome); if(!key||seen.has(key)) return;
+    seen.add(key); pool.push(_simMerge(p));
+  });
+  Object.values(window._clientesPorNome||{}).forEach(c=>{
+    const key=_normNome(c.nome); if(!key||seen.has(key)) return;
+    seen.add(key);
+    pool.push({nome:c.nome,cpf:c.cpf||'',telefone:c.tel||'',idCliente:c.idCliente||'',_semPasta:true});
+  });
+  return pool;
+}
+
 function simClienteInput() {
   const query = (document.getElementById('sim-cliente').value || '').toLowerCase().trim();
   // Usa dropdown fixo no body para evitar clipping por overflow de elementos pai
@@ -7952,22 +7991,7 @@ function simClienteInput() {
   // Busca clientes nas pastas E também nos contratos já lançados (para achar CPF/telefone
   // mesmo de clientes que nunca tiveram uma "pasta" (dossiê) criada). Pasta tem prioridade
   // quando o mesmo nome existe nos dois lugares, pois tem ficha cadastral mais completa.
-  const pastas = Object.values(_pastas || {});
-  const porContrato = Object.values(window._clientesPorNome || {});
-  const seen = new Set();
-  const pool = [];
-  pastas.forEach(p => {
-    const key = (p.nome||'').toLowerCase().trim();
-    if (!key || seen.has(key)) return;
-    seen.add(key);
-    pool.push(p);
-  });
-  porContrato.forEach(c => {
-    const key = (c.nome||'').toLowerCase().trim();
-    if (!key || seen.has(key)) return;
-    seen.add(key);
-    pool.push({ nome: c.nome, cpf: c.cpf||'', telefone: c.tel||'', _semPasta: true });
-  });
+  const pool = _simPoolClientes();
   const matches = pool.filter(p => {
     if (!p.nome) return false;
     return p.nome.toLowerCase().includes(query);
@@ -8002,7 +8026,7 @@ function simClienteInput() {
   });
 
   // Se só tem 1 match exato, já exibe o score e preenche CPF/telefone sozinho
-  if (matches.length === 1 && matches[0].nome.toLowerCase() === query) {
+  if (matches.length === 1 && _normNome(matches[0].nome) === _normNome(query)) {
     simClienteSelecionar(matches[0]);
     dropdown.style.display = 'none';
   }
@@ -8016,13 +8040,15 @@ function simClienteSelecionar(pasta) {
   const _dd = document.getElementById('sim-cliente-dropdown-portal');
   if (_dd) _dd.style.display = 'none';
 
-  // Preenche CPF e telefone se disponíveis
-  if (pasta.cpf) document.getElementById('sim-cpf').value = pasta.cpf;
-  if (pasta.telefone) document.getElementById('sim-tel').value = pasta.telefone;
+  // Completa com dados dos contratos (CPF/telefone) quando a pasta não os tem
+  pasta = _simMerge(pasta);
+  // Preenche CPF e telefone (sempre sobrescreve: evita dado de outro cliente selecionado antes)
+  document.getElementById('sim-cpf').value = pasta.cpf || '';
+  document.getElementById('sim-tel').value = pasta.telefone || '';
 
   // Calcula score
-  const { total, temHistorico, scoreComp } = calcScoreFinal(pasta);
-  const comp = _comportamento[(pasta.nome||'').toLowerCase().trim()] || {};
+  const { total, temHistorico, scoreComp, semFicha } = calcScoreFinal(pasta);
+  const comp = _compGet(pasta.nome) || {};
 
   const cor = total >= 650 ? 'var(--green)' : total >= 450 ? 'var(--gold2)' : 'var(--red)';
   const panel = document.getElementById('sim-score-panel');
@@ -8051,7 +8077,7 @@ function simClienteSelecionar(pasta) {
   };
   let recHtml, borderCor;
   // Taxa: mínimo 20%, varia por score + valor do empréstimo simulado
-  const _simValor = parseFloat(document.getElementById('sim-capital')?.value)||0;
+  const _simValor = parseFloat(document.getElementById('sim-valor')?.value)||0;
   function _simTaxa(sc,val){
     if(sc>=750){ if(val>=1500)return'20% a 25%'; if(val>=500)return'25% a 30%'; return'35% a 40%'; }
     if(sc>=600){ if(val>=1500)return'25% a 30%'; if(val>=500)return'30% a 40%'; return'40% a 60%'; }
@@ -8114,6 +8140,9 @@ function simClienteSelecionar(pasta) {
   } else {
     hist.innerHTML = `📋 Sem histórico de contratos — score baseado apenas na ficha cadastral`;
   }
+  if (semFicha && temHistorico) {
+    hist.innerHTML += `<br><span style="color:var(--muted)">ℹ️ Sem ficha de crédito preenchida — score calculado só pelo histórico de pagamentos. Preencha a ficha na aba Análise para um score completo.</span>`;
+  }
 }
 
 // Fecha dropdown ao perder foco (com delay para deixar o clique executar primeiro).
@@ -8129,10 +8158,9 @@ document.getElementById('sim-cliente').addEventListener('blur', () => {
     const cpfVazio = !(document.getElementById('sim-cpf').value || '').trim();
     const telVazio = !(document.getElementById('sim-tel').value || '').trim();
     if (nomeAtual && (cpfVazio || telVazio)) {
-      const pastaMatch = Object.values(_pastas || {}).find(p => (p.nome||'').toLowerCase().trim() === nomeAtual);
-      const contratoMatch = (window._clientesPorNome || {})[Object.keys(window._clientesPorNome || {}).find(k => k.toLowerCase().trim() === nomeAtual)];
-      if (pastaMatch) simClienteSelecionar(pastaMatch);
-      else if (contratoMatch) simClienteSelecionar({ nome: contratoMatch.nome, cpf: contratoMatch.cpf||'', telefone: contratoMatch.tel||'', _semPasta: true });
+      const alvo = _normNome(nomeAtual);
+      const achado = _simPoolClientes().find(p => _normNome(p.nome) === alvo);
+      if (achado) simClienteSelecionar(achado);
     }
   }, 300);
 });
@@ -10542,13 +10570,13 @@ function calcScoreFinal(pasta) {
   const scoreFicha = pasta.scoreCredito || 0;
 
   // Dados comportamentais da planilha
-  const nome = (pasta.nome || '').toLowerCase().trim();
-  const comp  = _comportamento[nome];
+  const comp  = _compGet(pasta.nome);
+  const temFicha = scoreFicha > 0;
 
   if (!comp || comp.qtdContratos === 0) {
     // Sem histórico — usa só a ficha com peso menor
-    const total = Math.round(scoreFicha * 0.7);
-    return { total, temHistorico: false };
+    const total = temFicha ? Math.round(scoreFicha * 0.7) : 0;
+    return { total, temHistorico: false, semFicha: !temFicha };
   }
 
   // Score comportamental (0–1000)
@@ -10580,8 +10608,9 @@ function calcScoreFinal(pasta) {
   scoreComp = Math.max(0, Math.min(1000, scoreComp));
 
   // Score final: 60% ficha + 40% comportamento
-  const total = Math.round(scoreFicha * 0.6 + scoreComp * 0.4);
-  return { total: Math.max(0, Math.min(1000, total)), temHistorico: true, scoreComp };
+  // Sem ficha preenchida: usa só o comportamento (antes a ficha=0 derrubava o total para ≤400 = "crítico")
+  const total = temFicha ? Math.round(scoreFicha * 0.6 + scoreComp * 0.4) : Math.round(scoreComp);
+  return { total: Math.max(0, Math.min(1000, total)), temHistorico: true, scoreComp, semFicha: !temFicha };
 }
 
 function scoreBadgeHtml(total, temHistorico) {
